@@ -1,0 +1,24 @@
+.modalItemOperador {
+    width: 30%;
+}
+
+.modalItemData {
+    width: 30%;
+}
+
+.modalItemCampos {
+    width: 30%;
+    margin-bottom: 20px;
+}
+
+.modalItemPar {
+    background-color: white;
+    color: black;
+    margin-bottom: 10px;
+}
+
+.modalItemImpar {
+    background-color: #222222;
+    color: white;
+    margin-bottom: 10px;
+}

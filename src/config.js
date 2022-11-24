@@ -1,0 +1,33 @@
+export const MOSTRA_BANNERS = true
+export const MOSTRA_PROMOCOES = false
+export const MOSTRA_MARCAS = true
+export const EMPLOYEES = 'Employees'
+export const CLIENTES = 'Clients'
+export const NAVIOS = 'Navios'
+export const PRECISA_LOGAR = 'Você precisa estar logado para acessar este conteúdo!'
+export const CAMINHO_FOTOS = ''
+export const NOME_EMPRESA = 'SulTrade'
+export const CAMINHO_DOCUMENTOS = 'http://ftptrade.ddns.net/sultrade/api/pictures/'
+export const API_BANCO = 'https://api-ip.bb.com.br/pagamentos-lote/v1';
+
+export const API_BANCO_GPS = '/lotes-gps';
+export const API_BANCO_GPS_GET = '/lotes-gps/';
+
+export const API_BANCO_GRU = '/pagamentos-gru';
+export const API_BANCO_GRU_GET = '/lotes-gru/';
+
+export const API_BANCO_DARF = '/lotes-darf-normal-preto';
+export const API_BANCO_DARF_GET = '/lotes-darf-preto-normal/';
+
+export const API_BANCO_TRANS = '/lotes-transferencias';
+export const API_BANCO_TRANS_GET = '/beneficiarios/';
+
+export const API_BANCO_BOL = '/lotes-boletos';
+export const API_BANCO_BOL_GET = '/lotes-boletos/';
+
+export const API_BANCO_PIX = '/arrecadacao-qrcodes';
+
+export const API_LIBERAR = '/liberar-pagamentos';
+
+export const URL_SIGISS = "https://riogrande.sigiss.com.br/riogrande/ws/sigiss_ws.php?wsdl";
+export const URL_SOAPACTION = "http://tempuri.org/GerarNota"

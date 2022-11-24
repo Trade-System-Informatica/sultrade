@@ -1,0 +1,30 @@
+.darkBack{
+    background-color: #333333 !important;
+    color: white !important;
+}
+
+.modalItemContainer {
+    width: 100%;
+    min-width: 300px;
+    height: 75vh;
+    border-radius: 25px;
+    z-index: 0  ;
+}
+
+
+.modalItemContent{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 75%;
+}
+
+.modalItemValor {
+    width: 45%;
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+.modalItemTitulo {
+    width: 45%;
+}

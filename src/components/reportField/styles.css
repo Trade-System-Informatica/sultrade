@@ -1,0 +1,23 @@
+.bordaExterna {
+    border: solid 0.2em #000 !important;
+    margin-top: 4em;
+    margin-bottom: 4em;
+}
+.titulo {
+    background-color: #c7d9f1 !important;
+    border-bottom: solid black 0.2em !important;
+}
+
+.titulo h4{
+    font-weight: bold !important;
+}
+
+.subtitulo {
+    font-size: 14px !important;
+}
+
+h5 {
+    text-decoration: underline !important;
+    color: #16386a !important;
+    font-weight: bolder !important;
+}
