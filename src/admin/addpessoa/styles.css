@@ -1,0 +1,59 @@
+.fieldDividido {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fieldDividido_1 {
+    width: 60%;
+    border-bottom-right-radius: 0px !important;
+    border-top-right-radius: 0px !important;
+}
+
+.fieldDividido_2 {
+    width: 40%;
+    border-bottom-left-radius: 0px !important;
+    border-top-left-radius: 0px !important;
+}
+
+.center {
+    text-align: center;
+    font-size: 1.5em !important;
+}
+
+.sessaoContatos {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+.sessaoEnderecos {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.sessaoContatos > .MuiPaper-root {
+    border-radius: 25px !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+}
+
+.sessaoEnderecos > .MuiPaper-root {
+    border-radius: 25px !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.sessaoEnderecos > .MuiPaper-root, .sessaoContatos > .MuiPaper-root {
+    background-color: inherit !important;
+
+}
+
+.sessaoEnderecos > div > div > .MuiAccordionSummary-content, .sessaoContatos > div > div > .MuiAccordionSummary-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}

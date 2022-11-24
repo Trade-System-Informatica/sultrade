@@ -1,0 +1,44 @@
+    .navios {
+        border-bottom: solid .1em black;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+    }
+    
+    .bordaCircular {
+        background-color: #17386b;
+        border-radius: .5em;
+        padding: .2em;
+        position: fixed;
+        margin: auto;
+        left: 92%;
+        top: 88%;
+    }
+    
+    .negrito {
+        font-weight: bold;
+        color: #000;
+    }
+    
+    .progress-custom {
+        background-color: #fff;
+        color: #fff;
+    }
+
+    @media(max-width: 480px){
+        .negrito {
+            font-size: 11px;
+        }
+
+        .navios p{
+            font-size: 10px;
+        }
+
+        .navios {
+            font-size: .75rem;
+        }
+
+        .progresso {
+            width: 4em;
+        }
+    }
+    

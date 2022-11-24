@@ -1,0 +1,92 @@
+.feed {
+    display: inline-flex;
+    justify-content: space-between;
+    flex-direction: row;
+    border-bottom: solid .1em black;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.textNavio {
+    text-align: justify;
+}
+
+#title{
+    text-align: center;
+}
+
+.feed {
+    border-bottom: #17386b solid .1em;
+}
+
+.loadingProcess {
+    margin-left: 16%;
+    margin-right: 16%;
+    margin-top: 5em;
+    margin-bottom: 3em;
+}
+
+.loadingProcess h4{
+    font-size: 2em;
+    color: #17386b;
+    margin-bottom: 1em;
+}
+
+.information {
+    margin-left: 16%;
+    margin-right: 16%;
+    margin-top: 5em;
+    margin-bottom: 3em;
+}
+
+.information h4{
+    font-size: 2em;
+    color: #17386b;
+    margin-bottom: 1em;
+}
+
+.fumigation {
+    margin-left: 16%;
+    margin-right: 16%;
+    margin-top: 5em;
+    margin-bottom: 3em;
+}
+
+.fumigation h4{
+    font-size: 2em;
+    color: #17386b;
+    margin-bottom: 1em;
+}
+
+.sectionItem {
+    font-size: 1em;
+}
+
+.bordaCircular {
+    background-color: #17386b;
+    border-radius: .5em;
+    position: fixed;
+    left: 92%;
+    top: 88%;
+}
+
+.negrito {
+    font-weight: bold;
+    color: #000;
+}
+
+.barraProgresso {
+    margin-top: 2em;
+    margin-bottom: 3em;
+}
+.updated {
+    justify-content: center;
+    margin-top: 1em;
+    margin-bottom: 2em;
+}
+
+.updated h4 {
+    text-align: center;
+    font-size: .9em;
+    color: #17386b;
+}
