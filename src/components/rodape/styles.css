@@ -1,0 +1,17 @@
+
+ .containertradeinfo {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: white;
+	background-color: #061935;
+	height: 20px;
+	font-size: 12px;
+}
+
+@media (max-width: 520px) {
+	.containertradeinfo {
+		height: 30px;
+	}
+}

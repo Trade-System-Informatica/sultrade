@@ -174,7 +174,7 @@ class Contas
             $result = $database->doSelect(
                 'contas_aberto',
                 'contas_aberto.*',
-                "contas_aberto.Saldo = 0 AND contas_aberto.Tipo = 1"
+                "contas_aberto.Saldo = 0 AND contas_aberto.Tipo = 0"
             );
         } else {
             $result = $database->doSelect(
@@ -722,7 +722,7 @@ class Contas
     {
         $database = new Database();
 
-        if ($id_status == 3) {
+        if ($id_status == 4) {
             $query = "saldo = '" . ($saldo - $valor) . "', valor_pago = '" . $valor . "', data_pagto = '" . $data_pagto . "'";
             $result = $database->doUpdate('contas_aberto', $query, 'Chave = ' . $chave);
         }

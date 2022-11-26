@@ -74,7 +74,7 @@ if ($objData != NULL) {
     
     $body = [
         "numeroRequisicao" => intval($codigo),
-//        "numeroContratoPagamento" => intval($informacoesBancarias[0]["codigo_contrato"]),
+        "numeroContratoPagamento" => intval($informacoesBancarias[0]["codigo_contrato"]),
         "agenciaDebito" => intval($informacoesBancarias[0]["agencia"]),
         "contaCorrenteDebito" => intval($informacoesBancarias[0]["conta"]),
         "digitoVerificadorContaCorrente" => $informacoesBancarias[0]["digito_conta"],

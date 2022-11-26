@@ -1,0 +1,49 @@
+
+.scrollDiv {
+    overflow: auto;
+    max-height: 100px;
+}
+
+.reduceCheckSize {
+    max-width: 25px !important;
+}
+
+.scrollDiv > div {
+    max-height: 200px;
+    min-height: 45px;
+}
+
+.scrollDiv > div > label, .scrollDiv > div > div > label{
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.borderAll, .borderAll > tr, .borderAll > tr > td, .borderAll > tr > th {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+.totalTablePDF {
+    border: 2px solid black;
+    width: 60%;
+}
+
+@media (max-width: 767px) {
+    .relatorioLabelTitulo {
+        margin-top: 50px;
+        margin-bottom: -50px;
+    }
+    
+    .relatorioCheckLabel {
+        margin-bottom: -60px;
+    }
+    
+    .relatorioCheck {
+        margin-bottom: 10px;
+    }
+    
+    
+    .firstScrollLabel {
+        margin-top: 4px
+    }
+}

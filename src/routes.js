@@ -1,75 +1,75 @@
 import React from 'react'
 import {BrowserRouter, Route, Switch} from 'react-router-dom'
 
-import Login from './admin/login'
-import Inicio from './admin/inicio'
-import Tabelas from './admin/tabelas'
-import OrdensServico from './admin/ordensservico'
-import Utilitarios from './admin/utilitarios'
-import Financeiro from './admin/financeiro'
+import Login from './screens/login'
+import Inicio from './screens/inicio'
+import Tabelas from './screens/tabelas/inicio'
+import OrdensServico from './screens/ordensservico/inicio'
+import Utilitarios from './screens/utilitarios/inicio'
+import Financeiro from './screens/financeiro/inicio'
 
 
-import Ships from './admin/ships'
-import TiposServicos from './admin/tiposservicos'
-import Grupos from './admin/grupos'
-import Subgrupos from './admin/subgrupos'
-import Moedas from './admin/moedas'
-import Taxas from './admin/taxas'
-import Pessoas from './admin/pessoas'
-import PessoaContatos from './admin/pessoaContatos'
-import PessoaEnderecos from './admin/pessoaEnderecos'
-import Portos from './admin/portos'
-import CentrosCustos from './admin/centroscustos'
-import PlanosContas from './admin/planoscontas'
-import HistoricosPadrao from './admin/historicospadrao'
-import TiposDocumentos from './admin/tiposdocumentos'
+import Ships from './screens/tabelas/ships'
+import TiposServicos from './screens/tabelas/tiposservicos'
+import Grupos from './screens/tabelas/grupos'
+import Subgrupos from './screens/tabelas/subgrupos'
+import Moedas from './screens/tabelas/moedas'
+import Taxas from './screens/tabelas/taxas'
+import Pessoas from './screens/tabelas/pessoas'
+import PessoaContatos from './screens/tabelas/pessoaContatos'
+import PessoaEnderecos from './screens/tabelas/pessoaEnderecos'
+import Portos from './screens/tabelas/portos'
+import CentrosCustos from './screens/tabelas/centroscustos'
+import PlanosContas from './screens/tabelas/planoscontas'
+import HistoricosPadrao from './screens/tabelas/historicospadrao'
+import TiposDocumentos from './screens/tabelas/tiposdocumentos'
 
-import AddShip from './admin/addship'
-import AddTipoServico from './admin/addtiposervico'
-import AddGrupo from './admin/addgrupo'
-import AddSubgrupo from './admin/addsubgrupo'
-import AddMoeda from './admin/addmoeda'
-import AddTaxa from './admin/addtaxa'
-import AddPessoa from './admin/addpessoa'
-import AddPessoaContato from './admin/addpessoacontato'
-import AddPessoaEndereco from './admin/addpessoaendereco'
-import AddPorto from './admin/addporto'
-import AddCentroCusto from './admin/addcentrocusto'
-import AddPlanoConta from './admin/addplanoconta'
-import AddHistorico from './admin/addhistorico'
-import AddTipoDocumento from './admin/addtipodocumento'
-
-
-import Operadores from './admin/operadores'
-import Permissoes from './admin/permissoes'
-
-import AddOperador from './admin/addoperador'
+import AddShip from './screens/tabelas/addship'
+import AddTipoServico from './screens/tabelas/addtiposervico'
+import AddGrupo from './screens/tabelas/addgrupo'
+import AddSubgrupo from './screens/tabelas/addsubgrupo'
+import AddMoeda from './screens/tabelas/addmoeda'
+import AddTaxa from './screens/tabelas/addtaxa'
+import AddPessoa from './screens/tabelas/addpessoa'
+import AddPessoaContato from './screens/tabelas/addpessoacontato'
+import AddPessoaEndereco from './screens/tabelas/addpessoaendereco'
+import AddPorto from './screens/tabelas/addporto'
+import AddCentroCusto from './screens/tabelas/addcentrocusto'
+import AddPlanoConta from './screens/tabelas/addplanoconta'
+import AddHistorico from './screens/tabelas/addhistorico'
+import AddTipoDocumento from './screens/tabelas/addtipodocumento'
 
 
-import OS from './admin/os'
-import SolicitacoesServicos from './admin/solicitacoesservicos'
-import Logs from './admin/logs'
-import Parametros from './admin/parametros'
+import Operadores from './screens/utilitarios/operadores'
+import Permissoes from './screens/utilitarios/permissoes'
+import Logs from './screens/utilitarios/logs'
+import Parametros from './screens/utilitarios/parametros'
 
-import AddOS from './admin/addos'
-import AddSolicitacao from './admin/addsolicitacao'
-import AddSolicitacaoFinanceiro from './admin/addsolicitacaofinanceiro'
+import AddOperador from './screens/utilitarios/addoperador'
 
 
-import ContasAbertas from './admin/contasabertas'
-import ContasReceber from './admin/contasreceber'
-import ContasPagar from './admin/contaspagar'
-import ContasLiquidadas from './admin/contasliquidadas'
-import ContasRecebidas from './admin/contasrecebidas'
-import ContasPagas from './admin/contaspagas'
-import Relatorio from './admin/relatorio'
-import PagamentosLote from './admin/pagamentoslote'
-import PagamentosManual from './admin/pagamentosmanual'
-//import RecebimentosPix from './admin/recebimentospix'
-import Faturas from './admin/faturas'
+import OS from './screens/ordensservico/os'
+import SolicitacoesServicos from './screens/ordensservico/solicitacoesservicos'
 
-import AddConta from './admin/addconta'
-import AddFatura from './admin/addfatura'
+import AddOS from './screens/ordensservico/addos'
+import AddSolicitacao from './screens/ordensservico/addsolicitacao'
+import AddSolicitacaoFinanceiro from './screens/ordensservico/addsolicitacaofinanceiro'
+
+
+import ContasAbertas from './screens/financeiro/contasabertas'
+import ContasReceber from './screens/financeiro/contasreceber'
+import ContasPagar from './screens/financeiro/contaspagar'
+import ContasLiquidadas from './screens/financeiro/contasliquidadas'
+import ContasRecebidas from './screens/financeiro/contasrecebidas'
+import ContasPagas from './screens/financeiro/contaspagas'
+import Relatorio from './screens/financeiro/relatorio'
+import PagamentosLote from './screens/financeiro/pagamentoslote'
+import PagamentosManual from './screens/financeiro/pagamentosmanual'
+//import RecebimentosPix from './screens/financeiro/recebimentospix'
+import Faturas from './screens/financeiro/faturas'
+
+import AddConta from './screens/financeiro/addconta'
+import AddFatura from './screens/financeiro/addfatura'
 
 
 export default function Routes(){
@@ -77,75 +77,74 @@ export default function Routes(){
         <BrowserRouter>
             <Switch>
                 <Route path="/" exact component={Login}  />
-                <Route path="/admin" exact component={Login} />
-                <Route path="/admin/inicio" component={Inicio} />
-                <Route path="/admin/tabelas" component={Tabelas} />
-                <Route path="/admin/ordensservico" component={OrdensServico} />
-                <Route path="/admin/utilitarios" component={Utilitarios} />
-                <Route path="/admin/financeiro" component={Financeiro} />
+                <Route path="/inicio" exact component={Inicio} />
+                <Route path="/tabelas" exact component={Tabelas} />
+                <Route path="/ordensservico" exact component={OrdensServico} />
+                <Route path="/utilitarios" exact component={Utilitarios} />
+                <Route path="/financeiro" exact component={Financeiro} />
 
 
-                <Route path="/admin/navios" component={Ships} />
-                <Route path="/admin/tiposservicos" component={TiposServicos} />
-                <Route path="/admin/subgrupos" component={Subgrupos} />
-                <Route path="/admin/grupos" component={Grupos} />
-                <Route path="/admin/moedas" component={Moedas} />
-                <Route path="/admin/taxas" component={Taxas} />
-                <Route path="/admin/pessoas" component={Pessoas} />
-                <Route path="/admin/pessoacontatos/:id" component={PessoaContatos} />
-                <Route path="/admin/pessoaenderecos/:id" component={PessoaEnderecos} />
-                <Route path="/admin/portos" component={Portos} />
-                <Route path="/admin/centroscustos" component={CentrosCustos} />
-                <Route path="/admin/planoscontas" component={PlanosContas} />
-                <Route path="/admin/historicospadrao" component={HistoricosPadrao} />
-                <Route path="/admin/tiposdocumentos" component={TiposDocumentos} />
+                <Route path="/tabelas/navios" component={Ships} />
+                <Route path="/tabelas/tiposservicos" component={TiposServicos} />
+                <Route path="/tabelas/subgrupos" component={Subgrupos} />
+                <Route path="/tabelas/grupos" component={Grupos} />
+                <Route path="/tabelas/moedas" component={Moedas} />
+                <Route path="/tabelas/taxas" component={Taxas} />
+                <Route path="/tabelas/pessoas" component={Pessoas} />
+                <Route path="/tabelas/pessoacontatos/:id" component={PessoaContatos} />
+                <Route path="/tabelas/pessoaenderecos/:id" component={PessoaEnderecos} />
+                <Route path="/tabelas/portos" component={Portos} />
+                <Route path="/tabelas/centroscustos" component={CentrosCustos} />
+                <Route path="/tabelas/planoscontas" component={PlanosContas} />
+                <Route path="/tabelas/historicospadrao" component={HistoricosPadrao} />
+                <Route path="/tabelas/tiposdocumentos" component={TiposDocumentos} />
 
-                <Route path="/admin/addship/:id" component={AddShip} />
-                <Route path="/admin/addtiposervico/:id" component={AddTipoServico} />
-                <Route path="/admin/addsubgrupo/:id" component={AddSubgrupo} />
-                <Route path="/admin/addgrupo/:id" component={AddGrupo} />
-                <Route path="/admin/addmoeda/:id" component={AddMoeda} />
-                <Route path="/admin/addtaxa/:id" component={AddTaxa} />
-                <Route path="/admin/addpessoa/:id/" component={AddPessoa} />
-                <Route path="/admin/addpessoacontato/:id/:ed" component={AddPessoaContato} />
-                <Route path="/admin/addpessoaendereco/:id/:ed" component={AddPessoaEndereco} />
-                <Route path="/admin/addporto/:id" component={AddPorto} />
-                <Route path="/admin/addcentrocusto/:id/" component={AddCentroCusto} />
-                <Route path="/admin/addplanoconta/:id/" component={AddPlanoConta} />
-                <Route path="/admin/addhistorico/:id/" component={AddHistorico} />          
-                <Route path="/admin/addtipodocumento/:id/" component={AddTipoDocumento} />          
-
-
-                <Route path="/admin/operadores" component={Operadores} />
-                <Route path="/admin/permissoes" component={Permissoes} />
-
-                <Route path="/admin/addoperador/:id/" component={AddOperador} />
+                <Route path="/tabelas/addship/:id" component={AddShip} />
+                <Route path="/tabelas/addtiposervico/:id" component={AddTipoServico} />
+                <Route path="/tabelas/addsubgrupo/:id" component={AddSubgrupo} />
+                <Route path="/tabelas/addgrupo/:id" component={AddGrupo} />
+                <Route path="/tabelas/addmoeda/:id" component={AddMoeda} />
+                <Route path="/tabelas/addtaxa/:id" component={AddTaxa} />
+                <Route path="/tabelas/addpessoa/:id/" component={AddPessoa} />
+                <Route path="/tabelas/addpessoacontato/:id/:ed" component={AddPessoaContato} />
+                <Route path="/tabelas/addpessoaendereco/:id/:ed" component={AddPessoaEndereco} />
+                <Route path="/tabelas/addporto/:id" component={AddPorto} />
+                <Route path="/tabelas/addcentrocusto/:id/" component={AddCentroCusto} />
+                <Route path="/tabelas/addplanoconta/:id/" component={AddPlanoConta} />
+                <Route path="/tabelas/addhistorico/:id/" component={AddHistorico} />          
+                <Route path="/tabelas/addtipodocumento/:id/" component={AddTipoDocumento} />          
 
 
-                <Route path="/admin/os" component={OS} />
-                <Route path="/admin/solicitacoesservicos" component={SolicitacoesServicos} />
-                <Route path="/admin/logs" component={Logs} />
-                <Route path="/admin/parametros" component={Parametros} />
+                <Route path="/utilitarios/operadores" component={Operadores} />
+                <Route path="/utilitarios/permissoes" component={Permissoes} />
+                <Route path="/utilitarios/logs" component={Logs} />
+                <Route path="/utilitarios/parametros" component={Parametros} />
+
+                <Route path="/utilitarios/addoperador/:id/" component={AddOperador} />
+
+
+                <Route path="/ordensservico/os" component={OS} />
+                <Route path="/ordensservico/solicitacoesservicos" component={SolicitacoesServicos} />
                 
-                <Route path="/admin/addos/:id/" component={AddOS} />
-                <Route path="/admin/addsolicitacao/:id/" component={AddSolicitacao} />
-                <Route path="/admin/addsolicitacaoFinanceiro/:id/" component={AddSolicitacaoFinanceiro} />
+                <Route path="/ordensservico/addos/:id/" component={AddOS} />
+                <Route path="/ordensservico/addsolicitacao/:id/" component={AddSolicitacao} />
+                <Route path="/ordensservico/addsolicitacaoFinanceiro/:id/" component={AddSolicitacaoFinanceiro} />
 
 
-                <Route path="/admin/contasabertas" component={ContasAbertas} />
-                <Route path="/admin/contasreceber" component={ContasReceber} />
-                <Route path="/admin/contaspagar" component={ContasPagar} />
-                <Route path="/admin/contasliquidadas" component={ContasLiquidadas} />
-                <Route path="/admin/contasrecebidas" component={ContasRecebidas} />
-                <Route path="/admin/contaspagas" component={ContasPagas} />
-                <Route path="/admin/relatorio" component={Relatorio} />
-                <Route path="/admin/pagamentoslote" component={PagamentosLote} />
-                <Route path="/admin/pagamentosmanual" component={PagamentosManual} />
-                {/*<Route path="/admin/recebimentospix" component={RecebimentosPix} />*/}
-                <Route path="/admin/faturas" component={Faturas} />
+                <Route path="/financeiro/contasabertas" component={ContasAbertas} />
+                <Route path="/financeiro/contasreceber" component={ContasReceber} />
+                <Route path="/financeiro/contaspagar" component={ContasPagar} />
+                <Route path="/financeiro/contasliquidadas" component={ContasLiquidadas} />
+                <Route path="/financeiro/contasrecebidas" component={ContasRecebidas} />
+                <Route path="/financeiro/contaspagas" component={ContasPagas} />
+                <Route path="/financeiro/relatorio" component={Relatorio} />
+                <Route path="/financeiro/pagamentoslote" component={PagamentosLote} />
+                <Route path="/financeiro/pagamentosmanual" component={PagamentosManual} />
+                {/*<Route path="/financeiro/recebimentospix" component={RecebimentosPix} />*/}
+                <Route path="/financeiro/faturas" component={Faturas} />
 
-                <Route path="/admin/addconta/:id/" component={AddConta} />
-                <Route path="/admin/addfatura/:id/" component={AddFatura} />
+                <Route path="/financeiro/addconta/:id/" component={AddConta} />
+                <Route path="/financeiro/addfatura/:id/" component={AddFatura} />
             </Switch>
         </BrowserRouter>
     )

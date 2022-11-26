@@ -48,6 +48,7 @@ if ($objData != NULL) {
         "numeroAgenciaDebito" => intval($informacoesBancarias[0]["agencia"]),
         "numeroContaCorrenteDebito" => intval($informacoesBancarias[0]["conta"]),
         "digitoVerificadorContaCorrenteDebito" => $informacoesBancarias[0]["digito_conta"],
+        "codigoContrato" => $informacoesBancarias[0]["codigo_contrato"],
         "lancamentos" => [[
             "numeroCodigoBarras" => "".$conta->{"RepCodBar"}."",
             "valorPagamento" => floatval($conta->{"Valor"}),

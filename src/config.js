@@ -25,6 +25,9 @@ export const API_BANCO_TRANS_GET = '/beneficiarios/';
 export const API_BANCO_BOL = '/lotes-boletos';
 export const API_BANCO_BOL_GET = '/lotes-boletos/';
 
+export const API_BANCO_CONVENIO = '/lotes-guias-codigo-barras';
+export const API_BANCO_CONVENIO_GET = '/lotes-guias-codigo-barras/';
+
 export const API_BANCO_PIX = '/arrecadacao-qrcodes';
 
 export const API_LIBERAR = '/liberar-pagamentos';
