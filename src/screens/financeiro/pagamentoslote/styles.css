@@ -13,3 +13,35 @@
     margin-top: -10px;
     margin-bottom: 10px;
 }
+
+.comprovanteHeader {
+    width: 90%;
+    margin-left: 5%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.marginFixLeftComprovanteHeader{
+    margin-left: 20px;
+}
+
+.marginFixRightComprovanteHeader{
+    margin-right: 20px;
+}
+
+.comprovanteTable {
+    width: 90%;
+    margin-left: 5%;
+    margin-right: 5%;
+    font-size: 1em;
+}
+
+.spanTdFix {
+    margin-left: 10px;
+}
+
+.tdMarginFix {
+    text-align: right;
+    padding-right: 10px;
+}

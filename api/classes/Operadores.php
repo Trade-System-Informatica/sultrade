@@ -294,10 +294,10 @@ class Operadores {
         }
     }
 
-    public static function updateParametros($Empresa, $conta_desconto, $conta_retencao_inss, $conta_retencao_ir, $conta_retencao_iss, $conta_retencao_pis, $conta_retencao_cofins, $conta_retencao_csll){
+    public static function updateParametros($Empresa, $conta_desconto, $conta_retencao_inss, $conta_retencao_ir, $conta_retencao_iss, $conta_retencao_pis, $conta_retencao_cofins, $conta_retencao_csll, $bank_charges){
         $database = new Database();
 
-        $query = "conta_desconto = '".$conta_desconto."', conta_retencao_inss = '".$conta_retencao_inss."', conta_retencao_ir = '".$conta_retencao_ir."', conta_retencao_iss = '".$conta_retencao_iss."', conta_retencao_pis = '".$conta_retencao_pis."', conta_retencao_cofins = '".$conta_retencao_cofins."', conta_retencao_csll = '".$conta_retencao_csll."'";
+        $query = "conta_desconto = '".$conta_desconto."', conta_retencao_inss = '".$conta_retencao_inss."', conta_retencao_ir = '".$conta_retencao_ir."', conta_retencao_iss = '".$conta_retencao_iss."', conta_retencao_pis = '".$conta_retencao_pis."', conta_retencao_cofins = '".$conta_retencao_cofins."', conta_retencao_csll = '".$conta_retencao_csll."', bank_charges = '$bank_charges'";
         $result = $database->doUpdate('parametros', $query, "Empresa = '".$Empresa."'");
         
         $database->closeConection();

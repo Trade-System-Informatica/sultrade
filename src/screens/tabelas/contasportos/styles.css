@@ -1,0 +1,9 @@
+.multipleOptions {
+    color: white;
+    font-size: 0.8em;
+    cursor: pointer;
+}
+
+.multipleOptions:hover{
+    color: red;
+}

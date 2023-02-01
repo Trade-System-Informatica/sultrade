@@ -4,14 +4,13 @@ import { apiEmployee } from '../../../services/apiamrg'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import Skeleton from '../../../components/skeleton'
-import { Link, useHistory, Redirect } from 'react-router-dom'
+import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { PRECISA_LOGAR, NOME_EMPRESA } from '../../../config'
+import { NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHandHoldingUsd, faCashRegister, faTrashAlt, faPen, faPlus, faEnvelope, faCreditCard } from '@fortawesome/free-solid-svg-icons'
+import { faHandHoldingUsd, faCashRegister } from '@fortawesome/free-solid-svg-icons'
 import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
-import moment from 'moment'
 
 
 const estadoInicial = {
@@ -225,7 +224,7 @@ class ContasLiquidadas extends Component {
                     {!this.state.loading &&
                         <div>
                             <section>
-                                <Header voltarFinanceiro titulo="Contas Liquidadas"/>
+                                <Header voltarFinanceiroTabelas titulo="Contas Liquidadas"/>
 
 
                                 <br />

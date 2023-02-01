@@ -1,4 +1,5 @@
-import { USER_LOGGED_IN, USER_LOGGED_OUT} from '../actions/actionTypes'
+import { USER_LOGGED_IN, USER_LOGGED_OUT, USER_EXTEND_EXPIRATION} from '../actions/actionTypes'
+import moment from 'moment'
 
 const initialState = {
     nome: '',
@@ -15,8 +16,18 @@ const reducer = (state = initialState, action) => {
                 nome: action.payload.nome,
                 codigo: action.payload.codigo,
                 empresa: action.payload.empresa,
-                token: null
+                token: null,
+                expiry: moment().add(15,'minutes')
             } 
+        case USER_EXTEND_EXPIRATION: 
+            return {
+                ...state,
+                nome: action.payload.nome,
+                codigo: action.payload.codigo,
+                empresa: action.payload.empresa,
+                token: null,
+                expiry: moment().add(15,'minutes')
+            }
         case USER_LOGGED_OUT:
             return{
                 ...state,

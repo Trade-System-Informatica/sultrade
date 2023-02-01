@@ -18,11 +18,13 @@ if($objData != NULL){
     $Nome_Fantasia = prepareInput($objData->Nome_Fantasia);
     $Cnpj_Cpf = prepareInput($objData->Cnpj_Cpf);
     $Rg_Ie = prepareInput($objData->Rg_Ie);
+    $Inscricao_Municipal = prepareInput($objData->Inscricao_Municipal);
     $Nascimento_Abertura = prepareInput($objData->Nascimento_Abertura);
     $Inclusao = prepareInput($objData->Inclusao);
     $Categoria = prepareInput($objData->Categoria);
     $Conta_Contabil = prepareInput($objData->Conta_Contabil);
     $Conta_Provisao = prepareInput($objData->Conta_Provisao);
+    $Conta_Faturar = prepareInput($objData->Conta_Faturar);
 
 
     $employees = new Employees();
@@ -31,7 +33,7 @@ if($objData != NULL){
     //$result = $employees->checkToken($token);
     //if($result == 'true'){
         //$result = "'" . $id_seaport . "'";
-        $result = $pessoas->updatePessoa($Chave, $Nome, $Nome_Fantasia, $Cnpj_Cpf, $Rg_Ie, $Nascimento_Abertura, $Inclusao, $Categoria, $Conta_Contabil, $Conta_Provisao);
+        $result = $pessoas->updatePessoa($Chave, $Nome, $Nome_Fantasia, $Cnpj_Cpf, $Rg_Ie, $Inscricao_Municipal, $Nascimento_Abertura, $Inclusao, $Categoria, $Conta_Contabil, $Conta_Provisao, $Conta_Faturar);
     //}
 } else {
     $result = "false";

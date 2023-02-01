@@ -3,17 +3,13 @@ import './styles.css'
 import { Formik, Field, Form } from 'formik'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
-import util from '../../../classes/util'
 import loader from '../../../classes/loader'
-import { PRECISA_LOGAR } from '../../../config'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
-import Image from 'react-bootstrap/Image'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import { apiEmployee } from '../../../services/apiamrg'
 import moment from 'moment'
-import Select from 'react-select';
 import ModalLogs from '../../../components/modalLogs'
 
 const estadoInicial = {
@@ -24,7 +20,6 @@ const estadoInicial = {
     id: null,
     seaports: [],
     redirect: false,
-    finalizaOperacao: false,
     spanerror1: '',
     spanerror2: '',
     spanerror3: '',
@@ -146,7 +141,8 @@ class AddMoeda extends Component {
                 {titulo: 'Sigla', valor: this.state.sigla},
                 {titulo: 'plural', valor: this.state.plural},
                 {titulo: 'cotacao', valor: this.state.cotacao}
-            ]
+            ],
+            loading: true
         })
 
         this.setState({ bloqueado: true })
@@ -162,7 +158,7 @@ class AddMoeda extends Component {
                         await this.setState({ chave: res.data[0].Chave })
                         await loader.salvaLogs('moedas', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
                         //alert('Moeda Inserida!')
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         alert(`Erro: ${JSON.stringify(res)}`)
                     }
@@ -183,10 +179,10 @@ class AddMoeda extends Component {
                     if (res.data === true) {
                         await loader.salvaLogs('moedas', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `MOEDA: ${this.state.descricao}`);
                         
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else if (res.data && res.data.includes('Duplicate')) {
                         await alert("Não foi possivel alterar a moeda, o valor já foi alterado na data de hoje")
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         await alert(`Erro ${JSON.stringify(res)}`)
                     }
@@ -255,10 +251,6 @@ class AddMoeda extends Component {
 
                 {this.state.redirect &&
                     <Redirect to={'/'} />
-                }
-
-                {this.state.finalizaOperacao &&
-                    <Redirect to={{pathname: '/tabelas/moedas', state:{chave: this.state.chave}}} />
                 }
 
                 <section>

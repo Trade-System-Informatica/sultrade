@@ -6,8 +6,6 @@ import Skeleton from '../../../components/skeleton'
 import './styles.css'
 import { apiEmployee } from '../../../services/apiamrg'
 import { connect } from 'react-redux'
-
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBookOpen, faCheckCircle, faAddressCard, faCogs} from '@fortawesome/free-solid-svg-icons'
 

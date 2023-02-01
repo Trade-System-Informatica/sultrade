@@ -1,0 +1,38 @@
+.centerDiv {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.alertMessage {
+	display: flex;
+	flex-direction: column;
+	padding: 3px;
+	position: fixed;
+	top: 25%;
+	width: 30%;
+	min-width: 300px;
+	background: #FFFFFF;
+	box-shadow: 0px 0px 15px black;
+	font-size: 1.2em;
+	border-top: 3px solid #FF0000;
+	border-bottom: 1px solid #000000;
+	border-left: 1px solid #000000;
+	border-right: 1px solid #000000;
+	min-height: 50px;
+	cursor: pointer;
+	user-select: none;
+	z-index: 500;
+}
+
+.alertTitle {
+	font-size: 1.3em;
+	font-weight: bold;
+	user-select: none;
+	width: 100%;
+}
+
+.alertContent {
+	width: 100%;
+}

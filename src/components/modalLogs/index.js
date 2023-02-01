@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import './styles.css'
-import { Link } from 'react-router-dom'
 import Modal from '@material-ui/core/Modal';
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import moment from 'moment';

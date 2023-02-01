@@ -26,6 +26,7 @@ $return = ['successes' => [], 'failures' => [], 'warnings' => []];
 
 //Create an instance; passing `true` enables exceptions
 $mail = new PHPMailer;
+$mail->CharSet="UTF-8";
 
 for ($i=0; $i<count($emails); $i++) {
 try {

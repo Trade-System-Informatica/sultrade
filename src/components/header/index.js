@@ -2,24 +2,20 @@ import 'react-confirm-alert/src/react-confirm-alert.css'
 import React, { Component } from 'react'
 import { NOME_EMPRESA } from '../../config'
 import { Link, Redirect } from 'react-router-dom'
-import { logout } from '../../store/actions/user'
+import { logout, extendExpiration } from '../../store/actions/user'
 import { connect } from 'react-redux'
 import { apiEmployee } from '../../services/apiamrg'
 import Logo from '../../img/logo.png'
 import tradeLogo from '../../img/tradeLogo.png'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSignOutAlt, faArrowLeft, faBars } from '@fortawesome/free-solid-svg-icons'
-
-
 import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
+import moment from 'moment'
 
 import './styles.css'
 
 class Header extends Component {
-
-
-
     state = {
         token: '',
         nome: '',
@@ -59,9 +55,41 @@ class Header extends Component {
         await this.setState({ redirect: true })
     }
 
+    expirarSessao = async () => {
+        await this.props.onLogout()
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return (
+                    <div className='custom-ui text-center'>
+                        <h1>{NOME_EMPRESA}</h1>
+                        <p>Tempo de sessão expirado!</p>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-success w-50"
+                            onClick={
+                                async () => {
+                                    onClose()
+                                }
+                            }
+                        >
+                            Ok
+                        </button>
+                    </div>
+                )
+            }
+        })
+        await this.setState({ redirect: true })
+    }
+
     componentDidMount = async () => {
         if (!this.props.user.codigo) {
             await this.setState({ redirect: true })
+        } else {
+            if (this.props.user.expiry && moment().isSameOrBefore(this.props.user.expiry)) {
+                await this.props.extendExpiration({ ...this.props.user });
+            } else if (this.props.user.expiry) {
+                await this.expirarSessao();
+            }
         }
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
@@ -124,11 +152,11 @@ class Header extends Component {
                     <Redirect to={'/'} />
                 }
                 <div className="header">
+
                     <div className="headerSimbolos">
                         <div className="setaAcima">
                             {this.props.voltar &&
                                 <Link to={{ pathname: `/inicio` }}>
-
                                     <FontAwesomeIcon className='seta' cursor="pointer" icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
@@ -151,6 +179,12 @@ class Header extends Component {
                                 </Link>
                             }
                             {this.props.voltarFinanceiro &&
+                                <Link to={{ pathname: `/financeiro` }}>
+
+                                    <FontAwesomeIcon className='seta' cursor="pointer" icon={faArrowLeft} color="#17386b" size="2x" />
+                                </Link>
+                            }
+                            {this.props.voltarFinanceiroTabelas &&
                                 <Link to={{ pathname: `/financeiro` }}>
 
                                     <FontAwesomeIcon className='seta' cursor="pointer" icon={faArrowLeft} color="#17386b" size="2x" />
@@ -218,6 +252,11 @@ class Header extends Component {
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
+                            {this.props.voltarDescricoesPadrao &&
+                                <Link to={{ pathname: `/tabelas/descricoespadrao`, state: { chave: this.props.chave } }}>
+                                    <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
+                                </Link>
+                            }
                             {this.props.voltarTiposDocumentos &&
                                 <Link to={{ pathname: `/tabelas/tiposdocumentos`, state: { chave: this.props.chave } }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
@@ -247,25 +286,25 @@ class Header extends Component {
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
-                            {this.props.voltarSolicitacoes &&
-                                <Link to={{ pathname: `/ordensservico/solicitacoesservicos`, state: { chave: this.props.chave } }}>
+                            {this.props.voltarEventos &&
+                                <Link to={{ pathname: `/ordensservico/eventos`, state: { chave: this.props.chave } }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
-                            {this.props.voltarAddSolicitacao &&
-                                <Link to={{ pathname: `/ordensservico/addsolicitacao/${this.props.solicitacao.chave}`, state: { solicitacao: this.props.solicitacao, os: this.props.os ? { ...this.props.os } : null } }}>
+                            {this.props.voltarAddEvento &&
+                                <Link to={{ pathname: `/ordensservico/addevento/${this.props.evento.chave}`, state: { evento: this.props.evento, os: this.props.os ? { ...this.props.os } : null } }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
 
 
                             {this.props.voltarPlanosContas &&
-                                <Link to={{ pathname: `/financeiro/planoscontas`, state: { chave: this.props.chave } }}>
+                                <Link to={{ pathname: `/tabelas/planoscontas`, state: { chave: this.props.chave } }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
                             {this.props.voltarCentrosCustos &&
-                                <Link to={{ pathname: `/financeiro/centroscustos`, state: { chave: this.props.chave } }}>
+                                <Link to={{ pathname: `/tabelas/centroscustos`, state: { chave: this.props.chave } }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
@@ -290,15 +329,15 @@ class Header extends Component {
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
+                            {this.props.voltarFaturasOS &&
+                                <Link to={{ pathname: this.props.state.backTo, state: { os: this.props.state.os } }}>
+                                    <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
+                                </Link>
+                            }
                             {this.props.voltarPagamentosLote &&
                                 <Link to={{ pathname: `/financeiro/pagamentoslote` }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
-                            }
-                            {/*this.props.voltarRecebimentosPix &&
-                                <Link to={{ pathname: `/financeiro/recebimentospix` }}>
-                                    <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
-                                </Link>*/
                             }
                             {this.props.voltarContasPagas &&
                                 <Link to={{ pathname: `/financeiro/contaspagas`, state: { chave: this.props.chave } }}>
@@ -312,6 +351,11 @@ class Header extends Component {
                             }
                             {this.props.voltarContasRecebidas &&
                                 <Link to={{ pathname: `/financeiro/contasrecebidas`, state: { chave: this.props.chave } }}>
+                                    <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
+                                </Link>
+                            }
+                            {this.props.voltarLancamentos &&
+                                <Link to={{ pathname: `/financeiro/lancamentos`, state: { chave: this.props.chave } }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
@@ -423,7 +467,7 @@ class Header extends Component {
                                                         </Link>
                                                     }
                                                     {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
-                                                        <Link className="dropdown-item" to={{ pathname: `/ordensservico/solicitacoesservicos` }}>
+                                                        <Link className="dropdown-item" to={{ pathname: `/ordensservico/eventos` }}>
                                                             Solitações de Serviço
                                                         </Link>
                                                     }
@@ -442,6 +486,7 @@ class Header extends Component {
                                             </Link>
                                             {window.innerWidth >= 650 &&
                                                 <ul className="dropdown-menu">
+
                                                     {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_ABERTAS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
 
                                                         <div className="dropdown-item dropend text-left" >
@@ -449,13 +494,13 @@ class Header extends Component {
                                                             <Link className="dropdown-item" to={{ pathname: `/financeiro/contasabertas` }}>
                                                                 Contas em Aberto
                                                             </Link>
-                                                            {window.innerWidth >= 780 &&
+                                                            {window.innerWidth >= 940 &&
                                                                 <ul className="dropdown-menu">
                                                                     <div className="dropdown-item dropend" >
                                                                         <Link className="dropdown-item" to={{ pathname: `/financeiro/contasreceber` }}>
                                                                             Contas a receber
                                                                         </Link>
-                                                                        {window.innerWidth >= 915 && !this.props.relatorio &&
+                                                                        {window.innerWidth >= 1150 && !this.props.relatorio &&
                                                                             <ul className="dropdown-menu">
                                                                                 <Link className="dropdown-item" to={{ pathname: `/financeiro/relatorio`, state: { backTo: 'contasReceber' } }}>
                                                                                     Relatório
@@ -468,7 +513,7 @@ class Header extends Component {
                                                                         <Link className="dropdown-item" to={{ pathname: `/financeiro/contaspagar` }}>
                                                                             Contas a pagar
                                                                         </Link>
-                                                                        {window.innerWidth >= 915 && !this.props.relatorio &&
+                                                                        {window.innerWidth >= 1150 && !this.props.relatorio &&
                                                                             <ul className="dropdown-menu">
                                                                                 <Link className="dropdown-item" to={{ pathname: `/financeiro/relatorio`, state: { backTo: 'contasPagar' } }}>
                                                                                     Relatório
@@ -485,13 +530,13 @@ class Header extends Component {
                                                             <Link className="dropdown-item" to={{ pathname: `/financeiro/contasliquidadas` }}>
                                                                 Contas Liquidadas
                                                             </Link>
-                                                            {window.innerWidth >= 780 &&
+                                                            {window.innerWidth >= 940 &&
                                                                 <ul className="dropdown-menu">
                                                                     <div className="dropdown-item dropend" >
                                                                         <Link className="dropdown-item" to={{ pathname: `/financeiro/contasrecebidas` }}>
                                                                             Contas recebidas
                                                                         </Link>
-                                                                        {window.innerWidth >= 915 && !this.props.relatorio &&
+                                                                        {window.innerWidth >= 1150 && !this.props.relatorio &&
                                                                             <ul className="dropdown-menu">
                                                                                 <Link className="dropdown-item" to={{ pathname: `/financeiro/relatorio`, state: { backTo: 'contasRecebidas' } }}>
                                                                                     Relatório
@@ -503,7 +548,7 @@ class Header extends Component {
                                                                         <Link className="dropdown-item" to={{ pathname: `/financeiro/contaspagas` }}>
                                                                             Contas pagas
                                                                         </Link>
-                                                                        {window.innerWidth >= 915 && !this.props.relatorio &&
+                                                                        {window.innerWidth >= 1150 && !this.props.relatorio &&
                                                                             <ul className="dropdown-menu">
                                                                                 <Link className="dropdown-item" to={{ pathname: `/financeiro/relatorio`, state: { backTo: 'contasPagas' } }}>
                                                                                     Relatório
@@ -515,6 +560,11 @@ class Header extends Component {
                                                             }
                                                         </div>
                                                     }
+                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'FATURAS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                        <Link className="dropdown-item" to={{ pathname: `/financeiro/faturas` }}>
+                                                            Notas Fiscais de Serviço
+                                                        </Link>
+                                                    }
                                                     {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_ABERTAS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                                         <Link className="dropdown-item" to={{ pathname: `/financeiro/pagamentoslote` }}>
                                                             Pagamentos em Lote
@@ -525,14 +575,9 @@ class Header extends Component {
                                                             Pagamentos Manual
                                                         </Link>
                                                     }
-                                                    {/*this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_LIQUIDADAS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
-                                                        <Link className="dropdown-item" to={{ pathname: `/financeiro/recebimentospix` }}>
-                                                            Recebimentos por Pix
-                                                        </Link>
-                                                    */}
-                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'FATURAS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
-                                                        <Link className="dropdown-item" to={{ pathname: `/financeiro/faturas` }}>
-                                                            Notas Fiscais de Serviço
+                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                        <Link className="dropdown-item" to={{ pathname: `/financeiro/lancamentos` }}>
+                                                            Lançamentos
                                                         </Link>
                                                     }
                                                 </ul>
@@ -621,7 +666,8 @@ const mapStateToProps = ({ user }) => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onLogout: user => dispatch(logout(user))
+        onLogout: user => dispatch(logout(user)),
+        extendExpiration: user => dispatch(extendExpiration(user))
     }
 }
 

@@ -4,12 +4,10 @@ import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import Skeleton from '../../../components/skeleton'
 import './styles.css'
-import { NAVIOS, NOME_EMPRESA } from '../../../config'
+import { NAVIOS } from '../../../config'
 import { apiEmployee } from '../../../services/apiamrg'
 import { connect } from 'react-redux'
 import { GiShipBow } from "react-icons/gi"
-
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBriefcase, faFileAlt, faUserFriends, faWater, faPaperclip, faBalanceScale, faCreditCard, faListUl, faDollarSign, faScroll, faLayerGroup } from '@fortawesome/free-solid-svg-icons'
 
@@ -138,7 +136,7 @@ class Tabelas extends Component {
                     {this.state.loading &&
                         <Skeleton />
                     }
-                    <Header voltar titulo="Tabelas"/>
+                    <Header voltar titulo="Tabelas" />
                     <br />
                     <br />
                     {!this.state.loading &&
@@ -238,6 +236,15 @@ class Tabelas extends Component {
                                                 <Link className="semTextDecoration" to={{ pathname: `/tabelas/historicospadrao` }}>
                                                     <FontAwesomeIcon icon={faListUl} size="2x" color="tomato" />
                                                     <h4 className="textoMenu">Históricos Padrão</h4>
+                                                </Link>
+                                            </li>
+                                        }
+
+                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'DESCRICOES_PADRAO') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                            <li className=" text-left itemMenu list-group-item ">
+                                                <Link className="semTextDecoration" to={{ pathname: `/tabelas/descricoespadrao` }}>
+                                                    <FontAwesomeIcon icon={faListUl} size="2x" color="tomato" />
+                                                    <h4 className="textoMenu">Descrições Padrão</h4>
                                                 </Link>
                                             </li>
                                         }

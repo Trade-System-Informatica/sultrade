@@ -1,9 +1,7 @@
 
 import { apiEmployee } from '../services/apiamrg'
 import axios from 'axios'
-import { CLIENT_ID, CLIENT_SECRET } from '../config'
 import moment from 'moment'
-import util from './util';
 
 export default class loader {
     static async getCodigoCC() {
@@ -180,7 +178,7 @@ export default class loader {
             empresa: empresa
         }).then(
             async res => {
-                return res.data[0]
+                    return res.data[0]
             },
             async err => { alert(err) }
         )
@@ -372,15 +370,18 @@ export default class loader {
     }
 
     static async getContaPessoa(chave, tipo) {
+        console.log(chave);
         return await apiEmployee.post('getPessoa.php', {
             token: true,
             chave
         }).then(
             async res => {
-                if (tipo == "provisao") {
-                    return res.data[0].Conta_Provisao == '0' || !res.data[0].Conta_Provisao ? '' : res.data[0].Conta_Provisao;
-                } else {
-                    return res.data[0].Conta_Contabil == '0' || !res.data[0].Conta_Contabil ? '' : res.data[0].Conta_Contabil;
+                if (res.data[0]) {
+                    if (tipo == "provisao") {
+                        return res.data[0].Conta_Provisao == '0' || !res.data[0].Conta_Provisao ? '' : res.data[0].Conta_Provisao;
+                    } else {
+                        return res.data[0].Conta_Contabil == '0' || !res.data[0].Conta_Contabil ? '' : res.data[0].Conta_Contabil;
+                    }
                 }
             },
             async err => { alert(err) }
@@ -411,6 +412,35 @@ export default class loader {
                 return retorno;
             }
         )
+    }
+
+    static async postContasDescontos(contas, chave_conta_aberto) {
+        for (let i = 0; i<contas.length; i++) {
+            const conta = contas[i];
+
+            if (conta.check) {
+                await apiEmployee.post(`insertContaDescontos.php`, {
+                    token: true,
+                    chave_conta_aberto,
+                    chave_conta: conta.conta,
+                    complemento: conta.complemento,
+                    valor: conta.valor,
+                    tipo: conta.tipo
+                }).then(
+                    async res => {                    },
+                    async res => await console.log(`Erro: ${res.data}`)
+                )
+            } else {
+                await apiEmployee.post('checkAndDeleteContaDescontos.php', {
+                    token: true,
+                    chave_conta_aberto,
+                    tipo: conta.tipo
+                }).then(
+                    async res => {},
+                    async res => await console.log(`Erro: ${res.data}`)
+                )
+            }
+        }
     }
     //
 

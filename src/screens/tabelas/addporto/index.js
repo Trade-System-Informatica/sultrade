@@ -3,18 +3,13 @@ import './styles.css'
 import { Formik, Field, Form } from 'formik'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
-import util from '../../../classes/util'
 import loader from '../../../classes/loader'
-import { PRECISA_LOGAR } from '../../../config'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
-import Image from 'react-bootstrap/Image'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import ModalLogs from '../../../components/modalLogs'
 import { apiEmployee } from '../../../services/apiamrg'
-import moment from 'moment'
-import Select from 'react-select';
 
 const estadoInicial = {
     data: '',
@@ -131,7 +126,8 @@ class AddPorto extends Component {
             dadosFinais: [
                 {titulo: 'Descricao', valor: this.state.descricao},
                 {titulo: 'Codigo', valor: this.state.sigla}
-            ]
+            ],
+            loading: true
         })
         
         if (parseInt(this.state.chave) === 0 && validForm) {
@@ -145,7 +141,7 @@ class AddPorto extends Component {
                         await this.setState({ chave: res.data[0].Chave })
                         await loader.salvaLogs('os_portos', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
 
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         console.log(res.data)
                     }
@@ -163,7 +159,7 @@ class AddPorto extends Component {
                     if (res.data === true) {
                         await loader.salvaLogs('os_portos', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `PORTO: ${this.state.descricao}`);
 
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                     }
                 },
@@ -198,10 +194,6 @@ class AddPorto extends Component {
 
                 {this.state.redirect &&
                     <Redirect to={'/'} />
-                }
-
-                {this.state.finalizaOperacao &&
-                    <Redirect to={{pathname: '/tabelas/portos', state:{chave: this.state.chave}}} />
                 }
 
                 <section>

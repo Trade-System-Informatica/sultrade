@@ -22,13 +22,17 @@ if($objData != NULL){
     $tipo_sub = prepareInput($objData->tipo_sub);
     $Fornecedor_Custeio = prepareInput($objData->Fornecedor_Custeio);
     $remarks = prepareInput($objData->remarks);
+    $Moeda = prepareInput($objData->Moeda);
+    $valor = prepareInput($objData->valor);
+    $valor1 = prepareInput($objData->valor1);
+    $repasse = prepareInput($objData->repasse);
     
     $os = new OS();
 
     //$result = $employees->checkToken($token);
     //if($result == 'true'){
         //$result = "'" . $id_seaport . "'";
-        $result = $os->updateServicoItem($chave, $chave_os, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks);
+        $result = $os->updateServicoItem($chave, $chave_os, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks, $Moeda, $valor, $valor1, $repasse);
     //}
 } else {
     $result = "false";

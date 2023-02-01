@@ -4,11 +4,11 @@ import { apiEmployee } from '../../../services/apiamrg'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import Skeleton from '../../../components/skeleton'
-import { Link, useHistory, Redirect } from 'react-router-dom'
+import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { PRECISA_LOGAR, NOME_EMPRESA } from '../../../config'
+import { NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSearch, faTimes, faTrashAlt, faPen, faPlus, faEnvelope, faFilePdf } from '@fortawesome/free-solid-svg-icons'
+import { faTimes, faPen, faPlus } from '@fortawesome/free-solid-svg-icons'
 import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import moment from 'moment'
@@ -46,7 +46,7 @@ const estadoInicial = {
     permissoes: [],
     acessosPermissoes: [],
 
-    load: 50,
+    load: 200,
     offset: 0,
 }
 
@@ -111,7 +111,7 @@ class OS extends Component {
     }
 
     getOS = async () => {
-        const os = [... this.state.os, ...await loader.getBase(`getOS.php`, this.state.usuarioLogado.empresa, 51, this.state.offset)]
+        const os = [... this.state.os, ...await loader.getBase(`getOS.php`, this.state.usuarioLogado.empresa, 201, this.state.offset)]
 
         await this.setState({ os });
     }
@@ -188,19 +188,19 @@ class OS extends Component {
 
     filtrarPesquisa = (os) => {
         let osFiltrada = os;
-
+        
         if (this.state.situacao == 2) {
             osFiltrada = ((!os.Data_Encerramento || moment(os.Data_Encerramento).format() == "Invalid date") && os.cancelada == '0') ? os : '';
         } else if (this.state.situacao == 3) {
             osFiltrada = (os.cancelada != '0') ? os : '';
         } else if (this.state.situacao == 4) {
-            osFiltrada = (os.Data_Encerramento && moment(os.Data_Encerramento).format() != "Invalid date" && os.cancelada == '0') ? os : '';
+            osFiltrada = (os.Data_Encerramento && moment(os.Data_Encerramento).format() != "Invalid date" && os.cancelada == '0') && (!os.Data_Faturamento || moment(os.Data_Faturamento).format() == "Invalid date") ? os : '';
         } else if (this.state.situacao == 5) {
             osFiltrada = (os.Data_Faturamento && moment(os.Data_Faturamento).format() != "Invalid date" && os.cancelada == '0') ? os : '';
         } else if (this.state.situacao == 6) {
             osFiltrada = ((!os.Data_Faturamento || moment(os.Data_Faturamento).format() == "Invalid date") && os.cancelada == '0') ? os : '';
         }
-
+        
         if (osFiltrada) {
             return osFiltrada;
         }
@@ -350,7 +350,8 @@ class OS extends Component {
                                     </div>
                                 </div>
                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
-                            </div>
+                             
+                             </div>
 
                             <div id="product-list">
                                 {this.state.pesquisa == '' &&

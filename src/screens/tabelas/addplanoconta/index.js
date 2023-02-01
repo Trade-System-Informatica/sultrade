@@ -3,19 +3,14 @@ import './styles.css'
 import { Formik, Field, Form } from 'formik'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
-import util from '../../../classes/util'
 import loader from '../../../classes/loader'
-import { PRECISA_LOGAR } from '../../../config'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
-import Image from 'react-bootstrap/Image'
 import InputMask from 'react-input-mask';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import { apiEmployee } from '../../../services/apiamrg'
-import moment from 'moment'
 import ModalLogs from '../../../components/modalLogs'
-import Select from 'react-select';
 
 const estadoInicial = {
     chave: '',
@@ -293,7 +288,7 @@ class AddPlanoConta extends Component {
             nivel = 5;
         } else if (value.length == 10) {
             nivel = 6;
-        } else if (value.length == 13) {
+        } else if (value.length == 14) {
             nivel = 7;
         }
 
@@ -330,7 +325,8 @@ class AddPlanoConta extends Component {
                 {titulo: 'Descricao', valor: this.state.descricao},
                 {titulo: 'Conta_Inativa', valor: this.state.contaInativa},
                 {titulo: 'grupo', valor: this.state.grupo},
-            ]
+            ],
+            loading: true
         })
         
         
@@ -347,7 +343,7 @@ class AddPlanoConta extends Component {
                         await this.setState({ codigo: res.data[0].Codigo })
                         await loader.salvaLogs('planocontas', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
 
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         console.log(res)
                     }
@@ -369,7 +365,7 @@ class AddPlanoConta extends Component {
                     if (res.data === true) {
                         await loader.salvaLogs('planocontas', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `PLANO DE CONTA: ${this.state.descricao}`);
 
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         alert(JSON.stringify(res))
                     }
@@ -419,10 +415,6 @@ class AddPlanoConta extends Component {
 
                 {this.state.redirect &&
                     <Redirect to={'/'} />
-                }
-
-                {this.state.finalizaOperacao &&
-                    <Redirect to={{pathname: '/tabelas/planoscontas', state:{chave: this.state.codigo}}} />
                 }
 
                 <section>
@@ -503,8 +495,8 @@ class AddPlanoConta extends Component {
                                                                             '9.9.9.99.99'
                                                                             : (this.state.codigoLimpo.length == 8 || this.state.codigoLimpo.length == 9 || this.state.codigoLimpo.length == 10) ?
                                                                                 '9.9.9.99.99.999'
-                                                                                : (this.state.codigoLimpo.length == 11 || this.state.codigoLimpo.length == 12 || this.state.codigoLimpo.length == 13) ?
-                                                                                    '9.9.9.99.99.999.999'
+                                                                                : (this.state.codigoLimpo.length == 11 || this.state.codigoLimpo.length == 12 || this.state.codigoLimpo.length == 13 || this.state.codigoLimpo.length == 14) ?
+                                                                                    '9.9.9.99.99.999.9999'
                                                                                     : '9'
                                                     } className='form-control' value={this.state.codigoLimpo} onChange={async e => { await this.setState({ codigo: e.currentTarget.value }); this.setNivel(this.state.codigoLimpo); }} onKeyDown={e => { if ((this.state.codigoLimpo.length == 1 || this.state.codigoLimpo.length == 2 || this.state.codigoLimpo.length == 3 || this.state.codigoLimpo.length == 5 || this.state.codigoLimpo.length == 7 || this.state.codigoLimpo.length == 10) && e.nativeEvent.key == parseInt(e.nativeEvent.key)) { this.setState({ codigoLimpo: `${this.state.codigoLimpo}${e.nativeEvent.key}` }) } }} />
                                                 </div>

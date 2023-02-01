@@ -1,5 +1,6 @@
 import React from 'react'
 import {BrowserRouter, Route, Switch} from 'react-router-dom'
+import ScreenSaver from './components/screensaver'
 
 import Login from './screens/login'
 import Inicio from './screens/inicio'
@@ -22,7 +23,9 @@ import Portos from './screens/tabelas/portos'
 import CentrosCustos from './screens/tabelas/centroscustos'
 import PlanosContas from './screens/tabelas/planoscontas'
 import HistoricosPadrao from './screens/tabelas/historicospadrao'
+import DescricoesPadrao from './screens/tabelas/descricoespadrao'
 import TiposDocumentos from './screens/tabelas/tiposdocumentos'
+import ContasPortos from './screens/tabelas/contasportos'
 
 import AddShip from './screens/tabelas/addship'
 import AddTipoServico from './screens/tabelas/addtiposervico'
@@ -37,6 +40,7 @@ import AddPorto from './screens/tabelas/addporto'
 import AddCentroCusto from './screens/tabelas/addcentrocusto'
 import AddPlanoConta from './screens/tabelas/addplanoconta'
 import AddHistorico from './screens/tabelas/addhistorico'
+import AddDescricao from './screens/tabelas/adddescricao'
 import AddTipoDocumento from './screens/tabelas/addtipodocumento'
 
 
@@ -49,12 +53,15 @@ import AddOperador from './screens/utilitarios/addoperador'
 
 
 import OS from './screens/ordensservico/os'
-import SolicitacoesServicos from './screens/ordensservico/solicitacoesservicos'
+import Eventos from './screens/ordensservico/eventos'
 
 import AddOS from './screens/ordensservico/addos'
-import AddSolicitacao from './screens/ordensservico/addsolicitacao'
-import AddSolicitacaoFinanceiro from './screens/ordensservico/addsolicitacaofinanceiro'
+import AddEvento from './screens/ordensservico/addevento'
+import AddEventoFinanceiro from './screens/ordensservico/addeventofinanceiro'
 
+
+import PagamentosLote from './screens/financeiro/pagamentoslote'
+import PagamentosManual from './screens/financeiro/pagamentosmanual'
 
 import ContasAbertas from './screens/financeiro/contasabertas'
 import ContasReceber from './screens/financeiro/contasreceber'
@@ -63,13 +70,12 @@ import ContasLiquidadas from './screens/financeiro/contasliquidadas'
 import ContasRecebidas from './screens/financeiro/contasrecebidas'
 import ContasPagas from './screens/financeiro/contaspagas'
 import Relatorio from './screens/financeiro/relatorio'
-import PagamentosLote from './screens/financeiro/pagamentoslote'
-import PagamentosManual from './screens/financeiro/pagamentosmanual'
-//import RecebimentosPix from './screens/financeiro/recebimentospix'
 import Faturas from './screens/financeiro/faturas'
+import Lancamentos from './screens/financeiro/lancamentos'
 
 import AddConta from './screens/financeiro/addconta'
 import AddFatura from './screens/financeiro/addfatura'
+import AddLancamento from './screens/financeiro/addlancamento'
 
 
 export default function Routes(){
@@ -97,7 +103,9 @@ export default function Routes(){
                 <Route path="/tabelas/centroscustos" component={CentrosCustos} />
                 <Route path="/tabelas/planoscontas" component={PlanosContas} />
                 <Route path="/tabelas/historicospadrao" component={HistoricosPadrao} />
+                <Route path="/tabelas/descricoespadrao" component={DescricoesPadrao} />
                 <Route path="/tabelas/tiposdocumentos" component={TiposDocumentos} />
+                <Route path="/tabelas/contasportos" component={ContasPortos} />
 
                 <Route path="/tabelas/addship/:id" component={AddShip} />
                 <Route path="/tabelas/addtiposervico/:id" component={AddTipoServico} />
@@ -112,6 +120,7 @@ export default function Routes(){
                 <Route path="/tabelas/addcentrocusto/:id/" component={AddCentroCusto} />
                 <Route path="/tabelas/addplanoconta/:id/" component={AddPlanoConta} />
                 <Route path="/tabelas/addhistorico/:id/" component={AddHistorico} />          
+                <Route path="/tabelas/adddescricao/:id/" component={AddDescricao} />          
                 <Route path="/tabelas/addtipodocumento/:id/" component={AddTipoDocumento} />          
 
 
@@ -124,12 +133,15 @@ export default function Routes(){
 
 
                 <Route path="/ordensservico/os" component={OS} />
-                <Route path="/ordensservico/solicitacoesservicos" component={SolicitacoesServicos} />
+                <Route path="/ordensservico/eventos" component={Eventos} />
                 
                 <Route path="/ordensservico/addos/:id/" component={AddOS} />
-                <Route path="/ordensservico/addsolicitacao/:id/" component={AddSolicitacao} />
-                <Route path="/ordensservico/addsolicitacaoFinanceiro/:id/" component={AddSolicitacaoFinanceiro} />
+                <Route path="/ordensservico/addevento/:id/" component={AddEvento} />
+                <Route path="/ordensservico/addeventoFinanceiro/:id/" component={AddEventoFinanceiro} />
 
+
+                <Route path="/financeiro/pagamentoslote" component={PagamentosLote} />
+                <Route path="/financeiro/pagamentosmanual" component={PagamentosManual} />
 
                 <Route path="/financeiro/contasabertas" component={ContasAbertas} />
                 <Route path="/financeiro/contasreceber" component={ContasReceber} />
@@ -138,13 +150,12 @@ export default function Routes(){
                 <Route path="/financeiro/contasrecebidas" component={ContasRecebidas} />
                 <Route path="/financeiro/contaspagas" component={ContasPagas} />
                 <Route path="/financeiro/relatorio" component={Relatorio} />
-                <Route path="/financeiro/pagamentoslote" component={PagamentosLote} />
-                <Route path="/financeiro/pagamentosmanual" component={PagamentosManual} />
-                {/*<Route path="/financeiro/recebimentospix" component={RecebimentosPix} />*/}
                 <Route path="/financeiro/faturas" component={Faturas} />
+                <Route path="/financeiro/lancamentos" component={Lancamentos} />
 
                 <Route path="/financeiro/addconta/:id/" component={AddConta} />
                 <Route path="/financeiro/addfatura/:id/" component={AddFatura} />
+                <Route path="/financeiro/addlancamento/:id/" component={AddLancamento} />          
             </Switch>
         </BrowserRouter>
     )

@@ -24,10 +24,11 @@ const estadoInicial = {
     emissao: moment().format('YYYY-MM-DD'),
     vencimento: '',
     cliente: '',
-    praca: '',
+    praca: 'Rio Grande',
     observacoes: '',
     total: '',
     discriminacaoServico: '',
+    atividade: 1006,
     tributada: false,
     enviarXml: false,
 
@@ -36,8 +37,6 @@ const estadoInicial = {
     pessoasOptionsTexto: '',
 
     formularios: [],
-    formulariosOptions: [],
-    formulariosOptionsTexto: '',
 
     acessos: [],
     permissoes: [],
@@ -63,11 +62,12 @@ class AddFatura extends Component {
             await this.setState({ fatura: this.props.location.state.fatura })
 
             await this.setState({
-                fatura: this.state.fatura.Fatura,
+                faturaNum: this.state.fatura.Fatura,
                 emissao: moment(this.state.fatura.Emissao).format('YYYY-MM-DD'),
                 vencimento: moment(this.state.fatura.Vencto).format('YYYY-MM-DD'),
                 praca: this.state.fatura.Praca_Pagto,
                 cliente: this.state.fatura.Cliente,
+                atividade: this.state.fatura.atividade,
                 total: this.state.fatura.Valor.replaceAll('.', ','),
                 observacoes: this.state.fatura.Obs,
                 formulario: this.state.fatura.Formulario,
@@ -78,10 +78,10 @@ class AddFatura extends Component {
 
             await this.setState({
                 dadosIniciais: [
-                    { titulo: 'Fatura', valor: this.state.fatura },
                     { titulo: 'Emissao', valor: this.state.emissao },
                     { titulo: 'Vencto', valor: this.state.vencimento },
                     { titulo: 'Praca_Pagto', valor: this.state.praca },
+                    { titulo: 'atividade', valor: this.state.atividade },
                     { titulo: 'Cliente', valor: this.state.cliente },
                     { titulo: 'Valor', valor: parseFloat(this.state.total.replaceAll('.', '').replaceAll('.', '')) },
                     { titulo: 'Obs', valor: this.state.observacoes },
@@ -102,7 +102,6 @@ class AddFatura extends Component {
     loadAll = async () => {
         await this.setState({
             formularios: await loader.getBase('getFormularios.php'),
-            formulariosOptions: await loader.getBaseOptions('getFormularios.php', 'Codigo', 'chave'),
 
             pessoas: await loader.getBase('getPessoas.php'),
             pessoasOptions: await loader.getBaseOptions('getPessoas.php', "Nome", "Chave"),
@@ -111,19 +110,31 @@ class AddFatura extends Component {
             permissoes: await loader.getBase('getPermissoes.php')
         })
 
+        const nfe = this.state.formularios.find((form) => form.Codigo === "NFE");
+
+        if (nfe) {
+            this.setState({ formulario: nfe.chave });
+        }
+
         await this.setState({
             acessosPermissoes: await loader.testaAcesso(this.state.acessos, this.state.permissoes, this.state.usuarioLogado),
-            loading: false
+            loading: false, bloqueado: false
         })
     }
 
     enviaNota = async () => {
         const retorno = await Xml.criaXml(this.state.chave);
 
-        await apiEmployee.post(`updateFaturaNotaEnviada.php`,{
+        const link = document.createElement("a");
+        link.href = retorno.linkImpressao;
+        link.target = "_blank";
+        link.click();
+
+        await apiEmployee.post(`updateFaturaNotaEnviada.php`, {
             Chave: this.state.chave,
             chavenfe: retorno.numero,
             protocolonfe: retorno.autenticidade,
+            urlqrcode: retorno.linkImpressao,
             serie: 'S1'
         }).then();
     }
@@ -135,23 +146,24 @@ class AddFatura extends Component {
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'Fatura', valor: this.state.fatura },
                 { titulo: 'Emissao', valor: this.state.emissao },
                 { titulo: 'Vencto', valor: this.state.vencimento },
                 { titulo: 'Praca_Pagto', valor: this.state.praca },
+                { titulo: 'atividade', valor: this.state.atividade },
                 { titulo: 'Cliente', valor: this.state.cliente },
                 { titulo: 'Valor', valor: parseFloat(this.state.total.replaceAll('.', '').replaceAll('.', '')) },
                 { titulo: 'Obs', valor: this.state.observacoes },
                 { titulo: 'Formulario', valor: this.state.formulario },
                 { titulo: 'Cobranca', valor: this.state.tributada },
                 { titulo: 'discriminacaoservico', valor: this.state.discriminacaoServico }
-            ]
+            ],
+            loading: true
         })
 
         if (parseInt(this.state.chave) === 0 && validForm) {
             await apiEmployee.post(`insertFatura.php`, {
                 token: true,
-                values: `'${this.state.fatura}', '${moment(this.state.emissao).format('YYYY-MM-DD')}', '${moment(this.state.vencimento).format('YYYY-MM-DD')}', '${this.state.praca}', '${this.state.cliente}', '${this.state.total.replaceAll('.', '').replaceAll(',', '.')}', '${this.state.observacoes}', '${this.state.formulario}', '${this.state.tributada}', '${this.state.discriminacaoServico}', '${this.state.usuarioLogado.empresa}'`,
+                values: `'${moment(this.state.emissao).format('YYYY-MM-DD')}', '${moment(this.state.vencimento).format('YYYY-MM-DD')}', '${this.state.praca}', '${this.state.cliente}', '${this.state.total.replaceAll('.', '').replaceAll(',', '.')}', '${this.state.observacoes}', '${this.state.formulario}', '${this.state.tributada}', '${this.state.discriminacaoServico}', '${this.state.usuarioLogado.empresa}', '${this.state.atividade}'`,
                 formulario: this.state.formulario
             }).then(
                 async res => {
@@ -159,7 +171,7 @@ class AddFatura extends Component {
                         await this.setState({ chave: res.data[0].Chave })
                         await loader.salvaLogs('faturas', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
 
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         await alert(`Erro ${JSON.stringify(res.data)}`)
                     }
@@ -170,7 +182,6 @@ class AddFatura extends Component {
             await apiEmployee.post(`updateFatura.php`, {
                 token: true,
                 Chave: this.state.chave,
-                Fatura: this.state.fatura,
                 Emissao: moment(this.state.emissao).format('YYYY-MM-DD'),
                 Vencto: moment(this.state.vencimento).format('YYYY-MM-DD'),
                 Praca_Pagto: this.state.praca,
@@ -178,13 +189,14 @@ class AddFatura extends Component {
                 Valor: this.state.total.replaceAll('.', '').replaceAll(',', '.'),
                 Obs: this.state.observacoes,
                 Cobranca: this.state.tributada ? 1 : 0,
-                discriminacaoservico: this.state.discriminacaoServico
+                discriminacaoservico: this.state.discriminacaoServico,
+                atividade: this.state.atividade
             }).then(
                 async res => {
                     if (res.data === true) {
                         await loader.salvaLogs('faturas', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `FATURA: ${this.state.fatura}`);
 
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: true })
 
                     } else {
                         await alert(`Erro ${JSON.stringify(res.data)}`)
@@ -219,9 +231,9 @@ class AddFatura extends Component {
 
     render() {
         const validations = []
-        validations.push(this.state.fatura)
         validations.push(this.state.emissao)
         validations.push(this.state.cliente)
+        validations.push(this.state.atividade)
         validations.push(this.state.total && this.state.total.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.total.replaceAll('.', '').replaceAll(',', '.')))
         validations.push(this.state.formulario)
         validations.push(this.state.discriminacaoServico)
@@ -240,14 +252,15 @@ class AddFatura extends Component {
                     <Redirect to={'/'} />
                 }
 
-                {this.state.finalizaOperacao &&
-                    <Redirect to={{ pathname: `/financeiro/faturas`, state: { chave: this.state.chave } }} />
-                }
-
                 {!this.state.loading &&
                     <>
                         <section>
-                            <Header voltarFaturas chave={this.state.chave} titulo="Notas Fiscais de Serviço" />
+                            {(!this.props.location || !this.props.location.state || !this.props.location.state.backTo) &&
+                                <Header voltarFaturas chave={this.state.chave} titulo="Notas Fiscais de Serviço" />
+                            }
+                            {this.props.location && this.props.location.state && this.props.location.state.backTo &&
+                                <Header voltarFaturasOS state={this.props.location.state} chave={this.state.chave} titulo="Notas Fiscais de Serviço" />
+                            }
                             <br />
                             <br />
                             <br />
@@ -289,49 +302,26 @@ class AddFatura extends Component {
 
                                                     <div className="row addservicos">
                                                         {this.state.chave != 0 &&
-                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
-                                                                <label>Chave</label>
-                                                            </div>
+                                                            <>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
+                                                                    <label>Chave</label>
+                                                                </div>
+                                                                <div className='col-1'></div>
+                                                                <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10 ">
+                                                                    <Field className="form-control" style={{ backgroundColor: '#dddddd' }} type="text" disabled value={this.state.chave} />
+                                                                </div>
+                                                                <div className="col-xl-4 col-lg-4 col-md-3 col-sm-1 col-1 ">
+                                                                </div>
+                                                                <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
+                                                                    <label>Fatura Nº</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control" type="text" value={this.state.faturaNum} disabled />
+                                                                </div>
+                                                            </>
                                                         }
-                                                        {this.state.chave != 0 &&
-                                                            <div className='col-1'></div>
-                                                        }
-                                                        {this.state.chave != 0 &&
-                                                            <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10 ">
-                                                                <Field className="form-control" style={{ backgroundColor: '#dddddd' }} type="text" disabled value={this.state.chave} />
-                                                            </div>
-                                                        }
-                                                        {this.state.chave != 0 &&
-                                                            <div className="col-xl-4 col-lg-4 col-md-3 col-sm-1 col-1 ">
-                                                            </div>
-                                                        }
-                                                        <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
-                                                            <label>Fatura Nº</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                            {!this.state.fatura &&
-                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                            }
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Field className="form-control" type="text" value={this.state.fatura} onChange={async e => { this.setState({ fatura: e.currentTarget.value }) }} />
-                                                        </div>
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Formulário</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                            {!this.state.formulario &&
-                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                            }
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            {(!this.state.chave || this.state.chave == '0') &&
-                                                                <Select className='SearchSelect' options={this.state.formulariosOptions.filter(e => this.filterSearch(e, this.state.formulariosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ formulariosOptionsTexto: e }) }} value={this.state.formulariosOptions.filter(option => option.value == this.state.formulario)[0]} search={true} onChange={(e) => { this.setState({ formulario: e.value, }) }} />
-                                                            }
-                                                            {this.state.chave && this.state.chave != '0' &&
-                                                                <Select className='SearchSelect' options={this.state.formulariosOptions.filter(e => this.filterSearch(e, this.state.formulariosOptionsTexto)).slice(0, 20)} value={this.state.formulariosOptions.filter(option => option.value == this.state.formulario)[0]} isDisabled />
-                                                            }
-                                                        </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Emissão</label>
                                                         </div>
@@ -362,16 +352,21 @@ class AddFatura extends Component {
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Select className='SearchSelect' options={this.state.pessoasOptions.filter(e => this.filterSearch(e, this.state.pessoasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ pessoasOptionsTexto: e }) }} value={this.state.pessoasOptions.filter(option => option.value == this.state.cliente)[0]} search={true} onChange={(e) => { this.setState({ cliente: e.value, }) }} />
                                                         </div>
-                                                        <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
-                                                            <label>Praça de Pagamento</label>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Atividade</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
-                                                            {!this.state.praca &&
+                                                            {!this.state.atividade &&
                                                                 <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
                                                             }
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Field className="form-control" type="text" value={this.state.praca} onChange={async e => { this.setState({ praca: e.currentTarget.value }) }} />
+                                                            <select className='form-control' value={this.state.atividade} onChange={(e) => { this.setState({ atividade: e.currentTarget.value }) }} >
+                                                                <option value=""></option>
+                                                                <option value="1006">Agenciamento Marítimo</option>
+                                                                <option value="1602">Outros servicos de transporte de natureza municipal</option>
+                                                                <option value="1702">Datilografia, digitação, estenografia, expediente</option>
+                                                            </select>
                                                         </div>
                                                         <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
                                                             <label>Discriminação Serviço</label>
@@ -388,9 +383,6 @@ class AddFatura extends Component {
                                                             <label>Obs</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
-                                                            {!this.state.observacoes &&
-                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                            }
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Field className="form-control" type="text" value={this.state.observacoes} onChange={async e => { this.setState({ observacoes: e.currentTarget.value }) }} />
@@ -403,7 +395,7 @@ class AddFatura extends Component {
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-1 col-1 labelForm"></div>
                                                         <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
-                                                            <label> da Fatura</label>
+                                                            <label>Total da Fatura</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
                                                             {!this.state.total &&

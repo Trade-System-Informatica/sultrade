@@ -6,10 +6,8 @@ import Skeleton from '../../../components/skeleton'
 import './styles.css'
 import { apiEmployee } from '../../../services/apiamrg'
 import { connect } from 'react-redux'
-
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCommentDollar, faMoneyCheck, faBoxOpen, faArchive, faIdCard, faCommentsDollar } from '@fortawesome/free-solid-svg-icons'
+import { faCommentDollar, faMoneyCheck, faBoxOpen, faArchive, faIdCard, faTable } from '@fortawesome/free-solid-svg-icons'
 
 class Financeiro extends Component {
 
@@ -123,7 +121,7 @@ class Financeiro extends Component {
                             <div className="col-12 text-center">
                                 <div className="rounded">
                                     <ul className='itens_centro'>
-                                        <li className=" text-left itemMenu list-group-item ">
+                                    <li className=" text-left itemMenu list-group-item ">
                                             <Link className="semTextDecoration" to={{ pathname: `/financeiro/contasabertas` }}>
                                                 <FontAwesomeIcon icon={faBoxOpen} size="2x" color="tomato" />
                                                 <h4 className="textoMenu">Contas em Aberto</h4>
@@ -136,6 +134,24 @@ class Financeiro extends Component {
                                                 <h4 className="textoMenu">Contas Liquidadas</h4>
                                             </Link>
                                         </li>
+
+                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'FATURAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                            <li className=" text-left itemMenu list-group-item ">
+                                                <Link className="semTextDecoration" to={{ pathname: `/financeiro/faturas` }}>
+                                                    <FontAwesomeIcon icon={faIdCard} size="2x" color="tomato" />
+                                                    <h4 className="textoMenu">Notas Fiscais de Serviço</h4>
+                                                </Link>
+                                            </li>
+                                        }
+
+                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                            <li className=" text-left itemMenu list-group-item ">
+                                                <Link className="semTextDecoration" to={{ pathname: `/financeiro/lancamentos` }}>
+                                                    <FontAwesomeIcon icon={faIdCard} size="2x" color="tomato" />
+                                                    <h4 className="textoMenu">Lançamentos</h4>
+                                                </Link>
+                                            </li>
+                                        }
 
                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_ABERTAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                             <li className=" text-left itemMenu list-group-item ">
@@ -151,24 +167,6 @@ class Financeiro extends Component {
                                                 <Link className="semTextDecoration" to={{ pathname: `/financeiro/pagamentosmanual` }}>
                                                     <FontAwesomeIcon icon={faMoneyCheck} size="2x" color="tomato" />
                                                     <h4 className="textoMenu">Pagamentos Manual</h4>
-                                                </Link>
-                                            </li>
-                                        }
-
-                                        {/*this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_RECEBER') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
-                                            <li className=" text-left itemMenu list-group-item ">
-                                                <Link className="semTextDecoration" to={{ pathname: `/financeiro/recebimentospix` }}>
-                                                    <FontAwesomeIcon icon={faCommentsDollar} size="2x" color="tomato" />
-                                                    <h4 className="textoMenu">Recebimentos por Pix</h4>
-                                                </Link>
-                                            </li>
-                                    */}
-
-                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'FATURAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
-                                            <li className=" text-left itemMenu list-group-item ">
-                                                <Link className="semTextDecoration" to={{ pathname: `/financeiro/faturas` }}>
-                                                    <FontAwesomeIcon icon={faIdCard} size="2x" color="tomato" />
-                                                    <h4 className="textoMenu">Notas Fiscais de Serviço</h4>
                                                 </Link>
                                             </li>
                                         }

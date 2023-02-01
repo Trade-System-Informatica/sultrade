@@ -1,6 +1,5 @@
-import React, { Component, useRef } from 'react'
+import React, { Component } from 'react'
 import './styles.css'
-import { api, apiLocal } from '../../../services/api'
 import { apiEmployee } from '../../../services/apiamrg'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
@@ -11,13 +10,11 @@ import loader from '../../../classes/loader'
 import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSearch, faCoffee, faTrashAlt, faPen, faPlus, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
-import moment from 'moment'
-import { PRECISA_LOGAR, NOME_EMPRESA } from '../../../config'
+import { faTrashAlt, faPen, faPlus, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
+import { NOME_EMPRESA } from '../../../config'
 import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
-import { PDFExport, savePDF } from "@progress/kendo-react-pdf";
-var numbro = require("numbro");
+
 const estadoInicial = {
     name: '',
     portos: [],

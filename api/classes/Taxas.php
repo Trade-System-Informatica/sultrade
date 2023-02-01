@@ -87,6 +87,22 @@ class Taxas {
         return $result;
     }
 
+    public static function getDescricoesPadrao(){
+        $database = new Database();
+
+        $result = $database->doSelect('os_descricao_padrao', 'os_descricao_padrao.*');
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function getTaxasPortos($taxa) {
+        $database = new Database();
+
+        $result = $database->doSelect('os_taxas_portos', 'os_taxas_portos.*', "taxa = $taxa");
+        $database->closeConection();
+        return $result;
+    }
+
     public static function getMaxService(){
         $database = new Database();
 
@@ -192,6 +208,19 @@ class Taxas {
         return $result;
     }
 
+    public static function insertDescricaoPadrao($values){
+        $database = new Database();
+
+        $cols = 'Descricao';
+    
+        $result = $database->doInsert('os_descricao_padrao', $cols, $values);
+
+        $result = $database->doSelect('os_descricao_padrao','os_descricao_padrao.*','1=1 ORDER BY chave DESC LIMIT 1');
+        
+        $database->closeConection();
+        return $result;
+    }
+
 	public static function updateService($id_service, $titulo, $link, $inativo){
         $database = new Database();
 
@@ -286,6 +315,42 @@ class Taxas {
         }
     }
 
+    public static function updateDescricaoPadrao($chave, $descricao){
+        $database = new Database();
+
+        $query = "Descricao = '" . $descricao . "'";
+		$result = $database->doUpdate('os_descricao_padrao', $query, 'chave= '.$chave);
+        $database->closeConection();
+        if($result == NULL){
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+
+    public static function setTaxasPortos($taxa, $chaves, $portos, $contas) {
+        $database = new Database();
+
+        if (count($chaves) != count($portos) || count($portos) != count($contas)) {
+            return count($contas);
+        }
+        $result = "";
+        
+        for ($i = 0; $i < count($chaves); $i++) {
+            if ($chaves[$i] == 0 ) {
+                $values = "'$taxa', '".$portos[$i]."', '".$contas[$i]."'";
+                $cols = "taxa, porto, conta";
+
+                $result = $database->doInsert("os_taxas_portos", $cols, $values);
+            } else {
+                $query = "taxa = '$taxa', porto = '".$portos[$i]."', conta = '".$contas[$i]."'";
+
+                $result = $database->doUpdate('os_taxas_portos', $query, 'chave = '.$chaves[$i]);
+            }
+        }
+
+        return $result;
+    }
 
     public static function deleteSubgrupo($chave){
         $database = new Database();
@@ -323,6 +388,14 @@ class Taxas {
         $database = new Database();
     
         $result = $database->doDelete('historicos', 'chave = '.$chave);
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function deleteDescricaoPadrao($chave){
+        $database = new Database();
+    
+        $result = $database->doDelete('os_descricao_padrao', 'chave = '.$chave);
         $database->closeConection();
         return $result;
     }

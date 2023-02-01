@@ -81,6 +81,27 @@ class Contas
         return $result;
     }
 
+    public static function getContasAbertoOptions($empresa)
+    {
+        $database = new Database();
+
+        if ($empresa == 0) {
+            $result = $database->doSelect(
+                'contas_aberto',
+                'contas_aberto.*',
+                "contas_aberto.Saldo > 0 GROUP BY contas_aberto.chave"
+            );
+        } else {
+            $result = $database->doSelect(
+                'contas_aberto',
+                'contas_aberto.*',
+                "contas_aberto.Saldo > 0 AND empresa = '" . $empresa . "' GROUP BY contas_aberto.chave"
+            );
+        }
+        $database->closeConection();
+        return $result;
+    }
+
     public static function getContasReceber($empresa)
     {
         $database = new Database();
@@ -174,15 +195,36 @@ class Contas
             $result = $database->doSelect(
                 'contas_aberto',
                 'contas_aberto.*',
-                "contas_aberto.Saldo = 0 AND contas_aberto.Tipo = 0"
+                "contas_aberto.Saldo = 0 AND contas_aberto.Tipo = 1"
             );
         } else {
             $result = $database->doSelect(
                 'contas_aberto',
                 'contas_aberto.*',
-                "contas_aberto.Saldo = 0 AND contas_aberto.Tipo = 0 AND empresa = '" . $empresa . "'"
+                "contas_aberto.Saldo = 0 AND contas_aberto.Tipo = 1 AND empresa = '" . $empresa . "'"
             );
         }
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function getContasCorrentes($empresa)
+    {
+        $database = new Database();
+
+        /*if ($empresa == 0) {
+            $result = $database->doSelect(
+                'contas_correntes',
+                'contas_correntes.*'
+            );
+        } else {
+            $result = $database->doSelect(
+                'contas_correntes',
+                'contas_correntes.*',
+                "empresa = '" . $empresa . "'"
+            );
+        }*/
+        $result = [];
         $database->closeConection();
         return $result;
     }
@@ -472,6 +514,82 @@ class Contas
         return $result;
     }
 
+    public static function getLancamentos()
+    {
+        $database = new Database();
+
+
+        $result = $database->doSelect(
+            'lancamentos LEFT JOIN pessoas ON lancamentos.pessoa = pessoas.chave LEFT JOIN planocontas ContaDebito ON lancamentos.ContaDebito = ContaDebito.chave LEFT JOIN planocontas ContaCredito ON lancamentos.ContaCredito = ContaCredito.chave',
+            'lancamentos.*, pessoas.nome AS pessoaNome, ContaDebito.Descricao AS conta_Debito, ContaCredito.Descricao AS conta_Credito',
+            '1=1 ORDER BY Chave DESC LIMIT 200'
+        );
+        $database->closeConection();
+
+        return $result;
+    }
+
+    public static function getLancamentosPorLote($lote) 
+    {
+        $database = new Database();
+
+
+        $result = $database->doSelect(
+            'lancamentos LEFT JOIN pessoas ON lancamentos.pessoa = pessoas.chave',
+            'lancamentos.*, pessoas.nome AS pessoaNome',
+            "lote = '$lote' ORDER BY Chave DESC LIMIT 200"
+        );
+        $database->closeConection();
+
+        return $result;
+    }
+
+
+    public static function getLancamentosLotes()
+    {
+        $database = new Database();
+
+
+        $result = $database->doSelect(
+            'lancamentos LEFT JOIN pessoas ON lancamentos.pessoa = pessoas.chave',
+            'lancamentos.*, pessoas.nome AS pessoaNome',
+            '1=1 GROUP BY lote LIMIT 200'
+        );
+        $database->closeConection();
+
+        return $result;
+    }
+
+    public static function getLancamentoConta($chavePr)
+    {
+        $database = new Database();
+
+
+        $result = $database->doSelect(
+            'lancamentos LEFT JOIN pessoas ON lancamentos.pessoa = pessoas.chave',
+            'lancamentos.*, pessoas.nome AS pessoaNome',
+            "lancamentos.ChavePr = '$chavePr' ORDER BY Chave DESC LIMIT 200"
+        );
+        $database->closeConection();
+
+        return $result;
+    }
+
+    public static function getContasDescontos($chave_conta_aberto)
+    {
+        $database = new Database();
+
+        $result = $database->doSelect(
+            "contas_aberto_cc",
+            "contas_aberto_cc.*",
+            "chave_conta_aberto = '$chave_conta_aberto'"
+        );
+
+        $database->closeConection();
+
+        return $result;
+    }
+
     public static function getBearer($basic)
     {
         $ch = curl_init();
@@ -535,13 +653,15 @@ class Contas
 
         $result = $database->doInsert('contas_aberto', $cols, $values);
 
-        if ($result && ($meioPagamento == 'DARF' || $meioPagamento == 'GPS' || $meioPagamento == 'GRU')) {
+        if ($result && ($meioPagamento == 'DARF' || $meioPagamento == 'GPS' || $meioPagamento == 'GRU' || $meioPagamento == "PIX")) {
             $chave = $database->doSelect('contas_aberto', 'contas_aberto.*', '1=1 ORDER BY chave DESC');
 
             $values2 = $valuesDarf . ", '" . $chave[0]['Chave'] . "'";
             $cols = "codigo_receita, contribuinte, codigo_identificador_tributo, mes_compet_num_ref, data_apuracao, valor, valor_multa, valor_juros, valor_outros, valor_pagamento, chave_contas_aberto";
             if ($meioPagamento == 'GRU') {
                 $cols = "contribuinte, chave_contas_aberto";
+            } else if ($meioPagamento == 'PIX') {
+                $cols = "tipo_pix, chave_contas_aberto";
             }
 
             $result2 = $database->doInsert('contas_aberto_complementar', $cols, $values2);
@@ -559,17 +679,42 @@ class Contas
 
         $result = $database->doInsert('contas_aberto', $cols, $values);
 
-        if ($result && ($meioPagamento == 'DARF' || $meioPagamento == 'GPS' || $meioPagamento == 'GRU')) {
+        if ($result && ($meioPagamento == 'DARF' || $meioPagamento == 'GPS' || $meioPagamento == 'GRU' || $meioPagamento == "PIX")) {
             $chave = $database->doSelect('contas_aberto', 'contas_aberto.*', '1=1 ORDER BY chave DESC');
 
             $values2 = $valuesDarf . ", '" . $chave[0]['Chave'] . "'";
             $cols = "codigo_receita, contribuinte, codigo_identificador_tributo, mes_compet_num_ref, data_apuracao, valor, valor_multa, valor_juros, valor_outros, valor_pagamento, chave_contas_aberto";
             if ($meioPagamento == 'GRU') {
                 $cols = "contribuinte, chave_contas_aberto";
+            } else if ($meioPagamento == 'PIX') {
+                $cols = "tipo_pix, chave_contas_aberto";
             }
 
-
             $result2 = $database->doInsert('contas_aberto_complementar', $cols, $values2);
+        }
+
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function insertContaDescontos($chave_conta_aberto, $chave_conta, $complemento, $valor, $tipo)
+    {
+        $database = new Database();
+
+        $contaDesconto = $database->doSelect('contas_aberto_cc', 'contas_aberto_cc.*', "chave_conta_aberto = '$chave_conta_aberto' AND tipo = '$tipo'");
+
+        $result = true;
+        if ($contaDesconto[0]) {
+            if (!$chave_conta && !$complemento && !$valor) {
+                $result = $database->doDelete('contas_aberto_cc', "chave = '" . $contaDesconto[0]["chave"] . "'");
+            } else {
+                $query = "chave_conta = '$chave_conta', complemento = '$complemento', valor = '$valor'";
+                $result = $database->doUpdate('contas_aberto_cc', $query, "chave = '" . $contaDesconto[0]["chave"] . "'");
+            }
+        } else {
+            $values = "'$chave_conta_aberto', '$chave_conta', '$complemento', '$valor', '$tipo'";
+            $cols = "chave_conta_aberto, chave_conta, complemento, valor, tipo";
+            $result = $database->doInsert('contas_aberto_cc', $cols, $values);
         }
 
         $database->closeConection();
@@ -598,7 +743,7 @@ class Contas
     {
         $database = new Database();
 
-        $cols = 'Fatura, Emissao, Vencto, Praca_Pagto, Cliente, Valor, Obs, Formulario, Cobranca, discriminacaoservico, empresa';
+        $cols = 'Emissao, Vencto, Praca_Pagto, Cliente, Valor, Obs, Formulario, Cobranca, discriminacaoservico, empresa, atividade';
 
         $result = $database->doInsert('faturas', $cols, $values);
 
@@ -607,6 +752,155 @@ class Contas
         $database->closeConection();
         return $result;
     }
+
+    public static function insertLancamento($values, $lote_inicial)
+    {
+        $database = new Database();
+
+        if ($lote_inicial) {
+            $lote = $lote_inicial;
+        } else {
+            $lote = $database->doSelect('codigos', 'codigos.Proximo', "Tipo = 'LT'");
+            $database->doUpdate('codigos', 'Proximo = ' . ($lote[0]["Proximo"] + 1), "Tipo = 'LT'");
+            $lote = $lote[0]["Proximo"];
+        }
+        
+        $values .= ", '" . $lote . "'";
+        $cols = 'Data, ContaDebito, ContaCredito, TipoDocto, CentroControle, Historico_Padrao, Historico, Pessoa, Valor, ChavePr, Usuario_Inclusao, Usuario_Alteracao, Data_Inclusao, Data_Alteracao, Conciliado, atualizado, Lote';
+
+        $result = $database->doInsert('lancamentos', $cols, $values);
+        
+
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function insertLotesLancamentos($repasse, $tipoEvento, $tipo, $values, $historico, $chave_evento, $chave_taxa, $contaDebito)
+    {
+        $database = new Database();
+
+        $contaCredito = 0;
+        $lote = $database->doSelect('codigos', 'codigos.Proximo', "Tipo = 'LT'");
+        $lote = $lote[0]["Proximo"];
+
+        $evento = $database->doSelect('os_servicos_itens', 'os_servicos_itens.*', "os_servicos_itens.chave = '$chave_evento'");
+        $evento = $evento[0];
+
+        $result = [];
+
+        $valor = $evento["valor"];
+        $valor = (float)str_replace(",", ".", $valor);
+        $cols = "Data, TipoDocto, CentroControle, Historico_Padrao, Pessoa, ChavePr, Usuario_Inclusao, Usuario_Alteracao, Data_Inclusao, Data_Alteracao, Historico, Lote, ContaDebito, ContaCredito, Valor, Deletado, tipo, atualizado";
+
+
+        if ($evento["desconto_valor"] != 0) {
+            $valuesNew = $values . ", '" . $evento["desconto_cpl"] . "', '$lote', '0', '" . $evento["desconto_conta"] . "', '" . $evento['desconto_valor'] . "', 0, 0, 0";
+            $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
+            $valor -= (float)str_replace(",", ".", $evento["desconto_valor"]);
+        }
+        if ($evento["retencao_inss_valor"] != 0) {
+            $valuesNew = $values . ", '" . $evento["retencao_inss_cpl"] . "', '$lote', '0', '" . $evento["retencao_inss_conta"] . "', '" . $evento['retencao_inss_valor'] . "', 0, 0, 0";
+            $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
+            $valor -= (float)str_replace(",", ".", $evento["retencao_inss_valor"]);
+        }
+        if ($evento["retencao_ir_valor"] != 0) {
+            $valuesNew = $values . ", '" . $evento["retencao_ir_cpl"] . "', '$lote', '0', '" . $evento["retencao_ir_conta"] . "', '" . $evento['retencao_ir_valor'] . "', 0, 0, 0";
+            $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
+            $valor -= (float)str_replace(",", ".", $evento["retencao_ir_valor"]);
+        }
+        if ($evento["retencao_iss_valor"] != 0) {
+            $valuesNew = $values . ", '" . $evento["retencao_iss_cpl"] . "', '$lote', '0', '" . $evento["retencao_iss_conta"] . "', '" . $evento['retencao_iss_valor'] . "', 0, 0, 0";
+            $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
+            $valor -= (float)str_replace(",", ".", $evento["retencao_iss_valor"]);
+        }
+        if ($evento["retencao_pis_valor"] != 0) {
+            $valuesNew = $values . ", '" . $evento["retencao_pis_cpl"] . "', '$lote', '0', '" . $evento["retencao_pis_conta"] . "', '" . $evento['retencao_pis_valor'] . "', 0, 0, 0";
+            $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
+            $valor -= (float)str_replace(",", ".", $evento["retencao_pis_valor"]);
+        }
+        if ($evento["retencao_cofins_valor"] != 0) {
+            $valuesNew = $values . ", '" . $evento["retencao_cofins_cpl"] . "', '$lote', '0', '" . $evento["retencao_cofins_conta"] . "', '" . $evento['retencao_cofins_valor'] . "', 0, 0, 0";
+            $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
+            $valor -= (float)str_replace(",", ".", $evento["retencao_cofins_valor"]);
+        }
+        if ($evento["retencao_csll_valor"] != 0) {
+            $valuesNew = $values . ", '" . $evento["retencao_csll_cpl"] . "', '$lote', '0', '" . $evento["retencao_csll_conta"] . "', '" . $evento['retencao_csll_valor'] . "', 0, 0, 0";
+            $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
+            $valor -= (float)str_replace(",", ".", $evento["retencao_csll_valor"]);
+        }
+
+        if ($repasse == false) {
+            $fornecedor = $database->doSelect("pessoas", "pessoas.*", "pessoas.chave = '" . $evento["fornecedor"] . "'");
+
+            $contaCredito = $fornecedor[0]["Conta_Provisao"];
+        } else if ($repasse == true) {
+            $fornecedor = $database->doSelect("pessoas", "pessoas.*", "pessoas.chave = '" . $evento["fornecedor"] . "'");
+
+            $contaCredito = $fornecedor[0]["Conta_Provisao"];
+        }
+        /*
+        if ($tipoEvento == 2) {
+            $taxa = $database->doSelect("os_taxas", "os_taxas.*", "os_taxas.chave = $chave_taxa");
+            $taxa = $taxa[0];
+
+            $contaCredito = $taxa["Conta_Contabil"];
+        }*/
+
+        if (count($result) == 0) {
+            $valuesNew = $values . ", '$historico', '$lote', '$contaDebito', '$contaCredito', '".$evento["valor"]."', 0, 0, 0";
+        } else {
+            $valuesNew = $values . ", '$historico', '$lote', '0', '$contaCredito', '$valor', 0, 0, 0";
+            $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
+
+            $valuesNew = $values . ", '$historico', '$lote', '$contaDebito', '0', '".$evento["valor"]."', 0, 0, 0";
+        }
+
+        $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
+        $database->doUpdate('codigos', 'Proximo = ' . ($lote[0]["Proximo"] + 1), "Tipo = 'LT'");
+
+        return $result;
+    }
+
+    public static function contabilizaContasAberto($chave_conta, $data, $conta_credito, $conta_debito, $tipo_documento, $centro_custo, $historico_padrao, $historico, $pessoa, $valor, $chavePr, $usuario_inclusao, $usuario_alteracao, $data_inclusao, $data_alteracao, $extras)
+    {
+        $database = new Database();
+
+        $lote = $database->doSelect('codigos', 'codigos.Proximo', "Tipo = 'LT'");
+        $lote = $lote[0]["Proximo"];
+
+        $result = [];
+
+        $valorTotal = $valor;
+
+        $cols = "Data, TipoDocto, CentroControle, Historico_Padrao, Pessoa, ChavePr, Usuario_Inclusao, Usuario_Alteracao, Data_Inclusao, Data_Alteracao, Historico, Lote, ContaDebito, ContaCredito, Valor, Deletado, tipo, atualizado";
+        $baseValues = "'$data', '$tipo_documento', '$centro_custo', '$historico_padrao', '$pessoa', '$chavePr', '$usuario_inclusao', '$usuario_alteracao', '$data_inclusao', '$data_alteracao'";
+
+        foreach ($extras as $item) {
+            if ($item->{"check"}) {
+                $values = $baseValues . ", '" . $item->{"complemento"} . "', '$lote', 0, '" . $item->{"conta"} . "', '" . $item->{"valor"} . "', 0, 0, 0";
+                $result[count($result)] = $database->doInsert('lancamentos', $cols, $values);
+                $valor -= (float)str_replace(",", ".", $item->{"valor"});
+            }
+        }
+
+        if (count($result) == 0) {
+            $values = $baseValues . ", '$historico', '$lote', '$conta_debito', '$conta_credito', '$valorTotal', 0, 0, 0";
+            $result[count($result)] = $database->doInsert('lancamentos', $cols, $values);
+        } else {
+            $values = $baseValues . ", '$historico', '$lote', '0', '$conta_credito', '$valor', 0, 0, 0";
+            $result[count($result)] = $database->doInsert('lancamentos', $cols, $values);
+
+            if ($conta_debito) {
+                $values = $baseValues . ", '$historico', '$lote', '$conta_debito', '0', '$valorTotal', 0, 0, 0";
+                $result[count($result)] = $database->doInsert('lancamentos', $cols, $values);
+            }
+        }
+
+        $database->doUpdate('codigos', 'Proximo = ' . ($lote[0]["Proximo"] + 1), "Tipo = 'LT'");
+
+        return $result;
+    }
+
 
     public static function pagarManual($values, $chave, $valor, $saldo, $data_pagto)
     {
@@ -637,7 +931,7 @@ class Contas
         }
     }
 
-    public static function updateContaCliente($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $Centro_Custo, $Conta_Desconto, $Historico, $Parc_Ini, $Parc_Fim, $RepCodBar, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento)
+    public static function updateContaCliente($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $Centro_Custo, $Conta_Desconto, $Historico, $Parc_Ini, $Parc_Fim, $RepCodBar, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix)
     {
         $database = new Database();
 
@@ -645,27 +939,32 @@ class Contas
 
         $result = $database->doUpdate('contas_aberto', $query, 'Chave = ' . $Chave);
 
-        if ($meioPagamentoNome == "DARF" || $meioPagamento == "GPS" || $meioPagamento == "GRU") {
+        if ($meioPagamentoNome == "DARF" || $meioPagamentoNome == "GPS" || $meioPagamentoNome == "GRU" || $meioPagamentoNome == "PIX") {
             $chave_complementar = $database->doSelect('contas_aberto_complementar', 'contas_aberto_complementar.*', "chave_contas_aberto = '" . $Chave . "'");
 
             if ($chave_complementar) {
                 $query = "codigo_receita = '" . $codigo_receita . "', contribuinte = '" . $contribuinte . "', codigo_identificador_tributo = '" . $codigo_identificador_tributo . "', mes_compet_num_ref = '" . $mes_compet_num_ref . "', data_apuracao = '" . $data_apuracao . "', valor = '" . $darfValor . "', valor_multa = '" . $darfMulta . "', valor_juros = '" . $darfJuros . "', valor_outros = '" . $darfOutros . "', valor_pagamento = '" . $darfPagamento . "'";
 
-                if ($meioPagamento == 'GRU') {
+                if ($meioPagamentoNome == 'GRU') {
                     $query = "contribuinte = '" . $contribuinte . "'";
+                } else if ($meioPagamentoNome == "PIX") {
+                    $query = "tipo_pix = '$tipo_pix'";
                 }
 
-                $result = $database->doUpdate('contas_aberto_complementar', $query, 'chave = ' . $chave_complementar[0]['chave']);
+                $database->doUpdate('contas_aberto_complementar', $query, 'chave = ' . $chave_complementar[0]['chave']);
             } else {
                 $values2 = "'" . $codigo_receita . "', '" . $contribuinte . "', '" . $codigo_identificador_tributo . "', '" . $mes_compet_num_ref . "', '" . $data_apuracao . "', '" . $darfValor . "', '" . $darfMulta . "', '" . $darfJuros . "', '" . $darfOutros . "', '" . $darfPagamento . "', '" . $Chave . "'";
                 $cols = "codigo_receita, contribuinte, codigo_identificador_tributo, mes_compet_num_ref, data_apuracao, valor, valor_multa, valor_juros, valor_outros, valor_pagamento, chave_contas_aberto";
 
-                if ($meioPagamento == 'GRU') {
-                    $values2 = "'" . $contribuinte . "'";
-                    $cols = "contribuinte";
+                if ($meioPagamentoNome == 'GRU') {
+                    $values2 = "'" . $contribuinte . "', '$Chave'";
+                    $cols = "contribuinte, chave_contas_aberto";
+                } else if ($meioPagamentoNome == "PIX") {
+                    $values2 = "'$tipo_pix', '$Chave'";
+                    $cols = "tipo_pix, chave_contas_aberto";
                 }
 
-                $result = $database->doInsert('contas_aberto_complementar', $cols, $values2);
+                $database->doInsert('contas_aberto_complementar', $cols, $values2);
             }
         }
 
@@ -678,7 +977,7 @@ class Contas
         }
     }
 
-    public static function updateContaFornecedor($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $RepCodBar, $Centro_Custo, $Historico, $Conta_Desconto, $Parc_Ini, $Parc_Fim, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento)
+    public static function updateContaFornecedor($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $RepCodBar, $Centro_Custo, $Historico, $Conta_Desconto, $Parc_Ini, $Parc_Fim, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix)
     {
         $database = new Database();
 
@@ -687,25 +986,32 @@ class Contas
         $result = $database->doUpdate('contas_aberto', $query, 'Chave = ' . $Chave);
 
 
-        if ($meioPagamentoNome == "DARF" || $meioPagamento == "GPS" || $meioPagamento == "GRU") {
+        if ($meioPagamentoNome == "DARF" || $meioPagamentoNome == "GPS" || $meioPagamentoNome == "GRU" || $meioPagamentoNome == "PIX") {
             $chave_complementar = $database->doSelect('contas_aberto_complementar', 'contas_aberto_complementar.*', "chave_contas_aberto = '" . $Chave . "'");
 
             if ($chave_complementar) {
                 $query = "codigo_receita = '" . $codigo_receita . "', contribuinte = '" . $contribuinte . "', codigo_identificador_tributo = '" . $codigo_identificador_tributo . "', mes_compet_num_ref = '" . $mes_compet_num_ref . "', data_apuracao = '" . $data_apuracao . "', valor = '" . $darfValor . "', valor_multa = '" . $darfMulta . "', valor_juros = '" . $darfJuros . "', valor_outros = '" . $darfOutros . "', valor_pagamento = '" . $darfPagamento . "'";
 
-                if ($meioPagamento == 'GRU') {
+                if ($meioPagamentoNome == 'GRU') {
                     $query = "contribuinte = '" . $contribuinte . "'";
+                } else if ($meioPagamentoNome == "PIX") {
+                    $query = "tipo_pix = '$tipo_pix'";
                 }
-                $result = $database->doUpdate('contas_aberto_complementar', $query, 'chave = ' . $chave_complementar[0]['chave']);
+
+                $database->doUpdate('contas_aberto_complementar', $query, 'chave = ' . $chave_complementar[0]['chave']);
             } else {
                 $values2 = "'" . $codigo_receita . "', '" . $contribuinte . "', '" . $codigo_identificador_tributo . "', '" . $mes_compet_num_ref . "', '" . $data_apuracao . "', '" . $darfValor . "', '" . $darfMulta . "', '" . $darfJuros . "', '" . $darfOutros . "', '" . $darfPagamento . "', '" . $Chave . "'";
                 $cols = "codigo_receita, contribuinte, codigo_identificador_tributo, mes_compet_num_ref, data_apuracao, valor, valor_multa, valor_juros, valor_outros, valor_pagamento, chave_contas_aberto";
 
-                if ($meioPagamento == 'GRU') {
-                    $values2 = "'" . $contribuinte . "'";
-                    $cols = "contribuinte";
+                if ($meioPagamentoNome == 'GRU') {
+                    $values2 = "'" . $contribuinte . "', '$Chave'";
+                    $cols = "contribuinte, chave_contas_aberto";
+                } else if ($meioPagamentoNome == "PIX") {
+                    $values2 = "'$tipo_pix', '$Chave'";
+                    $cols = "tipo_pix, chave_contas_aberto";
                 }
-                $result = $database->doInsert('contas_aberto_complementar', $cols, $values2);
+
+                $database->doInsert('contas_aberto_complementar', $cols, $values2);
             }
         }
 
@@ -772,11 +1078,11 @@ class Contas
         }
     }
 
-    public static function updateFatura($Chave, $Fatura, $Emissao, $Vencto, $Praca_Pagto, $Cliente, $Valor, $Obs, $Cobranca, $discriminacaoservico)
+    public static function updateFatura($Chave, $Emissao, $Vencto, $Praca_Pagto, $Cliente, $Valor, $Obs, $Cobranca, $discriminacaoservico, $atividade)
     {
         $database = new Database();
 
-        $query = "Fatura = '" . $Fatura . "', Emissao = '" . $Emissao . "', Vencto = '" . $Vencto . "', Praca_Pagto = '" . $Praca_Pagto . "', Cliente = '" . $Cliente . "', Valor = '" . $Valor . "', Obs = '" . $Obs . "', Cobranca = '" . $Cobranca . "', discriminacaoservico = '" . $discriminacaoservico . "'";
+        $query = "Emissao = '" . $Emissao . "', Vencto = '" . $Vencto . "', Praca_Pagto = '" . $Praca_Pagto . "', Cliente = '" . $Cliente . "', Valor = '" . $Valor . "', Obs = '" . $Obs . "', Cobranca = '" . $Cobranca . "', discriminacaoservico = '" . $discriminacaoservico . "', atividade = '$atividade'";
 
         $result = $database->doUpdate('faturas', $query, 'Chave = ' . $Chave);
 
@@ -788,13 +1094,29 @@ class Contas
         }
     }
 
-    public static function updateFaturaNotaEnviada($Chave, $protocolonfe, $chavenfe, $serie)
+    public static function updateFaturaNotaEnviada($Chave, $protocolonfe, $chavenfe, $urlqrcode, $serie)
     {
         $database = new Database();
 
-        $query = "protocolonfe = '" . $protocolonfe . "', chavenfe = '" . $chavenfe . "', serie = '" . $serie . "'";
+        $query = "fatura = '$chavenfe', protocolonfe = '" . $protocolonfe . "', chavenfe = '" . $chavenfe . "', urlqrcode = '$urlqrcode', serie = '" . $serie . "'";
 
         $result = $database->doUpdate('faturas', $query, 'Chave = ' . $Chave);
+
+        $database->closeConection();
+        if ($result == NULL) {
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+
+    public static function updateLancamento($Chave, $Data, $ContaDebito, $ContaCredito, $TipoDocto, $CentroControle, $Historico_Padrao, $Historico, $Pessoa, $Valor, $ChavePr, $Usuario_Alteracao, $Data_Alteracao, $Conciliado, $atualizado)
+    {
+        $database = new Database();
+
+        $query = "Data = '$Data', ContaDebito = '$ContaDebito', ContaCredito = '$ContaCredito', TipoDocto = '$TipoDocto', CentroControle = '$CentroControle', Historico_Padrao = '$Historico_Padrao', Historico = '$Historico', Pessoa = '$Pessoa', Valor = '$Valor', ChavePr = '$ChavePr', Usuario_Alteracao = '$Usuario_Alteracao', Data_Alteracao = '$Data_Alteracao', Conciliado = '$Conciliado', atualizado = '$atualizado'";
+
+        $result = $database->doUpdate('lancamentos', $query, 'Chave = ' . $Chave);
 
         $database->closeConection();
         if ($result == NULL) {
@@ -814,6 +1136,20 @@ class Contas
         return $result;
     }
 
+    public static function checkAndDeleteContaDesconto($chave_conta_aberto, $tipo)
+    {
+        $database = new Database();
+
+        $contaDesconto = $database->doSelect('contas_aberto_cc', 'contas_aberto_cc', "chave_conta_aberto = '$chave_conta_aberto' AND tipo = '$tipo'");
+
+        $result = true;
+        if ($contaDesconto[0]) {
+            $result = $database->doDelete('contas_aberto_cc', "chave = '" . $contaDesconto[0]["chave"] . "'");
+        }
+        $database->closeConection();
+        return $result;
+    }
+
     public static function deletePlanoConta($chave)
     {
         $database = new Database();
@@ -828,6 +1164,24 @@ class Contas
         $database = new Database();
 
         $result = $database->doUpdate('faturas', "Cancelada = 1, Data_Cancelamento = '" . $data . "'", 'Chave = ' . $chave);
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function eraseFatura($chave)
+    {
+        $database = new Database();
+
+        $result = $database->doDelete('faturas', 'Chave = ' . $chave);
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function deleteLancamento($chave)
+    {
+        $database = new Database();
+
+        $result = $database->doUpdate('lancamentos', "Deletado = 1", 'Chave = ' . $chave);
         $database->closeConection();
         return $result;
     }

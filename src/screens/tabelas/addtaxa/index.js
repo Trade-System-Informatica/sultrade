@@ -3,16 +3,12 @@ import './styles.css'
 import { Formik, Field, Form } from 'formik'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
-import util from '../../../classes/util'
 import loader from '../../../classes/loader'
-import { PRECISA_LOGAR } from '../../../config'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
-import Image from 'react-bootstrap/Image'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import { apiEmployee } from '../../../services/apiamrg'
-import moment from 'moment'
 import ModalListas from '../../../components/modalListas'
 import Select from 'react-select';
 import ModalLogs from '../../../components/modalLogs'
@@ -26,7 +22,6 @@ const estadoInicial = {
     id: null,
     seaports: [],
     redirect: false,
-    finalizaOperacao: false,
     spanerror1: '',
     spanerror2: '',
     spanerror3: '',
@@ -49,6 +44,11 @@ const estadoInicial = {
     historico_padrao: '',
     formula_ate: '',
     subgrupo: '',
+
+    portos: [],
+    salvarPortos: false,
+    portosContas: [],
+    hideTaxaPortos: true,
 
     moedas: [],
     subgrupos: [],
@@ -101,7 +101,7 @@ class AddTaxa extends Component {
                 formula_ate: this.state.taxa.formula_ate,
                 subgrupo: this.state.taxa.sub_grupo
             })
-            
+
             await this.setState({
                 dadosIniciais: [
                     { titulo: 'descricao', valor: this.state.descricao },
@@ -117,14 +117,7 @@ class AddTaxa extends Component {
                 ]
             })
         }
-        await this.carregaMoedas();
-        await this.carregaSubgrupos();
-        await this.carregaPlanosContas();
-        await this.carregaHistoricos();
-
-        await this.carregaTiposAcessos()
-        await this.carregaPermissoes()
-        await this.testaAcesso()
+        await this.loadAll();
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "TAXAS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "TAXAS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -133,114 +126,59 @@ class AddTaxa extends Component {
         })
     }
 
-    carregaTiposAcessos = async () => {
-        await apiEmployee.post(`getTiposAcessos.php`, {
-            token: true,
-        }).then(
-            async res => {
-                await this.setState({ acessos: res.data });
-            },
-            async err => { this.erroApi(err) }
-        )
-    }
+    loadAll = async () => {
+        await this.setState({
+            acessos: await loader.getBase('getTiposAcessos.php'),
+            permissoes: await loader.getBase('getPermissoes.php'),
+            moedas: await loader.getBase('getMoedas.php'),
+            subgrupos: await loader.getBase('getSubgrupos.php'),
+            subgruposOptions: await loader.getBaseOptions('getSubgrupos.php', 'descricao', 'chave'),
+            planosContas: await loader.getBase('getPlanosContasAnaliticas.php'),
+            historicos: await loader.getBase('getHistoricos.php'),
+            historicosOptions: await loader.getBaseOptions('getHistoricos.php', 'Decricao', 'chave'),
+            portos: await loader.getBase('getPortos.php'),
+        });
 
-    carregaPermissoes = async () => {
-        await apiEmployee.post(`getPermissoes.php`, {
-            token: true,
-        }).then(
-            async res => {
-                await this.setState({ permissoes: res.data })
-            },
-            async err => { this.erroApi(err) }
-        )
-    }
+        if (this.state.chave) {
+            await this.setState({
+                portosContas: await loader.getBody('getTaxasPortos.php', { chave: this.state.chave })
+            })
+        }
 
-    testaAcesso = async () => {
-        let permissao = '';
+        const planosContasOptions = await loader.getBaseOptions('getPlanosContas.php', "Descricao", "Chave");
+        planosContasOptions.unshift({ label: '---', value: "" });
 
-        const acessosPermissoes = this.state.acessos.map((e, i) => {
-            permissao = this.state.permissoes.filter((permissao) => {
-                if (permissao.Usuario == this.state.usuarioLogado.codigo && permissao.Acessos == e.Chave && permissao.Empresa == this.state.usuarioLogado.empresa) {
-                    return permissao;
-                }
-            })[0]
-            return {
-                acesso: e.Chave,
-                acessoAcao: e.Acao,
-                permissaoInsere: permissao ? permissao.Liberacao.split(``)[0] : 0,
-                permissaoEdita: permissao ? permissao.Liberacao.split(``)[1] : 0,
-                permissaoConsulta: permissao ? permissao.Liberacao.split(``)[2] : 0,
-                permissaoDeleta: permissao ? permissao.Liberacao.split(``)[3] : 0
-            }
+        await this.setState({
+            planosContasOptions
         })
 
-        await this.setState({ acessosPermissoes: acessosPermissoes });
-
-
-
+        await this.setState({
+            acessosPermissoes: await loader.testaAcesso(this.state.acessos, this.state.permissoes, this.state.usuarioLogado),
+        });
     }
 
-    carregaMoedas = async () => {
-        await apiEmployee.post('getMoedas.php', {
-            token: true
-        }).then(
-            async res => {
-                await this.setState({ moedas: res.data })
-            },
-            async err => console.log(`erro: ` + err)
-        )
-    }
+    mudaTaxaPorto = async (value, porto) => {
+        if (this.state.portosContas.find((portoC) => portoC.porto === porto.Chave)) {
+            const portosContas = this.state.portosContas.map((portoC) => {
+                if (portoC.porto === porto.Chave) {
+                    return ({
+                        ...portoC,
+                        conta: value
+                    })
+                } else {
+                    return portoC;
+                }
+            })
+            this.setState({ portosContas });
+        } else {
+            const { portosContas } = this.state;
+            portosContas.push({ chave: 0, taxa: this.state.chave, porto: porto.Chave, conta: value });
+            this.setState({ portosContas });
+        }
 
-    carregaSubgrupos = async () => {
-        await apiEmployee.post('getSubgrupos.php', {
-            token: true
-        }).then(
-            async res => {
-                await this.setState({ subgrupos: res.data })
-
-                const options = this.state.subgrupos.map((e) => {
-                    return { label: e.descricao, value: e.chave }
-                })
-
-                await this.setState({ subgruposOptions: options })
-            },
-            async err => console.log(`erro: ` + err)
-        )
-    }
-
-    carregaPlanosContas = async () => {
-        await apiEmployee.post('getPlanosContas.php', {
-            token: true
-        }).then(
-            async res => {
-                await this.setState({ planosContas: res.data.filter((e) => e.Indicador == 'A') })
-
-                const options = this.state.planosContas.map((e) => {
-                    return { label: e.Descricao, value: e.Chave }
-                })
-                options.unshift({label: '---', value: ''})
-
-                await this.setState({ planosContasOptions: options })
-            },
-            async err => console.log(`erro: ` + err)
-        )
-    }
-
-    carregaHistoricos = async () => {
-        await apiEmployee.post('getHistoricos.php', {
-            token: true
-        }).then(
-            async res => {
-                await this.setState({ historicos: res.data })
-
-                const options = this.state.historicos.map((e) => {
-                    return { label: e.Descricao, value: e.chave }
-                })
-
-                await this.setState({ historicosOptions: options })
-            },
-            async err => console.log(`erro: ` + err)
-        )
+        if (!this.state.salvarPortos) {
+            this.setState({ salvarPortos: true });
+        }
     }
 
     salvarTaxa = async (validForm) => {
@@ -271,7 +209,7 @@ class AddTaxa extends Component {
             //$cols = 'data, titulo, texto, imagem, link, inativo';
             await apiEmployee.post(`insertTaxa.php`, {
                 token: true,
-                values: `'${this.state.descricao}', '${parseFloat(this.state.valor.replaceAll('.','').replaceAll(',', '.'))}', '${this.state.variavel}', '${this.state.moeda}', '${this.state.tipo}', '${this.state.conta_contabil}', '${this.state.historico_padrao}', '${this.state.formula_ate}', '${this.state.subgrupo}'`
+                values: `'${this.state.descricao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.variavel}', '${this.state.moeda}', '${this.state.tipo}', '${this.state.conta_contabil}', '${this.state.historico_padrao}', '${this.state.formula_ate}', '${this.state.subgrupo}'`
             }).then(
                 async res => {
                     if (res.data[0].chave) {
@@ -279,7 +217,7 @@ class AddTaxa extends Component {
                         await loader.salvaLogs('os_taxas', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
 
                         //alert('Taxa Inserida!')
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         //alert(`Erro: ${res.data}`)
                     }
@@ -291,7 +229,7 @@ class AddTaxa extends Component {
                 token: true,
                 chave: this.state.chave,
                 descricao: this.state.descricao,
-                valor: parseFloat(this.state.valor.replaceAll('.','').replaceAll(',', '.')),
+                valor: parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')),
                 variavel: this.state.variavel,
                 Moeda: this.state.moeda,
                 Tipo: this.state.tipo,
@@ -304,8 +242,8 @@ class AddTaxa extends Component {
                 async res => {
                     if (res.data === true) {
                         await loader.salvaLogs('os_taxas', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `TAXA: ${this.state.descricao}`);
-                        
-                        await this.setState({ finalizaOperacao: true })
+
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         await alert(`Erro ${JSON.stringify(res)}`)
                     }
@@ -315,6 +253,24 @@ class AddTaxa extends Component {
 
         }
 
+    }
+
+    salvarPortosContas = async () => {
+        const portosContas = this.state.portosContas.filter((portos) => portos.porto !== "");
+        
+        await apiEmployee.post(`setTaxasPortos.php`, {
+            token: true,
+            chaves: portosContas.map((portos) => portos.chave),
+            portos: portosContas.map((portos) => portos.porto),
+            taxa: this.state.chave,
+            contas: portosContas.map((portos) => portos.conta),
+        }).then(
+            async res => {
+                console.log(res);
+                console.log(res.data);
+            },
+            async res => await console.log(`Erro: ${res.data}`)
+        )
     }
 
     alteraModal = async (valor) => {
@@ -361,14 +317,11 @@ class AddTaxa extends Component {
     render() {
         const validations = []
         validations.push(this.state.descricao)
-        validations.push(this.state.valor && parseFloat(this.state.valor.replaceAll('.','').replaceAll(',','.')) > 0)
+        validations.push(this.state.valor && parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')) >= 0)
         validations.push(this.state.subgrupo)
         validations.push(this.state.moeda)
-        validations.push(this.state.valor && this.state.valor.replaceAll('.','').replaceAll(',','.') == parseFloat(this.state.valor.replaceAll('.','').replaceAll(',','.')))
+        validations.push(this.state.valor && this.state.valor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')))
         validations.push(!this.state.bloqueado)
-
-        //validations.push(this.state.porto && this.state.porto > 0)
-        //o formulário só será válido se todas as validações forem verdadeiras, com este reduce implementado
 
         const validForm = validations.reduce((t, a) => t && a)
 
@@ -379,18 +332,14 @@ class AddTaxa extends Component {
                     <Redirect to={'/'} />
                 }
 
-                {this.state.finalizaOperacao &&
-                    <Redirect to={{pathname: '/tabelas/taxas', state:{chave: this.state.chave}}} />
-                }
-
                 <section>
-                    <Header voltarTaxas titulo="Taxas" chave={this.state.chave != 0 ? this.state.chave : ''}/>
-                    <br/>
-                    <br/>
-                    <br/>
+                    <Header voltarTaxas titulo="Taxas" chave={this.state.chave != 0 ? this.state.chave : ''} />
+                    <br />
+                    <br />
+                    <br />
                 </section>
 
-                {this.state.chave !=0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                     <div className="logButton">
                         <button onClick={() => this.openLogs()}>Logs</button>
                     </div>
@@ -404,7 +353,7 @@ class AddTaxa extends Component {
                     modalAberto={this.state.modalLog}
                 />
 
-                <ModalListas alteraModal={this.alteraModal} alteraSubgrupo={this.alteraSubgrupo} alteraPlanoConta={this.alteraPlanoConta} acessosPermissoes={this.state.acessosPermissoes} modalAberto={this.state.modalAberto} modal={this.state.modal} modalLista={this.state.modalLista} closeModal={() => { this.setState({ modalAberto: false }) }} pesquisa={this.state.modalPesquisa}/>
+                <ModalListas alteraModal={this.alteraModal} alteraSubgrupo={this.alteraSubgrupo} alteraPlanoConta={this.alteraPlanoConta} acessosPermissoes={this.state.acessosPermissoes} modalAberto={this.state.modalAberto} modal={this.state.modal} modalLista={this.state.modalLista} closeModal={() => { this.setState({ modalAberto: false }) }} pesquisa={this.state.modalPesquisa} />
 
                 <div className="contact-section">
 
@@ -466,7 +415,7 @@ class AddTaxa extends Component {
                                                     {!this.state.moeda &&
                                                         <FontAwesomeIcon title='Preencha os campos' icon={faExclamationTriangle} />
                                                     }
-                                                    {this.state.valor && this.state.moeda && !this.state.valor.replaceAll('.','').replaceAll(',','.') == parseFloat(this.state.valor.replaceAll('.','').replaceAll(',','.')) &&
+                                                    {this.state.valor != "0,00" && this.state.valor && this.state.moeda && !this.state.valor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')) &&
                                                         <FontAwesomeIcon title='Apenas números são permitidos' icon={faExclamationTriangle} />
                                                     }
                                                 </div>
@@ -476,7 +425,7 @@ class AddTaxa extends Component {
                                                             <option value={e.Chave}>{e.Sigla}</option>
                                                         ))}
                                                     </select>
-                                                    <Field className="form-control fieldDividido_2 text-right" type="text" value={this.state.valor} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ valor: e.currentTarget.value }) }} onBlur={async e => { this.setState({valor: Number(e.currentTarget.value.replaceAll('.','').replaceAll(',','.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.','').replaceAll(',','.')) : ''})}} />
+                                                    <Field className="form-control fieldDividido_2 text-right" type="text" value={this.state.valor} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ valor: e.currentTarget.value }) }} onBlur={async e => { this.setState({ valor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }) }} />
                                                 </div>
                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                     <label>Grupo</label>
@@ -490,9 +439,9 @@ class AddTaxa extends Component {
                                                     <Select className='SearchSelect' options={this.state.subgruposOptions} value={this.state.subgruposOptions.filter(option => option.value == this.state.subgrupo)} search={true} onChange={(e) => { this.setState({ subgrupo: e.value }) }} />
                                                 </div>
                                                 <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
-                                                {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'TIPOS_SERVICOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
-                                                    <div className='insideFormButton' onClick={() => { this.setState({ modalPesquisa: this.state.subgrupo && this.state.subgrupo != 0 ? this.state.subgrupo : "", modalAberto: true, modal: 'listarSubgrupos', modalLista: this.state.subgrupos }) }}>...</div>
-                                                }
+                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'TIPOS_SERVICOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                                        <div className='insideFormButton' onClick={() => { this.setState({ modalPesquisa: this.state.subgrupo && this.state.subgrupo != 0 ? this.state.subgrupo : "", modalAberto: true, modal: 'listarSubgrupos', modalLista: this.state.subgrupos }) }}>...</div>
+                                                    }
                                                 </div>
                                                 <div className="col-1">
                                                 </div>
@@ -523,9 +472,9 @@ class AddTaxa extends Component {
                                                     <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.conta_contabil)[0]} search={true} onChange={(e) => { this.setState({ conta_contabil: e.value, }) }} />
                                                 </div>
                                                 <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
-                                                {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PLANOS_CONTAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
-                                                    <div className='insideFormButton' onClick={() => { this.setState({ modalPesquisa: this.state.conta_contabil && this.state.conta_contabil != 0 ? this.state.conta_contabil : "",modalAberto: true, modal: 'listarPlanosContas', modalLista: this.state.planosContas }) }}>...</div>
-                                                }
+                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PLANOS_CONTAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                                        <div className='insideFormButton' onClick={() => { this.setState({ modalPesquisa: this.state.conta_contabil && this.state.conta_contabil != 0 ? this.state.conta_contabil : "", modalAberto: true, modal: 'listarPlanosContas', modalLista: this.state.planosContas }) }}>...</div>
+                                                    }
                                                 </div>
                                                 <div className="col-1">
                                                 </div>
@@ -562,6 +511,42 @@ class AddTaxa extends Component {
                             </Formik>
                         </div>
                     </div>
+
+                    {this.state.chave &&
+                        <div>
+                            <table className="taxaPortoTable">
+                                <tr className="taxaPortoTr" style={{ cursor: "pointer" }} onClick={() => this.setState({ hideTaxaPortos: !this.state.hideTaxaPortos })}>
+                                    <th className='taxaPortoTh' colSpan={2}>Contas por Portos</th>
+                                </tr>
+                                {!this.state.hideTaxaPortos &&
+                                    <>
+                                        <tr className="taxaPortoTr">
+                                            <th className='taxaPortoTh' style={{ backgroundColor: "black", color: "white" }}>Porto</th>
+                                            <th className='taxaPortoTh' style={{ backgroundColor: "black", color: "white" }}>Conta</th>
+                                        </tr>
+                                        {this.state.portos.map((porto, portoIndex) => (
+                                            <tr className={`taxaPortoTr ${portoIndex % 2 == 0 ? "taxaPortoPar" : "taxaPortoImpar"}`}>
+                                                <td className='taxaPortoTd'>{porto.Descricao}</td>
+                                                <td className='taxaPortoTd keepColor'>
+                                                    <Select
+                                                        options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)}
+                                                        onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }}
+                                                        value={this.state.portosContas.find((taxaPorto) => taxaPorto.porto === porto.Chave) ? this.state.planosContasOptions.find(option => option.value == this.state.portosContas.find((taxaPorto) => taxaPorto.porto === porto.Chave).conta) : ""}
+                                                        onChange={(e) => this.mudaTaxaPorto(e.value, porto)}
+                                                    />
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </>
+                                }
+                            </table>
+                            {this.state.salvarPortos &&
+                                <div className='centerDiv' style={{ marginTop: 5 }}>
+                                    <button className="salvarPortosButton" onClick={() => this.salvarPortosContas()}>Salvar</button>
+                                </div>
+                            }
+                        </div>
+                    }
 
                 </div>
                 <Rodape />

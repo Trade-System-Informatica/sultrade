@@ -3,23 +3,21 @@ import './styles.css'
 import { Formik, Field, Form } from 'formik'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
-import util from '../../../classes/util'
 import loader from '../../../classes/loader'
 import { PRECISA_LOGAR, NOME_EMPRESA } from '../../../config'
 import { connect } from 'react-redux'
-import { Link, useHistory, Redirect } from 'react-router-dom'
-import Image from 'react-bootstrap/Image'
+import { Link, Redirect } from 'react-router-dom'
 import { apiEmployee } from '../../../services/apiamrg'
 import moment from 'moment'
 import InputMask from 'react-input-mask';
-import CEP from 'cep-promise'
 import Select from 'react-select';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSearch, faCoffee, faTrashAlt, faPen, faPlus, faPhoneAlt, faHome, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
+import { faTrashAlt, faPen, faPlus, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import { confirmAlert } from 'react-confirm-alert'
 import ModalItem from '../../../components/modalItem'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import ModalLogs from '../../../components/modalLogs'
+import { Skeleton } from '@mui/material'
 
 const estadoInicial = {
     porto: 0,
@@ -29,7 +27,6 @@ const estadoInicial = {
     id: null,
     seaports: [],
     redirect: false,
-    finalizaOperacao: false,
     spanerror1: '',
     spanerror2: '',
     spanerror3: '',
@@ -55,6 +52,7 @@ const estadoInicial = {
     cnpj_cpf: '',
     cnpj_cpfLimpo: '',
     rg_ie: '',
+    inscricao_municipal: '',
     inclusao: moment().format('YYYY-MM-DD'),
     categoria: {
         cliente: false,
@@ -85,6 +83,7 @@ const estadoInicial = {
     }*/],
     contaContabil: '',
     contaProvisao: '',
+    contaFaturar: '',
 
     cidades: [],
     cidadesOptions: [],
@@ -126,7 +125,7 @@ class AddPessoa extends Component {
     componentDidMount = async () => {
         window.scrollTo(0, 0)
         var id = await this.props.match.params.id
-        await this.setState({ chave: id })
+        await this.setState({ chave: id, loading: true })
 
         if (!this.props.location.state || this.props.location.state.pessoa) {
             await this.getPessoa()
@@ -142,12 +141,15 @@ class AddPessoa extends Component {
                 nome_fantasia: this.state.pessoa.Nome_Fantasia,
                 cnpj_cpf: this.state.pessoa.Cnpj_Cpf,
                 rg_ie: this.state.pessoa.Rg_Ie,
+                inscricao_municipal: this.state.pessoa.Inscricao_Municipal,
                 nascimento: this.state.pessoa.Nascimento_Abertura,
                 inclusao: this.state.pessoa.Inclusao,
                 contaContabilInicial: this.state.pessoa.Conta_Contabil,
                 contaProvisaoInicial: this.state.pessoa.Conta_Provisao,
+                contaFaturaInicial: this.state.pessoa.Conta_Fatura,
                 contaContabil: this.state.pessoa.Conta_Contabil,
-                contaProvisao: this.state.pessoa.Conta_Provisao
+                contaProvisao: this.state.pessoa.Conta_Provisao,
+                contaFaturar: this.state.pessoa.Conta_Faturar,
             })
             await this.converteCategoria();
 
@@ -157,10 +159,12 @@ class AddPessoa extends Component {
                     { titulo: 'Nome_Fantasia', valor: this.state.nome_fantasia },
                     { titulo: 'Cnpj_Cpf', valor: this.state.cnpj_cpf },
                     { titulo: 'Rg_Ie', valor: this.state.rg_ie },
+                    { titulo: 'Inscricao_Municipal', valor: this.state.inscricao_municipal },
                     { titulo: 'Nascimento_Abertura', valor: this.state.nascimento },
                     { titulo: 'Inclusao', valor: this.state.inclusao },
                     { titulo: 'Conta_Provisao', valor: this.state.contaProvisao },
-                    { titulo: 'Conta_Contabil', valor: this.state.contaContabil }
+                    { titulo: 'Conta_Contabil', valor: this.state.contaContabil },
+                    { titulo: 'Conta_Faturar', valor: this.state.contaFaturar }
                 ]
             })
         }
@@ -219,7 +223,7 @@ class AddPessoa extends Component {
                 deleteEndereco: false
             })
         }
-        
+
     }
 
     getPessoa = async () => {
@@ -254,7 +258,7 @@ class AddPessoa extends Component {
     }
 
     deleteEndereco = async (chave, nome) => {
-        this.setState({deleteEndereco: true})
+        this.setState({ deleteEndereco: true })
         confirmAlert({
             customUI: ({ onClose }) => {
                 return (
@@ -340,7 +344,7 @@ class AddPessoa extends Component {
     }
 
     deleteContato = async (chave, nome) => {
-        this.setState({deleteContato: true})
+        this.setState({ deleteContato: true })
         confirmAlert({
             customUI: ({ onClose }) => {
                 return (
@@ -480,7 +484,7 @@ class AddPessoa extends Component {
                 return;
             }
         }
-            this.setState({ bloqueado: true })
+        this.setState({ bloqueado: true })
 
         this.setState({
             dadosFinais: [
@@ -488,23 +492,26 @@ class AddPessoa extends Component {
                 { titulo: 'Nome_Fantasia', valor: this.state.nome_fantasia },
                 { titulo: 'Cnpj_Cpf', valor: this.state.cnpj_cpf },
                 { titulo: 'Rg_Ie', valor: this.state.rg_ie },
+                { titulo: 'Inscricao_Municipal', valor: this.state.inscricao_municipal },
                 { titulo: 'Nascimento_Abertura', valor: this.state.nascimento },
                 { titulo: 'Inclusao', valor: this.state.inclusao },
                 { titulo: 'Conta_Provisao', valor: this.state.contaProvisao },
-                { titulo: 'Conta_Contabil', valor: this.state.contaContabil }
-            ]
+                { titulo: 'Conta_Contabil', valor: this.state.contaContabil },
+                { titulo: 'Conta_Faturar', valor: this.state.contaFaturar }
+            ],
+            loading: true
         })
 
         if (parseInt(this.state.chave) === 0) {
             await apiEmployee.post(`insertPessoa.php`, {
                 token: true,
-                values: `'${this.state.nome}', '${this.state.nome_fantasia}', '${this.state.cnpj_cpfLimpo}', '${this.state.rg_ie}', '${this.state.nascimento}', '${this.state.inclusao}', '${categoria}', '${this.state.contaContabil}', '${this.state.contaProvisao}'`
+                values: `'${this.state.nome}', '${this.state.nome_fantasia}', '${this.state.cnpj_cpfLimpo}', '${this.state.rg_ie}', '${this.state.inscricao_municipal}', '${this.state.nascimento}', '${this.state.inclusao}', '${categoria}', '${this.state.contaContabil}', '${this.state.contaProvisao}', '${this.state.contaFaturar}'`
             }).then(
                 async res => {
                     if (res.data[0].Chave) {
                         await this.setState({ chave: res.data[0].Chave })
                         await loader.salvaLogs('pessoas', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                     }
                 },
@@ -518,17 +525,20 @@ class AddPessoa extends Component {
                 Nome_Fantasia: this.state.nome_fantasia,
                 Cnpj_Cpf: this.state.cnpj_cpfLimpo,
                 Rg_Ie: this.state.rg_ie,
+                Inscricao_Municipal: this.state.inscricao_municipal,
                 Nascimento_Abertura: this.state.nascimento,
                 Inclusao: this.state.inclusao,
                 Categoria: categoria,
                 Conta_Contabil: this.state.contaContabil,
-                Conta_Provisao: this.state.contaProvisao
+                Conta_Provisao: this.state.contaProvisao,
+                Conta_Faturar: this.state.contaFaturar
             }).then(
                 async res => {
+                    console.log(res.data);
                     if (res.data === true) {
                         await loader.salvaLogs('pessoas', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `PESSOA: ${this.state.nome}`);
 
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         //await alert(`Erro`)
                     }
@@ -571,185 +581,204 @@ class AddPessoa extends Component {
         return (
             <div className='allContent'>
 
-                {this.state.redirect &&
-                    <Redirect to={'/'} />
-                }
+                <div>
+                    {this.state.redirect &&
+                        <Redirect to={'/'} />
+                    }
 
-                {this.state.finalizaOperacao &&
-                    <Redirect to={{ pathname: '/tabelas/pessoas', state: { chave: this.state.chave } }} />
-                }
+                    {this.state.loading &&
+                        <Skeleton />
+                    }
 
-                <ModalItem
-                    closeModal={() => { this.setState({ modalItemAberto: false }) }}
-                    itens={this.state.itemInfo}
-                    nome={this.state.itemNome}
-                    chave={this.state.itemChave}
-                    itemPermissao={this.state.itemPermissao}
-                    modalAberto={this.state.modalItemAberto}
-                    itemAdd={this.state.itemAdd}
-                    itemEdit={this.state.itemEdit}
-                    itemDelete={this.state.itemDelete}
-                    acessosPermissoes={this.state.acessosPermissoes}
-                />
+                    <ModalItem
+                        closeModal={() => { this.setState({ modalItemAberto: false }) }}
+                        itens={this.state.itemInfo}
+                        nome={this.state.itemNome}
+                        chave={this.state.itemChave}
+                        itemPermissao={this.state.itemPermissao}
+                        modalAberto={this.state.modalItemAberto}
+                        itemAdd={this.state.itemAdd}
+                        itemEdit={this.state.itemEdit}
+                        itemDelete={this.state.itemDelete}
+                        acessosPermissoes={this.state.acessosPermissoes}
+                    />
 
-                <section>
-                    <Header voltarPessoas titulo="Pessoas" chave={this.state.chave != 0 ? this.state.chave : ''} />
-                    <br />
-                    <br />
-                </section>
+                    {!this.state.loading &&
+                        <>
+                            <section>
+                                <Header voltarPessoas titulo="Pessoas" chave={this.state.chave != 0 ? this.state.chave : ''} />
+                                <br />
+                                <br />
+                            </section>
 
-                {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
-                    <div className="logButton">
-                        <button onClick={() => this.openLogs()}>Logs</button>
-                    </div>
-                }
+                            {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                <div className="logButton">
+                                    <button onClick={() => this.openLogs()}>Logs</button>
+                                </div>
+                            }
 
-                <ModalLogs
-                    closeModal={() => { this.setState({ modalLog: false }) }}
-                    logs={this.state.logs}
-                    nome={this.state.nome}
-                    chave={this.state.chave}
-                    modalAberto={this.state.modalLog}
-                />
+                            <ModalLogs
+                                closeModal={() => { this.setState({ modalLog: false }) }}
+                                logs={this.state.logs}
+                                nome={this.state.nome}
+                                chave={this.state.chave}
+                                modalAberto={this.state.modalLog}
+                            />
 
-                <div className="contact-section">
+                            <div className="contact-section">
 
-                    <div className="row">
-                        <div className="col-lg-12">
-                            <Formik
-                                initialValues={{
-                                    name: '',
-                                }}
-                                onSubmit={async values => {
-                                    await new Promise(r => setTimeout(r, 1000))
-                                    this.salvarPessoa(validForm)
-                                }}
-                            >
-                                <Form className="contact-form" >
+                                <div className="row">
+                                    <div className="col-lg-12">
+                                        <Formik
+                                            initialValues={{
+                                                name: '',
+                                            }}
+                                            onSubmit={async values => {
+                                                await new Promise(r => setTimeout(r, 1000))
+                                                this.salvarPessoa(validForm)
+                                            }}
+                                        >
+                                            <Form className="contact-form" >
 
-                                    <div className="row">
-                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"></div>
+                                                <div className="row">
+                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"></div>
 
-                                        <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12 ">
+                                                    <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12 ">
 
-                                            <div className="row addservicos">
-                                                {this.state.chave != 0 &&
-                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstlabel">
-                                                        <label>Chave</label>
-                                                    </div>
-                                                }
-                                                {this.state.chave != 0 &&
-                                                    <div className='col-1'></div>
-                                                }
-                                                {this.state.chave != 0 &&
-                                                    <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10 ">
-                                                        <Field className="form-control" style={{ backgroundColor: '#dddddd' }} type="text" disabled value={this.state.chave} />
-                                                    </div>
-                                                }
-                                                {this.state.chave != 0 &&
-                                                    <div className="col-xl-4 col-lg-4 col-md-3 col-sm-1 col-1 ">
-                                                    </div>
-                                                }
-                                                <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
-                                                    <label>CPF/CNPJ</label>
-                                                </div>
-                                                <div className='col-1 errorMessage'>
-                                                </div>
-                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                    <InputMask type='text' mask={this.state.cnpj_cpfLimpo.length <= 11 ? '999.999.999-99' : '99.999.999/9999-99'} className='form-control' value={this.state.cnpj_cpf} onChange={e => this.setState({ cnpj_cpf: e.currentTarget.value })} onKeyDown={e => { if (this.state.cnpj_cpfLimpo.length == 11 && e.nativeEvent.key == parseInt(e.nativeEvent.key)) { this.setState({ cnpj_cpfLimpo: `${this.state.cnpj_cpfLimpo}${e.nativeEvent.key}` }) } }} />
+                                                        <div className="row addservicos">
+                                                            {this.state.chave != 0 &&
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstlabel">
+                                                                    <label>Chave</label>
+                                                                </div>
+                                                            }
+                                                            {this.state.chave != 0 &&
+                                                                <div className='col-1'></div>
+                                                            }
+                                                            {this.state.chave != 0 &&
+                                                                <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10 ">
+                                                                    <Field className="form-control" style={{ backgroundColor: '#dddddd' }} type="text" disabled value={this.state.chave} />
+                                                                </div>
+                                                            }
+                                                            {this.state.chave != 0 &&
+                                                                <div className="col-xl-4 col-lg-4 col-md-3 col-sm-1 col-1 ">
+                                                                </div>
+                                                            }
+                                                            <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
+                                                                <label>CPF/CNPJ</label>
+                                                            </div>
+                                                            <div className='col-1 errorMessage'>
+                                                            </div>
+                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                                <InputMask type='text' mask={this.state.cnpj_cpfLimpo.length <= 11 ? '999.999.999-99' : '99.999.999/9999-99'} className='form-control' value={this.state.cnpj_cpf} onChange={e => this.setState({ cnpj_cpf: e.currentTarget.value })} onKeyDown={e => { if (this.state.cnpj_cpfLimpo.length == 11 && e.nativeEvent.key == parseInt(e.nativeEvent.key)) { this.setState({ cnpj_cpfLimpo: `${this.state.cnpj_cpfLimpo}${e.nativeEvent.key}` }) } }} />
 
-                                                </div>
-                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                    <label>Nome</label>
-                                                </div>
-                                                <div className='col-1 errorMessage'>
-                                                    {!this.state.nome &&
-                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                    }
-                                                </div>
-                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                    <Field className="form-control" type="text" value={this.state.nome} onChange={async e => { this.setState({ nome: e.currentTarget.value }) }} />
-                                                </div>
-                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                    <label>Nome Fantasia</label>
-                                                </div>
-                                                <div className='col-1'></div>
-                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                    <Field className="form-control" type="text" value={this.state.nome_fantasia} onChange={async e => { this.setState({ nome_fantasia: e.currentTarget.value }) }} />
-                                                </div>
-                                                <div className='col-1'></div>
-                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                    <label>RG/IE</label>
-                                                </div>
-                                                <div className='col-1'></div>
-                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                    <Field className="form-control" type="text" value={this.state.rg_ie} onChange={async e => { this.setState({ rg_ie: e.currentTarget.value }) }} />
-                                                </div>
-                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                    <label>Nascimento / Abertura</label>
-                                                </div>
-                                                <div className='col-1'></div>
-                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                    <Field className="form-control" type="date" value={this.state.nascimento} onChange={async e => { this.setState({ nascimento: e.currentTarget.value }) }} />
-                                                </div>
-                                                {this.state.categoria.cliente &&
-                                                    <>
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Conta Contabil - Receber</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.contaContabil)[0]} search={true} onChange={(e) => { this.setState({ contaContabil: e.value, }) }} />
-                                                        </div>
-                                                    </>
-                                                }
-                                                {this.state.categoria.fornecedor &&
-                                                    <>
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Conta Contabil - Pagar</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.contaProvisao)[0]} search={true} onChange={(e) => { this.setState({ contaProvisao: e.value, }) }} />
-                                                        </div>
-                                                    </>
-                                                }
-                                                <div className="col-12">
-                                                    <label className="center">Categorias</label>
-                                                </div>
-                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                    <label>Cliente</label>
-                                                </div>
-                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                    <Field type="checkbox" name='cliente' checked={this.state.categoria.cliente} onChange={async e => { await this.setState({ categoria: { ...this.state.categoria, cliente: e.target.checked } }); if (e.target.checked) { await this.setState({ contaContabil: this.state.contaContabilInicial }) } else { await this.setState({ contaContabil: "" }) } }} />
-                                                </div>
-                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                    <label>Fornecedor</label>
-                                                </div>
-                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                    <Field type="checkbox" name='fornecedor' checked={this.state.categoria.fornecedor} onChange={async e => { this.setState({ categoria: { ...this.state.categoria, fornecedor: e.target.checked } }); if (e.target.checked) { await this.setState({ contaProvisao: this.state.contaProvisaoInicial }) } else { await this.setState({ contaProvisao: "" }) } }} />
-                                                </div>
-                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                    <label>Prestador de Serviços</label>
-                                                </div>
-                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                    <Field type="checkbox" name='prestador_servicos' checked={this.state.categoria.prestador_servico} onChange={async e => { this.setState({ categoria: { ...this.state.categoria, prestador_servico: e.target.checked } }) }} />
-                                                </div>
-                                                {/*<div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            </div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>Nome</label>
+                                                            </div>
+                                                            <div className='col-1 errorMessage'>
+                                                                {!this.state.nome &&
+                                                                    <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                }
+                                                            </div>
+                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                                <Field className="form-control" type="text" value={this.state.nome} onChange={async e => { this.setState({ nome: e.currentTarget.value }) }} />
+                                                            </div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>Nome Fantasia</label>
+                                                            </div>
+                                                            <div className='col-1'></div>
+                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                                <Field className="form-control" type="text" value={this.state.nome_fantasia} onChange={async e => { this.setState({ nome_fantasia: e.currentTarget.value }) }} />
+                                                            </div>
+                                                            <div className='col-1'></div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>RG/IE</label>
+                                                            </div>
+                                                            <div className='col-1'></div>
+                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                                <Field className="form-control" type="text" value={this.state.rg_ie} onChange={async e => { this.setState({ rg_ie: e.currentTarget.value }) }} />
+                                                            </div>
+                                                            <div className='col-1'></div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>Inscrição Municipal</label>
+                                                            </div>
+                                                            <div className='col-1'></div>
+                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                                <Field className="form-control" type="text" value={this.state.inscricao_municipal} onChange={async e => { this.setState({ inscricao_municipal: e.currentTarget.value }) }} />
+                                                            </div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>Nascimento / Abertura</label>
+                                                            </div>
+                                                            <div className='col-1'></div>
+                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                                <Field className="form-control" type="date" value={this.state.nascimento} onChange={async e => { this.setState({ nascimento: e.currentTarget.value }) }} />
+                                                            </div>
+                                                            {this.state.categoria.cliente &&
+                                                                <>
+                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                        <label>Conta Contabil - Receber</label>
+                                                                    </div>
+                                                                    <div className='col-1 errorMessage'>
+                                                                    </div>
+                                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                        <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.contaContabil)[0]} search={true} onChange={(e) => { this.setState({ contaContabil: e.value, }) }} />
+                                                                    </div>
+                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                        <label>Conta Contabil - Faturar</label>
+                                                                    </div>
+                                                                    <div className='col-1 errorMessage'>
+                                                                    </div>
+                                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                        <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.contaFaturar)[0]} search={true} onChange={(e) => { this.setState({ contaFaturar: e.value, }) }} />
+                                                                    </div>
+                                                                </>
+                                                            }
+                                                            {this.state.categoria.fornecedor &&
+                                                                <>
+                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                        <label>Conta Contabil - Pagar</label>
+                                                                    </div>
+                                                                    <div className='col-1 errorMessage'>
+                                                                    </div>
+                                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                        <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.contaProvisao)[0]} search={true} onChange={(e) => { this.setState({ contaProvisao: e.value, }) }} />
+                                                                    </div>
+                                                                </>
+                                                            }
+                                                            <div className="col-12">
+                                                                <label className="center">Categorias</label>
+                                                            </div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>Cliente</label>
+                                                            </div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <Field type="checkbox" name='cliente' checked={this.state.categoria.cliente} onChange={async e => { await this.setState({ categoria: { ...this.state.categoria, cliente: e.target.checked } }); if (e.target.checked) { await this.setState({ contaContabil: this.state.contaContabilInicial, contaFaturar: this.state.contaFaturaInicial }) } else { await this.setState({ contaContabil: "", contaFaturar: "" }) } }} />
+                                                            </div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>Fornecedor</label>
+                                                            </div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <Field type="checkbox" name='fornecedor' checked={this.state.categoria.fornecedor} onChange={async e => { this.setState({ categoria: { ...this.state.categoria, fornecedor: e.target.checked } }); if (e.target.checked) { await this.setState({ contaProvisao: this.state.contaProvisaoInicial }) } else { await this.setState({ contaProvisao: "" }) } }} />
+                                                            </div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>Prestador de Serviços</label>
+                                                            </div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <Field type="checkbox" name='prestador_servicos' checked={this.state.categoria.prestador_servico} onChange={async e => { this.setState({ categoria: { ...this.state.categoria, prestador_servico: e.target.checked } }) }} />
+                                                            </div>
+                                                            {/*<div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                     <label>Transportador</label>
                                                 </div>
                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                     <Field type="checkbox" name='transportador' checked={this.state.categoria.transportador} onChange={async e => { this.setState({ categoria: { ...this.state.categoria, transportador: e.target.checked } }) }} />
                                                 </div>*/}
-                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                    <label>Banco</label>
-                                                </div>
-                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                    <Field type="checkbox" name='banco' checked={this.state.categoria.banco} onChange={async e => { this.setState({ categoria: { ...this.state.categoria, banco: e.target.checked } }) }} />
-                                                </div>
-                                                {/*<div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>Banco</label>
+                                                            </div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <Field type="checkbox" name='banco' checked={this.state.categoria.banco} onChange={async e => { this.setState({ categoria: { ...this.state.categoria, banco: e.target.checked } }) }} />
+                                                            </div>
+                                                            {/*<div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                     <label>Adm. Cartão</label>
                                                 </div>
                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -763,413 +792,416 @@ class AddPessoa extends Component {
                                             </div>*/}
 
 
-                                            </div>
+                                                        </div>
 
 
-                                        </div>
-                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                                                    </div>
+                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                                                </div>
+
+                                                <div className="row">
+                                                    <div className="col-2"></div>
+                                                    <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                        <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
+                                                    </div>
+                                                    <div className="col-2"></div>
+                                                </div>
+
+                                            </Form>
+                                        </Formik>
                                     </div>
+                                    {this.props.match.params.id != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_ENDERECOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
 
-                                    <div className="row">
-                                        <div className="col-2"></div>
-                                        <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                            <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
-                                        </div>
-                                        <div className="col-2"></div>
-                                    </div>
-
-                                </Form>
-                            </Formik>
-                        </div>
-                        {this.props.match.params.id != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_ENDERECOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
-
-                            <div>
-
-                                <div>
-                                    <div>
-                                        <div className="page-breadcrumb2"><h3>ENDERECOS</h3></div>
-                                    </div>
-                                    <div>
                                         <div>
-                                            <div className="row" id="product-list">
-                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
-                                                <div className="col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags">
-                                                    <div className="single-product-item">
-                                                        <div className="row subtitulosTabela">
-                                                            {window.innerWidth >= 500 &&
-                                                                <>
-                                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
-                                                                        <span className="subtituloships">Chave</span>
-                                                                    </div>
-                                                                    <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-center">
-                                                                        <span className="subtituloships">Endereço</span>
-                                                                    </div>
-                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center">
-                                                                        <span className="subtituloships">Cep</span>
-                                                                    </div>
-                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center">
 
-                                                                        <Link to=
-                                                                            {{
-                                                                                pathname: `/tabelas/addpessoaendereco/${this.props.match.params.id}/0`,
-                                                                                state: { endereco: {}, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                            }}
-                                                                        >
-                                                                            <FontAwesomeIcon icon={faPlus} />
-                                                                        </Link>
-                                                                    </div>
-                                                                </>
-                                                            }
-                                                            {window.innerWidth < 500 &&
-                                                                <>
-                                                                    <div className="col-xl-5 col-lg-5 col-md-5 col-sm-5 col-5 text-center">
-                                                                        <span className="subtituloships">Endereço</span>
-                                                                    </div>
-                                                                    <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-center">
-                                                                        <span className="subtituloships">Cep</span>
-                                                                    </div>
-                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center">
+                                            <div>
+                                                <div>
+                                                    <div className="page-breadcrumb2"><h3>ENDERECOS</h3></div>
+                                                </div>
+                                                <div>
+                                                    <div>
+                                                        <div className="row" id="product-list">
+                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
+                                                            <div className="col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags">
+                                                                <div className="single-product-item">
+                                                                    <div className="row subtitulosTabela">
+                                                                        {window.innerWidth >= 500 &&
+                                                                            <>
+                                                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
+                                                                                    <span className="subtituloships">Chave</span>
+                                                                                </div>
+                                                                                <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-center">
+                                                                                    <span className="subtituloships">Endereço</span>
+                                                                                </div>
+                                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center">
+                                                                                    <span className="subtituloships">Cep</span>
+                                                                                </div>
+                                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center">
 
-                                                                        <Link to=
-                                                                            {{
-                                                                                pathname: `/tabelas/addpessoaendereco/${this.props.match.params.id}/0`,
-                                                                                state: { endereco: {}, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                            }}
-                                                                        >
-                                                                            <FontAwesomeIcon icon={faPlus} />
-                                                                        </Link>
+                                                                                    <Link to=
+                                                                                        {{
+                                                                                            pathname: `/tabelas/addpessoaendereco/${this.props.match.params.id}/0`,
+                                                                                            state: { endereco: {}, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                        }}
+                                                                                    >
+                                                                                        <FontAwesomeIcon icon={faPlus} />
+                                                                                    </Link>
+                                                                                </div>
+                                                                            </>
+                                                                        }
+                                                                        {window.innerWidth < 500 &&
+                                                                            <>
+                                                                                <div className="col-xl-5 col-lg-5 col-md-5 col-sm-5 col-5 text-center">
+                                                                                    <span className="subtituloships">Endereço</span>
+                                                                                </div>
+                                                                                <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-center">
+                                                                                    <span className="subtituloships">Cep</span>
+                                                                                </div>
+                                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center">
+
+                                                                                    <Link to=
+                                                                                        {{
+                                                                                            pathname: `/tabelas/addpessoaendereco/${this.props.match.params.id}/0`,
+                                                                                            state: { endereco: {}, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                        }}
+                                                                                    >
+                                                                                        <FontAwesomeIcon icon={faPlus} />
+                                                                                    </Link>
+                                                                                </div>
+                                                                            </>
+                                                                        }
                                                                     </div>
-                                                                </>
-                                                            }
+                                                                </div>
+                                                            </div>
+                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
+                                                        </div>
+
+                                                        <div id="product-list">
+
+
+                                                            {this.state.enderecos[0] != undefined && this.state.enderecos.map((feed, index) => (
+                                                                <div key={feed.Chave} className="row row-list">
+                                                                    <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
+                                                                    <div className={index % 2 == 0 ? "col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags par" : "col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags itemLista impar"}>
+                                                                        {window.innerWidth >= 500 &&
+                                                                            <div className="row deleteMargin alignCenter">
+                                                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
+                                                                                    <p>{feed.Chave}</p>
+                                                                                </div>
+                                                                                <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-center">
+                                                                                    <p>{feed.Endereco}</p>
+                                                                                </div>
+                                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center" style={{ overflowWrap: 'anywhere' }}>
+                                                                                    <p>{feed.Cep}</p>
+                                                                                </div>
+                                                                                <div className='col-1'></div>
+                                                                                <div className="col-lg-1 col-md-1 col-sm-1 col-1  text-left  mobileajuster4 icones">
+                                                                                    <div className='iconelixo giveMargin' type='button' >
+                                                                                        <Link to=
+                                                                                            {{
+                                                                                                pathname: `/tabelas/addpessoaendereco/${feed.Chave_Pessoa}/0`,
+                                                                                                state: { endereco: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                            }}
+                                                                                        >
+                                                                                            <FontAwesomeIcon icon={faPlus} />
+                                                                                        </Link>
+                                                                                    </div>
+
+
+                                                                                    <div className='iconelixo giveMargin' type='button' >
+                                                                                        <Link to=
+                                                                                            {{
+                                                                                                pathname: `/tabelas/addpessoaendereco/${feed.Chave_Pessoa}/${feed.Chave}`,
+                                                                                                state: { endereco: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                            }}
+                                                                                        >
+                                                                                            <FontAwesomeIcon icon={faPen} />
+                                                                                        </Link>
+                                                                                    </div>
+
+                                                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_ENDERECOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
+
+                                                                                        <div type='button' className='iconelixo' onClick={(a) => this.deleteEndereco(feed.Chave, feed.Endereco)} >
+                                                                                            <FontAwesomeIcon icon={faTrashAlt} />
+                                                                                        </div>
+                                                                                    }
+                                                                                </div>
+
+
+                                                                            </div>
+                                                                        }
+
+                                                                        {window.innerWidth < 500 &&
+                                                                            <div
+                                                                                onClick={() => {
+                                                                                    this.setState({
+                                                                                        modalItemAberto: true,
+                                                                                        itemInfo: [{ titulo: 'Chave', valor: feed.Chave }, { titulo: 'Tipo', valor: ['Padrão', 'Entrega', 'Cobrança', 'Residencial'][feed.Tipo] }, { titulo: 'Endereço', valor: feed.Endereco }, { titulo: 'Numero', valor: feed.Numero }, { titulo: 'Complemento', valor: feed.Complemento }, { titulo: 'Bairro', valor: feed.bairro }, { titulo: 'Cidade', valor: feed.Cidade_Descricao }],
+                                                                                        itemNome: feed.Endereco,
+                                                                                        itemChave: feed.Chave,
+                                                                                        itemPermissao: 'PESSOAS_ENDERECOS',
+                                                                                        itemAdd: {
+                                                                                            pathname: `/tabelas/addpessoaendereco/${feed.Chave_Pessoa}/0`,
+                                                                                            state: { endereco: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                        },
+                                                                                        itemEdit: {
+                                                                                            pathname: `/tabelas/addpessoaendereco/${feed.Chave_Pessoa}/${feed.Chave}`,
+                                                                                            state: { endereco: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                        },
+                                                                                        itemDelete: this.deleteEndereco
+                                                                                    })
+                                                                                }}
+                                                                                className="row deleteMargin alignCenter">
+                                                                                <div className="col-xl-5 col-lg-5 col-md-5 col-sm-5 col-5 text-center">
+                                                                                    <p>{feed.Endereco}</p>
+                                                                                </div>
+                                                                                <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-center" style={{ overflowWrap: 'anywhere' }}>
+                                                                                    <p>{feed.Cep}</p>
+                                                                                </div>
+                                                                                <div className="col-lg-1 col-md-1 col-sm-1 col-1  text-left  mobileajuster4 icones">
+                                                                                    <div className='iconelixo giveMargin' type='button' >
+                                                                                        <Link to=
+                                                                                            {{
+                                                                                                pathname: `/tabelas/addpessoaendereco/${feed.Chave_Pessoa}/0`,
+                                                                                                state: { endereco: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                            }}
+                                                                                        >
+                                                                                            <FontAwesomeIcon icon={faPlus} />
+                                                                                        </Link>
+                                                                                    </div>
+
+
+                                                                                    <div className='iconelixo giveMargin' type='button' >
+                                                                                        <Link to=
+                                                                                            {{
+                                                                                                pathname: `/tabelas/addpessoaendereco/${feed.Chave_Pessoa}/${feed.Chave}`,
+                                                                                                state: { endereco: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                            }}
+                                                                                        >
+                                                                                            <FontAwesomeIcon icon={faPen} />
+                                                                                        </Link>
+                                                                                    </div>
+
+                                                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_ENDERECOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
+
+                                                                                        <div type='button' className='iconelixo' onClick={(a) => this.deleteEndereco(feed.Chave, feed.Endereco)} >
+                                                                                            <FontAwesomeIcon icon={faTrashAlt} />
+                                                                                        </div>
+                                                                                    }
+                                                                                </div>
+                                                                            </div>
+                                                                        }
+                                                                    </div>
+                                                                    <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
+                                                                </div>
+                                                            ))}
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
                                             </div>
-
-                                            <div id="product-list">
-
-
-                                                {this.state.enderecos[0] != undefined && this.state.enderecos.map((feed, index) => (
-                                                    <div key={feed.Chave} className="row row-list">
-                                                        <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
-                                                        <div className={index % 2 == 0 ? "col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags par" : "col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags itemLista impar"}>
-                                                            {window.innerWidth >= 500 &&
-                                                                <div className="row deleteMargin alignCenter">
-                                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
-                                                                        <p>{feed.Chave}</p>
-                                                                    </div>
-                                                                    <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-center">
-                                                                        <p>{feed.Endereco}</p>
-                                                                    </div>
-                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center" style={{ overflowWrap: 'anywhere' }}>
-                                                                        <p>{feed.Cep}</p>
-                                                                    </div>
-                                                                    <div className='col-1'></div>
-                                                                    <div className="col-lg-1 col-md-1 col-sm-1 col-1  text-left  mobileajuster4 icones">
-                                                                        <div className='iconelixo giveMargin' type='button' >
-                                                                            <Link to=
-                                                                                {{
-                                                                                    pathname: `/tabelas/addpessoaendereco/${feed.Chave_Pessoa}/0`,
-                                                                                    state: { endereco: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                                }}
-                                                                            >
-                                                                                <FontAwesomeIcon icon={faPlus} />
-                                                                            </Link>
-                                                                        </div>
-
-
-                                                                        <div className='iconelixo giveMargin' type='button' >
-                                                                            <Link to=
-                                                                                {{
-                                                                                    pathname: `/tabelas/addpessoaendereco/${feed.Chave_Pessoa}/${feed.Chave}`,
-                                                                                    state: { endereco: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                                }}
-                                                                            >
-                                                                                <FontAwesomeIcon icon={faPen} />
-                                                                            </Link>
-                                                                        </div>
-
-                                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_ENDERECOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-
-                                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteEndereco(feed.Chave, feed.Endereco)} >
-                                                                                <FontAwesomeIcon icon={faTrashAlt} />
-                                                                            </div>
-                                                                        }
-                                                                    </div>
-
-
-                                                                </div>
-                                                            }
-
-                                                            {window.innerWidth < 500 &&
-                                                                <div
-                                                                    onClick={() => {
-                                                                        this.setState({
-                                                                            modalItemAberto: true,
-                                                                            itemInfo: [{ titulo: 'Chave', valor: feed.Chave }, { titulo: 'Tipo', valor: ['Padrão', 'Entrega', 'Cobrança', 'Residencial'][feed.Tipo] }, { titulo: 'Endereço', valor: feed.Endereco }, { titulo: 'Numero', valor: feed.Numero }, { titulo: 'Complemento', valor: feed.Complemento }, { titulo: 'Bairro', valor: feed.bairro }, { titulo: 'Cidade', valor: feed.Cidade_Descricao }],
-                                                                            itemNome: feed.Endereco,
-                                                                            itemChave: feed.Chave,
-                                                                            itemPermissao: 'PESSOAS_ENDERECOS',
-                                                                            itemAdd: {
-                                                                                pathname: `/tabelas/addpessoaendereco/${feed.Chave_Pessoa}/0`,
-                                                                                state: { endereco: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                            },
-                                                                            itemEdit: {
-                                                                                pathname: `/tabelas/addpessoaendereco/${feed.Chave_Pessoa}/${feed.Chave}`,
-                                                                                state: { endereco: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                            },
-                                                                            itemDelete: this.deleteEndereco
-                                                                        })
-                                                                    }}
-                                                                    className="row deleteMargin alignCenter">
-                                                                    <div className="col-xl-5 col-lg-5 col-md-5 col-sm-5 col-5 text-center">
-                                                                        <p>{feed.Endereco}</p>
-                                                                    </div>
-                                                                    <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-center" style={{ overflowWrap: 'anywhere' }}>
-                                                                        <p>{feed.Cep}</p>
-                                                                    </div>
-                                                                    <div className="col-lg-1 col-md-1 col-sm-1 col-1  text-left  mobileajuster4 icones">
-                                                                        <div className='iconelixo giveMargin' type='button' >
-                                                                            <Link to=
-                                                                                {{
-                                                                                    pathname: `/tabelas/addpessoaendereco/${feed.Chave_Pessoa}/0`,
-                                                                                    state: { endereco: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                                }}
-                                                                            >
-                                                                                <FontAwesomeIcon icon={faPlus} />
-                                                                            </Link>
-                                                                        </div>
-
-
-                                                                        <div className='iconelixo giveMargin' type='button' >
-                                                                            <Link to=
-                                                                                {{
-                                                                                    pathname: `/tabelas/addpessoaendereco/${feed.Chave_Pessoa}/${feed.Chave}`,
-                                                                                    state: { endereco: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                                }}
-                                                                            >
-                                                                                <FontAwesomeIcon icon={faPen} />
-                                                                            </Link>
-                                                                        </div>
-
-                                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_ENDERECOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-
-                                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteEndereco(feed.Chave, feed.Endereco)} >
-                                                                                <FontAwesomeIcon icon={faTrashAlt} />
-                                                                            </div>
-                                                                        }
-                                                                    </div>
-                                                                </div>
-                                                            }
-                                                        </div>
-                                                        <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                            <hr />
                                         </div>
-                                    </div>
-                                </div>
-                                <hr />
-                            </div>
-                        }
-                        {this.props.match.params.id != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_ENDERECOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_CONTATOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
-                            <div style={{ display: `flex`, justifyContent: `center`, alignItems: `center` }}>
-                                <hr style={{ width: `50%` }} />
-                            </div>
-                        }
-                        {this.props.match.params.id != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_CONTATOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
-                            <div>
-                                <div>
-                                    <div>
-                                        <div className="page-breadcrumb2"><h3>CONTATOS</h3></div>
-                                    </div>
-                                    <div>
+                                    }
+                                    {this.props.match.params.id != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_ENDERECOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_CONTATOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                        <div style={{ display: `flex`, justifyContent: `center`, alignItems: `center` }}>
+                                            <hr style={{ width: `50%` }} />
+                                        </div>
+                                    }
+                                    {this.props.match.params.id != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_CONTATOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                         <div>
-                                            <div className="row" id="product-list">
-                                                <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
-                                                <div className="col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags">
-                                                    <div className="single-product-item">
-                                                        {window.innerWidth >= 500 &&
-                                                            <div className="row subtitulosTabela">
-                                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
-                                                                    <span className="subtituloships">Chave</span>
-                                                                </div>
-                                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
-                                                                    <span className="subtituloships">Tipo</span>
-                                                                </div>
-                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center">
-                                                                    <span className="subtituloships">Campo 1</span>
-                                                                </div>
-                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center">
-                                                                    <span className="subtituloships">Campo 2</span>
-                                                                </div>
-                                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
-                                                                    <Link to=
-                                                                        {{
-                                                                            pathname: `/tabelas/addpessoacontato/${this.props.match.params.id}/0`,
-                                                                            state: { contato: {}, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                        }}
-                                                                    >
-                                                                        <FontAwesomeIcon icon={faPlus} />
-                                                                    </Link>
+                                            <div>
+                                                <div>
+                                                    <div className="page-breadcrumb2"><h3>CONTATOS</h3></div>
+                                                </div>
+                                                <div>
+                                                    <div>
+                                                        <div className="row" id="product-list">
+                                                            <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
+                                                            <div className="col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags">
+                                                                <div className="single-product-item">
+                                                                    {window.innerWidth >= 500 &&
+                                                                        <div className="row subtitulosTabela">
+                                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
+                                                                                <span className="subtituloships">Chave</span>
+                                                                            </div>
+                                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
+                                                                                <span className="subtituloships">Tipo</span>
+                                                                            </div>
+                                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center">
+                                                                                <span className="subtituloships">Campo 1</span>
+                                                                            </div>
+                                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center">
+                                                                                <span className="subtituloships">Campo 2</span>
+                                                                            </div>
+                                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
+                                                                                <Link to=
+                                                                                    {{
+                                                                                        pathname: `/tabelas/addpessoacontato/${this.props.match.params.id}/0`,
+                                                                                        state: { contato: {}, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                    }}
+                                                                                >
+                                                                                    <FontAwesomeIcon icon={faPlus} />
+                                                                                </Link>
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                    {window.innerWidth < 500 &&
+                                                                        <div className="row subtitulosTabela">
+                                                                            <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-center">
+                                                                                <span className="subtituloships">Tipo</span>
+                                                                            </div>
+                                                                            <div className="col-xl-5 col-lg-5 col-md-5 col-sm-5 col-5 text-center">
+                                                                                <span className="subtituloships">Campo 1</span>
+                                                                            </div>
+                                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
+                                                                                <Link to=
+                                                                                    {{
+                                                                                        pathname: `/tabelas/addpessoacontato/${this.props.match.params.id}/0`,
+                                                                                        state: { contato: {}, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                    }}
+                                                                                >
+                                                                                    <FontAwesomeIcon icon={faPlus} />
+                                                                                </Link>
+                                                                            </div>
+                                                                        </div>
+                                                                    }
                                                                 </div>
                                                             </div>
-                                                        }
-                                                        {window.innerWidth < 500 &&
-                                                            <div className="row subtitulosTabela">
-                                                                <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-center">
-                                                                    <span className="subtituloships">Tipo</span>
+                                                            <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
+                                                        </div>
+
+                                                        <div id="product-list">
+                                                            {this.state.contatos[0] != undefined && this.state.contatos.map((feed, index) => (
+                                                                <div key={feed.Chave} className="row row-list">
+                                                                    <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
+                                                                    <div className={index % 2 == 0 ? "col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags par" : "col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags itemLista impar"}>
+                                                                        {window.innerWidth >= 500 &&
+                                                                            <div className="row deleteMargin alignCenter">
+                                                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
+                                                                                    <p>{feed.Chave}</p>
+                                                                                </div>
+                                                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
+                                                                                    <p>{feed.tipoNome}</p>
+                                                                                </div>
+                                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center" style={{ overflowWrap: 'anywhere' }}>
+                                                                                    <p>{feed.Campo1}</p>
+                                                                                </div>
+                                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center" style={{ overflowWrap: 'anywhere' }}>
+                                                                                    <p>{feed.Campo2}</p>
+                                                                                </div>
+                                                                                <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones" >
+                                                                                    <div className='iconelixo giveMargin' type='button' >
+                                                                                        <Link to=
+                                                                                            {{
+                                                                                                pathname: `/tabelas/addpessoacontato/${feed.Chave_Pessoa}/0`,
+                                                                                                state: { contato: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                            }}
+                                                                                        >
+                                                                                            <FontAwesomeIcon icon={faPlus} />
+                                                                                        </Link>
+                                                                                    </div>
+
+
+                                                                                    <div className='iconelixo giveMargin' type='button' >
+                                                                                        <Link to=
+                                                                                            {{
+                                                                                                pathname: `/tabelas/addpessoacontato/${feed.Chave_Pessoa}/${feed.Chave}`,
+                                                                                                state: { contato: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                            }}
+                                                                                        >
+                                                                                            <FontAwesomeIcon icon={faPen} />
+                                                                                        </Link>
+                                                                                    </div>
+
+                                                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_CONTATOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
+
+                                                                                        <div type='button' className='iconelixo' onClick={(a) => this.deleteContato(feed.Chave, feed.tipoNome)} >
+                                                                                            <FontAwesomeIcon icon={faTrashAlt} />
+                                                                                        </div>
+                                                                                    }
+                                                                                </div>
+
+                                                                            </div>
+                                                                        }
+                                                                        {window.innerWidth < 500 &&
+                                                                            <div
+                                                                                onClick={() => {
+                                                                                    this.setState({
+                                                                                        modalItemAberto: true,
+                                                                                        itemInfo: [{ titulo: 'Chave', valor: feed.Chave }, { titulo: 'Tipo', valor: feed.tipoNome }, { titulo: 'Campo 1', valor: feed.Campo1 }, { titulo: 'Campo 2', valor: feed.Campo2 }],
+                                                                                        itemNome: feed.tipoNome,
+                                                                                        itemChave: feed.Chave,
+                                                                                        itemPermissao: 'PESSOAS_CONTATOS',
+                                                                                        itemAdd: {
+                                                                                            pathname: `/tabelas/addpessoacontato/${feed.Chave_Pessoa}/0`,
+                                                                                            state: { contato: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                        },
+                                                                                        itemEdit: {
+                                                                                            pathname: `/tabelas/addpessoacontato/${feed.Chave_Pessoa}/${feed.Chave}`,
+                                                                                            state: { contato: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                        },
+                                                                                        itemDelete: this.deleteContato
+                                                                                    })
+                                                                                }}
+                                                                                className="row deleteMargin alignCenter">
+                                                                                <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-center">
+                                                                                    <p>{feed.tipoNome}</p>
+                                                                                </div>
+                                                                                <div className="col-xl-5 col-lg-5 col-md-5 col-sm-5 col-5 text-center" style={{ overflowWrap: 'anywhere' }}>
+                                                                                    <p>{feed.Campo1}</p>
+                                                                                </div>
+                                                                                <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones" >
+                                                                                    <div className='iconelixo giveMargin' type='button' >
+                                                                                        <Link to=
+                                                                                            {{
+                                                                                                pathname: `/tabelas/addpessoacontato/${feed.Chave_Pessoa}/0`,
+                                                                                                state: { contato: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                            }}
+                                                                                        >
+                                                                                            <FontAwesomeIcon icon={faPlus} />
+                                                                                        </Link>
+                                                                                    </div>
+
+
+                                                                                    <div className='iconelixo giveMargin' type='button' >
+                                                                                        <Link to=
+                                                                                            {{
+                                                                                                pathname: `/tabelas/addpessoacontato/${feed.Chave_Pessoa}/${feed.Chave}`,
+                                                                                                state: { contato: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
+                                                                                            }}
+                                                                                        >
+                                                                                            <FontAwesomeIcon icon={faPen} />
+                                                                                        </Link>
+                                                                                    </div>
+
+                                                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_CONTATOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
+
+                                                                                        <div type='button' className='iconelixo' onClick={(a) => this.deleteContato(feed.Chave, feed.tipoNome)} >
+                                                                                            <FontAwesomeIcon icon={faTrashAlt} />
+                                                                                        </div>
+                                                                                    }
+                                                                                </div>
+
+                                                                            </div>
+                                                                        }
+                                                                    </div>
+                                                                    <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
                                                                 </div>
-                                                                <div className="col-xl-5 col-lg-5 col-md-5 col-sm-5 col-5 text-center">
-                                                                    <span className="subtituloships">Campo 1</span>
-                                                                </div>
-                                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
-                                                                    <Link to=
-                                                                        {{
-                                                                            pathname: `/tabelas/addpessoacontato/${this.props.match.params.id}/0`,
-                                                                            state: { contato: {}, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                        }}
-                                                                    >
-                                                                        <FontAwesomeIcon icon={faPlus} />
-                                                                    </Link>
-                                                                </div>
-                                                            </div>
-                                                        }
+                                                            ))}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
-                                            </div>
-
-                                            <div id="product-list">
-                                                {this.state.contatos[0] != undefined && this.state.contatos.map((feed, index) => (
-                                                    <div key={feed.Chave} className="row row-list">
-                                                        <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
-                                                        <div className={index % 2 == 0 ? "col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags par" : "col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags itemLista impar"}>
-                                                            {window.innerWidth >= 500 &&
-                                                                <div className="row deleteMargin alignCenter">
-                                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
-                                                                        <p>{feed.Chave}</p>
-                                                                    </div>
-                                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
-                                                                        <p>{feed.tipoNome}</p>
-                                                                    </div>
-                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center" style={{ overflowWrap: 'anywhere' }}>
-                                                                        <p>{feed.Campo1}</p>
-                                                                    </div>
-                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center" style={{ overflowWrap: 'anywhere' }}>
-                                                                        <p>{feed.Campo2}</p>
-                                                                    </div>
-                                                                    <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones" >
-                                                                        <div className='iconelixo giveMargin' type='button' >
-                                                                            <Link to=
-                                                                                {{
-                                                                                    pathname: `/tabelas/addpessoacontato/${feed.Chave_Pessoa}/0`,
-                                                                                    state: { contato: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                                }}
-                                                                            >
-                                                                                <FontAwesomeIcon icon={faPlus} />
-                                                                            </Link>
-                                                                        </div>
-
-
-                                                                        <div className='iconelixo giveMargin' type='button' >
-                                                                            <Link to=
-                                                                                {{
-                                                                                    pathname: `/tabelas/addpessoacontato/${feed.Chave_Pessoa}/${feed.Chave}`,
-                                                                                    state: { contato: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                                }}
-                                                                            >
-                                                                                <FontAwesomeIcon icon={faPen} />
-                                                                            </Link>
-                                                                        </div>
-
-                                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_CONTATOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-
-                                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteContato(feed.Chave, feed.tipoNome)} >
-                                                                                <FontAwesomeIcon icon={faTrashAlt} />
-                                                                            </div>
-                                                                        }
-                                                                    </div>
-
-                                                                </div>
-                                                            }
-                                                            {window.innerWidth < 500 &&
-                                                                <div
-                                                                    onClick={() => {
-                                                                        this.setState({
-                                                                            modalItemAberto: true,
-                                                                            itemInfo: [{ titulo: 'Chave', valor: feed.Chave }, { titulo: 'Tipo', valor: feed.tipoNome }, { titulo: 'Campo 1', valor: feed.Campo1 }, { titulo: 'Campo 2', valor: feed.Campo2 }],
-                                                                            itemNome: feed.tipoNome,
-                                                                            itemChave: feed.Chave,
-                                                                            itemPermissao: 'PESSOAS_CONTATOS',
-                                                                            itemAdd: {
-                                                                                pathname: `/tabelas/addpessoacontato/${feed.Chave_Pessoa}/0`,
-                                                                                state: { contato: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                            },
-                                                                            itemEdit: {
-                                                                                pathname: `/tabelas/addpessoacontato/${feed.Chave_Pessoa}/${feed.Chave}`,
-                                                                                state: { contato: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                            },
-                                                                            itemDelete: this.deleteContato
-                                                                        })
-                                                                    }}
-                                                                    className="row deleteMargin alignCenter">
-                                                                    <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-center">
-                                                                        <p>{feed.tipoNome}</p>
-                                                                    </div>
-                                                                    <div className="col-xl-5 col-lg-5 col-md-5 col-sm-5 col-5 text-center" style={{ overflowWrap: 'anywhere' }}>
-                                                                        <p>{feed.Campo1}</p>
-                                                                    </div>
-                                                                    <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones" >
-                                                                        <div className='iconelixo giveMargin' type='button' >
-                                                                            <Link to=
-                                                                                {{
-                                                                                    pathname: `/tabelas/addpessoacontato/${feed.Chave_Pessoa}/0`,
-                                                                                    state: { contato: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                                }}
-                                                                            >
-                                                                                <FontAwesomeIcon icon={faPlus} />
-                                                                            </Link>
-                                                                        </div>
-
-
-                                                                        <div className='iconelixo giveMargin' type='button' >
-                                                                            <Link to=
-                                                                                {{
-                                                                                    pathname: `/tabelas/addpessoacontato/${feed.Chave_Pessoa}/${feed.Chave}`,
-                                                                                    state: { contato: { ...feed }, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
-                                                                                }}
-                                                                            >
-                                                                                <FontAwesomeIcon icon={faPen} />
-                                                                            </Link>
-                                                                        </div>
-
-                                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_CONTATOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-
-                                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteContato(feed.Chave, feed.tipoNome)} >
-                                                                                <FontAwesomeIcon icon={faTrashAlt} />
-                                                                            </div>
-                                                                        }
-                                                                    </div>
-
-                                                                </div>
-                                                            }
-                                                        </div>
-                                                        <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
-                                                    </div>
-                                                ))}
                                             </div>
                                         </div>
-                                    </div>
+                                    }
                                 </div>
+
+
                             </div>
-                        }
-                    </div>
-
-
+                            <Rodape />
+                        </>
+                    }
                 </div>
-                <Rodape />
             </div >
         )
 

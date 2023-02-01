@@ -3,11 +3,8 @@ import './styles.css'
 import { Formik, Field, Form } from 'formik'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
-import util from '../../../classes/util'
-import { PRECISA_LOGAR } from '../../../config'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
-import Image from 'react-bootstrap/Image'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import { apiEmployee } from '../../../services/apiamrg'
@@ -25,7 +22,6 @@ const estadoInicial = {
     id: null,
     seaports: [],
     redirect: false,
-    finalizaOperacao: false,
     spanerror1: '',
     spanerror2: '',
     spanerror3: '',
@@ -126,7 +122,8 @@ class AddCentroCusto extends Component {
                 {titulo: 'Descricao', valor: this.state.descricao},
                 {titulo: 'Data', valor: this.state.data},
                 {titulo: 'Encerrado', valor: this.state.encerrado},
-            ]
+            ],
+            loading: true
         })
 
         if (parseInt(this.state.chave) === 0 && validForm) {
@@ -142,7 +139,7 @@ class AddCentroCusto extends Component {
                     if (res.data[0].Chave) {
                         await this.setState({ chave: res.data[0].Chave })
                         loader.salvaLogs('centros_custos', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         console.log(res)
                     }
@@ -163,7 +160,7 @@ class AddCentroCusto extends Component {
                 async res => {
                     if (res.data === true) {
                         loader.salvaLogs('centros_custos', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `CENTRO DE CUSTO: ${this.state.descricao}`);
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         console.log(res.data)
                     }
@@ -209,10 +206,6 @@ class AddCentroCusto extends Component {
 
                 {this.state.redirect &&
                     <Redirect to={'/'} />
-                }
-
-                {this.state.finalizaOperacao &&
-                    <Redirect to={{pathname: '/tabelas/centroscustos', state:{chave: this.state.chave}}} />
                 }
 
                 <section>

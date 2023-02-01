@@ -23,6 +23,7 @@ class NotaFiscal {
                                       faturas.chave AS id_sis_legado,
                                       faturas.vencto AS vencimento,
                                       faturas.emissao AS emissao,
+                                      faturas.Fatura AS nota,
                                       pessoas.cnpj_cpf AS tomador_cnpj, 
                                       pessoas_email.campo1 AS tomador_email,
                                       pessoas.nome AS tomador_razao,
@@ -41,7 +42,7 @@ class NotaFiscal {
                                       controle.crc AS crc,
                                       controle.crc_estado AS crc_estado,
                                       controle.cnpj AS cnpj,
-                                      controle.codservico AS servico, 
+                                      faturas.atividade AS servico, 
                                       faturas.valor AS valor,
                                       faturas.valor AS base
                                       ",

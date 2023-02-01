@@ -82,6 +82,14 @@ if ($objData != NULL) {
             $statusId = 0;
 
             $status = $returnJSON->{"erros"}[0]->{"mensagem"};
+        } else if ($returnJSON->{"lancamentos"}[0]->{"erros"}[0]) {
+            $statusId = 0;
+
+            for ($i = 0; $i < count($codigosBB); $i++) {
+                if ($returnJSON->{"lancamentos"}[0]->{"erros"}[0] == $codigosBB[$i]["codigo"] && $codigosBB[$i]["tipo"] == "erro") {
+                    $status = $codigosBB[$i]["mensagem"];
+                }
+            }
         } else {
             $status = "Requisição enviada com Numero de Requisição: $codigo";
         }

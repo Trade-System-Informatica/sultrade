@@ -1,5 +1,4 @@
 import React, {Component} from 'react'
-//import Skeleton from 'react-loading-skeleton'
 import {Spinner} from 'react-activity'
 import 'react-activity/dist/react-activity.css'
 
@@ -21,7 +20,3 @@ class SkeletonPesquisa extends Component {
 }
 
 export default SkeletonPesquisa
-
-/**
-<Skeleton count={2} style={{alignItems: 'center', justifyContent: 'center'}} height={20} duration={0.7}/>   
- */

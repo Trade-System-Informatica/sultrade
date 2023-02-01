@@ -5,19 +5,12 @@ import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import util from '../../../classes/util'
 import loader from '../../../classes/loader'
-import { PRECISA_LOGAR } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
-import Image from 'react-bootstrap/Image'
 import { apiEmployee } from '../../../services/apiamrg'
-import moment from 'moment'
-import InputMask from 'react-input-mask';
 import ModalLogs from '../../../components/modalLogs'
-import CEP from 'cep-promise'
-import Select from 'react-select';
-
 const estadoInicial = {
     porto: 0,
     thumb: [],
@@ -26,7 +19,6 @@ const estadoInicial = {
     id: null,
     seaports: [],
     redirect: false,
-    finalizaOperacao: false,
     spanerror1: '',
     spanerror2: '',
     spanerror3: '',
@@ -165,7 +157,8 @@ class AddPessoa extends Component {
         await this.setState({
             dadosFinais: [
                 { titulo: 'Nome', valor: this.state.nome },
-            ]
+            ],
+            loading: true
         })
 
         await this.testaNome();
@@ -184,7 +177,7 @@ class AddPessoa extends Component {
                         await this.setState({ codigo: res.data[0].Codigo })
                         await loader.salvaLogs('operadores', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Codigo);
                         //alert('Operador Inserido!')
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         //alert(`Erro: ${res}`)
                     }
@@ -201,7 +194,7 @@ class AddPessoa extends Component {
                 async res => {
                     if (res.data === true) {
                         await loader.salvaLogs('operadores', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.codigo);
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         //await alert(`Erro ${JSON.stringify(res)}`)
                     }
@@ -252,10 +245,6 @@ class AddPessoa extends Component {
 
                 {this.state.redirect &&
                     <Redirect to={'/'} />
-                }
-
-                {this.state.finalizaOperacao &&
-                    <Redirect to={{ pathname: '/utilitarios/operadores/', state: { chave: this.state.codigo } }} />
                 }
 
                 <section>

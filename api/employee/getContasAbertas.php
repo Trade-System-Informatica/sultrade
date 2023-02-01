@@ -11,12 +11,13 @@ $objData = json_decode($data);
 
 if($objData != NULL){
     $token = prepareInput($objData->token);
+    $empresa = prepareInput($objData->empresa);
 
     $contas = new Contas();
 
     //$operadores = $operadores->checkToken($token);
     //if($result == 'true'){
-        $result = $contas->getContasAbertas();
+        $result = $contas->getContasAbertas($empresa);
 		//$result = 'Entrou aqui';
         //}
     } else {

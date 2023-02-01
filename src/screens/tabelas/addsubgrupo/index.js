@@ -3,14 +3,10 @@ import './styles.css'
 import { Formik, Field, Form } from 'formik'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
-import util from '../../../classes/util'
 import loader from '../../../classes/loader'
-import { PRECISA_LOGAR } from '../../../config'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
-import Image from 'react-bootstrap/Image'
 import { apiEmployee } from '../../../services/apiamrg'
-import moment from 'moment'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import Select from 'react-select';
@@ -25,7 +21,6 @@ const estadoInicial = {
     id: null,
     seaports: [],
     redirect: false,
-    finalizaOperacao: false,
     spanerror1: '',
     spanerror2: '',
     spanerror3: '',
@@ -161,7 +156,8 @@ class AddSubgrupo extends Component {
             dadosFinais: [
                 { titulo: 'descricao', valor: this.state.descricao },
                 { titulo: 'chave_grupo', valor: this.state.grupo }
-            ]
+            ],
+            loading: true
         })
 
         if (parseInt(this.state.chave) === 0 && validForm) {
@@ -174,7 +170,7 @@ class AddSubgrupo extends Component {
                         await this.setState({ chave: res.data[0].chave })
                         await loader.salvaLogs('os_subgrupos_taxas', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
 
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                     }
                 },
@@ -191,7 +187,7 @@ class AddSubgrupo extends Component {
                     if (res.data === true) {
                         await loader.salvaLogs('os_subgrupos_taxas', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `SUBGRUPOS DE TAXAS: ${this.state.descricao}`);
 
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                     }
                 },
@@ -237,10 +233,6 @@ class AddSubgrupo extends Component {
 
                 {this.state.redirect &&
                     <Redirect to={'/'} />
-                }
-
-                {this.state.finalizaOperacao &&
-                    <Redirect to={{pathname: '/tabelas/subgrupos', state:{chave: this.state.chave}}} />
                 }
 
                 <section>

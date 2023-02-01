@@ -13,12 +13,15 @@
     <link rel="icon" href="%PUBLIC_URL%/ico.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <link rel="stylesheet" href="./styles.css">
+    
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css?family=Amatic+SC:400,700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Montserrat:100,200,300,400,500,600,700,800,900&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
 
-
+    <head>
+      <link rel="stylesheet" href="https://unpkg.com/@progress/kendo-theme-material@latest/dist/all.css">
+      </link>
   <link
   rel="stylesheet"
   type="text/css"
@@ -89,12 +92,179 @@
     <link rel="stylesheet" href="../src/css/slicknav.min.css" type="text/css" />
     <!-- <link rel="stylesheet" href="https://unpkg.com/swiper/css/swiper.css" type="text/css"> -->
     
+    <style>
+      body {
+        position: relative;
+      }
+  
+      html,
+      body {
+        height: 100%;
+      }
+  
+      my-app {
+        display: block;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        min-height: 80px;
+        box-sizing: border-box;
+        padding: 30px;
+      }
+  
+      @keyframes k-loading-animation {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+  
+      .k-i-loading.k-example-loading {
+        font-size: 64px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: rgb(63, 81, 181);
+      }
+  
+      .k-i-loading.k-example-loading::before,
+      .k-i-loading.k-example-loading::after {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        display: inline-block;
+        content: "";
+        box-sizing: inherit;
+        border-radius: 50%;
+        border-width: .05em;
+        border-style: solid;
+        border-color: currentColor;
+        border-top-color: transparent;
+        border-bottom-color: transparent;
+        background-color: transparent;
+      }
+  
+      .k-icon.k-i-loading.k-example-loading::before,
+      .k-icon.k-i-loading::after {
+        content: "";
+      }
+  
+      .k-i-loading.k-example-loading::before {
+        margin-top: -0.5em;
+        margin-left: -0.5em;
+        width: 1em;
+        height: 1em;
+        animation: k-loading-animation .7s linear infinite;
+      }
+  
+      .k-i-loading.k-example-loading::after {
+        margin-top: -0.25em;
+        margin-left: -0.25em;
+        width: .5em;
+        height: .5em;
+        animation: k-loading-animation reverse 1.4s linear infinite;
+      }
+  
+      .example-wrapper {
+        min-height: 280px;
+        align-content: flex-start;
+      }
+  
+      .example-wrapper p,
+      .example-col p {
+        margin: 20px 0 10px;
+      }
+  
+      .example-wrapper p:first-child,
+      .example-col p:first-child {
+        margin-top: 0;
+      }
+  
+      .example-col {
+        display: inline-block;
+        vertical-align: top;
+        padding-right: 20px;
+        padding-bottom: 20px;
+      }
+  
+      .example-config {
+        margin: 0 0 20px;
+        padding: 20px;
+        background-color: rgba(0, 0, 0, .03);
+        border: 1px solid rgba(0, 0, 0, .08);
+      }
+  
+      .event-log {
+        margin: 0;
+        padding: 0;
+        max-height: 100px;
+        overflow-y: auto;
+        list-style-type: none;
+        border: 1px solid rgba(0, 0, 0, .08);
+        background-color: white;
+      }
+  
+      .event-log li {
+        margin: 0;
+        padding: .3em;
+        line-height: 1.2em;
+        border-bottom: 1px solid rgba(0, 0, 0, .08);
+      }
+  
+      .event-log li:last-child {
+        margin-bottom: -1px;
+      }
+    </style>
+      <style>
+        /*
+            Use the DejaVu Sans font for displaying and embedding in the PDF file.
+            The standard PDF fonts do not support Unicode characters.
+        */
+        .pdfExp {
+          font-family: "DejaVu Sans", "Arial", sans-serif;
+          font-size: 12px;
+        }
+    
+        /*
+          The example loads the DejaVu Sans from the Kendo UI CDN.
+          Other fonts have to be hosted from your application.
+          The official site of the Deja Vu Fonts project is
+          https://dejavu-fonts.github.io/.
+        */
+        @font-face {
+          font-family: "DejaVu Sans";
+          src: url("https://kendo.cdn.telerik.com/2017.2.621/styles/fonts/DejaVu/DejaVuSans.ttf") format("truetype");
+        }
+    
+        @font-face {
+          font-family: "DejaVu Sans";
+          font-weight: bold;
+          src: url("https://kendo.cdn.telerik.com/2017.2.621/styles/fonts/DejaVu/DejaVuSans-Bold.ttf") format("truetype");
+        }
+    
+        @font-face {
+          font-family: "DejaVu Sans";
+          font-style: italic;
+          src: url("https://kendo.cdn.telerik.com/2017.2.621/styles/fonts/DejaVu/DejaVuSans-Oblique.ttf") format("truetype");
+        }
+    
+        @font-face {
+          font-family: "DejaVu Sans";
+          font-weight: bold;
+          font-style: italic;
+          src: url("https://kendo.cdn.telerik.com/2017.2.621/styles/fonts/DejaVu/DejaVuSans-Oblique.ttf") format("truetype");
+        }
+      </style>
     
 
     <title>SulTrade</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
+
     <div id="root"></div>
     <!--
       This HTML file is a template.

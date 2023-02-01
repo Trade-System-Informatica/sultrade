@@ -1,0 +1,35 @@
+.spaceBetween {
+    width: 90%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: -10px !important;
+    margin-bottom: 15px;
+}
+
+.addRemoveButton {
+    padding: 5px !important;
+    color: white !important;
+    border: 1px solid white !important;
+    font-size: 25px;
+    width: 50px;
+    height: 50px;
+}
+
+.addRemoveButton:hover {
+    background-color: rgba(255, 255, 255, 0.397)
+}
+
+.addRemoveButtonDisabled {
+    color: grey !important;
+    border: 1px solid grey !important;
+    cursor: default !important;
+}
+
+.addRemoveButton:hover {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.horizontalScroll {
+    overflow-x: scroll !important;
+}

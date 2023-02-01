@@ -13,7 +13,6 @@ $objData = json_decode($data);
 if($objData != NULL){
     $token = prepareInput($objData->token);
     $Chave = prepareInput($objData->Chave);
-    $Fatura = prepareInput($objData->Fatura);
     $Emissao = prepareInput($objData->Emissao);
     $Vencto = prepareInput($objData->Vencto);
     $Praca_Pagto = prepareInput($objData->Praca_Pagto);
@@ -22,11 +21,12 @@ if($objData != NULL){
     $Obs = prepareInput($objData->Obs);
     $Cobranca = prepareInput($objData->Cobranca);
     $discriminacaoservico = prepareInput($objData->discriminacaoservico);
+    $atividade = prepareInput($objData->atividade);
     
     $contas = new Contas();
 
 
-    $result = $contas->updateFatura($Chave, $Fatura, $Emissao, $Vencto, $Praca_Pagto, $Cliente, $Valor, $Obs, $Cobranca, $discriminacaoservico);
+    $result = $contas->updateFatura($Chave, $Emissao, $Vencto, $Praca_Pagto, $Cliente, $Valor, $Obs, $Cobranca, $discriminacaoservico, $atividade);
 
     } else {
     $result = "false";

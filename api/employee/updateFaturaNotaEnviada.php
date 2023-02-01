@@ -15,12 +15,13 @@ if($objData != NULL){
     $Chave = prepareInput($objData->Chave);
     $protocolonfe = prepareInput($objData->protocolonfe);
     $chavenfe = prepareInput($objData->chavenfe);
+    $urlqrcode = prepareInput($objData->urlqrcode);
     $serie = prepareInput($objData->serie);
     
     $contas = new Contas();
 
 
-    $result = $contas->updateFaturaNotaEnviada($Chave, $protocolonfe, $chavenfe, $serie);
+    $result = $contas->updateFaturaNotaEnviada($Chave, $protocolonfe, $chavenfe, $urlqrcode, $serie);
 
     } else {
     $result = "false";

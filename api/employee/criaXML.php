@@ -28,8 +28,10 @@ if ($objData != NULL) {
 
     $result = curl_exec($curl);
 
-    if (curl_errno($curl)) {
-        throw new Exception(curl_error($curl));
+    echo $result;
+    exit;
+    if (!$result) {
+        $result = curl_error($curl);
     }
 
     curl_close($curl);

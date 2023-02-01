@@ -12,7 +12,6 @@ import 'react-confirm-alert/src/react-confirm-alert.css'
 import Select from 'react-select';
 import Rodape from '../../components/rodape'
 import Header from '../../components/header'
-
 import { NOME_EMPRESA } from '../../config'
 
 const estadoInicial = {

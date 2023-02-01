@@ -44,7 +44,10 @@ if ($objData != NULL) {
         }
         if ($contato["Tipo"] == "CC") {
             $contaCorrenteCredito = $contato["Campo1"];
-            $digitoVerificadorContaCorrente = $contato["Campo2"];
+            $contaCorrenteCredito = explode(' ', $contato["Campo1"]);
+            array_pop($contaCorrenteCredito);
+            $contaCorrenteCredito = implode(' ', $contaCorrenteCredito);
+            $digitoVerificadorContaCorrente = substr($contato["Campo1"], -1);
         }
     }
 
@@ -105,7 +108,6 @@ if ($objData != NULL) {
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
 
         $return = curl_exec($ch);
-        curl_close($ch);
         $returnJSON = json_decode($return);
 
         if ($returnJSON->{"statusCode"} >= 400 && $returnJSON->{"statusCode"} < 500) {
@@ -118,6 +120,14 @@ if ($objData != NULL) {
             $statusId = 0;
 
             $status = $returnJSON->{"erros"}[0]->{"mensagem"};
+        } else if ($returnJSON->{"lancamentos"}[0]->{"erros"}[0]) {
+            $statusId = 0;
+
+            for ($i = 0; $i < count($codigosBB); $i++) {
+                if ($returnJSON->{"lancamentos"}[0]->{"erros"}[0] == $codigosBB[$i]["codigo"] && $codigosBB[$i]["tipo"] == "erro") {
+                    $status = $codigosBB[$i]["mensagem"];
+                }
+            }
         } else {
             $status = "Requisição enviada com Numero de Requisição: $codigo";
         }

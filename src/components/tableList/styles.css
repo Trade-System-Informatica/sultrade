@@ -1,0 +1,35 @@
+.tableList_Wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+}
+
+.tableList_Main {
+    display: flex;
+    flex-direction: column;
+    width: 85%;
+    overflow-x: scroll;
+}
+
+.tableList_Header {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 15px;
+}
+
+.tableList_Header > div {
+    border: 1px solid white;
+    background-color: #aaaaaa;
+}
+
+.tableList_Header > div, .tableList_Body > div {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.tableList_Body {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 15px;
+}

@@ -4,16 +4,10 @@ import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import Skeleton from '../../../components/skeleton'
 import './styles.css'
-import { CLIENTES, EMPLOYEES, NAVIOS, NOME_EMPRESA } from '../../../config'
 import { apiEmployee } from '../../../services/apiamrg'
 import { connect } from 'react-redux'
-import Logo from '../../../img/logo.png'
-import { IoBusiness } from "react-icons/io5";
-import { GiCargoCrate, GiShipBow } from "react-icons/gi"
-
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBriefcase, faChartBar, faUserFriends, faAddressCard, faFileContract, faWater, faPaperclip, faDollyFlatbed, faSignal, faCartPlus, faTv, faDollarSign, faScroll, faScrewdriver } from '@fortawesome/free-solid-svg-icons'
+import { faChartBar, faFileContract } from '@fortawesome/free-solid-svg-icons'
 
 class OrdensServico extends Component {
 
@@ -135,9 +129,9 @@ class OrdensServico extends Component {
                                         
                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                             <li className=" text-left itemMenu list-group-item ">
-                                                <Link className="semTextDecoration" to={{ pathname: `/ordensservico/solicitacoesservicos` }}>
+                                                <Link className="semTextDecoration" to={{ pathname: `/ordensservico/eventos` }}>
                                                     <FontAwesomeIcon icon={faFileContract} size="2x" color="tomato" />
-                                                    <h4 className="textoMenu">Solicitações de Serviços</h4>
+                                                    <h4 className="textoMenu">Eventos</h4>
                                                 </Link>
                                             </li>
                                         }

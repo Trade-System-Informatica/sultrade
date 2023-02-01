@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import './styles.css'
-import { Formik, Form } from 'formik'
+import { Formik, Form, Field } from 'formik'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import loader from '../../../classes/loader'
@@ -20,6 +20,7 @@ const estadoInicial = {
     PIS: '',
     COFINS: '',
     CSLL: '',
+    bank_charges: 0,
 
     planosContas: [],
     planosContasOptions: [],
@@ -54,7 +55,8 @@ class Parametros extends Component {
                 { titulo: 'conta_retencao_iss', valor: this.state.ISS },
                 { titulo: 'conta_retencao_pis', valor: this.state.PIS },
                 { titulo: 'conta_retencao_cofins', valor: this.state.COFINS },
-                { titulo: 'conta_retencao_csll', valor: this.state.CSLL }
+                { titulo: 'conta_retencao_csll', valor: this.state.CSLL },
+                { titulo: 'bank_charges', valor: this.state.bank_charges }
             ]
         })
 
@@ -84,9 +86,10 @@ class Parametros extends Component {
             PIS: this.state.parametros[0].conta_retencao_pis,
             COFINS: this.state.parametros[0].conta_retencao_cofins,
             CSLL: this.state.parametros[0].conta_retencao_csll,
+            bank_charges: this.state.parametros[0].bank_charges,
 
             acessosPermissoes: await loader.testaAcesso(this.state.acessos, this.state.permissoes, this.state.usuarioLogado),
-            loading: false
+            loading: false, bloqueado: false
         })
     }
 
@@ -101,8 +104,10 @@ class Parametros extends Component {
                 { titulo: 'conta_retencao_iss', valor: this.state.ISS },
                 { titulo: 'conta_retencao_pis', valor: this.state.PIS },
                 { titulo: 'conta_retencao_cofins', valor: this.state.COFINS },
-                { titulo: 'conta_retencao_csll', valor: this.state.CSLL }
-            ]
+                { titulo: 'conta_retencao_csll', valor: this.state.CSLL },
+                { titulo: 'bank_charges', valor: this.state.bank_charges }
+            ],
+            loading: true
         })
 
         if (validForm) {
@@ -115,13 +120,14 @@ class Parametros extends Component {
                 conta_retencao_iss: this.state.ISS,
                 conta_retencao_pis: this.state.PIS,
                 conta_retencao_cofins: this.state.COFINS,
-                conta_retencao_csll: this.state.CSLL
+                conta_retencao_csll: this.state.CSLL,
+                bank_charges: this.state.bank_charges
             }).then(
                 async res => {
                     console.log(res.data)
-                    if (res.data === true) {                        
+                    if (res.data === true) {
                         await loader.salvaLogs('parametros', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave);
-                        await this.setState({ finalizaOperacao: true });
+                        await this.setState({ loading: false, bloqueado: false });
                     } else {
                         await alert(`Erro ${JSON.stringify(res)}`)
                     }
@@ -158,6 +164,7 @@ class Parametros extends Component {
         validations.push(this.state.PIS);
         validations.push(this.state.COFINS);
         validations.push(this.state.CSLL);
+        validations.push(this.state.bank_charges);
 
         const validForm = validations.reduce((t, a) => t && a)
 
@@ -169,10 +176,6 @@ class Parametros extends Component {
 
                 {this.state.redirect &&
                     <Redirect to={'/'} />
-                }
-
-                {this.state.finalizaOperacao &&
-                    <Redirect to={{ pathname: `/utilitarios/inicio/` }} />
                 }
 
                 {!this.state.loading &&
@@ -264,6 +267,15 @@ class Parametros extends Component {
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.CSLL)[0]} search={true} onChange={(e) => { this.setState({ CSLL: e.value, }) }} />
+                                                        </div>
+
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Bank Charges</label>
+                                                        </div>
+                                                        <div className='col-1 errorMessage'>
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Field className="form-control text-right" type="text" value={this.state.bank_charges} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ bank_charges: e.currentTarget.value }) }} onBlur={async e => { this.setState({bank_charges: Number(e.currentTarget.value.replaceAll('.','').replaceAll(',','.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.','').replaceAll(',','.')) : ''})}} />
                                                         </div>
                                                     </div>
                                                 </div>

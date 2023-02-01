@@ -67,6 +67,18 @@ class Pessoas {
 
     }
 
+    public static function getCPF($chave){
+        $database = new Database();
+
+        $result = $database->doSelect('pessoas',
+                                      'pessoas.Cnpj_Cpf AS cpf',
+                                      'pessoas.Chave ='.$chave
+                                    );
+        $database->closeConection();
+        return $result;
+
+    }
+
     public static function testaCpf($Cnpj_Cpf){
         $database = new Database();
 
@@ -133,7 +145,7 @@ class Pessoas {
     public static function insertPessoa($values) {
         $database = new Database();
 
-        $cols = 'Nome, Nome_Fantasia, Cnpj_Cpf, Rg_Ie, Nascimento_Abertura, Inclusao, Categoria, Conta_Contabil, Conta_Provisao';
+        $cols = 'Nome, Nome_Fantasia, Cnpj_Cpf, Rg_Ie, Inscricao_Municipal, Nascimento_Abertura, Inclusao, Categoria, Conta_Contabil, Conta_Provisao, Conta_Faturar';
     
         $result = $database->doInsert('pessoas', $cols, $values);
         $database->closeConection();
@@ -143,7 +155,7 @@ class Pessoas {
     public static function insertPessoaBasico($values) {
         $database = new Database();
 
-        $cols = 'Nome, Nome_Fantasia, Cnpj_Cpf, Rg_Ie, Nascimento_Abertura, Inclusao, Categoria, Conta_Contabil, Conta_Provisao';
+        $cols = 'Nome, Nome_Fantasia, Cnpj_Cpf, Rg_Ie, Inscricao_Municipal, Nascimento_Abertura, Inclusao, Categoria, Conta_Contabil, Conta_Provisao, Conta_Faturar';
     
         $result = $database->doInsert('pessoas', $cols, $values);
 
@@ -178,10 +190,10 @@ class Pessoas {
         return $result;
     }
 
-	public static function updatePessoa($Chave, $Nome, $Nome_Fantasia, $Cnpj_Cpf, $Rg_Ie, $Nascimento_Abertura, $Inclusao, $Categoria, $Conta_Contabil, $Conta_Provisao){
+	public static function updatePessoa($Chave, $Nome, $Nome_Fantasia, $Cnpj_Cpf, $Rg_Ie, $Inscricao_Municipal, $Nascimento_Abertura, $Inclusao, $Categoria, $Conta_Contabil, $Conta_Provisao, $Conta_Faturar){
         $database = new Database();
 
-        $query = "Nome = '" . $Nome . "', Nome_Fantasia = '" . $Nome_Fantasia . "', Cnpj_Cpf = '" . $Cnpj_Cpf . "', Rg_Ie = '".$Rg_Ie."', Nascimento_Abertura = '".$Nascimento_Abertura."', Inclusao = '".$Inclusao."', Categoria = '".$Categoria."', Conta_Contabil = '".$Conta_Contabil."', Conta_Provisao = '".$Conta_Provisao."'";
+        $query = "Nome = '" . $Nome . "', Nome_Fantasia = '" . $Nome_Fantasia . "', Cnpj_Cpf = '" . $Cnpj_Cpf . "', Rg_Ie = '".$Rg_Ie."', Inscricao_Municipal = '$Inscricao_Municipal', Nascimento_Abertura = '".$Nascimento_Abertura."', Inclusao = '".$Inclusao."', Categoria = '".$Categoria."', Conta_Contabil = '".$Conta_Contabil."', Conta_Provisao = '".$Conta_Provisao."', Conta_Faturar = '$Conta_Faturar'";
 		$result = $database->doUpdate('pessoas', $query, 'Chave = '.$Chave);
 
         $database->closeConection();
@@ -229,6 +241,8 @@ class Pessoas {
         $database = new Database();
     
         $result = $database->doDelete('pessoas', 'Chave = '.$chave);
+        $result = $database->doDelete('pessoas_contatos', 'Chave_Pessoa = '.$chave);
+        $result = $database->doDelete('pessoas_enderecos', 'Chave_Pessoa = '.$chave);
         $database->closeConection();
         return $result;
     }

@@ -4,7 +4,7 @@ import { apiEmployee } from '../../../services/apiamrg'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import Skeleton from '../../../components/skeleton'
-import { Link, useHistory, Redirect } from 'react-router-dom'
+import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import axios from 'axios';
 import {
@@ -13,8 +13,7 @@ import {
     API_BANCO_PIX
 } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSearch, faCoffee, faTrashAlt, faPen, faPlus, faChevronUp, faChevronDown, faDollarSign } from '@fortawesome/free-solid-svg-icons'
-import { confirmAlert } from 'react-confirm-alert'
+import { faChevronUp, faChevronDown, faDollarSign } from '@fortawesome/free-solid-svg-icons'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import moment from 'moment'
 import Select from 'react-select';

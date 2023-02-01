@@ -3,18 +3,13 @@ import './styles.css'
 import { Formik, Field, Form } from 'formik'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
-import util from '../../../classes/util'
 import loader from '../../../classes/loader'
-import { PRECISA_LOGAR } from '../../../config'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
-import Image from 'react-bootstrap/Image'
 import ModalLogs from '../../../components/modalLogs'
 import { apiEmployee } from '../../../services/apiamrg'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
-import moment from 'moment'
-import Select from 'react-select';
 
 const estadoInicial = {
     descricao: '',
@@ -26,7 +21,6 @@ const estadoInicial = {
     id: null,
     seaports: [],
     redirect: false,
-    finalizaOperacao: false,
     spanerror1: '',
     spanerror2: '',
     spanerror3: '',
@@ -138,7 +132,8 @@ class AddHistorico extends Component {
         await this.setState({
             dadosFinais: [
                 {titulo: 'Descricao', valor: this.state.descricao}
-            ]
+            ],
+            loading: true
         })
         
         if (parseInt(this.state.chave) === 0 && validForm) {
@@ -154,7 +149,7 @@ class AddHistorico extends Component {
                         await loader.salvaLogs('historicos', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
 
                         //alert('Serviço Inserido!')
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         //alert(`Erro: ${res.data}`)
                     }
@@ -173,7 +168,7 @@ class AddHistorico extends Component {
                         await loader.salvaLogs('historicos', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `HISTÓRICO PADRÃO: ${this.state.descricao}`);
 
                         //await alert(`Serviço alterado`)
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         await alert(`Erro ${JSON.stringify(res)}`)
                     }

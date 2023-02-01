@@ -221,11 +221,16 @@ class OS {
         $result = $database->doSelect('os_servicos_itens
         LEFT JOIN os ON os.chave = os_servicos_itens.chave_os 
         LEFT JOIN os_taxas ON os_taxas.chave = os_servicos_itens.taxa
+        LEFT JOIN os_taxas_portos ON os_taxas_portos.taxa = os_taxas.chave AND os_taxas_portos.porto = os.porto
         LEFT JOIN os_navios ON os.chave_navio = os_navios.chave
+        LEFT JOIN pessoas as cliente ON os.Chave_Cliente = cliente.chave
         LEFT JOIN pessoas ON os_servicos_itens.fornecedor = pessoas.chave
-        LEFT JOIN pessoas as fornecedor_custeio ON os_servicos_itens.fornecedor_custeio = pessoas.chave',
+        LEFT JOIN pessoas as fornecedor_custeio ON os_servicos_itens.fornecedor_custeio = fornecedor_custeio.chave',
                                       'os_servicos_itens.*, 
-                                      os_taxas.Conta_Contabil as contaContabil, 
+                                      os_taxas_portos.conta as contaTaxa, 
+                                      cliente.Conta_Faturar as contaCliente, 
+                                      pessoas.Conta_Provisao as contaFornecedor, 
+                                      fornecedor_custeio.Conta_Provisao as contaFornecedorCusteio, 
                                       os.centro_custo AS centroCusto, 
                                       pessoas.Nome AS fornecedorNome, 
                                       fornecedor_custeio.Nome as fornecedorCustioNome,
@@ -322,7 +327,7 @@ class OS {
     public static function insertOS($values, $codigo, $tipo){
         $database = new Database();
 
-        $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges';
+        $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador';
 
         $result = $database->doInsert('os', $cols, $values);
 
@@ -337,7 +342,7 @@ class OS {
     public static function insertServicoItem($values){
         $database = new Database();
 
-        $cols = 'chave_os, data, fornecedor, taxa, descricao, ordem, tipo_sub, Fornecedor_Custeio, remarks';
+        $cols = 'chave_os, data, fornecedor, taxa, descricao, ordem, tipo_sub, Fornecedor_Custeio, remarks, Moeda, valor, valor1, repasse';
 
         $result = $database->doInsert('os_servicos_itens', $cols, $values);
 
@@ -348,7 +353,7 @@ class OS {
     public static function insertServicoItemBasico($values){
         $database = new Database();
 
-        $cols = 'chave_os, data, fornecedor, taxa, descricao, ordem, tipo_sub, Fornecedor_Custeio, remarks';
+        $cols = 'chave_os, data, fornecedor, taxa, descricao, ordem, tipo_sub, Fornecedor_Custeio, remarks, Moeda, valor, valor1, repasse';
 
         $result = $database->doInsert('os_servicos_itens', $cols, $values);
 
@@ -438,10 +443,10 @@ class OS {
     }
 
     
-    public static function updateOS($Chave, $Descricao, $Chave_Cliente, $chave_navio, $Data_Abertura, $Data_Chegada, $chave_tipo_servico, $viagem, $porto, $Data_Saida, $Data_Encerramento, $Data_Faturamento, $centro_custo, $ROE, $Comentario_Voucher, $encerradoPor, $faturadoPor, $Empresa, $eta, $atb, $etb, $governmentTaxes, $bankCharges){
+    public static function updateOS($Chave, $Descricao, $Chave_Cliente, $chave_navio, $Data_Abertura, $Data_Chegada, $chave_tipo_servico, $viagem, $porto, $Data_Saida, $Data_Encerramento, $Data_Faturamento, $centro_custo, $ROE, $Comentario_Voucher, $encerradoPor, $faturadoPor, $Empresa, $eta, $atb, $etb, $governmentTaxes, $bankCharges, $operador){
         $database = new Database();
 
-        $query = "Descricao = '".$Descricao."', Chave_Cliente = '".$Chave_Cliente."', chave_navio = '".$chave_navio."', Data_Abertura = '".$Data_Abertura."', Data_Chegada = '".$Data_Chegada."', chave_tipo_servico = '".$chave_tipo_servico."', viagem = '".$viagem."', porto = '".$porto."', Data_Saida = '".$Data_Saida."', Data_Encerramento = '".$Data_Encerramento."', Data_Faturamento = '".$Data_Faturamento."', centro_custo = '".$centro_custo."', ROE = '".$ROE."', Comentario_Voucher = '".$Comentario_Voucher."', encerradoPor = '".$encerradoPor."', faturadoPor = '".$faturadoPor."',Empresa = '".$Empresa."', eta = '".$eta."', atb = '".$atb."', etb = '".$etb."', governmentTaxes = '".$governmentTaxes."', bankCharges = '".$bankCharges."'";
+        $query = "Descricao = '".$Descricao."', Chave_Cliente = '".$Chave_Cliente."', chave_navio = '".$chave_navio."', Data_Abertura = '".$Data_Abertura."', Data_Chegada = '".$Data_Chegada."', chave_tipo_servico = '".$chave_tipo_servico."', viagem = '".$viagem."', porto = '".$porto."', Data_Saida = '".$Data_Saida."', Data_Encerramento = '".$Data_Encerramento."', Data_Faturamento = '".$Data_Faturamento."', centro_custo = '".$centro_custo."', ROE = '".$ROE."', Comentario_Voucher = '".$Comentario_Voucher."', encerradoPor = '".$encerradoPor."', faturadoPor = '".$faturadoPor."',Empresa = '".$Empresa."', eta = '".$eta."', atb = '".$atb."', etb = '".$etb."', governmentTaxes = '".$governmentTaxes."', bankCharges = '".$bankCharges."', operador = '$operador'";
         
         $result = $database->doUpdate('os', $query, 'Chave = '.$Chave);
         $database->closeConection();
@@ -452,10 +457,24 @@ class OS {
         }
     }
 
-    public static function updateServicoItem($chave, $chave_os, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks){
+    public static function updateOSCabecalho($Chave, $cabecalho){
         $database = new Database();
 
-        $query = "chave_os = '".$chave_os."', data = '".$data."', fornecedor = '".$fornecedor."', taxa = '".$taxa."', descricao = '".$descricao."', ordem = '".$ordem."', tipo_sub = '".$tipo_sub."', Fornecedor_Custeio = '".$Fornecedor_Custeio."', remarks = '".$remarks."'";
+        $query = "cabecalho = '$cabecalho'";
+        
+        $result = $database->doUpdate('os', $query, 'Chave = '.$Chave);
+        $database->closeConection();
+        if($result == NULL){
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+
+    public static function updateServicoItem($chave, $chave_os, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks, $Moeda, $valor, $valor1, $repasse){
+        $database = new Database();
+
+        $query = "chave_os = '".$chave_os."', data = '".$data."', fornecedor = '".$fornecedor."', taxa = '".$taxa."', descricao = '".$descricao."', ordem = '".$ordem."', tipo_sub = '".$tipo_sub."', Fornecedor_Custeio = '".$Fornecedor_Custeio."', remarks = '".$remarks."', Moeda = '$Moeda', valor = '$valor', valor1 = '$valor1', repasse = '$repasse'";
         
         $result = $database->doUpdate('os_servicos_itens', $query, 'chave = '.$chave);
 
@@ -608,4 +627,3 @@ class OS {
         return $result;
     }
 }
-?>

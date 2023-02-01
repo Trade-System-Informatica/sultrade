@@ -1,6 +1,7 @@
 
 export const USER_LOGGED_IN = 'USER_LOGGED_IN'
 export const USER_LOGGED_OUT = 'USER_LOGGED_OUT'
+export const USER_EXTEND_EXPIRATION = 'USER_EXTEND_EXPIRATION'
 export const ADD_PROD = 'ADD_PROD'
 export const LIST_PROD = 'LIST_PROD'
 export const REMOVE_PROD = 'REMOVE_PROD'

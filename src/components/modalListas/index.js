@@ -15,6 +15,7 @@ import Select from 'react-select';
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import CEP from 'cep-promise';
 import loader from '../../classes/loader'
+import Util from '../../classes/util'
 
 const estadoInicial = {
     pesquisa: '',
@@ -47,11 +48,14 @@ const estadoInicial = {
     clienteCpf: '',
     clienteCpfLimpo: '',
     clienteRG: '',
+    clienteInscricaoMunicipal: '',
     clienteNascimento: '',
     clienteContaContabil: '',
     clienteContaProvisao: '',
+    clienteContaFatura: '',
     clienteContaContabilInicial: '',
     clienteContaProvisaoInicial: '',
+    clienteContaFaturaInicial: '',
     clienteCategoria: {
         cliente: false,
         fornecedor: false,
@@ -167,6 +171,32 @@ const estadoInicial = {
     tipoEndereco: ['Padrão', 'Entrega', 'Cobrança', 'Residencial'],
 
     cpfAprovado: false,
+
+    taxaChave: 0,
+    taxaNome: '',
+    taxaValor: '',
+    taxaVariavel: false,
+    taxaMoeda: 5,
+    taxaTipo: 'P',
+    taxaConta_contabil: '',
+    taxaConta_credito: '',
+    taxaHistorico_padrao: '',
+    taxaFormula_ate: '',
+    taxaSubgrupo: '',
+    taxaBloqueado: false,
+
+    moedas: [],
+    subgrupos: [],
+    subgruposOptions: [],
+    subgruposOptionsTexto: '',
+
+    historicos: [],
+    historicosOptions: [],
+    historicosOptionsTexto: '',
+
+    descricaoChave: 0,
+    descricaoNome: '',
+    descricaoBloqueado: false
 }
 
 
@@ -186,7 +216,15 @@ class ModalListas extends Component {
 
         await this.setState({
             planosContas: await loader.getBase('getPlanosContasAnaliticas.php'),
-            planosContasOptions: await loader.getPlanosContasAnaliticasOptions(),
+            moedas: await loader.getBase('getMoedas.php'),
+            subgrupos: await loader.getBase('getSubgrupos.php'),
+            historicos: await loader.getBase('getHistoricos.php')
+        })
+
+        await this.setState({
+            planosContasOptions: await Util.turnToOption(this.state.planosContas, "Descricao", "Chave"),
+            subgruposOptions: await Util.turnToOption(this.state.subgrupos, 'descricao', 'chave'),
+            historicosOptions: await Util.turnToOption(this.state.historicos, "Descricao", 'chave')
         })
     }
 
@@ -719,8 +757,10 @@ class ModalListas extends Component {
                 { titulo: 'Cnpj_Cpf', valor: this.state.clienteCpfLimpo },
                 { titulo: 'Nascimento_Abertura', valor: this.state.clienteNascimento },
                 { titulo: 'Rg_Ie', valor: this.state.clienteRG },
+                { titulo: 'Inscricao_Municipal', valor: this.state.clienteInscricaoMunicipal },
                 { titulo: 'Conta_Contabil', valor: this.state.clienteContaContabil },
-                { titulo: 'Conta_Provisao', valor: this.state.clienteContaProvisao }
+                { titulo: 'Conta_Provisao', valor: this.state.clienteContaProvisao },
+                { titulo: 'Conta_Fatura', valor: this.state.clienteContaFatura }
             ]
         })
 
@@ -728,7 +768,7 @@ class ModalListas extends Component {
         if (this.state.clienteChave == 0) {
             await apiEmployee.post('insertPessoaBasico.php', {
                 token: true,
-                values: `'${this.state.clienteNome}', '${this.state.clienteNomeFantasia}', '${this.state.clienteCpfLimpo}', '${this.state.clienteRG}', '${this.state.clienteNascimento}', '${moment().format('YYYY-MM-DD')}', '${categoria}', '${this.state.clienteContaContabil}', '${this.state.clienteContaProvisao}'`
+                values: `'${this.state.clienteNome}', '${this.state.clienteNomeFantasia}', '${this.state.clienteCpfLimpo}', '${this.state.clienteRG}', '${this.state.clienteInscricaoMunicipal}','${this.state.clienteNascimento}', '${moment().format('YYYY-MM-DD')}', '${categoria}', '${this.state.clienteContaContabil}', '${this.state.clienteContaProvisao}', '${this.state.clienteContaFatura}'`
             }).then(
                 async res => {
                     await loader.salvaLogs('pessoas', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
@@ -746,15 +786,18 @@ class ModalListas extends Component {
                 Nome_Fantasia: this.state.clienteNomeFantasia,
                 Cnpj_Cpf: this.state.clienteCpfLimpo,
                 Rg_Ie: this.state.clienteRG,
+                Inscricao_Municipal: this.state.clienteInscricaoMunicipal,
                 Nascimento_Abertura: this.state.clienteNascimento,
                 Categoria: categoria,
                 Conta_Contabil: this.state.clienteContaContabil,
-                Conta_Provisao: this.state.clienteContaProvisao
+                Conta_Provisao: this.state.clienteContaProvisao,
+                Conta_Fatura: this.state.clienteContaFatura
             }).then(
                 async res => {
                     await loader.salvaLogs('pessoas', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.clienteChave, `PESSOA: ${this.state.clienteNome}`);
 
-                    this.props.alteraCliente(this.state.clienteChave, this.state.clienteCategoria)
+                    console.log(categoria);
+                    this.props.alteraCliente(this.state.clienteChave, categoria);
                     this.setState({ clienteBloqueado: false })
                 },
                 async res => await console.log(`erro: ${res}`)
@@ -768,19 +811,20 @@ class ModalListas extends Component {
             Cnpj_Cpf: this.state.clienteCpfLimpo
         }).then(
             async res => {
-                if (!res.data[0] || res.data[0].Chave == this.state.chave) {
+                if (!res.data[0] || res.data[0].Chave == this.state.clienteChave) {
                     await this.setState({ cpfAprovado: true })
                 } else {
-                    await this.setState({ pessoa: res.data[0] });
                     this.setState({
                         clienteNome: this.state.pessoa.Nome,
                         clienteNomeFantasia: this.state.pessoa.Nome_Fantasia,
                         clienteCpf: this.state.pessoa.Cnpj_Cpf,
                         clienteRG: this.state.pessoa.Rg_Ie,
+                        clienteInscricaoMunicipal: this.state.pessoa.Inscricao_Municipal,
                         clienteNascimento: this.state.pessoa.Nascimento_Abertura,
                         clienteInclusao: this.state.pessoa.Inclusao,
                         clienteChave: this.state.pessoa.Chave,
                         clienteContaContabil: this.state.pessoa.Conta_Contabil,
+                        clienteContaFatura: this.state.pessoa.Conta_Fatura,
                         clienteContaProvisao: this.state.pessoa.Conta_Provisao
                     })
                 }
@@ -803,7 +847,7 @@ class ModalListas extends Component {
                 { titulo: 'Numero', valor: this.state.enderecoNumero },
                 { titulo: 'Complemento', valor: this.state.enderecoComplemento },
                 { titulo: 'Tipo', valor: this.state.enderecoTipo },
-                { titulo: 'Cidade_Descricao', valor: this.state.this.state.enderecoCidadeDescricao }
+                { titulo: 'Cidade_Descricao', valor: this.state.enderecoCidadeDescricao }
             ]
         })
 
@@ -1035,6 +1079,125 @@ class ModalListas extends Component {
 
         }
 
+    }
+
+    salvarTaxa = async (validForm) => {
+        //this.getMaxNews()
+        if (this.state.taxaVariavel) {
+            this.setState({ taxaVariavel: 1 })
+        } else {
+            this.setState({ taxaVariavel: 0 })
+        }
+        this.setState({ taxaBloqueado: true })
+
+        await this.setState({
+            dadosFinais: [
+                { titulo: 'descricao', valor: this.state.taxaNome },
+                { titulo: 'valor', valor: this.state.taxaValor },
+                { titulo: 'variavel', valor: this.state.taxaVariavel },
+                { titulo: 'Moeda', valor: this.state.taxaMoeda },
+                { titulo: 'Tipo', valor: this.state.taxaTipo },
+                { titulo: 'Conta_Contabil', valor: this.state.taxaConta_contabil },
+                { titulo: 'conta_credito', valor: this.state.taxaConta_credito },
+                { titulo: 'historico_padrao', valor: this.state.taxaHistorico_padrao },
+                { titulo: 'formula_ate', valor: this.state.taxaFormula_ate },
+                { titulo: 'sub_grupo', valor: this.state.taxaSubgrupo }
+            ]
+        })
+
+        if (parseInt(this.state.taxaChave) === 0 && validForm) {
+            //$cols = 'data, titulo, texto, imagem, link, inativo';
+            await apiEmployee.post(`insertTaxa.php`, {
+                token: true,
+                values: `'${this.state.taxaNome}', '${parseFloat(this.state.taxaValor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.taxaVariavel}', '${this.state.taxaMoeda}', '${this.state.taxaTipo}', '${this.state.taxaConta_contabil}', '${this.state.taxaHistorico_padrao}', '${this.state.taxaFormula_ate}', '${this.state.taxaSubgrupo}'`
+            }).then(
+                async res => {
+                    if (res.data[0].chave) {
+                        await this.setState({ chave: res.data[0].chave })
+                        await loader.salvaLogs('os_taxas', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
+
+
+                        this.props.alteraTaxa(res.data[0].chave, res.data[0].tipo)
+                        this.setState({ taxaBloqueado: false })
+
+                    } else {
+                        //alert(`Erro: ${res.data}`)
+                    }
+                },
+                async res => await console.log(`Erro: ${res.data}`)
+            )
+        } else if (validForm) {
+            await apiEmployee.post(`updateTaxa.php`, {
+                token: true,
+                chave: this.state.taxaChave,
+                descricao: this.state.taxaNome,
+                valor: parseFloat(this.state.taxaValor.replaceAll('.', '').replaceAll(',', '.')),
+                variavel: this.state.taxaVariavel,
+                Moeda: this.state.taxaMoeda,
+                Tipo: this.state.taxaTipo,
+                Conta_Contabil: this.state.taxaConta_contabil,
+                conta_credito: this.state.taxaConta_credito,
+                historico_padrao: this.state.taxaHistorico_padrao,
+                formula_ate: this.state.taxaFormula_ate,
+                sub_grupo: this.state.taxaSubgrupo
+            }).then(
+                async res => {
+                    if (res.data === true) {
+                        await loader.salvaLogs('os_taxas', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `TAXA: ${this.state.taxaNome}`);
+
+                        this.props.alteraTaxa(this.state.taxaChave, this.state.taxaTipo)
+                        this.setState({ taxaBloqueado: false })
+                    } else {
+                        await alert(`Erro ${JSON.stringify(res)}`)
+                    }
+                },
+                async res => await console.log(`Erro: ${res.data}`)
+            )
+
+        }
+
+    }
+
+    salvarDescricaoPadrao = async (validForm) => {
+        if (!validForm) {
+            return;
+        }
+        this.setState({ descricaoBloqueado: true });
+
+        await this.setState({
+            dadosFinais: [
+                { titulo: 'descricao', valor: this.state.descricaoNome }
+            ]
+        })
+
+        if (this.state.tipoServicoChave == 0) {
+            await apiEmployee.post('insertDescricaoPadrao.php', {
+                token: true,
+                values: `'${this.state.descricaoNome}'`
+            }).then(
+                async res => {
+                    await loader.salvaLogs('os_descricao_padrao', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
+
+                    this.props.alteraDescricaoPadrao(this.state.descricaoNome)
+                    this.setState({ descricaoBloqueado: false })
+                },
+                async res => await console.log(`erro: ${res}`)
+            )
+        } else {
+            await apiEmployee.post(`updateDescricaoPadrao.php`, {
+                token: true,
+                chave: this.state.descricaoChave,
+                descricao: this.state.descricaoNome
+            }).then(
+                async res => {
+                    await loader.salvaLogs('os_descricao_padrao', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.descricaoChave, `DESCRICAO PADRAO: ${this.state.descricaoNome}`);
+
+                    this.props.alteraDescricaoPadrao(this.state.descricaoNome)
+                    this.setState({ descricaoBloqueado: false })
+                },
+                async res => await console.log(`erro: ${res}`)
+            )
+        }
     }
 
     deleteShip = async (chave, nome) => {
@@ -1504,9 +1667,111 @@ class ModalListas extends Component {
         })
     }
 
+    deleteTaxa = async (chave, nome) => {
+        this.fecharModal()
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return (
+                    <div className='custom-ui text-center'>
+                        <h1>{NOME_EMPRESA}</h1>
+                        <p>Deseja remover esta Taxa? ({nome}) </p>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-success w-25"
+                            onClick={
+                                async () => {
+                                    onClose()
+                                }
+                            }
+                        >
+                            Não
+                        </button>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-danger w-25"
+                            onClick={
+                                async () => {
+                                    await apiEmployee.post(`deleteTaxa.php`, {
+                                        token: true,
+                                        chave: chave
+                                    }).then(
+                                        async response => {
+                                            if (response.data == true) {
+                                                await loader.salvaLogs('os_taxas', this.state.usuarioLogado.codigo, null, "Exclusão", chave);
+
+                                                document.location.reload()
+                                            }
+                                        },
+                                        async response => {
+                                            this.alert(response)
+                                        }
+                                    )
+                                    onClose()
+                                }
+                            }
+
+                        >
+                            Sim
+                        </button>
+                    </div>
+                )
+            }
+        })
+    }
+
+    deleteDescricaoPadrao = async (chave, nome) => {
+        this.fecharModal()
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return (
+                    <div className='custom-ui text-center'>
+                        <h1>{NOME_EMPRESA}</h1>
+                        <p>Deseja remover esta Descrição Padrão? ({nome}) </p>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-success w-25"
+                            onClick={
+                                async () => {
+                                    onClose()
+                                }
+                            }
+                        >
+                            Não
+                        </button>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-danger w-25"
+                            onClick={
+                                async () => {
+                                    await apiEmployee.post(`deleteDescricaoPadrao.php`, {
+                                        token: true,
+                                        chave: chave
+                                    }).then(
+                                        async response => {
+                                            if (response.data == true) {
+                                                //alert('Removido!')
+                                                document.location.reload()
+                                            }
+                                        },
+                                        async response => {
+                                            this.erroApi(response)
+                                        }
+                                    )
+                                    onClose()
+                                }
+                            }
+
+                        >
+                            Sim
+                        </button>
+                    </div>
+                )
+            }
+        })
+    }
 
     filtrarPesquisa = (item) => {
-        if (this.state.pesquisa == '') {
+        if (!this.state.pesquisa) {
             return true;
         }
         if (this.state.tipoPesquisa == 1) {
@@ -1553,6 +1818,8 @@ class ModalListas extends Component {
             return item.Cep.toLowerCase().includes(this.state.pesquisa.toLowerCase())
         } else if (item.Campo1 && this.state.tipoPesquisa == 12) {
             return item.Campo1.toLowerCase().includes(this.state.pesquisa.toLowerCase())
+        } else if (item.valor && this.state.tipoPesquisa == 13) {
+            return item.valor.includes(this.state.pesquisa)
         }
 
     }
@@ -1637,6 +1904,22 @@ class ModalListas extends Component {
         validationsContato.push(!this.state.contatoBloqueado)
 
         const validFormContato = validationsContato.reduce((t, a) => t && a)
+
+        const validationsTaxa = []
+        validationsTaxa.push(this.state.taxaNome)
+        validationsTaxa.push(this.state.taxaValor && parseFloat(this.state.taxaValor.replaceAll('.', '').replaceAll(',', '.')) >= 0)
+        validationsTaxa.push(this.state.taxaSubgrupo)
+        validationsTaxa.push(this.state.taxaMoeda)
+        validationsTaxa.push(this.state.taxaValor && this.state.taxaValor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.taxaValor.replaceAll('.', '').replaceAll(',', '.')))
+        validationsTaxa.push(!this.state.taxaBloqueado)
+
+        const validFormTaxa = validationsTaxa.reduce((t, a) => t && a)
+
+        const validationsDescricao = []
+        validationsDescricao.push(this.state.descricaoNome)
+        validationsDescricao.push(!this.state.descricaoBloqueado)
+
+        const validFormDescricao = validationsDescricao.reduce((t, a) => t && a)
 
         return (
             <Modal
@@ -2122,7 +2405,7 @@ class ModalListas extends Component {
                                                 <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value, pesquisaExata: false }) }} />
                                                 {!this.props.modalLista[0] &&
                                                     <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-center">
-                                                        <div><button onClick={() => { this.setState({ dadosIniciais: [], clienteChave: 0, clienteNome: '', clienteNomeFantasia: '', clienteCpf: '', clienteCpfLimpo: '', clienteNascimento: '', clienteRG: '', clienteContaContabil: '', clienteContaProvisao: '', clienteContaContabilInicial: '', clienteContaProvisaoInicial: '' }); this.converteCategoria("0000000"); this.props.alteraModal('criarCliente') }} className="btn btn-success">Adicionar Pessoa</button></div>
+                                                        <div><button onClick={() => { this.setState({ dadosIniciais: [], clienteChave: 0, clienteNome: '', clienteNomeFantasia: '', clienteCpf: '', clienteCpfLimpo: '', clienteNascimento: '', clienteRG: '', clienteInscricaoMunicipal: "", clienteContaContabil: '', clienteContaProvisao: '', clienteContaFatura: '', clienteContaContabilInicial: '', clienteContaProvisaoInicial: '', clienteContaFaturaInicial: '' }); this.converteCategoria("0000000"); this.props.alteraModal('criarCliente') }} className="btn btn-success">Adicionar Pessoa</button></div>
                                                     </div>}
                                             </div>
 
@@ -2176,14 +2459,14 @@ class ModalListas extends Component {
                                                         </div>
                                                         <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones">
                                                             {this.props.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_CONTATOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
-                                                                <div className='iconelixo giveMargin' type='button' onClick={async () => { await this.setState({ clienteChave: feed.Chave, tipoPesquisa: 12 }); await this.getContatos(feed.Chave); await this.adicionaInformacaoContatos(); this.props.alteraModal('listarContatos') }}>
+                                                                <div className='iconelixo giveMargin' type='button' onClick={async () => { await this.setState({ clienteChave: feed.Chave, tipoPesquisa: 12, pesquisa: "", pesquisaExata: false }); console.log(this.state.pesquisa); await this.getContatos(feed.Chave); await this.adicionaInformacaoContatos(); this.props.alteraModal('listarContatos') }}>
                                                                     <FontAwesomeIcon icon={faEnvelope} />
                                                                 </div>
                                                             }
 
                                                             {this.props.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_ENDERECOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                                                 <div className='iconelixo giveMargin' type='button' >
-                                                                    <div className='iconelixo giveMargin' type='button' onClick={async () => { await this.setState({ clienteChave: feed.Chave, tipoPesquisa: 9 }); await this.getEnderecos(feed.Chave); this.props.alteraModal('listarEnderecos') }}>
+                                                                    <div className='iconelixo giveMargin' type='button' onClick={async () => { await this.setState({ clienteChave: feed.Chave, tipoPesquisa: 9, pesquisa: "", pesquisaExata: false }); console.log(this.state.pesquisa); await this.getEnderecos(feed.Chave); this.props.alteraModal('listarEnderecos') }}>
                                                                         <FontAwesomeIcon icon={faHome} />
                                                                     </div>
                                                                 </div>
@@ -2200,10 +2483,13 @@ class ModalListas extends Component {
                                                                         clienteCpfLimpo: '',
                                                                         clienteNascimento: '',
                                                                         clienteRG: '',
+                                                                        clienteInscricaoMunicipal: '',
                                                                         clienteContaContabil: '',
                                                                         clienteContaProvisao: '',
+                                                                        clienteContaFatura: '',
                                                                         clienteContaContabilInicial: '',
                                                                         clienteContaProvisaoInicial: '',
+                                                                        clienteContaFaturaInicial: '',
                                                                         dadosIniciais: []
                                                                     });
                                                                     await this.converteCategoria("0000000");
@@ -2224,11 +2510,14 @@ class ModalListas extends Component {
                                                                         clienteCpf: feed.Cnpj_Cpf,
                                                                         clienteNascimento: feed.Nascimento_Abertura,
                                                                         clienteRG: feed.Rg_Ie,
+                                                                        clienteInscricaoMunicipal: feed.Inscricao_Municipal,
                                                                         clienteChave: feed.Chave,
                                                                         clienteContaContabil: feed.Conta_Contabil,
                                                                         clienteContaProvisao: feed.Conta_Provisao,
+                                                                        clienteContaFatura: feed.Conta_Faturar,
                                                                         clienteContaContabilInicial: feed.Conta_Contabil,
                                                                         clienteContaProvisaoInicial: feed.Conta_Provisao,
+                                                                        clienteContaFaturaInicial: feed.Conta_Faturar,
 
                                                                         dadosIniciais: [
                                                                             { titulo: 'Nome', valor: feed.Nome },
@@ -2236,8 +2525,10 @@ class ModalListas extends Component {
                                                                             { titulo: 'Cnpj_Cpf', valor: feed.Cnpj_Cpf },
                                                                             { titulo: 'Nascimento_Abertura', valor: feed.Nascimento_Abertura },
                                                                             { titulo: 'Rg_Ie', valor: feed.Rg_Ie },
+                                                                            { titulo: 'Inscricao_Municipal', valor: feed.Inscricao_Municipal },
                                                                             { titulo: 'Conta_Contabil', valor: feed.Conta_Contabil },
                                                                             { titulo: 'Conta_Provisao', valor: feed.Conta_Provisao },
+                                                                            { titulo: 'Conta_Fatura', valor: feed.Conta_Fatura },
                                                                         ]
                                                                     });
                                                                     await this.getEnderecos(feed.Chave)
@@ -2345,6 +2636,14 @@ class ModalListas extends Component {
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                             <Field className="form-control" type="text" value={this.state.clienteRG} onChange={async e => { this.setState({ clienteRG: e.currentTarget.value }) }} />
                                                         </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Inscrição Municipal</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                            <Field className="form-control" type="text" value={this.state.clienteInscricaoMunicipal} onChange={async e => { this.setState({ clienteInscricaoMunicipal: e.currentTarget.value }) }} />
+                                                        </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Nascimento / Abertura</label>
                                                         </div>
@@ -2361,6 +2660,14 @@ class ModalListas extends Component {
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                     <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.clienteContaContabil)[0]} search={true} onChange={(e) => { this.setState({ clienteContaContabil: e.value, }) }} />
+                                                                </div>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Conta Contabil - Fatura</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.clienteContaFatura)[0]} search={true} onChange={(e) => { this.setState({ clienteContaFatura: e.value, }) }} />
                                                                 </div>
                                                             </>
                                                         }
@@ -2383,7 +2690,7 @@ class ModalListas extends Component {
                                                             <label>Cliente</label>
                                                         </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <Field type="checkbox" name='cliente' checked={this.state.clienteCategoria.cliente} onChange={async e => { await this.setState({ clienteCategoria: { ...this.state.clienteCategoria, cliente: e.target.checked } }); if (e.target.checked) { await this.setState({ clienteContaContabil: this.state.clienteContaContabilInicial }) } else { await this.setState({ clienteContaContabil: "" }) } }} />
+                                                            <Field type="checkbox" name='cliente' checked={this.state.clienteCategoria.cliente} onChange={async e => { await this.setState({ clienteCategoria: { ...this.state.clienteCategoria, cliente: e.target.checked } }); if (e.target.checked) { await this.setState({ clienteContaContabil: this.state.clienteContaContabilInicial, clienteContaFatura: this.state.clienteContaFaturaInicial }) } else { await this.setState({ clienteContaContabil: "", clienteContaFatura: "" }) } }} />
                                                         </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Fornecedor</label>
@@ -3314,7 +3621,7 @@ class ModalListas extends Component {
                                                             <Select className='SearchSelect' value={this.state.contato} options={this.state.contatoTiposOptions} onChange={(e) => { this.setState({ contatoTipo: e.value, contatoTipoNome: e.label }) }} placeholder={this.state.contatoTipoNome} />
                                                         </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Campo1</label>
+                                                            <label>Descrição</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
                                                             {!this.state.contatoCampo1 &&
@@ -3325,11 +3632,20 @@ class ModalListas extends Component {
                                                             <Field className="form-control" type="text" value={this.state.contatoCampo1} onChange={async e => { this.setState({ contatoCampo1: e.currentTarget.value }) }} />
                                                         </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Campo2</label>
+                                                            <label>Complemento</label>
                                                         </div>
                                                         <div className='col-1'></div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Field className="form-control" type="text" value={this.state.contatoCampo2} onChange={async e => { this.setState({ contatoCampo2: e.currentTarget.value }) }} />
+                                                            {this.state.contatoTipo != "PX" &&
+                                                                <Field className="form-control" type="text" value={this.state.contatoCampo2} onChange={async e => { this.setState({ contatoCampo2: e.currentTarget.value }) }} />
+                                                            }
+                                                            {this.state.contatoTipo == "PX" &&
+                                                                <select className="form-control" value={this.state.contatoCampo2} onChange={async e => { this.setState({ contatoCampo2: e.currentTarget.value }) }}>
+                                                                    <option value="E-mail">E-mail</option>
+                                                                    <option value="Telefone">Celular</option>
+                                                                    <option value="CPF/CNPJ">CPF/CNPJ</option>
+                                                                </select>
+                                                            }
                                                         </div>
 
                                                     </div>
@@ -4015,7 +4331,7 @@ class ModalListas extends Component {
                                             <div className="row">
                                                 <div className="col-2"></div>
                                                 <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                    <button disabled={!validFormSubgrupo} type="submit" style={validFormSubgrupo ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
+                                                    <button disabled={!validFormTipoServico} type="submit" style={validFormTipoServico ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
                                                 </div>
                                                 <div className="col-2"></div>
                                             </div>
@@ -4326,6 +4642,504 @@ class ModalListas extends Component {
 
 
                         </div>}
+
+                    {this.props.modal == 'listarTaxas' &&
+                        <div className='modalCriar'>
+                            <div className='containersairlistprodmodal'>
+                                <div className='botaoSairModal' onClick={async () => { await this.setState({ tipoPesquisa: 1 }); await this.fecharModal() }}>
+                                    <span>X</span>
+                                </div>
+                            </div>
+                            <div className='modalContent'>
+                                <div className='tituloModal'>
+                                    <span>Taxas</span>
+                                </div>
+
+
+                                <div className='modalLista'>
+                                    <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-center">
+                                        <div className="row mobileajuster3">
+                                            <div className="col-1 col-sm-1 col-md-1 col-lg-1 col-xl-1 sumir">
+                                            </div>
+
+                                            <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
+                                                <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value, pesquisaExata: false }) }}>
+                                                    <option value={1}>Descrição</option>
+                                                    <option value={13}>Valor</option>
+                                                    <option value={3}>Chave</option>
+                                                </select>
+                                                <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value, pesquisaExata: false }) }} />
+                                                {!this.props.modalLista[0] &&
+                                                    <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-center">
+                                                        <div><button onClick={() => { this.setState({ dadosIniciais: [], taxaChave: 0, taxaNome: '', taxaValor: '', taxaVariavel: false, taxaMoeda: 5, taxaTipo: 'P', taxaConta_contabil: '', taxaConta_credito: '', taxaHistorico_padrao: '', taxaFormula_ate: '', taxaSubgrupo: '' }); this.props.alteraModal('criarPorto') }} className="btn btn-success">Adicionar Porto</button></div>
+                                                    </div>}
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    {this.state.loadingPesquisa &&
+                                        <SkeletonPesquisa />
+                                    }
+
+                                    <div className="row deleteMargin" id="product-list">
+                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
+                                        <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12 mix all dresses bags">
+                                            <div className="single-product-item aasd">
+                                                <div className="row subtitulosTabela">
+                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
+                                                        <span className="subtituloships">Chave</span>
+                                                    </div>
+                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center">
+                                                        <span className="subtituloships">Tipo de Serviço</span>
+                                                    </div>
+                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center">
+                                                        <span className="subtituloships">Grupo</span>
+                                                    </div>
+                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
+                                                        <span className="subtituloships">Valor</span>
+                                                    </div>
+                                                    <div className="col-2 text-right">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-lg-2 col-md-2 col-sm-0 col-0"></div>
+                                    </div>
+
+                                    <div className="row" id="product-list">
+                                        <div className="col-lg-2 col-md-2 col-sm-0 col-0"></div>
+                                        <div className="col-lg-8 col-md-8 col-sm-12 mobileajuste14 ">
+                                            {this.props.modalLista[0] != undefined && this.props.modalLista.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (
+                                                <div key={feed.id} className={index % 2 == 0 ? "col-lg-12 col-md-12 col-sm-12 mix all dresses bags par lightHover" : "col-lg-12 col-md-12 col-sm-12 mix all dresses bags itemLista impar darkHover"}>
+                                                    <div className="row ">
+                                                        <div onClick={() => this.props.alteraTaxa(feed.chave, feed.Tipo)} className="col-2 text-left">
+                                                            <p>{feed.chave}</p>
+                                                        </div>
+                                                        <div onClick={() => this.props.alteraTaxa(feed.chave, feed.Tipo)} className="col-3 text-left">
+                                                            <p>{feed.descricao}</p>
+                                                        </div>
+                                                        <div onClick={() => this.props.alteraTaxa(feed.chave, feed.Tipo)} className="col-3 text-left">
+                                                            <p>{feed.subgrupo}</p>
+                                                        </div>
+                                                        <div onClick={() => this.props.alteraTaxa(feed.chave, feed.Tipo)} className="col-2 text-left">
+                                                            <p>{feed.moeda_sigla} {parseFloat(feed.valor).toFixed(2).replaceAll('.', ',')}</p>
+                                                        </div>
+                                                        <div className="col-2 text-center icones mobileajuster4 ">
+                                                            <div className='iconelixo giveMargin' type='button' >
+                                                                <div onClick={() => {
+                                                                    this.setState({
+                                                                        dadosIniciais: [],
+                                                                        taxaChave: 0,
+                                                                        taxaNome: '',
+                                                                        taxaValor: '',
+                                                                        taxaVariavel: false,
+                                                                        taxaMoeda: 5,
+                                                                        taxaTipo: 'P',
+                                                                        taxaConta_contabil: '',
+                                                                        taxaConta_credito: '',
+                                                                        taxaHistorico_padrao: '',
+                                                                        taxaFormula_ate: '',
+                                                                        taxaSubgrupo: ''
+                                                                    });
+                                                                    this.props.alteraModal('criarTaxa')
+                                                                }}
+                                                                >
+                                                                    <FontAwesomeIcon icon={faPlus} />
+
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div className='iconelixo giveMargin' type='button' >
+                                                                <div onClick={() => {
+                                                                    this.setState({
+                                                                        taxaChave: feed.chave,
+                                                                        taxaNome: feed.descricao,
+                                                                        taxaValor: feed.valor,
+                                                                        taxaVariavel: (feed.variavel == 1) ? true : false,
+                                                                        taxaMoeda: feed.Moeda,
+                                                                        taxaTipo: feed.Tipo,
+                                                                        taxaConta_contabil: feed.Conta_Contabil,
+                                                                        taxaConta_credito: feed.conta_credito,
+                                                                        taxaHistorico_padrao: feed.historico_padrao,
+                                                                        taxaFormula_ate: feed.formula_ate,
+                                                                        taxaSubgrupo: feed.sub_grupo,
+                                                                        dadosIniciais: [
+                                                                            { titulo: 'descricao', valor: feed.descricao },
+                                                                            { titulo: 'valor', valor: feed.valor },
+                                                                            { titulo: 'variavel', valor: feed.variavel },
+                                                                            { titulo: 'Moeda', valor: feed.Moeda },
+                                                                            { titulo: 'Tipo', valor: feed.Tipo },
+                                                                            { titulo: 'Conta_Contabil', valor: feed.Conta_Contabil },
+                                                                            { titulo: 'conta_credito', valor: feed.conta_credito },
+                                                                            { titulo: 'historico_padrao', valor: feed.historico_padrao },
+                                                                            { titulo: 'formula_ate', valor: feed.formula_ate },
+                                                                            { titulo: 'sub_grupo', valor: feed.sub_grupo }
+                                                                        ]
+                                                                    }); this.props.alteraModal('criarTaxa')
+                                                                }}
+                                                                >
+                                                                    <FontAwesomeIcon icon={faPen} />
+                                                                </div>
+                                                            </div>
+
+                                                            {this.props.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'TAXAS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
+
+                                                                <div type='button' className='iconelixo' onClick={(a) => this.deleteTaxa(feed.chave, feed.descricao)} >
+                                                                    <FontAwesomeIcon icon={faTrashAlt} />
+                                                                </div>
+                                                            }
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="col-lg-2 col-md-2 col-sm-0 col-0"></div>
+                                        {this.props.modalLista.filter(this.filtrarPesquisa)[this.state.load] &&
+                                            <div className='loadMoreDiv'>
+                                                <div className='loadMore' onClick={() => { this.setState({ load: this.state.load + 100 }) }}>Carregar Mais...</div>
+                                            </div>
+                                        }
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>}
+
+
+
+                    {this.props.modal == 'criarTaxa' &&
+                        <div className='modalCriar'>
+                            <div className='containersairlistprodmodal'>
+                                <div className='botaoSairModal' onClick={async () => { await this.setState({ tipoPesquisa: 1 }); await this.fecharModal() }}>
+                                    <span>X</span>
+                                </div>
+                            </div>
+                            <div className='modalContent'>
+                                <div className='tituloModal'>
+                                    <span>Taxas</span>
+                                </div>
+
+
+                                <div className='modalForm'>
+                                    <Formik
+                                        initialValues={{
+                                            name: '',
+                                        }}
+                                        onSubmit={async values => {
+                                            await new Promise(r => setTimeout(r, 1000))
+                                            this.salvarTaxa(validFormTaxa)
+                                        }}
+                                    >
+                                        <Form className="contact-form" >
+
+                                            <div className="row">
+
+                                                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
+
+                                                    <div className="row addservicos">
+                                                        <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
+                                                            <label>Descrição</label>
+                                                        </div>
+                                                        <div className='col-1 errorMessage'>
+                                                            {!this.state.taxaNome &&
+                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                            }
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Field className="form-control" type="text" value={this.state.taxaNome} onChange={async e => { this.setState({ taxaNome: e.currentTarget.value }) }} />
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Valor</label>
+                                                        </div>
+                                                        <div className='col-1 errorMessage'>
+                                                            {!this.state.taxaValor &&
+                                                                <FontAwesomeIcon title='Preencha os campos' icon={faExclamationTriangle} />
+                                                            }
+                                                            {!this.state.taxaMoeda &&
+                                                                <FontAwesomeIcon title='Preencha os campos' icon={faExclamationTriangle} />
+                                                            }
+                                                            {this.state.taxaValor != "0,00" && this.state.taxaValor && this.state.taxaMoeda && !this.state.taxaValor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.taxaValor.replaceAll('.', '').replaceAll(',', '.')) &&
+                                                                <FontAwesomeIcon title='Apenas números são permitidos' icon={faExclamationTriangle} />
+                                                            }
+                                                        </div>
+                                                        <div className="fieldDividido col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <select className='form-control fieldDividido_1' value={this.state.taxaMoeda} onChange={(e) => { this.setState({ taxaMoeda: e.target.value }) }}>
+                                                                {this.state.moedas.map((e) => (
+                                                                    <option value={e.Chave}>{e.Sigla}</option>
+                                                                ))}
+                                                            </select>
+                                                            <Field className="form-control fieldDividido_2 text-right" type="text" value={this.state.taxaValor} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ taxaValor: e.currentTarget.value }) }} onBlur={async e => { this.setState({ taxaValor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }) }} />
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Grupo</label>
+                                                        </div>
+                                                        <div className='col-1 errorMessage'>
+                                                            {!this.state.taxaSubgrupo &&
+                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                            }
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
+                                                            <Select className='SearchSelect' options={this.state.subgruposOptions} value={this.state.subgruposOptions.filter(option => option.value == this.state.taxaSubgrupo)} search={true} onChange={(e) => { this.setState({ taxaSubgrupo: e.value }) }} />
+                                                        </div>
+                                                        <div className="col-1">
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Tipo</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <select className='form-control' value={this.state.taxaTipo} onChange={(e) => { this.setState({ taxaTipo: e.currentTarget.value }) }}>
+                                                                <option value={'P'}>Pagar</option>
+                                                                <option value={'R'}>Receber</option>
+                                                                <option value={'GT'}>Government Taxes</option>
+                                                                <option value={'BC'}>Bank Charges</option>
+                                                            </select>
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Variavel</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <input className='form_control' checked={this.state.taxaVariavel} onChange={(e) => { this.setState({ taxaVariavel: e.target.checked }) }} type="checkbox" />
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Conta Contabil</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
+                                                            <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.taxaConta_contabil)[0]} search={true} onChange={(e) => { this.setState({ taxaConta_contabil: e.value, }) }} />
+                                                        </div>
+                                                        <div className="col-1">
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Historico Padrao</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Select className='SearchSelect' options={this.state.historicosOptions.filter(e => this.filterSearch(e, this.state.historicosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ historicosOptionsTexto: e }) }} value={this.state.historicosOptions.filter(option => option.value == this.state.taxaHistorico_padrao)[0]} search={true} onChange={(e) => { this.setState({ taxaHistorico_padrao: e.value, }) }} />
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Formula Ate</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Field className="form-control" type="number" value={this.state.taxaFormula_ate} onChange={async e => { this.setState({ taxaFormula_ate: e.currentTarget.value }) }} />
+                                                        </div>
+
+
+                                                    </div>
+                                                </div>
+                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                                            </div>
+
+                                            <div className="row">
+                                                <div className="col-2"></div>
+                                                <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                    <button disabled={!validFormTaxa} type="submit" style={validFormTaxa ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
+                                                </div>
+                                                <div className="col-2"></div>
+                                            </div>
+
+                                        </Form>
+                                    </Formik>
+
+                                </div>
+                            </div>
+                        </div>}
+
+
+                    {this.props.modal == 'listarDescricoesPadrao' &&
+                        <div className='modalCriar'>
+                            <div className='containersairlistprodmodal'>
+                                <div className='botaoSairModal' onClick={async () => { await this.setState({ tipoPesquisa: 1 }); await this.fecharModal() }}>
+                                    <span>X</span>
+                                </div>
+                            </div>
+                            <div className='modalContent'>
+                                <div className='tituloModal'>
+                                    <span>Descrições Padrão</span>
+                                </div>
+
+
+                                <div className='modalLista'>
+                                    <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-center">
+                                        <div className="row mobileajuster3">
+                                            <div className="col-1 col-sm-1 col-md-1 col-lg-1 col-xl-1 sumir">
+                                            </div>
+
+                                            <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
+                                                <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value, pesquisaExata: false }) }}>
+                                                    <option value={1}>Descricao</option>
+                                                    <option value={3}>Chave</option>
+                                                </select>
+                                                <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value, pesquisaExata: false }) }} />
+                                                {!this.props.modalLista[0] &&
+                                                    <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-center">
+                                                        <div><button onClick={() => { this.setState({ dadosIniciais: [], descricaoChave: 0, descricaoNome: '' }); this.props.alteraModal('criarDescricaoPadrao') }} className="btn btn-success">Adicionar Descrição Padrão</button></div>
+                                                    </div>}
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    {this.state.loadingPesquisa &&
+                                        <SkeletonPesquisa />
+                                    }
+
+                                    <div className="row deleteMargin" id="product-list">
+                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
+                                        <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12 mix all dresses bags">
+                                            <div className="single-product-item aasd">
+                                                <div className="row subtitulosTabela">
+                                                    <div className="col-lg-2 col-md-2 col-sm-2  col-2 text-center">
+                                                        <span className='subtituloships'>Chave</span>
+                                                    </div>
+                                                    <div className="col-7 text-center">
+                                                        <span className='subtituloships'>Descrição</span>
+                                                    </div>
+                                                    <div className="col-lg-3 col-md-3 col-sm-3 col-3 text-center">
+                                                        <span className='subtituloships'></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-lg-2 col-md-2 col-sm-0 col-0"></div>
+                                    </div>
+
+                                    <div className="row" id="product-list">
+                                        <div className="col-lg-2 col-md-2 col-sm-0 col-0"></div>
+                                        <div className="col-lg-8 col-md-8 col-sm-12 mobileajuste14 ">
+                                            {this.props.modalLista[0] != undefined && this.props.modalLista.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (
+                                                <div key={feed.id} className={index % 2 == 0 ? "col-lg-12 col-md-12 col-sm-12 mix all dresses bags par lightHover" : "col-lg-12 col-md-12 col-sm-12 mix all dresses bags itemLista impar darkHover"}>
+
+                                                    <div className="row ">
+                                                        <div onClick={() => this.props.alteraDescricaoPadrao(feed.chave)} className="col-lg-2 col-md-2 col-sm-2 col-2 text-left">
+                                                            <p className="mobileajuster5">{feed.chave}</p>
+                                                        </div>
+                                                        <div onClick={() => this.props.alteraDescricaoPadrao(feed.chave)} className="col-7 text-left">
+                                                            <h6 className="mobileajuster5">{feed.descricao}</h6>
+                                                        </div>
+                                                        <div className="col-lg-3 col-md-3 col-sm-3 col-3  text-left icones mobileajuster4 ">
+                                                            <div className='iconelixo giveMargin' type='button' >
+                                                                <div onClick={() => { this.setState({ dadosIniciais: [], descricaoChave: 0, descricaoNome: '' }); this.props.alteraModal('criarDescricaoPadrao') }}
+                                                                >
+                                                                    <FontAwesomeIcon icon={faPlus} />
+
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div className='iconelixo giveMargin' type='button' >
+                                                                <div onClick={() => {
+                                                                    this.setState({
+                                                                        descricaoNome: feed.descricao,
+                                                                        descricaoChave: feed.chave,
+
+                                                                        dadosIniciais: [
+                                                                            { titulo: 'descricao', valor: feed.descricaoNome },
+                                                                        ]
+                                                                    });
+                                                                    this.props.alteraModal('criarDescricaoPadrao')
+                                                                }}
+                                                                >
+                                                                    <FontAwesomeIcon icon={faPen} />
+                                                                </div>
+                                                            </div>
+
+                                                            {this.props.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'DESCRICOES_PADRAO') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
+
+                                                                <div type='button' className='iconelixo' onClick={(a) => this.deleteDescricaoPadrao(feed.chave, feed.descricao)} >
+                                                                    <FontAwesomeIcon icon={faTrashAlt} />
+                                                                </div>
+                                                            }
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="col-lg-2 col-md-2 col-sm-0 col-0"></div>
+                                        {this.props.modalLista.filter(this.filtrarPesquisa)[this.state.load] &&
+                                            <div className='loadMoreDiv'>
+                                                <div className='loadMore' onClick={() => { this.setState({ load: this.state.load + 100 }) }}>Carregar Mais...</div>
+                                            </div>
+                                        }
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>}
+
+
+
+                    {this.props.modal == 'criarDescricaoPadrao' &&
+                        <div className='modalCriar'>
+                            <div className='containersairlistprodmodal'>
+                                <div className='botaoSairModal' onClick={async () => { await this.setState({ tipoPesquisa: 1 }); await this.fecharModal() }}>
+                                    <span>X</span>
+                                </div>
+                            </div>
+                            <div className='modalContent'>
+                                <div className='tituloModal'>
+                                    <span>Descrições Padrão</span>
+                                </div>
+
+
+                                <div className='modalForm'>
+                                    <Formik
+                                        initialValues={{
+                                            name: '',
+                                        }}
+                                        onSubmit={async values => {
+                                            await new Promise(r => setTimeout(r, 1000))
+                                            this.salvarDescricaoPadrao(validFormDescricao)
+                                        }}
+                                    >
+                                        <Form className="contact-form" >
+
+                                            <div className="row">
+
+                                                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
+
+                                                    <div className="row addservicos">
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
+                                                            <label>Descrição</label>
+                                                        </div>
+                                                        <div className="col-1 errorMessage">
+                                                            {!this.state.descricaoNome &&
+                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                            }
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Field className="form-control" type="text" value={this.state.descricaoNome} onChange={async e => { this.setState({ descricaoNome: e.currentTarget.value }) }} />
+                                                        </div>
+                                                        <div className="col-1"></div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                                            </div>
+
+                                            <div className="row">
+                                                <div className="col-2"></div>
+                                                <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                    <button disabled={!validFormDescricao} type="submit" style={validFormDescricao ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
+                                                </div>
+                                                <div className="col-2"></div>
+                                            </div>
+
+                                        </Form>
+                                    </Formik>
+
+                                </div>
+                            </div>
+
+
+
+
+
+                        </div>}
+
 
 
 

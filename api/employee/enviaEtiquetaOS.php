@@ -21,25 +21,34 @@ $os = prepareInput($objData->os);
 $navio = prepareInput($objData->navio);
 $cliente = prepareInput($objData->cliente);
 $servico = prepareInput($objData->servico);
+$operador = prepareInput($objData->operador);
 $porto = prepareInput($objData->porto);
-$ets = prepareInput($objData->ets);
+$eta = prepareInput($objData->eta);
+$etb = prepareInput($objData->etb);
+$data_saida = prepareInput($objData->data_saida);
 
 if ($os) {
 
     $pdf = new FPDF();
     $pdf->AddPage();
     $pdf->SetFont('arial', '', 16);
-    $pdf->Cell(40, 10, "NAVIO: $navio");
+    $pdf->Cell(40, 10, "NAVIO: ".iconv('UTF-8', 'windows-1252', $navio));
     $pdf->Ln(10);
-    $pdf->Cell(40, 10, "PO: $os");
+    $pdf->Cell(40, 10, "PO: ".iconv('UTF-8', 'windows-1252', $os));
     $pdf->Ln(20);
-    $pdf->Cell(40, 10, "CLIENTE: $cliente");
+    $pdf->Cell(40, 10, "CLIENTE: ".iconv('UTF-8', 'windows-1252', $cliente));
     $pdf->Ln(10);
-    $pdf->Cell(40, 10, "SERVICO: $servico");
+    $pdf->Cell(40, 10, "SERVICO: ".iconv('UTF-8', 'windows-1252', $servico));
     $pdf->Ln(10);
-    $pdf->Cell(40, 10, "PORTO: $porto");
+    $pdf->Cell(40, 10, "PORTO: ".iconv('UTF-8', 'windows-1252', $porto));
     $pdf->Ln(10);
-    $pdf->Cell(40, 10, "ETS: $ets");
+    $pdf->Cell(40, 10, "OPERADOR: ".iconv('UTF-8', 'windows-1252', $operador));
+    $pdf->Ln(20);
+    $pdf->Cell(40, 10, "E.T.A.: ".iconv('UTF-8', 'windows-1252', $eta));
+    $pdf->Ln(20);
+    $pdf->Cell(40, 10, "E.T.B.: ".iconv('UTF-8', 'windows-1252', $etb));
+    $pdf->Ln(20);
+    $pdf->Cell(40, 10, "E.T.S.: ".iconv('UTF-8', 'windows-1252', $data_saida));
     $pdf->Ln(20);
     $pdf->Cell(40, 10, 'DATA DO FATURAMENTO: _____/_____/__________');
     $pdf->Ln(20);
@@ -49,7 +58,7 @@ if ($os) {
 
     //Create an instance; passing `true` enables exceptions
     $mail = new PHPMailer;
-
+    $mail->CharSet="UTF-8";
     //for ($i=0; $i<count($emails); $i++) {
     try {
         //Server settings
@@ -73,6 +82,8 @@ if ($os) {
         //Recipients
         $mail->setFrom('no-reply@tradesystem.com.br', 'Sultrade');
 
+        //$mail->addAddress('dev2@tradesystem.com.br');     //Add a recipient
+        
         $mail->addAddress('operations@sultradeagency.com');     //Add a recipient
         $mail->addAddress('accounts@sultradeagency.com');     //Add a recipient
         $mail->addCC('no-reply@tradesystem.com.br');
@@ -80,9 +91,9 @@ if ($os) {
 
         //Content
         $mail->isHTML(true);                                  //Set email format to HTML
-        $mail->Subject = 'Abertura de OS: ST5302';
+        $mail->Subject = "Abertura de OS: $os $navio - $porto";
         $mail->Body    = " ";
-        $mail->addStringAttachment($pdfdoc, 'OS_ST5302.pdf');
+        $mail->addStringAttachment($pdfdoc, "OS_$os.pdf");
 
         $mail->send();
     } catch (Exception $e) {

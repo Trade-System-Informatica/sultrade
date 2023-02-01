@@ -15,3 +15,52 @@
     border-bottom-left-radius: 0px !important;
     border-top-left-radius: 0px !important;
 }
+
+.taxaPortoTable {
+    width: 95%;
+    margin-left: 2.5%;
+}
+
+.taxaPortoTr {
+}
+
+.taxaPortoPar > td {
+    background-color: white;
+    color: black;
+}
+
+.taxaPortoImpar > td {
+    background-color: black;
+    color: white;
+}
+
+.taxaPortoImpar > .keepColor {
+    background-color: black;
+    color: black;
+}
+
+.taxaPortoTh {
+    padding: 5px;
+    font-size: 1.2em;
+    text-align: center;
+    width: 50%;
+}
+
+.taxaPortoTd {
+    text-overflow: ellipsis;
+    padding: 5px;
+}
+
+
+.salvarPortosButton {
+    color: #1e1e1e;
+	background: transparent;
+	border: none;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 13px 30px;
+	border: 2px solid #1e1e1e;
+	border-radius: 50px;
+	cursor: pointer;
+	text-transform: uppercase;
+}

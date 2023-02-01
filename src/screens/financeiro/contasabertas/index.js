@@ -4,14 +4,13 @@ import { apiEmployee } from '../../../services/apiamrg'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import Skeleton from '../../../components/skeleton'
-import { Link, useHistory, Redirect } from 'react-router-dom'
+import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { PRECISA_LOGAR, NOME_EMPRESA } from '../../../config'
+import { NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCashRegister, faHandHoldingUsd, faTrashAlt, faPen, faPlus, faEnvelope, faCreditCard } from '@fortawesome/free-solid-svg-icons'
+import { faCashRegister, faHandHoldingUsd } from '@fortawesome/free-solid-svg-icons'
 import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
-import moment from 'moment'
 
 
 const estadoInicial = {
@@ -226,7 +225,7 @@ class ContasAbertas extends Component {
                     {!this.state.loading &&
                         <div>
                             <section>
-                                <Header voltarFinanceiro titulo="Contas em Aberto"/>
+                                <Header voltarFinanceiroTabelas titulo="Contas em Aberto"/>
 
 
                                 <br />

@@ -39,24 +39,102 @@
 }
 
 .voucherImagem {
-    float: right;
+    position: absolute;
+    top: 120px;
+    right: 100px;
+}
+
+.k-grid {
+    font-family: "DejaVu Sans", "Arial", sans-serif;
 }
 
 .voucherHeader {
-    width: 80%;
+    width: 90%;
+    margin-left: 5%;
 }
 
-.voucherHeader > table {
-    width: 100%;
+.voucherHeader>table {
+    width: 90%;
+    margin-left: 5%;
 }
 
-.voucherContent > table {
-    width: 100%;
+.voucherContent>table {
+    width: 90%;
+    margin-left: 5%;
 }
 
-.voucherContent > table, .voucherContent > table tr, .voucherContent > table tr td {
+.voucherContent>table,
+.voucherContent>table tr,
+.voucherContent>table tr td {
     border: 1px solid black;
     border-collapse: collapse;
+}
+
+.faturamentoCabecalho {
+    text-align: left;
+    font-size: 0.9em;
+}
+
+.faturamentoTitulo {
+    width: 100%;
+    background-color: #9a9a9a;
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.faturamentoFooter {
+    width: 100%;
+    text-align: right;
+    padding-right: 25px;
+}
+
+
+.relatoriosSection {
+    width: 90%;
+    min-width: 300px;
+    margin-left: 5%;
+    margin-right: 5%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.k-grid {
+    font-family: "DejaVu Sans", "Arial", sans-serif;
+}
+
+.k-pdf-export .k-grid-content td[role="gridcell"] {
+    word-wrap: break-word;
+}
+
+.pdfTableCabecalho {
+    width: 90%;
+    margin-left: 5%;
+}
+
+.voucherTableFinal {
+    margin-left: 5%;
+    margin-bottom: 20px;
+    width: 90%;
+    border: 3px solid black !important;
+}
+
+.voucherFooter {
+    margin-left: 100px;
+}
+
+.voucherTable {
+    margin-left: 5%;
+    width: 90%;
+}
+
+.pdfHeader {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    align-items: center;
 }
 
 @media (min-width: 768px) {
@@ -66,5 +144,24 @@
         margin-left: 0;
         margin-right: 0;
         margin-top: 7px;
+    }
+}
+
+@media (max-width: 500px) {
+    .relatoriosSection {
+        width: 100%;
+        margin-left: 0px;
+        margin-right: 0px;
+        flex-direction: column;
+        justify-content: center;
+        align-content: center;
+    }
+
+    .relatorioButton {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        margin-bottom: 20px;
     }
 }

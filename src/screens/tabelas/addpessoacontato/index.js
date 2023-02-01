@@ -3,18 +3,12 @@ import './styles.css'
 import { Formik, Field, Form } from 'formik'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
-import util from '../../../classes/util'
 import loader from '../../../classes/loader'
-import { PRECISA_LOGAR } from '../../../config'
 import { connect } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import { Redirect } from 'react-router-dom'
-import Image from 'react-bootstrap/Image'
 import { apiEmployee } from '../../../services/apiamrg'
-import moment from 'moment'
-import InputMask from 'react-input-mask';
-import CEP from 'cep-promise'
 import ModalLogs from '../../../components/modalLogs'
 import Select from 'react-select';
 
@@ -26,7 +20,6 @@ const estadoInicial = {
     id: null,
     seaports: [],
     redirect: false,
-    finalizaOperacao: false,
     spanerror1: '',
     spanerror2: '',
     spanerror3: '',
@@ -80,15 +73,15 @@ class AddPessoaContato extends Component {
 
             await this.setState({
                 dadosIniciais: [
-                    {titulo: 'Tipo', valor: this.state.tipo},
-                    {titulo: 'Campo1', valor: this.state.campo1},
-                    {titulo: 'Campo2', valor: this.state.campo2},
+                    { titulo: 'Tipo', valor: this.state.tipo },
+                    { titulo: 'Campo1', valor: this.state.campo1 },
+                    { titulo: 'Campo2', valor: this.state.campo2 },
                 ]
             })
         }
         this.setState({ chave_pessoa: this.props.match.params.id })
         this.carregaTipos();
-        
+
 
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
@@ -170,12 +163,13 @@ class AddPessoaContato extends Component {
 
         await this.setState({
             dadosFinais: [
-                {titulo: 'Tipo', valor: this.state.tipo},
-                {titulo: 'Campo1', valor: this.state.campo1},
-                {titulo: 'Campo2', valor: this.state.campo2},
-            ]
+                { titulo: 'Tipo', valor: this.state.tipo },
+                { titulo: 'Campo1', valor: this.state.campo1 },
+                { titulo: 'Campo2', valor: this.state.campo2 },
+            ],
+            loading: true
         })
-        
+
         if (parseInt(this.state.chave) === 0 && validForm) {
             //$cols = 'data, titulo, texto, imagem, link, inativo';
             await apiEmployee.post(`insertContato.php`, {
@@ -186,8 +180,8 @@ class AddPessoaContato extends Component {
                     if (res.data[0]) {
                         await this.setState({ chave: res.data[0].Chave })
                         await loader.salvaLogs('pessoas_contatos', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
- 
-                        await this.setState({ finalizaOperacao: true })
+
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         //alert(`Erro: ${res.data}`)
                     }
@@ -207,7 +201,7 @@ class AddPessoaContato extends Component {
                     if (res.data === true) {
                         await loader.salvaLogs('pessoas_contatos', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `CONTATO: ${this.state.campo1}`);
 
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         //await alert(`Erro`)
                     }
@@ -253,23 +247,17 @@ class AddPessoaContato extends Component {
                 {this.state.redirect &&
                     <Redirect to={'/'} />
                 }
-                {this.state.finalizaOperacao && this.props.location.state.backTo == 'addpessoa' &&
-                    <Redirect to={{ pathname: `/tabelas/addpessoa/${this.props.location.state.pessoa.Chave}`, state: { pessoa: { ...this.props.location.state.pessoa } } }} />
-                }
-                {this.state.finalizaOperacao && this.props.location.state.backTo == 'contatos' &&
-                    <Redirect to={{ pathname: `/tabelas/pessoacontatos/${this.props.location.state.pessoa.Chave}`, state: { pessoa: { ...this.props.location.state.pessoa }, chave: this.state.chave } }} />
-                }
 
                 <section>
                     {this.props.location.state.backTo == 'addpessoa' &&
-                        <Header voltarAddPessoa pessoa={this.props.location.state.pessoa} titulo="Contatos"/>
+                        <Header voltarAddPessoa pessoa={this.props.location.state.pessoa} titulo="Contatos" />
                     }
                     {this.props.location.state.backTo == 'contatos' &&
-                        <Header voltarPessoaContatos pessoa={this.props.location.state.pessoa} chave={this.state.chave != 0 ? this.state.chave : ''} titulo="Contatos"/>
+                        <Header voltarPessoaContatos pessoa={this.props.location.state.pessoa} chave={this.state.chave != 0 ? this.state.chave : ''} titulo="Contatos" />
                     }
                 </section>
 
-                {this.state.chave !=0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                     <div className="logButton">
                         <button onClick={() => this.openLogs()}>Logs</button>
                     </div>
@@ -333,7 +321,7 @@ class AddPessoaContato extends Component {
                                                     <Select className='SearchSelect' value={this.state.tipo} options={this.state.tiposOptions} onChange={(e) => { this.setState({ tipo: e.value, tipoNome: e.label }) }} placeholder={this.state.tipoNome} />
                                                 </div>
                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                    <label>Campo1</label>
+                                                    <label>Descrição</label>
                                                 </div>
                                                 <div className='col-1 errorMessage'>
                                                     {!this.state.campo1 &&
@@ -344,11 +332,20 @@ class AddPessoaContato extends Component {
                                                     <Field className="form-control" type="text" value={this.state.campo1} onChange={async e => { this.setState({ campo1: e.currentTarget.value }) }} />
                                                 </div>
                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                    <label>Campo2</label>
+                                                    <label>Complemento</label>
                                                 </div>
                                                 <div className='col-1'></div>
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                    <Field className="form-control" type="text" value={this.state.campo2} onChange={async e => { this.setState({ campo2: e.currentTarget.value }) }} />
+                                                    {this.state.tipo != "PX" &&
+                                                        <Field className="form-control" type="text" value={this.state.campo2} onChange={async e => { this.setState({ campo2: e.currentTarget.value }) }} />
+                                                    }
+                                                    {this.state.tipo == "PX" &&
+                                                        <select className="form-control" value={this.state.campo2} onChange={async e => { this.setState({ campo2: e.currentTarget.value }) }}>
+                                                            <option value="E-mail">E-mail</option>
+                                                            <option value="Telefone">Celular</option>
+                                                            <option value="CPF/CNPJ">CPF/CNPJ</option>
+                                                        </select>
+                                                    }
                                                 </div>
 
 

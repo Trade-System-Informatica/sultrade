@@ -28,9 +28,13 @@ export const API_BANCO_BOL_GET = '/lotes-boletos/';
 export const API_BANCO_CONVENIO = '/lotes-guias-codigo-barras';
 export const API_BANCO_CONVENIO_GET = '/lotes-guias-codigo-barras/';
 
-export const API_BANCO_PIX = '/arrecadacao-qrcodes';
+export const API_BANCO_PIX = '/lotes-transferencias-pix';
+export const API_BANCO_PIX_GET = '/lotes-transferencias-pix';
 
 export const API_LIBERAR = '/liberar-pagamentos';
 
 export const URL_SIGISS = "https://riogrande.sigiss.com.br/riogrande/ws/sigiss_ws.php?wsdl";
-export const URL_SOAPACTION = "http://tempuri.org/GerarNota"
+export const URL_SOAPACTION = "http://tempuri.org/GerarNota";
+
+export const URL_SIGISS_CANCELAMENTO = "https://riogrande.sigiss.com.br/riogrande/ws/sigiss_ws.php?wsdl";
+export const URL_SOAPACTION_CANCELAMENTO = "http://tempuri.org/CancelarNota";

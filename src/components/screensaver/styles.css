@@ -1,0 +1,26 @@
+.screenSaver {
+	position: fixed;
+	height: 100vh;
+	width: 100vw;
+	z-index: -999;
+	background-image: url("https://ibb.co/XVJbTH5");
+}
+
+.screenSaverActive {
+	z-index: 999;
+	animation-name: backgroundColorPalette;
+	animation-duration: 1s;
+	animation-fill-mode: forwards;
+	animation-direction:normal;
+	animation-timing-function: linear; 
+	/* linear is enabled default, it’s not necessary to add it make it work but it can make your code more expressive */
+}
+
+@keyframes backgroundColorPalette {
+	0% {
+		background: rgba(255, 255, 255, 00);
+	}
+	100% {
+		background: #080d29;
+	}
+}

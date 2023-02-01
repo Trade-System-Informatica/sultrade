@@ -20,7 +20,6 @@ const estadoInicial = {
     id: null,
     seaports: [],
     redirect: false,
-    finalizaOperacao: false,
     spanerror1: '',
     spanerror2: '',
     spanerror3: '',
@@ -136,7 +135,8 @@ class AddGrupo extends Component {
         await this.setState({
             dadosFinais: [
                 { titulo: 'descricao', valor: this.state.descricao }
-            ]
+            ],
+            loading: true
         })
 
         if (parseInt(this.state.chave) === 0 && validForm) {
@@ -149,7 +149,7 @@ class AddGrupo extends Component {
                         await this.setState({ chave: res.data[0].chave })
                         await loader.salvaLogs('os_grupos_taxas', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
 
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                     }
                 },
@@ -165,7 +165,7 @@ class AddGrupo extends Component {
                     if (res.data === true) {
                         await loader.salvaLogs('os_grupos_taxas', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `GRUPOS DE TAXAS: ${this.state.descricao}`);
 
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                     }
                 },
@@ -211,11 +211,7 @@ class AddGrupo extends Component {
                 {this.state.redirect &&
                     <Redirect to={'/'} />
                 }
-
-                {this.state.finalizaOperacao &&
-                    <Redirect to={{ pathname: '/tabelas/grupos', state: { chave: this.state.chave } }} />
-                }
-
+                
                 <section>
                     <Header voltarGrupos titulo="Grupos de Taxa" chave={this.state.chave != 0 ? this.state.chave : ''} />
                 </section>

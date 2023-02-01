@@ -3,16 +3,12 @@ import './styles.css'
 import { Formik, Field, Form } from 'formik'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
-import util from '../../../classes/util'
 import loader from '../../../classes/loader'
-import { PRECISA_LOGAR } from '../../../config'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
-import Image from 'react-bootstrap/Image'
 import { apiEmployee } from '../../../services/apiamrg'
-import moment from 'moment'
 import InputMask from 'react-input-mask';
 import ModalLogs from '../../../components/modalLogs'
 import CEP from 'cep-promise'
@@ -26,7 +22,6 @@ const estadoInicial = {
     id: null,
     seaports: [],
     redirect: false,
-    finalizaOperacao: false,
     spanerror1: '',
     spanerror2: '',
     spanerror3: '',
@@ -98,11 +93,11 @@ class AddPessoaEndereco extends Component {
         ...estadoInicial,
         usuarioLogado: this.props.user
     }
-
+    
     componentDidMount = async () => {
         window.scrollTo(0, 0)
         var ed = await this.props.match.params.ed
-        await this.setState({ chave: ed })
+        await this.setState({ chave: ed, chave_pessoa: this.props.match.params.id })
         if (parseInt(ed) != 0) {
             await this.setState({ endereco: this.props.location.state.endereco })
             //console.log('Servicos: ' + JSON.stringify(this.state.tiposervico))
@@ -143,8 +138,9 @@ class AddPessoaEndereco extends Component {
                 ]
             })
             
+        } else {
+            this.getCPF();
         }
-        this.setState({ chave_pessoa: this.props.match.params.id })
         this.getLugares();
 
         await this.carregaTiposAcessos()
@@ -211,6 +207,22 @@ class AddPessoaEndereco extends Component {
         }
     }
 
+    getCPF = async () => {
+        await apiEmployee.post(`getCPF.php`, {
+            token: true, chave: this.state.chave_pessoa
+        }).then(
+            async res => {
+                if (!res.data[0].cpf) {
+                    this.setState({uf: 81, ufNome: "EXTERIOR"});
+                }
+            }, 
+            async err => {
+                console.log(err)
+            }
+        );
+
+    }
+
     getLugares = async () => {
         await apiEmployee.post('getLugares.php', {
             token: true
@@ -260,13 +272,14 @@ class AddPessoaEndereco extends Component {
                 {titulo: 'bairro', valor: this.state.bairro},
                 {titulo: 'Cidade_Descricao', valor: this.state.cidade_descricao},
                 {titulo: 'pais', valor: this.state.pais},
-            ]
+            ],
+            loading: true
         })
 
         if (parseInt(this.state.chave) === 0 && validForm) {
             await apiEmployee.post(`insertEndereco.php`, {
                 token: true,
-                values: `'${this.state.tipo}', '${this.state.endereco}', '${this.state.numero}', '${this.state.complemento}', ${this.state.cidade}, '${this.state.cepLimpo}', ${this.state.uf}, '${this.state.bairro}', '${this.state.cidade_descricao}', '${this.state.pais}', ${this.state.chave_pessoa}`,
+                values: `'${this.state.tipo}', '${this.state.endereco}', '${this.state.numero}', '${this.state.complemento}', '${this.state.cidade}', '${this.state.cepLimpo}', ${this.state.uf}, '${this.state.bairro}', '${this.state.cidade_descricao}', '${this.state.pais}', ${this.state.chave_pessoa}`,
                 Tipo: this.state.tipo,
                 Chave_Pessoa: this.state.chave_pessoa
             }).then(
@@ -276,7 +289,7 @@ class AddPessoaEndereco extends Component {
                         await loader.salvaLogs('pessoas_enderecos', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
 
                         
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         alert(`Erro: ${JSON.stringify(res)}`)
                     }
@@ -303,7 +316,7 @@ class AddPessoaEndereco extends Component {
                     if (res.data === true) {
                         await loader.salvaLogs('pessoas_enderecos', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `ENDERECO: ${this.state.endereco}`);
 
-                        await this.setState({ finalizaOperacao: true })
+                        await this.setState({ loading: false, bloqueado: false })
                     } else {
                         await alert(`Erro ${JSON.stringify(res)}`)
                     }
@@ -376,13 +389,6 @@ class AddPessoaEndereco extends Component {
             <div className='allContent'>
                 {this.state.redirect &&
                     <Redirect to={'/'} />
-                }
-
-                {this.state.finalizaOperacao && this.props.location.state.backTo == 'addpessoa' &&
-                    <Redirect to={{ pathname: `/tabelas/addpessoa/${this.props.location.state.pessoa.Chave}`, state: { pessoa: { ...this.props.location.state.pessoa } } }} />
-                }
-                {this.state.finalizaOperacao && this.props.location.state.backTo == 'enderecos' &&
-                    <Redirect to={{ pathname: `/tabelas/pessoaenderecos/${this.props.location.state.pessoa.Chave}`, state: { pessoa: { ...this.props.location.state.pessoa }, chave: this.state.chave } }} />
                 }
 
                 <section>

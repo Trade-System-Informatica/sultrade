@@ -20,10 +20,11 @@ if($objData != NULL){
     $conta_retencao_pis = prepareInput($objData->conta_retencao_pis);
     $conta_retencao_cofins = prepareInput($objData->conta_retencao_cofins);
     $conta_retencao_csll = prepareInput($objData->conta_retencao_csll);
+    $bank_charges = prepareInput($objData->bank_charges);
     
     $operadores = new Operadores();
 
-    $result = $operadores->updateParametros($Empresa, $conta_desconto, $conta_retencao_inss, $conta_retencao_ir, $conta_retencao_iss, $conta_retencao_pis, $conta_retencao_cofins, $conta_retencao_csll);
+    $result = $operadores->updateParametros($Empresa, $conta_desconto, $conta_retencao_inss, $conta_retencao_ir, $conta_retencao_iss, $conta_retencao_pis, $conta_retencao_cofins, $conta_retencao_csll, $bank_charges);
 
 } else {
     $result = "false";

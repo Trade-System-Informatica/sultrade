@@ -64,7 +64,7 @@ export default class Util {
         return parseFloat(valor.replace('.','').replace(',','.')).toFixed(2);
     }
 
-    static async formataDinheiroBrasileiro(valor) {
+    static formataDinheiroBrasileiro(valor) {
         if (typeof valor != "string") {
             valor += "";
         }
@@ -73,7 +73,9 @@ export default class Util {
             return "";
         }
 
-        return new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor);
+        const valorFormatado = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor);
+
+        return valorFormatado;
     }
 
     static returnIfExists(item, item2) {
@@ -184,4 +186,53 @@ export default class Util {
         const hash = await crypto.subtle.digest('SHA-256', data)
         return hash
     }
+
+    static async constroiJsonBB(data) {
+        if (typeof data == "string") {
+            const start = data.indexOf(",\"texto\":");
+            const end = data.indexOf("}],\"l")
+            
+            if (start != -1 && end != -1) {
+                return JSON.parse(data.replaceAll(data.slice(start, end), ""));
+            } else {
+
+                return JSON.parse(data);
+            }
+        } else {
+            return data;
+        }
+    }
+
+    static async turnToOption(array, label, value) {
+        return array.map((key) => ({label: key[label], value: key[value]}));
+    }
+
+    static async formataCPF(input) {
+        input = `${input}`;
+        
+        if (input.length <= 11) {
+            for (; input.length < 11;) {
+                input = `0${input}`;
+            }
+            
+            return `${input.substring(0, 3)}.${input.substring(3, 6)}.${input.substring(6, 9)}-${input.substring(9)}`;
+        } else {
+            for (; input.length < 14;) {
+                input = `0${input}`;
+            }
+
+            return `${input.substring(0, 2)}.${input.substring(2, 5)}.${input.substring(5, 8)}/${input.substring(8, 12)}-${input.substring(12)}`;
+        }
+    }
+
+    static formataData(input) {
+        input = `${input}`
+        
+        for (; input.length < 8;) {
+            input = `0${input}`;
+        }
+        
+        return `${input.substring(0, 2)}/${input.substring(2, 4)}/${input.substring(4)}`;   
+    }
+
 }

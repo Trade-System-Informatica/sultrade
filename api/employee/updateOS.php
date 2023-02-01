@@ -35,10 +35,11 @@ if($objData != NULL){
     $etb = prepareInput($objData->etb);
     $governmentTaxes = prepareInput($objData->governmentTaxes);
     $bankCharges = prepareInput($objData->bankCharges);
+    $operador = prepareInput($objData->operador);
 
     $os = new OS();
 
-        $result = $os->updateOS($Chave, $Descricao, $Chave_Cliente, $chave_navio, $Data_Abertura, $Data_Chegada, $chave_tipo_servico, $viagem, $porto, $Data_Saida, $Data_Encerramento, $Data_Faturamento, $centro_custo, $ROE, $Comentario_Voucher, $encerradoPor, $faturadoPor, $Empresa, $eta, $atb, $etb, $governmentTaxes, $bankCharges);
+        $result = $os->updateOS($Chave, $Descricao, $Chave_Cliente, $chave_navio, $Data_Abertura, $Data_Chegada, $chave_tipo_servico, $viagem, $porto, $Data_Saida, $Data_Encerramento, $Data_Faturamento, $centro_custo, $ROE, $Comentario_Voucher, $encerradoPor, $faturadoPor, $Empresa, $eta, $atb, $etb, $governmentTaxes, $bankCharges, $operador);
 
 } else {
     $result = "false";

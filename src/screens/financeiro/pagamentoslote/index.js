@@ -18,16 +18,21 @@ import {
     API_BANCO_TRANS_GET,
     API_BANCO_BOL,
     API_BANCO_BOL_GET,
+    API_BANCO_PIX,
+    API_BANCO_PIX_GET,
     API_LIBERAR,
     API_BANCO_CONVENIO,
     API_BANCO_CONVENIO_GET
 } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons'
+import { faChevronUp, faChevronDown, faFileInvoiceDollar } from '@fortawesome/free-solid-svg-icons'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import moment from 'moment'
 import Select from 'react-select';
 import loader from '../../../classes/loader'
+import Util from '../../../classes/util'
+import { PDFExport } from "@progress/kendo-react-pdf";
+import Alert from '../../../components/alert';
 
 const estadoInicial = {
     name: '',
@@ -66,6 +71,7 @@ const estadoInicial = {
 
     pesquisa: "",
 
+    error: { msg: "", type: "" },
     mostraFiltros: true,
 
     loading: true,
@@ -82,9 +88,14 @@ const estadoInicial = {
     liberacoesBloqueado: false,
 
     errors: [],
+    pdfGerado: ""
 }
 
 class PagamentosLote extends Component {
+    constructor(props) {
+        super(props);
+        this.pdfExportComponent = React.createRef(null);
+    }
 
     state = {
         ...estadoInicial,
@@ -92,7 +103,7 @@ class PagamentosLote extends Component {
     }
 
     componentDidMount = async () => {
-        this.setState({requisicoesCarregando: []})
+        this.setState({ requisicoesCarregando: [] })
         await this.loadAll();
 
         this.state.acessosPermissoes.map((e) => {
@@ -149,7 +160,7 @@ class PagamentosLote extends Component {
         const transacoes = await loader.getBase(`getTransacoesPagas.php`, this.state.usuarioLogado.empresa);
 
         if (transacoes.find((e) => e.meio_pagamento)) {
-            await this.setState({ transacoes: transacoes.filter((e) => e.meio_pagamento) });
+            await this.setState({ transacoes: transacoes.filter((e) => e.meioPagamento) });
         } else {
             await this.setState({ transacoes: [] });
         }
@@ -251,7 +262,7 @@ class PagamentosLote extends Component {
                 }).then(
                     async res => {
                         const requisicoes = this.state.requisicoesCarregando;
-                        const id = this.state.bbTrc.find((e) => e.codigo == res.data.estadoPagamento).status;
+                        const id = this.state.bbGet.find((e) => e.codigo == res.data.estadoRequisicao).status;
 
                         requisicoes.push(`Conta ${e.Historico} (chave ${e.Chave}) - ${id == 3 ? "Aceita" : id == 0 ? "Rejeitada" : "Paga"}`);
 
@@ -260,8 +271,48 @@ class PagamentosLote extends Component {
                     }
                 )
             } else if (e.meioPagamento == 'PIX') {
+                const dadosComplementares = await apiEmployee.post('getContasComplementar.php', {
+                    token: true,
+                    chave: e.Chave
+                }).then(
+                    async res => {
+                        console.log(res.data[0])
+                        return res.data[0];
+                    },
+                    async err => console.log(`erro: ` + err)
+                )
 
+                await apiEmployee.post(`enviaPIX.php`, {
+                    token: true,
+                    url: `${API_BANCO}${API_BANCO_PIX}`,
+                    pessoa: e.Pessoa,
+                    conta: e,
+                    codigo,
+                    empresa: this.state.usuarioLogado.empresa,
+                    operador: this.state.usuarioLogado.codigo,
+                    lote: this.state.lote,
+                    dadosComplementares
+                }).then(
+                    async res => {
+                        console.log(res);
+                        console.log(res.data);
 
+                        const requisicoes = this.state.requisicoesCarregando;
+                        if (res.data.erros) {
+                            requisicoes.push(`Conta ${e.Historico} (chave ${e.Chave}) - "Rejeitada"`);
+
+                            await this.setState({ requisicoesCarregando: requisicoes })
+                            return;
+                        }
+
+                        const id = this.state.bbGet.find((e) => e.codigo == res.data.estadoRequisicao).status;
+
+                        requisicoes.push(`Conta ${e.Historico} (chave ${e.Chave}) - ${id == 3 ? "Aceita" : id == 0 ? "Rejeitada" : "Paga"}`);
+
+                        await this.setState({ requisicoesCarregando: requisicoes })
+
+                    }
+                )
             } else if (e.meioPagamento == "BOL") {
                 await apiEmployee.post(`enviaBOL.php`, {
                     token: true,
@@ -276,7 +327,7 @@ class PagamentosLote extends Component {
                     async res => {
                         console.log(res);
                         console.log(res.data);
-                        
+
                         const requisicoes = this.state.requisicoesCarregando;
                         const id = this.state.bbGet.find((e) => e.codigo == res.data.estadoRequisicao).status;
 
@@ -300,9 +351,9 @@ class PagamentosLote extends Component {
                     async res => {
                         console.log(res);
                         console.log(res.data);
-                        
+
                         const requisicoes = this.state.requisicoesCarregando;
-                        const id = this.state.bbGet.find((e) => e.codigo == res.data.codigoEstado ).status;
+                        const id = this.state.bbGet.find((e) => e.codigo == res.data.codigoEstado).status;
 
                         requisicoes.push(`Conta ${e.Historico} (chave ${e.Chave}) - ${id == 3 ? "Aceita" : id == 0 ? "Rejeitada" : "Paga"}`);
                         await this.setState({ requisicoesCarregando: requisicoes })
@@ -375,7 +426,6 @@ class PagamentosLote extends Component {
 
                     }
                 )
-
             } else if (e.meioPagamento == "GPS") {
                 const dadosComplementares = await apiEmployee.post('getContasComplementar.php', {
                     token: true,
@@ -447,7 +497,6 @@ class PagamentosLote extends Component {
         await this.setState({ loading: false, requisicoesCarregando: [] })
     }
 
-
     consultarLote = async () => {
         await this.setState({ loading: true });
         const contas = this.state.contas.filter((e) => this.filtrarPesquisa && e.check).splice(0, this.state.load);
@@ -484,6 +533,33 @@ class PagamentosLote extends Component {
                     err => { this.erroApi(err) }
                 )
             } else if (e.meioPagamento == 'PIX') {
+                await apiEmployee.post(`getContatos.php`, {
+                    token: true,
+                    pessoa: e.Pessoa
+                }).then(
+                    async res => {
+                        dados.push({
+                            dadosBase: {
+                                chave: e.Chave,
+                                data: e.data_hora_envio,
+                                historico: e.Historico,
+                                transacao_chave: e.transacao_chave,
+                                valor: e.Valor,
+                                saldo: e.Saldo,
+                                cpf: e.pessoaCPF,
+                                transacao: e.transacao,
+                                existe: e.existe,
+                                status: e.status,
+                                statusId: e.statusId,
+                                meio: e.meioPagamento,
+                            },
+
+                            id: e.transacao,
+                        })
+                    },
+                    err => { this.erroApi(err) }
+
+                )
 
             } else if (e.meioPagamento == "BOL") {
                 await apiEmployee.post(`getContatos.php`, {
@@ -644,6 +720,7 @@ class PagamentosLote extends Component {
 
             if (!e.dadosBase.error) {
                 if (e.dadosBase.meio == 'TRC') {
+                    console.log(e);
                     await apiEmployee.post(`consultaTRC.php`, {
                         token: true,
                         url: `${API_BANCO}${API_BANCO_TRANS_GET}${e.dadosBase.cpf}/transferencias`,
@@ -655,86 +732,109 @@ class PagamentosLote extends Component {
                             console.log(res)
                             console.log(res.data)
 
-                            if (res.data && !res.data.erros) {
-                                let trans = {};
+                            try {
+                                if (res.data && !res.data.erros) {
+                                    let trans = {};
 
-                                if (res.data.transferencias && res.data.transferencias[0]) {
-                                    trans = res.data.transferencias.find((trans) => trans.valorTransferencia == e.dadosBase.valor && parseFloat(trans.cpfCnpjBeneficiario) == parseFloat(e.dadosBase.cpf));
-                                }
-
-                                if (trans && trans.estadoPagamento) {
-                                    let statusId = 0;
-                                    if (["AGENDADO", "AGUARDANDO SALDO", "CONSISTENTE", "PENDENTE"].includes(trans.estadoPagamento)) {
-                                        statusId = e.dadosBase.statusId == 2 ? 2 : 3;
-                                    } else if (["DEBITADO", "PAGO"].includes(trans.estadoPagamento)) {
-                                        statusId = 4;
-                                    } else if (["BLOQUEADO", "CANCELADO", "INCONSISTENTE", "REJEITADO", "VENCIDO"]) {
-                                        statusId = 1;
+                                    if (res.data.transferencias && res.data.transferencias[0]) {
+                                        trans = res.data.transferencias.filter((trans) => trans.valorTransferencia == e.dadosBase.valor && parseFloat(trans.cpfCnpjBeneficiario) == parseFloat(e.dadosBase.cpf));
                                     }
-                                    status.push({
-                                        conta: e.dadosBase.chave,
-                                        transacao_chave: e.dadosBase.transacao_chave,
-                                        transacao: e.dadosBase.transacao,
-                                        existe: e.dadosBase.existe,
-                                        valor: e.dadosBase.valor,
-                                        saldo: e.dadosBase.saldo,
-                                        status: `${trans.estadoPagamento} ${statusId == 1 ? " - Tente novamente" : ""}`,
-                                        statusId,
-                                        errors: ''
-                                    })
-                                    const requisicoes = this.state.requisicoesCarregando;
 
-                                    requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${statusId == 3 ? "Aceita" : statusId == 0 ? "Rejeitada" : "Paga"}`);
+                                    if (trans[0]) {
+                                        trans = trans.at(-1);
+                                    }
 
-                                    await this.setState({ requisicoesCarregando: requisicoes })
+                                    if (trans && trans.estadoPagamento) {
+                                        let statusId = 0;
+                                        if (["AGENDADO", "AGUARDANDO SALDO", "CONSISTENTE", "PENDENTE"].includes(trans.estadoPagamento)) {
+                                            statusId = e.dadosBase.statusId == 2 ? 2 : 3;
+                                        } else if (["DEBITADO", "PAGO"].includes(trans.estadoPagamento)) {
+                                            statusId = 4;
+                                        } else if (["BLOQUEADO", "CANCELADO", "INCONSISTENTE", "REJEITADO", "VENCIDO"]) {
+                                            statusId = 1;
+                                        }
+                                        status.push({
+                                            conta: e.dadosBase.chave,
+                                            transacao_chave: e.dadosBase.transacao_chave,
+                                            transacao: e.dadosBase.transacao,
+                                            existe: e.dadosBase.existe,
+                                            valor: e.dadosBase.valor,
+                                            saldo: e.dadosBase.saldo,
+                                            status: `${trans.estadoPagamento} ${statusId == 1 ? " - Tente novamente" : ""}`,
+                                            statusId,
+                                            errors: ''
+                                        })
+                                        const requisicoes = this.state.requisicoesCarregando;
+
+                                        requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${statusId == 3 || statusId == 2 ? "Aceita" : statusId == 0 ? "Rejeitada" : "Paga"}`);
+
+                                        await this.setState({ requisicoesCarregando: requisicoes })
+                                    } else {
+                                        status.push({
+                                            conta: e.dadosBase.chave,
+                                            transacao_chave: e.dadosBase.transacao_chave,
+                                            transacao: e.dadosBase.transacao,
+                                            existe: e.dadosBase.existe,
+                                            valor: e.dadosBase.valor,
+                                            saldo: e.dadosBase.saldo,
+                                            status: "Não encontrado.",
+                                            statusId: 0,
+                                            errors: ''
+                                        })
+                                        const requisicoes = this.state.requisicoesCarregando;
+
+                                        requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Rejeitada`);
+
+                                        await this.setState({ requisicoesCarregando: requisicoes })
+                                    }
                                 } else {
-                                    status.push({
-                                        conta: e.dadosBase.chave,
-                                        transacao_chave: e.dadosBase.transacao_chave,
-                                        transacao: e.dadosBase.transacao,
-                                        existe: e.dadosBase.existe,
-                                        valor: e.dadosBase.valor,
-                                        saldo: e.dadosBase.saldo,
-                                        status: "Não encontrado.",
-                                        statusId: 0,
-                                        errors: ''
-                                    })
+                                    try {
+                                        status.push({
+                                            conta: e.dadosBase.chave,
+                                            transacao_chave: e.dadosBase.transacao_chave,
+                                            transacao: e.dadosBase.transacao,
+                                            existe: e.dadosBase.existe,
+                                            valor: e.dadosBase.valor,
+                                            saldo: e.dadosBase.saldo,
+                                            status: this.state.bbErr.find((e) => e.codigo == res.data.lancamentos[0].erros[0]).mensagem,
+                                            statusId: 0,
+                                            errors: ''
+                                        })
+                                    } catch (err) {
+                                        status.push({
+                                            conta: e.dadosBase.chave,
+                                            transacao_chave: e.dadosBase.transacao_chave,
+                                            transacao: e.dadosBase.transacao,
+                                            existe: e.dadosBase.existe,
+                                            valor: e.dadosBase.valor,
+                                            saldo: e.dadosBase.saldo,
+                                            status: "Erro Desconhecido",
+                                            statusId: 0,
+                                            errors: ''
+                                        })
+                                    }
+
                                     const requisicoes = this.state.requisicoesCarregando;
 
                                     requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Rejeitada`);
-
                                     await this.setState({ requisicoesCarregando: requisicoes })
                                 }
-                            } else {
-                                try {
-                                    status.push({
-                                        conta: e.dadosBase.chave,
+                            } catch (err) {
+                                status.push({
+                                    conta: e.dadosBase.chave,
                                     transacao_chave: e.dadosBase.transacao_chave,
                                     transacao: e.dadosBase.transacao,
                                     existe: e.dadosBase.existe,
                                     valor: e.dadosBase.valor,
                                     saldo: e.dadosBase.saldo,
-                                    status: this.state.bbErr.find((e) => e.codigo == res.data.lancamentos[0].erros[0]).mensagem,
+                                    status: "Erro interno no sistema, tente novamente mais tarde",
                                     statusId: 0,
                                     errors: ''
                                 })
-                            } catch(err) {
-                                status.push({
-                                    conta: e.dadosBase.chave,
-                                transacao_chave: e.dadosBase.transacao_chave,
-                                transacao: e.dadosBase.transacao,
-                                existe: e.dadosBase.existe,
-                                valor: e.dadosBase.valor,
-                                saldo: e.dadosBase.saldo,
-                                status: "Erro Desconhecido",
-                                statusId: 0,
-                                errors: ''
-                            }) 
-                            }
-
                                 const requisicoes = this.state.requisicoesCarregando;
 
-                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Rejeitada`);
+                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Erro interno`);
+
                                 await this.setState({ requisicoesCarregando: requisicoes })
                             }
                         },
@@ -757,41 +857,62 @@ class PagamentosLote extends Component {
                         }
                     )
                 } else if (e.dadosBase.meio == 'PIX') {
-
-                } else if (e.dadosBase.meio == 'BOL') {
-                    await apiEmployee.post(`consultaBOL.php`, {
+                    await apiEmployee.post(`consultaPIX.php`, {
                         token: true,
-                        url: `${API_BANCO}${API_BANCO_BOL_GET}${e.id}/solicitacao`,
+                        url: `${API_BANCO}${API_BANCO_PIX_GET}/${e.id}/solicitacao`,
                         empresa: this.state.usuarioLogado.empresa
                     }).then(
                         async res => {
-                            console.log(res)
-                            console.log(res.data)
+                            try {
+                                console.log(res);
+                                if (res.data) {
+                                    console.log(res.data);
+                                    const response = await Util.constroiJsonBB(res.data);
+                                    console.log(response);
 
-                            if (res.data && !res.data.lancamentos[0].erros[0]) {
-                                const newStatusId = this.state.bbGet.find((e) => e.codigo == res.data.estadoRequisicao).status;
-                                console.log(newStatusId)
-                                console.log(e.dadosBase.statusId)
+                                    if (response) {
+                                        const newStatusId = this.state.bbTrc.find((e) => e.codigo == response.estadoPagamento).status;
+                                        console.log(newStatusId)
+                                        console.log(e.dadosBase.statusId)
 
-                                status.push({
-                                    conta: e.dadosBase.chave,
-                                    transacao_chave: e.dadosBase.transacao_chave,
-                                    transacao: e.dadosBase.transacao,
-                                    existe: e.dadosBase.existe,
-                                    valor: e.dadosBase.valor,
-                                    saldo: e.dadosBase.saldo,
-                                    status: this.state.bbGet.find((e) => e.codigo == res.data.estadoRequisicao).mensagem,
-                                    statusId: newStatusId == 3 && e.dadosBase.statusId == 2 ? 2 : newStatusId,
-                                    errors: ''
-                                })
-                                const requisicoes = this.state.requisicoesCarregando;
+                                        status.push({
+                                            conta: e.dadosBase.chave,
+                                            transacao_chave: e.dadosBase.transacao_chave,
+                                            transacao: e.dadosBase.transacao,
+                                            existe: e.dadosBase.existe,
+                                            valor: e.dadosBase.valor,
+                                            saldo: e.dadosBase.saldo,
+                                            status: this.state.bbTrc.find((e) => e.codigo == response.estadoPagamento).mensagem,
+                                            statusId: newStatusId == 3 && e.dadosBase.statusId == 2 ? 2 : newStatusId,
+                                            errors: ''
+                                        })
+                                        const requisicoes = this.state.requisicoesCarregando;
 
-                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${newStatusId == 3 ? "Aceita" : newStatusId == 0 ? "Rejeitada" : "Paga"}`);
-                                await this.setState({ requisicoesCarregando: requisicoes })
+                                        requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${newStatusId == 3 || newStatusId == 2 ? "Aceita" : newStatusId == 0 ? "Rejeitada" : "Paga"}`);
+                                        await this.setState({ requisicoesCarregando: requisicoes })
 
 
-                            } else {
-                                try {
+                                    } else {
+
+                                        status.push({
+                                            conta: e.dadosBase.chave,
+                                            transacao_chave: e.dadosBase.transacao_chave,
+                                            transacao: e.dadosBase.transacao,
+                                            existe: e.dadosBase.existe,
+                                            valor: e.dadosBase.valor,
+                                            saldo: e.dadosBase.saldo,
+                                            status: "Erro Desconhecido",
+                                            statusId: 0,
+                                            errors: ''
+                                        })
+                                        const requisicoes = this.state.requisicoesCarregando;
+
+                                        requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Rejeitada`);
+                                        await this.setState({ requisicoesCarregando: requisicoes })
+                                    }
+                                } else {
+                                    const requisicoes = this.state.requisicoesCarregando;
+
                                     status.push({
                                         conta: e.dadosBase.chave,
                                         transacao_chave: e.dadosBase.transacao_chave,
@@ -799,11 +920,86 @@ class PagamentosLote extends Component {
                                         existe: e.dadosBase.existe,
                                         valor: e.dadosBase.valor,
                                         saldo: e.dadosBase.saldo,
-                                        status: this.state.bbErr.find((e) => e.codigo == res.data.lancamentos[0].erros[0]).mensagem,
+                                        status: "Não encontrada!",
                                         statusId: 0,
                                         errors: ''
                                     })
-                                } catch (err) {
+
+                                    requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Não encontrada!`);
+                                    await this.setState({ requisicoesCarregando: requisicoes })
+                                }
+                            } catch (err) {
+                                console.log(err);
+                                status.push({
+                                    conta: e.dadosBase.chave,
+                                    transacao_chave: e.dadosBase.transacao_chave,
+                                    transacao: e.dadosBase.transacao,
+                                    existe: e.dadosBase.existe,
+                                    valor: e.dadosBase.valor,
+                                    saldo: e.dadosBase.saldo,
+                                    status: "Erro interno no servidor, tente novamente mais tarde",
+                                    statusId: 0,
+                                    errors: ''
+                                })
+                                const requisicoes = this.state.requisicoesCarregando;
+
+                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Erro`);
+                                await this.setState({ requisicoesCarregando: requisicoes })
+                            }
+                        },
+                        async err => {
+                            status.push({
+                                conta: e.dadosBase.chave,
+                                transacao_chave: e.dadosBase.transacao_chave,
+                                transacao: e.dadosBase.transacao,
+                                existe: e.dadosBase.existe,
+                                valor: e.dadosBase.valor,
+                                saldo: e.dadosBase.saldo,
+                                status: false,
+                                statusId: 0,
+                                error: err.message.includes('40') ? "Erro no sistema" : err.message.includes('50') ? "Erro no servidor" : 'Erro desconhecido'
+                            })
+                            const requisicoes = this.state.requisicoesCarregando;
+
+                            requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Rejeitada`);
+                            await this.setState({ requisicoesCarregando: requisicoes })
+                        }
+                    )
+                } else if (e.dadosBase.meio == 'BOL') {
+                    await apiEmployee.post(`consultaBOL.php`, {
+                        token: true,
+                        url: `${API_BANCO}${API_BANCO_BOL_GET}${e.id}/solicitacao`,
+                        empresa: this.state.usuarioLogado.empresa
+                    }).then(
+                        async res => {
+
+                            try {
+                                const response = await Util.constroiJsonBB(res.data);
+
+                                if (response) {
+                                    const newStatusId = this.state.bbTrc.find((e) => e.codigo == response.estadoPagamento).status;
+                                    console.log(newStatusId)
+                                    console.log(e.dadosBase.statusId)
+
+                                    status.push({
+                                        conta: e.dadosBase.chave,
+                                        transacao_chave: e.dadosBase.transacao_chave,
+                                        transacao: e.dadosBase.transacao,
+                                        existe: e.dadosBase.existe,
+                                        valor: e.dadosBase.valor,
+                                        saldo: e.dadosBase.saldo,
+                                        status: this.state.bbTrc.find((e) => e.codigo == response.estadoPagamento).mensagem,
+                                        statusId: newStatusId == 3 && e.dadosBase.statusId == 2 ? 2 : newStatusId,
+                                        errors: ''
+                                    })
+                                    const requisicoes = this.state.requisicoesCarregando;
+
+                                    requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${newStatusId == 3 || newStatusId == 2 ? "Aceita" : newStatusId == 0 ? "Rejeitada" : "Paga"}`);
+                                    await this.setState({ requisicoesCarregando: requisicoes })
+
+
+                                } else {
+
                                     status.push({
                                         conta: e.dadosBase.chave,
                                         transacao_chave: e.dadosBase.transacao_chave,
@@ -815,10 +1011,26 @@ class PagamentosLote extends Component {
                                         statusId: 0,
                                         errors: ''
                                     })
+                                    const requisicoes = this.state.requisicoesCarregando;
+
+                                    requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Rejeitada`);
+                                    await this.setState({ requisicoesCarregando: requisicoes })
                                 }
+                            } catch (err) {
+                                status.push({
+                                    conta: e.dadosBase.chave,
+                                    transacao_chave: e.dadosBase.transacao_chave,
+                                    transacao: e.dadosBase.transacao,
+                                    existe: e.dadosBase.existe,
+                                    valor: e.dadosBase.valor,
+                                    saldo: e.dadosBase.saldo,
+                                    status: "Erro interno no servidor, tente novamente mais tarde",
+                                    statusId: 0,
+                                    errors: ''
+                                })
                                 const requisicoes = this.state.requisicoesCarregando;
 
-                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Rejeitada`);
+                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Erro`);
                                 await this.setState({ requisicoesCarregando: requisicoes })
                             }
                         },
@@ -847,14 +1059,66 @@ class PagamentosLote extends Component {
                         empresa: this.state.usuarioLogado.empresa
                     }).then(
                         async res => {
-                            console.log(res)
-                            console.log(res.data)
 
-                            if (res.data && !res.data.pagamentos[0].erros[0]) {
-                                const newStatusId = this.state.bbGet.find((e) => e.codigo == res.data.estadoRequisicao).status;
-                                console.log(newStatusId)
-                                console.log(e.dadosBase.statusId)
+                            try {
+                                console.log(res.data);
+                                const response = await Util.constroiJsonBB(res.data);
+                                console.log(response);
 
+                                if (response) {
+                                    const newStatusId = this.state.bbTrc.find((e) => e.codigo == response.estadoPagamento).status;
+
+                                    status.push({
+                                        conta: e.dadosBase.chave,
+                                        transacao_chave: e.dadosBase.transacao_chave,
+                                        transacao: e.dadosBase.transacao,
+                                        existe: e.dadosBase.existe,
+                                        valor: e.dadosBase.valor,
+                                        saldo: e.dadosBase.saldo,
+                                        status: this.state.bbTrc.find((e) => e.codigo == response.estadoPagamento).mensagem,
+                                        statusId: newStatusId == 3 && e.dadosBase.statusId == 2 ? 2 : newStatusId,
+                                        errors: ''
+                                    })
+                                    const requisicoes = this.state.requisicoesCarregando;
+
+                                    requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${newStatusId == 3 || newStatusId == 2 ? "Aceita" : newStatusId == 0 ? "Rejeitada" : "Paga"}`);
+                                    await this.setState({ requisicoesCarregando: requisicoes })
+
+
+                                } else {
+                                    try {
+                                        status.push({
+                                            conta: e.dadosBase.chave,
+                                            transacao_chave: e.dadosBase.transacao_chave,
+                                            transacao: e.dadosBase.transacao,
+                                            existe: e.dadosBase.existe,
+                                            valor: e.dadosBase.valor,
+                                            saldo: e.dadosBase.saldo,
+                                            status: this.state.bbErr.find((e) => e.codigo == res.data.lancamentos[0].erros[0]).mensagem,
+                                            statusId: 0,
+                                            errors: ''
+                                        })
+                                    } catch (err) {
+                                        console.log(err);
+                                        status.push({
+                                            conta: e.dadosBase.chave,
+                                            transacao_chave: e.dadosBase.transacao_chave,
+                                            transacao: e.dadosBase.transacao,
+                                            existe: e.dadosBase.existe,
+                                            valor: e.dadosBase.valor,
+                                            saldo: e.dadosBase.saldo,
+                                            status: "Erro Desconhecido",
+                                            statusId: 0,
+                                            errors: ''
+                                        })
+                                    }
+                                    const requisicoes = this.state.requisicoesCarregando;
+
+                                    requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Rejeitada`);
+                                    await this.setState({ requisicoesCarregando: requisicoes })
+                                }
+                            } catch (err) {
+                                console.log(err);
                                 status.push({
                                     conta: e.dadosBase.chave,
                                     transacao_chave: e.dadosBase.transacao_chave,
@@ -862,45 +1126,13 @@ class PagamentosLote extends Component {
                                     existe: e.dadosBase.existe,
                                     valor: e.dadosBase.valor,
                                     saldo: e.dadosBase.saldo,
-                                    status: this.state.bbGet.find((e) => e.codigo == res.data.estadoRequisicao).mensagem,
-                                    statusId: newStatusId == 3 && e.dadosBase.statusId == 2 ? 2 : newStatusId,
+                                    status: "Erro interno no servidor, tente novamente mais tarde",
+                                    statusId: 0,
                                     errors: ''
                                 })
                                 const requisicoes = this.state.requisicoesCarregando;
 
-                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${newStatusId == 3 ? "Aceita" : newStatusId == 0 ? "Rejeitada" : "Paga"}`);
-                                await this.setState({ requisicoesCarregando: requisicoes })
-
-
-                            } else {
-                                try {
-                                    status.push({
-                                        conta: e.dadosBase.chave,
-                                        transacao_chave: e.dadosBase.transacao_chave,
-                                        transacao: e.dadosBase.transacao,
-                                        existe: e.dadosBase.existe,
-                                        valor: e.dadosBase.valor,
-                                        saldo: e.dadosBase.saldo,
-                                        status: this.state.bbErr.find((e) => e.codigo == res.data.lancamentos[0].erros[0]).mensagem,
-                                        statusId: 0,
-                                        errors: ''
-                                    })
-                                } catch (err) {
-                                    status.push({
-                                        conta: e.dadosBase.chave,
-                                        transacao_chave: e.dadosBase.transacao_chave,
-                                        transacao: e.dadosBase.transacao,
-                                        existe: e.dadosBase.existe,
-                                        valor: e.dadosBase.valor,
-                                        saldo: e.dadosBase.saldo,
-                                        status: "Erro Desconhecido",
-                                        statusId: 0,
-                                        errors: ''
-                                    })
-                                }
-                                const requisicoes = this.state.requisicoesCarregando;
-
-                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Rejeitada`);
+                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Erro`);
                                 await this.setState({ requisicoesCarregando: requisicoes })
                             }
                         },
@@ -932,27 +1164,12 @@ class PagamentosLote extends Component {
                             console.log(res)
                             console.log(res.data)
 
-                            if (res.data && !res.data.lancamentos[0].erros[0]) {
-                                const newStatusId = this.state.bbGet.find((e) => e.codigo == res.data.estadoRequisicao).status;
+                            try {
+                                const response = await Util.constroiJsonBB(res.data);
 
-                                status.push({
-                                    conta: e.dadosBase.chave,
-                                    transacao_chave: e.dadosBase.transacao_chave,
-                                    transacao: e.dadosBase.transacao,
-                                    existe: e.dadosBase.existe,
-                                    valor: e.dadosBase.valor,
-                                    saldo: e.dadosBase.saldo,
-                                    status: this.state.bbGet.find((e) => e.codigo == res.data.estadoRequisicao).mensagem,
-                                    statusId: newStatusId == 3 && e.dadosBase.statusId == 2 ? 2 : newStatusId,
-                                    errors: ''
-                                })
-                                const requisicoes = this.state.requisicoesCarregando;
+                                if (response) {
+                                    const newStatusId = this.state.bbGet.find((e) => e.codigo == response.estadoRequisicao).status;
 
-                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${newStatusId == 3 ? "Aceita" : newStatusId == 0 ? "Rejeitada" : "Paga"}`);
-                                await this.setState({ requisicoesCarregando: requisicoes })
-
-                            } else {
-                                try {
                                     status.push({
                                         conta: e.dadosBase.chave,
                                         transacao_chave: e.dadosBase.transacao_chave,
@@ -960,11 +1177,16 @@ class PagamentosLote extends Component {
                                         existe: e.dadosBase.existe,
                                         valor: e.dadosBase.valor,
                                         saldo: e.dadosBase.saldo,
-                                        status: this.state.bbErr.find((e) => e.codigo == res.data.lancamentos[0].erros[0]).mensagem,
-                                        statusId: 0,
+                                        status: this.state.bbGet.find((e) => e.codigo == response.estadoRequisicao).mensagem,
+                                        statusId: newStatusId == 3 && e.dadosBase.statusId == 2 ? 2 : newStatusId,
                                         errors: ''
                                     })
-                                } catch (err) {
+                                    const requisicoes = this.state.requisicoesCarregando;
+
+                                    requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${newStatusId == 3 || newStatusId == 2 ? "Aceita" : newStatusId == 0 ? "Rejeitada" : "Paga"}`);
+                                    await this.setState({ requisicoesCarregando: requisicoes })
+
+                                } else {
                                     status.push({
                                         conta: e.dadosBase.chave,
                                         transacao_chave: e.dadosBase.transacao_chave,
@@ -976,10 +1198,27 @@ class PagamentosLote extends Component {
                                         statusId: 0,
                                         errors: ''
                                     })
+
+                                    const requisicoes = this.state.requisicoesCarregando;
+
+                                    requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Rejeitada`);
+                                    await this.setState({ requisicoesCarregando: requisicoes })
                                 }
+                            } catch (err) {
+                                status.push({
+                                    conta: e.dadosBase.chave,
+                                    transacao_chave: e.dadosBase.transacao_chave,
+                                    transacao: e.dadosBase.transacao,
+                                    existe: e.dadosBase.existe,
+                                    valor: e.dadosBase.valor,
+                                    saldo: e.dadosBase.saldo,
+                                    status: "Erro interno no servidor, tente novamente mais tarde",
+                                    statusId: 0,
+                                    errors: ''
+                                })
                                 const requisicoes = this.state.requisicoesCarregando;
 
-                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Rejeitada`);
+                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Erro`);
                                 await this.setState({ requisicoesCarregando: requisicoes })
                             }
                         },
@@ -1011,27 +1250,12 @@ class PagamentosLote extends Component {
                             console.log(res)
                             console.log(res.data)
 
-                            if (res.data && !res.data.lancamentos[0].erros[0]) {
-                                const newStatusId = this.state.bbGet.find((e) => e.codigo == res.data.estadoRequisicao).status;
+                            try {
+                                const response = await Util.constroiJsonBB(res.data);
 
-                                status.push({
-                                    conta: e.dadosBase.chave,
-                                    transacao_chave: e.dadosBase.transacao_chave,
-                                    transacao: e.dadosBase.transacao,
-                                    existe: e.dadosBase.existe,
-                                    valor: e.dadosBase.valor,
-                                    saldo: e.dadosBase.saldo,
-                                    status: this.state.bbGet.find((e) => e.codigo == res.data.estadoRequisicao).mensagem,
-                                    statusId: newStatusId == 3 && e.dadosBase.statusId == 2 ? 2 : newStatusId,
-                                    errors: ''
-                                })
-                                const requisicoes = this.state.requisicoesCarregando;
+                                if (response) {
+                                    const newStatusId = this.state.bbGet.find((e) => e.codigo == response.estadoRequisicao).status;
 
-                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${newStatusId == 3 ? "Aceita" : newStatusId == 0 ? "Rejeitada" : "Paga"}`);
-                                await this.setState({ requisicoesCarregando: requisicoes })
-
-                            } else {
-                                try {
                                     status.push({
                                         conta: e.dadosBase.chave,
                                         transacao_chave: e.dadosBase.transacao_chave,
@@ -1039,11 +1263,16 @@ class PagamentosLote extends Component {
                                         existe: e.dadosBase.existe,
                                         valor: e.dadosBase.valor,
                                         saldo: e.dadosBase.saldo,
-                                        status: this.state.bbErr.find((e) => e.codigo == res.data.lancamentos[0].erros[0]).mensagem,
-                                        statusId: 0,
+                                        status: this.state.bbGet.find((e) => e.codigo == response.estadoRequisicao).mensagem,
+                                        statusId: newStatusId == 3 && e.dadosBase.statusId == 2 ? 2 : newStatusId,
                                         errors: ''
                                     })
-                                } catch (err) {
+                                    const requisicoes = this.state.requisicoesCarregando;
+
+                                    requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${newStatusId == 3 || newStatusId == 2 ? "Aceita" : newStatusId == 0 ? "Rejeitada" : "Paga"}`);
+                                    await this.setState({ requisicoesCarregando: requisicoes })
+
+                                } else {
                                     status.push({
                                         conta: e.dadosBase.chave,
                                         transacao_chave: e.dadosBase.transacao_chave,
@@ -1055,10 +1284,26 @@ class PagamentosLote extends Component {
                                         statusId: 0,
                                         errors: ''
                                     })
+                                    const requisicoes = this.state.requisicoesCarregando;
+
+                                    requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Rejeitada`);
+                                    await this.setState({ requisicoesCarregando: requisicoes })
                                 }
+                            } catch (err) {
+                                status.push({
+                                    conta: e.dadosBase.chave,
+                                    transacao_chave: e.dadosBase.transacao_chave,
+                                    transacao: e.dadosBase.transacao,
+                                    existe: e.dadosBase.existe,
+                                    valor: e.dadosBase.valor,
+                                    saldo: e.dadosBase.saldo,
+                                    status: "Erro interno no servidor, tente novamente mais tarde",
+                                    statusId: 0,
+                                    errors: ''
+                                })
                                 const requisicoes = this.state.requisicoesCarregando;
 
-                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Rejeitada`);
+                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Erro`);
                                 await this.setState({ requisicoesCarregando: requisicoes })
                             }
                         },
@@ -1090,27 +1335,12 @@ class PagamentosLote extends Component {
                             console.log(res)
                             console.log(res.data)
 
-                            if (res.data && !res.data.lancamentos[0].erros[0]) {
-                                const newStatusId = this.state.bbGet.find((e) => e.codigo == res.data.estadoRequisicao).status;
+                            try {
+                                const response = await Util.constroiJsonBB(res.data);
 
-                                status.push({
-                                    conta: e.dadosBase.chave,
-                                    transacao_chave: e.dadosBase.transacao_chave,
-                                    transacao: e.dadosBase.transacao,
-                                    existe: e.dadosBase.existe,
-                                    valor: e.dadosBase.valor,
-                                    saldo: e.dadosBase.saldo,
-                                    status: this.state.bbGet.find((e) => e.codigo == res.data.estadoRequisicao).mensagem,
-                                    statusId: newStatusId == 3 && e.dadosBase.statusId == 2 ? 2 : newStatusId,
-                                    errors: ''
-                                })
-                                const requisicoes = this.state.requisicoesCarregando;
+                                if (response && !res.data.lancamentos[0].erros[0]) {
+                                    const newStatusId = this.state.bbGet.find((e) => e.codigo == response.estadoRequisicao).status;
 
-                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${newStatusId == 3 ? "Aceita" : newStatusId == 0 ? "Rejeitada" : "Paga"}`);
-                                await this.setState({ requisicoesCarregando: requisicoes })
-
-                            } else {
-                                try {
                                     status.push({
                                         conta: e.dadosBase.chave,
                                         transacao_chave: e.dadosBase.transacao_chave,
@@ -1118,11 +1348,16 @@ class PagamentosLote extends Component {
                                         existe: e.dadosBase.existe,
                                         valor: e.dadosBase.valor,
                                         saldo: e.dadosBase.saldo,
-                                        status: this.state.bbErr.find((e) => e.codigo == res.data.lancamentos[0].erros[0]).mensagem,
-                                        statusId: 0,
+                                        status: this.state.bbGet.find((e) => e.codigo == response.estadoRequisicao).mensagem,
+                                        statusId: newStatusId == 3 && e.dadosBase.statusId == 2 ? 2 : newStatusId,
                                         errors: ''
                                     })
-                                } catch (err) {
+                                    const requisicoes = this.state.requisicoesCarregando;
+
+                                    requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${newStatusId == 3 || newStatusId == 2 ? "Aceita" : newStatusId == 0 ? "Rejeitada" : "Paga"}`);
+                                    await this.setState({ requisicoesCarregando: requisicoes })
+
+                                } else {
                                     status.push({
                                         conta: e.dadosBase.chave,
                                         transacao_chave: e.dadosBase.transacao_chave,
@@ -1134,12 +1369,27 @@ class PagamentosLote extends Component {
                                         statusId: 0,
                                         errors: ''
                                     })
+                                    const requisicoes = this.state.requisicoesCarregando;
+
+                                    requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Rejeitada`);
+                                    await this.setState({ requisicoesCarregando: requisicoes })
                                 }
+                            } catch (err) {
+                                status.push({
+                                    conta: e.dadosBase.chave,
+                                    transacao_chave: e.dadosBase.transacao_chave,
+                                    transacao: e.dadosBase.transacao,
+                                    existe: e.dadosBase.existe,
+                                    valor: e.dadosBase.valor,
+                                    saldo: e.dadosBase.saldo,
+                                    status: "Erro interno no servidor, tente novamente mais tarde",
+                                    statusId: 0,
+                                    errors: ''
+                                })
                                 const requisicoes = this.state.requisicoesCarregando;
 
-                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Rejeitada`);
+                                requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - Erro`);
                                 await this.setState({ requisicoesCarregando: requisicoes })
-
                             }
                         },
                         async err => {
@@ -1226,7 +1476,307 @@ class PagamentosLote extends Component {
         await this.setState({ loading: false, requisicoesCarregando: [] });
     }
 
+    gerarComprovante = async (dados) => {
+        console.log(dados);
 
+        if (dados.meioPagamento == 'TRC') {
+            await apiEmployee.post(`consultaTRC.php`, {
+                token: true,
+                url: `${API_BANCO}${API_BANCO_TRANS_GET}${dados.pessoaCPF}/transferencias`,
+                url2: `&dataInicio=${moment(dados.Vencimento).format('DDMMYYYY')}&dataFim=${moment(dados.Vencimento).format('DDMMYYYY')}&indice=0&tipoBeneficiario=${dados.pessoaCPF?.length == 11 ? 1 : 2}`,
+                empresa: this.state.usuarioLogado.empresa,
+                id: dados.transacao
+            }).then(
+                async res => {
+                    console.log("TRC");
+                    console.log(res.data);
+                    if (!res.data.error) {
+                        const response = await Util.constroiJsonBB(res.data.transferencias.at(-1));
+
+                        const nomeBanco = this.state.bancos.find((banco) => parseInt(banco.compe) == parseInt(response.numeroCOMPE));
+                        if (nomeBanco) {
+                            response.nomeBanco = nomeBanco.Titular;
+                        }
+
+                        if (parseInt(response.numeroCOMPE) == 1) {
+                            console.log("Transferencia entre contas");
+
+
+                            console.log(response);
+
+                            this.comprovanteTransferencia(response, dados.transacao);
+                        } else {
+                            console.log("TED/DOC");
+                            console.log(response);
+
+                            this.comprovanteTED(response, dados.transacao);
+                        }
+                    } else {
+                        await this.setState({ error: { type: "error", msg: "Muitas requisições!\nAguarde alguns minutos, por favor..." } });
+                    }
+                },
+                async err => {
+                    console.log("ERRO:");
+                    console.log(err);
+                }
+            )
+        } else if (dados.meioPagamento == 'BOL') {
+            await apiEmployee.post(`consultaBOL.php`, {
+                token: true,
+                url: `${API_BANCO}${API_BANCO_BOL_GET}${dados.transacao}/solicitacao`,
+                empresa: this.state.usuarioLogado.empresa
+            }).then(
+                async res => {
+                    if (!res.data.error) {
+                        console.log("BOL");
+                        const response = await Util.constroiJsonBB(res.data)
+                        
+                        const nomeBanco = this.state.bancos.find((banco) => parseInt(banco.compe) == parseInt(response.numeroCOMPE));
+                        if (nomeBanco) {
+                            response.nomeBanco = nomeBanco.Titular;
+                        }
+                        
+                        this.comprovanteBOL(response, dados.transacao);
+                        
+                        console.log(response)
+                    } else {
+                        await this.setState({ error: { type: "error", msg: "Muitas requisições!\nAguarde alguns minutos, por favor..." } });
+                    }
+                },
+                async err => {
+                    console.log("ERRO:");
+                    console.log(err);
+                }
+            )
+        }
+    }
+
+    comprovanteTransferencia = async (dados, numero) => {
+        const pdf =
+            <div style={{ zoom: 1 }} key={546546554654}>
+                <div className='comprovanteHeader'>
+                    <div className='marginFixLeftComprovanteHeader'><h3>{moment().format("DD/MM/YYYY")}</h3></div>
+                    <div><h3>BANCO DO BRASIL</h3></div>
+                    <div className='marginFixRightComprovanteHeader'><h3>{moment().format("HH:mm:ss")}</h3></div>
+                </div>
+                <br />
+                <h3 className='text-center'>COMPROVANTE DE TRANSFERENCIA</h3>
+                <h3 className='text-center'>DE CONTA CORRENTE PARA CONTA CORRENTE</h3>
+                <br />
+                <br />
+                <table className='comprovanteTable'>
+                    <tr>
+                        <td colSpan={2}>CLIENTE: <span className='spanTdFix'>{dados.nomeBeneficiario}</span></td>
+                    </tr>
+                    <tr>
+                        <td>AGENCIA: <span className='spanTdFix'>{dados.agenciaDebito}</span></td>
+                        <td className="tdMarginFix">CONTA: <span style={{ marginLeft: "10px" }}>{dados.contaCorrenteDebito}-{dados.digitoVerificadorContaCorrenteDebito}</span></td>
+                    </tr>
+                </table>
+                <hr />
+                <table className='comprovanteTable'>
+                    <tr>
+                        <td>DATA DA TRANSFERENCIA</td>
+                        <td className="tdMarginFix">{await Util.formataData(dados.dataTransferencia)}</td>
+                    </tr>
+                    <tr>
+                        <td>NR. DOCUMENTO</td>
+                        <td className="tdMarginFix">{numero}</td>
+                    </tr>
+                    <tr>
+                        <td>VALOR TOTAL:</td>
+                        <td className="tdMarginFix">{await Util.formataDinheiroBrasileiro(dados.valorTransferencia)}</td>
+                    </tr>
+                    <tr>
+                        <td colSpan={2}>***TRANSFERIDO PARA:</td>
+                    </tr>
+                    <tr>
+                        <td colSpan={2}>CLIENTE: <span className="spanTdFix">{dados.nomeBeneficiario}</span></td>
+                    </tr>
+                    <tr>
+                        <td>AGENCIA: <span className='spanTdFix'>{dados.agenciaDebito}</span></td>
+                        <td className="tdMarginFix">CONTA: <span style={{ marginLeft: "10px" }}>{dados.contaCorrenteDebito}-{dados.digitoVerificadorContaCorrenteDebito}</span></td>
+                    </tr>
+                    <tr>
+                        <td>NR. DOCUMENTO</td>
+                        <td className="tdMarginFix">{numero}</td>
+                    </tr>
+                </table>
+                <hr />
+                <table className='comprovanteTable'>
+                    <tr>
+                        <td>NR. AUTENTICACAO</td>
+                        <td className="tdMarginFix">{dados.codigoAutenticacaoPagamento}</td>
+                    </tr>
+                </table>
+            </div>
+
+        await this.setState({ pdfgerado: pdf })
+        this.handleExportWithComponent()
+    }
+
+    comprovanteTED = async (dados, numero) => {
+        const pdf =
+            <div style={{ zoom: 1 }} key={546546554654}>
+                <div className='comprovanteHeader'>
+                    <div className='marginFixLeftComprovanteHeader'><h3>{moment().format("DD/MM/YYYY")}</h3></div>
+                    <div><h3>-</h3></div>
+                    <div><h3>BANCO DO BRASIL</h3></div>
+                    <div><h3>-</h3></div>
+                    <div className='marginFixRightComprovanteHeader'><h3>{moment().format("HH:mm:ss")}</h3></div>
+                </div>
+                <br />
+                <h3 className='text-center'>COMPROVANTE DOC/TED</h3>
+                <br />
+                <br />
+                <table className='comprovanteTable'>
+                    <tr>
+                        <td colSpan={2}>CLIENTE: <span className='spanTdFix'>{dados.nomeBeneficiario}</span></td>
+                    </tr>
+                    <tr>
+                        <td>AGENCIA: <span className='spanTdFix'>{dados.agenciaDebito}</span></td>
+                        <td className="tdMarginFix">CONTA: <span style={{ marginLeft: "10px" }}>{dados.contaCorrenteDebito}-{dados.digitoVerificadorContaCorrenteDebito}</span></td>
+                    </tr>
+                </table>
+                <hr />
+                <table className='comprovanteTable'>
+                    <tr>
+                        <td>NR. DOCUMENTO</td>
+                        <td className="tdMarginFix">{numero}</td>
+                    </tr>
+                    <tr>
+                        <td>DATA DA TRANSFERENCIA</td>
+                        <td className="tdMarginFix">{await Util.formataData(dados.dataTransferencia)}</td>
+                    </tr>
+                    <tr>
+                        <td>REMETENTE:</td>
+                        <td className="tdMarginFix">NOME DO REMETENTE</td>
+                    </tr>
+                    <tr>
+                        <td>FAVORECIDO:</td>
+                        <td className="tdMarginFix">{dados.nomeBeneficiario}</td>
+                    </tr>
+                    <tr>
+                        <td>CPF OU CNPJ</td>
+                        <td className="tdMarginFix">{await Util.formataCPF(dados.cpfCnpjBeneficiario)}</td>
+                    </tr>
+                    <tr>
+                        <td>BANCO:</td>
+                        <td className="tdMarginFix">{dados.nomeBanco}</td>
+                    </tr>
+                    <tr>
+                        <td>AGENCIA: <span className='spanTdFix'>{dados.agenciaDebito}</span></td>
+                        <td className="tdMarginFix">CONTA: <span style={{ marginLeft: "10px" }}>{dados.contaCorrenteDebito}-{dados.digitoVerificadorContaCorrenteDebito}</span></td>
+                    </tr>
+                    <tr>
+                        <td>FINALIDADE:</td>
+                        <td className="tdMarginFix">FINALIDADE DA TED/DOC</td>
+                    </tr>
+                    <tr>
+                        <td>VALOR (R$)</td>
+                        <td className="tdMarginFix">{await Util.formataDinheiroBrasileiro(dados.valorTransferencia)}</td>
+                    </tr>
+                </table>
+                <hr />
+                <table className='comprovanteTable'>
+                    <tr>
+                        <td>NR. AUTENTICACAO</td>
+                        <td className="tdMarginFix">{dados.codigoAutenticacaoPagamento}</td>
+                    </tr>
+                </table>
+            </div>
+
+        await this.setState({ pdfgerado: pdf })
+        this.handleExportWithComponent()
+    }
+
+    comprovanteBOL = async (dados, numero) => {
+        const pdf =
+            <div style={{ zoom: 1 }} key={546546554654}>
+                <div className='comprovanteHeader'>
+                    <div className='marginFixLeftComprovanteHeader'><h3>{moment().format("DD/MM/YYYY")}</h3></div>
+                    <div><h3>-</h3></div>
+                    <div><h3>BANCO DO BRASIL</h3></div>
+                    <div><h3>-</h3></div>
+                    <div className='marginFixRightComprovanteHeader'><h3>{moment().format("HH:mm:ss")}</h3></div>
+                </div>
+                <br />
+                <h3 className='text-center'>COMPROVANTE DE PAGAMENTO DE BOLETOS</h3>
+                <br />
+                <br />
+                <table className='comprovanteTable'>
+                    <tr>
+                        <td colSpan={2}>CLIENTE: <span className='spanTdFix'>{dados.listaPagamentos[0].nomeBeneficiario}</span></td>
+                    </tr>
+                    <tr>
+                        <td>AGENCIA: <span className='spanTdFix'>{dados.agenciaDebito}</span></td>
+                        <td className="tdMarginFix">CONTA: <span style={{ marginLeft: "10px" }}>{dados.contaCorrenteDebito}-{dados.digitoVerificadorContaCorrenteDebito}</span></td>
+                    </tr>
+                    <tr>
+                        <td className='text-center' colSpan={2}>{dados.listaPagamentos[0].codigo}</td>
+                    </tr>
+                    <tr>
+                        <td>CNPJ/CPF DO PAGADOR</td>
+                        <td className="tdMarginFix">{await Util.formataCPF(dados.listaPagamentos[0].documentoPagador)}</td>
+                    </tr>
+                    <tr>
+                        <td>CNPJ/CPF DO BENEFICIARIO</td>
+                        <td className="tdMarginFix">{await Util.formataCPF(dados.listaPagamentos[0].documentoBeneficiario)}</td>
+                    </tr>
+                    <tr>
+                        <td>CNPJ/CPF DO BENEFICIARIO FINAL</td>
+                        <td className="tdMarginFix">{await Util.formataCPF(dados.listaPagamentos[0].documentoBeneficiario)}</td>
+                    </tr>
+                </table>
+                <hr />
+                <table className='comprovanteTable'>
+                    <tr>
+                        <td>NR. DOCUMENTO</td>
+                        <td className="tdMarginFix">{numero}</td>
+                    </tr>
+                    <tr>
+                        <td>DATA DE VENCIMENTO</td>
+                        <td className="tdMarginFix">{await Util.formataData(dados.listaPagamentos[0].dataVencimento)}</td>
+                    </tr>
+                    <tr>
+                        <td>DATA DO PAGAMENTO</td>
+                        <td className="tdMarginFix">{await Util.formataData(dados.listaPagamentos[0].dataAgendamento)}</td>
+                    </tr>
+                    <tr>
+                        <td>VALOR DO DOCUMENTO (R$)</td>
+                        <td className="tdMarginFix">{await Util.formataDinheiroBrasileiro(dados.listaPagamentos[0].valorNominal)}</td>
+                    </tr>
+                    <tr>
+                        <td>VALOR DO DESCONTO/ABATIMENTO (R$)</td>
+                        <td className="tdMarginFix">{await Util.formataDinheiroBrasileiro(dados.listaPagamentos[0].valorDesconto)}</td>
+                    </tr>
+                    <tr>
+                        <td>VALOR DOS JUROS/MORA (R$)</td>
+                        <td className="tdMarginFix">{await Util.formataDinheiroBrasileiro(dados.listaPagamentos[0].valorMoraMulta)}</td>
+                    </tr>
+                    <tr>
+                        <td>VALOR COBRADO(R$)</td>
+                        <td className="tdMarginFix">{await Util.formataDinheiroBrasileiro(dados.valorPagamento)}</td>
+                    </tr>
+                </table>
+                <hr />
+                <table className='comprovanteTable'>
+                    <tr>
+                        <td>NR. AUTENTICACAO</td>
+                        <td className="tdMarginFix">{dados.codigoAutenticacaoPagamento}</td>
+                    </tr>
+                </table>
+            </div>
+
+        await this.setState({ pdfgerado: pdf })
+        this.handleExportWithComponent()
+
+    }
+
+    handleExportWithComponent = event => {
+        this.pdfExportComponent.current.save();
+        this.setState({ loading: false })
+    };
 
     erroApi = async (err) => {
         alert(err)
@@ -1283,7 +1833,27 @@ class PagamentosLote extends Component {
         return (
 
             <div className='allContent' >
+                <div
+                    style={{
+                        position: "absolute",
+                        left: "-900000px",
+                        top: 0,
+                    }}
 
+
+                >
+                    <PDFExport
+                        fileName={this.state.pdfNome}
+                        scale={0.6}
+                        landscape={false}
+                        className={"pdfExp"}
+                        paperSize="A4"
+                        margin="0.5cm"
+                        forcePageBreak=".page-break"
+                        ref={this.pdfExportComponent}>
+                        {this.state.pdfgerado}
+                    </PDFExport>
+                </div>
                 <div>
                     {this.state.loading &&
                         <>
@@ -1312,6 +1882,7 @@ class PagamentosLote extends Component {
 
                                 <br />
                             </section>
+                            <Alert alert={this.state.error} setAlert={(value) => this.setState({ error: value })} />
 
                             {this.state.errorFooter &&
                                 <div className="erroFooter">
@@ -1534,6 +2105,9 @@ class PagamentosLote extends Component {
                                                                 <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Valor)}</p>
                                                             </div>
                                                             <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones">
+                                                                {["BOL", "TRC"].includes(feed.meioPagamento) &&
+                                                                    <FontAwesomeIcon icon={faFileInvoiceDollar} onClick={() => { this.gerarComprovante(feed) }} />
+                                                                }
                                                             </div>
 
                                                         </div>

@@ -6,19 +6,15 @@ import Rodape from '../../../components/rodape'
 import Skeleton from '../../../components/skeleton'
 import loader from '../../../classes/loader'
 import { Formik, Field, Form } from 'formik'
-import { Link, useHistory, Redirect } from 'react-router-dom'
+import { Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { PRECISA_LOGAR, NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
-import { faChevronCircleDown, faPlus, faTrashAlt, faPen, faEye, faPrint, faHome } from '@fortawesome/free-solid-svg-icons'
-import { confirmAlert } from 'react-confirm-alert'
+import { faChevronCircleDown, faPlus, faTrashAlt, faPen, faEye, faPrint } from '@fortawesome/free-solid-svg-icons'
 import 'react-confirm-alert/src/react-confirm-alert.css'
-import moment from 'moment'
-import { GiReturnArrow } from 'react-icons/gi'
 
 
 const estadoInicial = {
@@ -48,7 +44,6 @@ const estadoInicial = {
     /*seaports: [],*/
     loading: true,
     redirect: false,
-    finalizaOperacao: false,
 
     acessos: [],
     permissoesUser: [],
@@ -206,7 +201,7 @@ class Permissoes extends Component {
                 })
 
                 await this.setState({ userPermissoes: todos })
-                await this.setState({ loading: false })
+                await this.setState({ loading: false, bloqueado: false })
             },
             response => { this.erroApi(response) }
         )
@@ -327,14 +322,21 @@ class Permissoes extends Component {
 
 
     marcaTodos = async (value, usuario, elementoIndex, index) => {
-        let operadores = this.state.operadores;
-        operadores[index].check[elementoIndex] = value;
-
+        console.log({value, usuario, elementoIndex, index})
+        let operadores = this.state.operadores.map((op) => {
+            if (op.Codigo == usuario) {
+                op.check[elementoIndex] = value;
+                
+                return({...op, botao: true});
+            } else {
+                return({...op});
+            }
+        });
         this.setState({ operadores: operadores })
 
-        const acessos = this.state.userPermissoes.map(async (e, acessoIndex) => {
+        this.state.userPermissoes.map(async (e, acessoIndex) => {
             if (e.usuario.Codigo == usuario) {
-                await this.alteraPermissoes(value, acessoIndex, elementoIndex, index);
+                await this.alteraPermissoes(value, acessoIndex, elementoIndex, usuario);
             }
         })
     }
@@ -382,10 +384,6 @@ class Permissoes extends Component {
 
                     {this.state.redirect &&
                         <Redirect to={'/'} />
-                    }
-
-                    {this.state.finalizaOperacao &&
-                        <Redirect to={'/utilitarios/permissoes'} />
                     }
 
                     {!this.state.loading &&

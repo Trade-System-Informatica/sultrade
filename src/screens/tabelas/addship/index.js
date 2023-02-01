@@ -1,26 +1,16 @@
 import React, { Component } from 'react'
 import './styles.css'
-import ReactDOM from 'react-dom'
 import { Formik, Field, Form } from 'formik'
 import { apiEmployee } from '../../../services/apiamrg'
 import Header from '../../../components/header'
 import { connect } from 'react-redux'
-import { Redirect, Link } from 'react-router-dom'
-import { NOME_EMPRESA, PRECISA_LOGAR } from '../../../config'
-import moment from 'moment'
-import Util from '../../../classes/util'
+import { Redirect } from 'react-router-dom'
+import { PRECISA_LOGAR } from '../../../config'
 import loader from '../../../classes/loader'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlusSquare, faMinusSquare } from '@fortawesome/free-regular-svg-icons'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
-import Radio from '@material-ui/core/Radio'
-import RadioGroup from '@material-ui/core/RadioGroup'
-import FormControl from '@material-ui/core/FormControl'
-import FormControlLabel from '@material-ui/core/FormControlLabel'
-import Formlabel from '@material-ui/core/FormLabel'
 import ModalLogs from '../../../components/modalLogs'
 
-import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import Select from 'react-select';
 
@@ -89,7 +79,6 @@ const estadoInicial = {
     exportation: 0,
     id: null,
     redirect: false,
-    finalizaOperacao: false,
     token: '',
     statusSelected: 0,
     empresas: [],
@@ -299,7 +288,10 @@ class AddShip extends Component {
         if (!validForm) {
             return;
         }
-        this.setState({ bloqueado: true })
+        this.setState({ 
+            bloqueado: true,
+            loading: true
+        })
 
         await apiEmployee.post(`insertNavio.php`, {
             token: this.props.token,
@@ -310,7 +302,7 @@ class AddShip extends Component {
                     await this.setState({chave: res.data[0].chave})
                     await loader.salvaLogs('os_navios', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
                 }
-                this.setState({ finalizaOperacao: true })
+                this.setState({ loading: false, bloqueado: false })
             },
             async res => await console.log(`erro: ${res.data}`)
         )
@@ -327,7 +319,8 @@ class AddShip extends Component {
                 { titulo: 'nome', valor: this.state.nome },
                 { titulo: 'bandeira', valor: this.state.bandeira },
                 { titulo: 'imo', valor: this.state.imo }
-            ]
+            ],
+            loading: true
         })
 
         await apiEmployee.post(`updateShip.php`, {
@@ -342,7 +335,7 @@ class AddShip extends Component {
                 if (res.data === true) {
                     await loader.salvaLogs('os_navios', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `NAVIO: ${this.state.nome}`);
 
-                    await this.setState({ finalizaOperacao: true })
+                    await this.setState({ loading: false, bloqueado: false })
                 } else {
                     console.log(res.data)
                 }
@@ -389,9 +382,6 @@ class AddShip extends Component {
                 <br />
                 {this.state.redirect &&
                     <Redirect to={'/'} />
-                }
-                {this.state.finalizaOperacao &&
-                    <Redirect to={{pathname: '/tabelas/navios', state:{chave: this.state.chave} }} />
                 }
 
                 {this.state.chave !=0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&

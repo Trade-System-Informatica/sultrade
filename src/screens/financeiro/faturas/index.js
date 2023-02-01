@@ -1,19 +1,21 @@
 import React, { Component } from 'react'
 import './styles.css'
+import { Formik, Field, Form } from 'formik'
 import { apiEmployee } from '../../../services/apiamrg'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import Skeleton from '../../../components/skeleton'
 import loader from '../../../classes/loader'
-import { Link, useHistory, Redirect } from 'react-router-dom'
+import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { PRECISA_LOGAR, NOME_EMPRESA } from '../../../config'
+import { NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSearch, faCoffee, faTrashAlt, faPen, faPlus, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
+import { faTimes, faPen, faPlus, faChevronDown, faChevronUp, faCopy } from '@fortawesome/free-solid-svg-icons'
 import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import moment from 'moment'
-import { GiLevelThree } from 'react-icons/gi'
+import Xml from '../../../classes/xml'
+import Modal from '@material-ui/core/Modal';
 
 
 const estadoInicial = {
@@ -25,6 +27,10 @@ const estadoInicial = {
     redirect: false,
 
     deleteFatura: false,
+
+    chaveCancela: 0,
+    cancelaModal: false,
+    motivo: "",
 
     acessos: [],
     permissoes: [],
@@ -88,14 +94,13 @@ class Faturas extends Component {
         await this.setState({ redirect: true })
     }
 
-    deleteFatura = async (chave, nome) => {
-        this.setState({ deleteFatura: true })
+    copyFatura = async (body) => {
         confirmAlert({
             customUI: ({ onClose }) => {
                 return (
                     <div className='custom-ui text-center'>
                         <h1>{NOME_EMPRESA}</h1>
-                        <p>Deseja remover a Nota fiscal {nome}? </p>
+                        <p>Deseja copiar essa Nota fiscal ({body.discriminacaoservico})? </p>
                         <button
                             style={{ marginRight: 5 }}
                             className="btn btn-danger w-25"
@@ -112,22 +117,88 @@ class Faturas extends Component {
                             className="btn btn-success w-25"
                             onClick={
                                 async () => {
-                                    await apiEmployee.post(`deleteFatura.php`, {
-                                        token: true,
-                                        chave: chave,
-                                        data: moment().format('YYYY-MM-DD')
-                                    }).then(
-                                        async response => {
-                                            if (response.data == true) {
-                                                await loader.salvaLogs('faturas', this.state.usuarioLogado.codigo, null, "Cancelamento", chave);
+                                    const formularios = await loader.getBase('getFormularios.php');
 
-                                                document.location.reload()
+                                    
+                                    const nfe = formularios.find((form) => form.Codigo === "NFE");
+
+                                    if (nfe) {
+                                        this.setState({loading:true})
+                                        await apiEmployee.post(`insertFatura.php`, {
+                                            token: true,
+                                            values: `'${moment(body.Emissao).format('YYYY-MM-DD')}', '${moment(body.Vencto).format('YYYY-MM-DD')}', '${body.Praca_Pagto}', '${body.Cliente}', '${body.Valor}', '${body.Obs}', '${nfe.chave}', '${body.Cobranca}', '${body.discriminacaoservico}', '${body.empresa}', '${body.atividade}'`,
+                                            formulario: nfe.chave
+                                        }).then(
+                                            async response => {
+                                                if (response.data[0]) {
+                                                    await loader.salvaLogs('faturas', this.state.usuarioLogado.codigo, null, "Inserir", response.data[0].chave);
+                                                    
+                                                    document.location.reload()
+                                                }
+                                            },
+                                            async response => {
+                                                this.erroApi(response)
                                             }
-                                        },
-                                        async response => {
-                                            this.erroApi(response)
+                                            )
+                                            this.setState({loading:false});
                                         }
-                                    )
+                                        onClose()
+                                }
+                            }
+
+                        >
+                            Sim
+                        </button>
+                    </div>
+                )
+            }
+        })
+    }
+
+    deleteFatura = async (chave, nome, fatura) => {
+        this.setState({ deleteFatura: true })
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return (
+                    <div className='custom-ui text-center'>
+                        <h1>{NOME_EMPRESA}</h1>
+                        <p>Deseja {fatura == 0 ? "apagar" : "cancelar"} a Nota fiscal {nome}? </p>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-danger w-25"
+                            onClick={
+                                async () => {
+                                    onClose()
+                                }
+                            }
+                        >
+                            Não
+                        </button>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-success w-25"
+                            onClick={
+                                async () => {
+                                    if (fatura != 0) {
+                                        this.setState({cancelaModal: true, chaveCancela: chave});
+                                    
+                                    } else {
+                                        await apiEmployee.post(`eraseFatura.php`, {
+                                            token: true,
+                                            chave
+                                        }).then(
+                                            async response => {
+                                                if (response.data == true) {
+                                                    await loader.salvaLogs('faturas', this.state.usuarioLogado.codigo, null, "Deleção", this.state.chaveCancela);
+    
+                                                    document.location.reload()
+                                                }
+                                            },
+                                            async response => {
+                                                this.erroApi(response)
+                                            }
+                                        )
+                                    }
                                     onClose()
                                 }
                             }
@@ -161,8 +232,10 @@ class Faturas extends Component {
             return fatura.clienteNome.toLowerCase().includes(this.state.pesquisa.toLowerCase())
         } else if (fatura.Emissao && this.state.tipoPesquisa == 3) {
             return fatura.Emissao.toLowerCase().includes(this.state.pesquisa.toLowerCase())
-        } if (this.state.tipoPesquisa == 4) {
+        } else if (this.state.tipoPesquisa == 4) {
             return fatura.Chave.includes(this.state.pesquisa.toLowerCase())
+        } else if (this.state.tipoPesquisa == 5) {
+            return fatura.discriminacaoservico.toLowerCase().includes(this.state.pesquisa.toLowerCase())
         }
 
     }
@@ -187,11 +260,101 @@ class Faturas extends Component {
                     {!this.state.loading &&
                         <div>
                             <section>
-                                <Header voltarFinanceiro titulo="Notas Fiscais de Serviço" />
+                                <Header voltarFinanceiroTabelas titulo="Notas Fiscais de Serviço" />
 
 
                                 <br />
                             </section>
+                            <Modal
+                            aria-labelledby="transition-modal-title"
+                            aria-describedby="transition-modal-description"
+                            style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
+                            open={this.state.cancelaModal}
+                            onClose={async () => { await this.setState({ cancelaModal: false }); }}
+                        >
+                            <div className='modalContainer'>
+                                <div className='modalCriar'>
+                                    <div className='containersairlistprodmodal'>
+                                        <div className='botaoSairModal' onClick={async () => await this.setState({ cabecalhoModal: false })}>
+                                            <span>X</span>
+                                        </div>
+                                    </div>
+                                    <div className='modalContent'>
+                                        <div className='tituloModal'>
+                                            <span>Cancelar nota:</span>
+                                        </div>
+
+
+                                        <div className='modalForm'>
+                                            <Formik
+                                                initialValues={{
+                                                    name: '',
+                                                }}
+                                                onSubmit={async values => {
+                                                    await new Promise(r => setTimeout(r, 1000))
+                                                    await Xml.cancelaXml(this.state.chaveCancela, this.state.motivo);
+                                                    await apiEmployee.post(`deleteFatura.php`, {
+                                                        token: true,
+                                                        chave: this.state.chaveCancela,
+                                                        data: moment().format('YYYY-MM-DD')
+                                                    }).then(
+                                                        async response => {
+                                                            if (response.data == true) {
+                                                                await loader.salvaLogs('faturas', this.state.usuarioLogado.codigo, null, "Cancelamento", this.state.chaveCancela);
+                
+                                                                document.location.reload()
+                                                            }
+                                                        },
+                                                        async response => {
+                                                            this.erroApi(response)
+                                                        }
+                                                    )
+                                                }}
+                                            >
+                                                <Form className="contact-form" >
+
+
+                                                    <div className="row">
+
+                                                        <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
+
+                                                            <div className="row addservicos">
+                                                                <div style={{marginTop: 0}} className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Motivo:</label>
+                                                                </div>
+                                                                <div className="col-1 errorMessage">
+
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control" type="text" value={this.state.motivo} onChange={async e => { this.setState({ motivo: e.currentTarget.value }) }} />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                                                    </div>
+
+                                                    <div className="row">
+                                                        <div className="col-2"></div>
+                                                        <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                            <button type="submit" style={{ width: 300 }} >Cancelar</button>
+                                                        </div>
+                                                        <div className="col-2"></div>
+                                                    </div>
+
+                                                </Form>
+                                            </Formik>
+
+                                        </div>
+                                    </div>
+
+
+
+
+
+                                </div >
+
+                            </div >
+                        </Modal >
 
                             <div className="row">
                                 <div className="col-2"></div>
@@ -206,6 +369,7 @@ class Faturas extends Component {
                                     <div className="col-12 text-right pesquisa mobileajuster1 ">
                                         <div className="col-12  text-right pesquisa mobileajuster1 ">
                                             <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
+                                                <option value={5}>Discriminação</option>
                                                 <option value={1}>Fatura</option>
                                                 <option value={2}>Cliente</option>
                                                 <option value={3}>Emissão</option>
@@ -229,10 +393,10 @@ class Faturas extends Component {
                                     <div className="single-product-item" >
                                         <div className="row subtitulosTabela">
                                             <div className="col-2 text-left">
-                                                <span className="subtituloships">Chave</span>
-                                            </div>
-                                            <div className="col-3 text-left">
                                                 <span className="subtituloships">Fatura</span>
+                                            </div>
+                                            <div className="col-4 text-left">
+                                                <span className="subtituloships">Discriminação</span>
                                             </div>
                                             <div className="col-3 text-left">
                                                 <span className="subtituloships">Cliente</span>
@@ -240,12 +404,12 @@ class Faturas extends Component {
                                             <div className="col-2 text-left">
                                                 <span className="subtituloships">Emissão</span>
                                             </div>
-                                            <div className="col-2 text-center revertItem" onClick={() => { if (this.state.contas[0]) { this.reverterItens() } }}>
+                                            <div className="col-1 text-center revertItem" onClick={() => { if (this.state.contas[0]) { this.reverterItens() } }}>
                                                 {!this.state.faturas[0] && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'FATURAS') { return e } }).map((e) => e.permissaoInsere)[0] == 1 &&
                                                     <span className="subtituloships"><Link to={{ pathname: `/financeiro/addfatura/0` }}><FontAwesomeIcon icon={faPlus} /></Link></span>
                                                 }
                                                 {this.state.faturas[0] &&
-                                                    <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela}/></span>
+                                                    <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela} /></span>
                                                 }
                                             </div>
                                         </div>
@@ -261,10 +425,10 @@ class Faturas extends Component {
                                         <div ref={feed.Chave == this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} className={`col-lg-8 col-md-8 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.Chave == this.state.chaveFocus ? "par focusLight" : "par " : feed.Chave == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
                                             <div className="row deleteMargin alignCenter">
                                                 <div className=" col-2 text-left" style={{ overflowWrap: 'anywhere' }}>
-                                                    <p>{feed.Chave}</p>
-                                                </div>
-                                                <div className="col-3 text-left">
                                                     <p>{feed.Fatura}</p>
+                                                </div>
+                                                <div className="col-4 text-left">
+                                                    <p>{feed.discriminacaoservico}</p>
                                                 </div>
                                                 <div className="col-3 text-left">
                                                     <p>{feed.clienteNome}</p>
@@ -272,7 +436,7 @@ class Faturas extends Component {
                                                 <div style={{ overflowWrap: 'anywhere' }} className="col-2 text-left">
                                                     <p>{moment(feed.Emissao).format('DD/MM/YYYY')}</p>
                                                 </div>
-                                                <div className="col-2  text-left  mobileajuster4 icones">
+                                                <div className="col-1  text-left  mobileajuster4 icones">
                                                     <div className='iconelixo giveMargin' type='button' >
                                                         <Link to=
                                                             {{
@@ -281,6 +445,12 @@ class Faturas extends Component {
                                                         >
                                                             <FontAwesomeIcon icon={faPlus} />
                                                         </Link>
+                                                    </div>
+
+                                                    <div className='iconelixo giveMargin' type='button' >
+                                                        <div type='button' className='iconelixo' onClick={(a) => this.copyFatura(feed)}>
+                                                            <FontAwesomeIcon icon={faCopy} />
+                                                        </div>
                                                     </div>
 
 
@@ -296,8 +466,8 @@ class Faturas extends Component {
                                                     </div>
 
                                                     {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'FATURAS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-                                                        <div type='button' className='iconelixo' onClick={(a) => this.deleteFatura(feed.Chave, feed.Fatura)} >
-                                                            <FontAwesomeIcon icon={faTrashAlt} />
+                                                        <div type='button' className='iconelixo' onClick={(a) => this.deleteFatura(feed.Chave, feed.discriminacaoservico, feed.Fatura)} >
+                                                            <FontAwesomeIcon icon={faTimes} />
                                                         </div>
                                                     }
                                                 </div>

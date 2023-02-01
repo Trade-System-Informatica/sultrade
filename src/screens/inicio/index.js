@@ -4,16 +4,10 @@ import Header from '../../components/header'
 import Rodape from '../../components/rodape'
 import Skeleton from '../../components/skeleton'
 import './styles.css'
-import Util from '../../classes/util'
 import { apiEmployee } from '../../services/apiamrg'
 import { connect } from 'react-redux'
-import Logo from '../../img/logo.png'
-import { IoBusiness } from "react-icons/io5";
-import { GiCargoCrate, GiShipBow } from "react-icons/gi"
-
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTable, faUserTie, faClipboard, faMoneyBillWave, faWater, faPaperclip, faDollyFlatbed, faSignal, faCartPlus, faTv, faDollarSign, faScroll, faScrewdriver } from '@fortawesome/free-solid-svg-icons'
+import { faTable, faUserTie, faClipboard, faMoneyBillWave } from '@fortawesome/free-solid-svg-icons'
 
 class Inicio extends Component {
 
@@ -77,7 +71,7 @@ class Inicio extends Component {
         })
 
         await this.setState({ acessosPermissoes: acessosPermissoes });
-        
+
 
 
     }
@@ -97,10 +91,10 @@ class Inicio extends Component {
         )
         await this.setState({ loading: false })
     }
-    
+
     erroApi = async (res) => {
         await this.setState({ isLogado: false })
-    
+
         this.setState({ redirect: true })
     }
 
@@ -115,46 +109,46 @@ class Inicio extends Component {
                     {this.state.loading &&
                         <Skeleton />
                     }
-                    <Header sair titulo="Inicio"/>
-                    
-                    <br/>
-                    <br/>
+                    <Header sair titulo="Inicio" />
+
+                    <br />
+                    <br />
                     {!this.state.loading &&
                         <div className="product-filter row">
                             <div className="col-12 text-center">
                                 <div className="rounded">
                                     <ul className='itens_centro'>
-                                            <li className=" text-left itemMenu list-group-item ">
-                                                <Link className="semTextDecoration" to={{ pathname: `/tabelas` }}>
-                                                    <FontAwesomeIcon icon={faTable} size="2x" color="tomato" />
+                                        <li className=" text-left itemMenu list-group-item ">
+                                            <Link className="semTextDecoration" to={{ pathname: `/tabelas` }}>
+                                                <FontAwesomeIcon icon={faTable} size="2x" color="tomato" />
 
-                                                    <h4 className="textoMenu">Tabelas</h4>
-                                                </Link>
-                                            </li>
+                                                <h4 className="textoMenu">Tabelas</h4>
+                                            </Link>
+                                        </li>
 
-                                            <li className=" text-left itemMenu list-group-item ">
-                                                <Link className="semTextDecoration" to={{ pathname: `/ordensservico` }}>
-                                                    <FontAwesomeIcon icon={faUserTie} size="2x" color="tomato" />
+                                        <li className=" text-left itemMenu list-group-item ">
+                                            <Link className="semTextDecoration" to={{ pathname: `/ordensservico` }}>
+                                                <FontAwesomeIcon icon={faUserTie} size="2x" color="tomato" />
 
-                                                    <h4 className="textoMenu">Ordens de Serviço</h4>
-                                                </Link>
-                                            </li>
-                                            
-                                            <li className=" text-left itemMenu list-group-item ">
-                                                <Link className="semTextDecoration" to={{ pathname: `/financeiro` }}>
-                                                    <FontAwesomeIcon icon={faMoneyBillWave} size="2x" color="tomato" />
+                                                <h4 className="textoMenu">Ordens de Serviço</h4>
+                                            </Link>
+                                        </li>
 
-                                                    <h4 className="textoMenu">Financeiro</h4>
-                                                </Link>
-                                            </li>
+                                        <li className=" text-left itemMenu list-group-item ">
+                                            <Link className="semTextDecoration" to={{ pathname: `/financeiro` }}>
+                                                <FontAwesomeIcon icon={faMoneyBillWave} size="2x" color="tomato" />
 
-                                            <li className=" text-left itemMenu list-group-item ">
-                                                <Link className="semTextDecoration" to={{ pathname: `/utilitarios` }}>
-                                                    <FontAwesomeIcon icon={faClipboard} size="2x" color="tomato" />
+                                                <h4 className="textoMenu">Financeiro</h4>
+                                            </Link>
+                                        </li>
 
-                                                    <h4 className="textoMenu">Utilitários</h4>
-                                                </Link>
-                                            </li>
+                                        <li className=" text-left itemMenu list-group-item ">
+                                            <Link className="semTextDecoration" to={{ pathname: `/utilitarios` }}>
+                                                <FontAwesomeIcon icon={faClipboard} size="2x" color="tomato" />
+
+                                                <h4 className="textoMenu">Utilitários</h4>
+                                            </Link>
+                                        </li>
 
                                     </ul>
                                 </div>

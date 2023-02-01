@@ -27,19 +27,19 @@ if ($objData != NULL) {
 
     $contas = new Contas();
     $informacoesBancarias = $contas->getInformacoesBancarias($empresa, 1);
-    
+
     if (strlen($informacoesBancarias[0]["cpf"]) == 11) {
         $codigoTipoPagador = 1;
     } else if (strlen($informacoesBancarias[0]["cpf"]) == 14) {
         $codigoTipoPagador = 2;
     }
-    
+
     if (strlen($conta->{"pessoaCPF"}) == 11) {
         $codigoTipoBeneficiario = 1;
     } else if (strlen($conta->{"pessoaCPF"}) == 14) {
         $codigoTipoBeneficiario = 2;
     }
-    
+
 
     $dataTransferencia = date_create($conta->{"Vencimento"});
 
@@ -50,7 +50,7 @@ if ($objData != NULL) {
         "digitoVerificadorContaCorrenteDebito" => $informacoesBancarias[0]["digito_conta"],
         "codigoContrato" => $informacoesBancarias[0]["codigo_contrato"],
         "lancamentos" => [[
-            "numeroCodigoBarras" => "".$conta->{"RepCodBar"}."",
+            "numeroCodigoBarras" => "" . $conta->{"RepCodBar"} . "",
             "valorPagamento" => floatval($conta->{"Valor"}),
             "descricaoPagamento" => $conta->{"Historico"},
             "valorNominal" => floatval($conta->{"Valor"}),
@@ -71,7 +71,6 @@ if ($objData != NULL) {
 
     if ($statusId != 0) {
         $url .= "?gw-dev-app-key=" . $informacoesBancarias[0]["chave_api"];
-
 
         //$url = "https://api.sandbox.bb.com.br/pagamentos-lote/v1/lotes-boletos?gw-dev-app-key=d27bc7790affabc01368e17df0050056b9a1a5bf";
 
@@ -94,7 +93,6 @@ if ($objData != NULL) {
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
 
         $return = curl_exec($ch);
-        curl_close($ch);
         $returnJSON = json_decode($return);
 
         if ($returnJSON->{"statusCode"} >= 400 && $returnJSON->{"statusCode"} < 500) {
@@ -107,13 +105,21 @@ if ($objData != NULL) {
             $statusId = 0;
 
             $status = $returnJSON->{"erros"}[0]->{"mensagem"};
+        } else if ($returnJSON->{"lancamentos"}[0]->{"erros"}[0]) {
+            $statusId = 0;
+
+            for ($i = 0; $i < count($codigosBB); $i++) {
+                if ($returnJSON->{"lancamentos"}[0]->{"erros"}[0] == $codigosBB[$i]["codigo"] && $codigosBB[$i]["tipo"] == "erro") {
+                    $status = $codigosBB[$i]["mensagem"];
+                }
+            }
         } else {
             $status = "Requisição enviada com Numero de Requisição: $codigo";
         }
-        
+
         if (!$return) {
             $return = curl_error($ch);
-        }  
+        }
         curl_close($ch);
     }
 

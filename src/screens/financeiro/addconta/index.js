@@ -5,11 +5,8 @@ import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import ModalListas from '../../../components/modalListas'
 import Skeleton from '../../../components/skeleton'
-import util from '../../../classes/util'
-import { PRECISA_LOGAR } from '../../../config'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
-import Image from 'react-bootstrap/Image'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import ModalLogs from '../../../components/modalLogs'
@@ -17,6 +14,7 @@ import { apiEmployee } from '../../../services/apiamrg'
 import moment from 'moment'
 import loader from '../../../classes/loader'
 import Select from 'react-select';
+import { Modal } from '@material-ui/core'
 
 const estadoInicial = {
     conta: '',
@@ -46,6 +44,7 @@ const estadoInicial = {
     tipoDocumento: '',
     meioPagamento: '',
     meioPagamentoNome: '',
+    descontosModal: false,
 
     logs: [],
     modalLog: false,
@@ -60,6 +59,35 @@ const estadoInicial = {
     darfJuros: '',
     darfOutros: '',
     darfPagamento: '',
+    tipoPix: '',
+
+    desconto: '',
+    descontoComplemento: '',
+    descontoConta: '',
+    retencaoInss: '',
+    retencaoInssCheck: false,
+    retencaoInssComplemento: '',
+    retencaoInssConta: '',
+    retencaoIr: '',
+    retencaoIrCheck: false,
+    retencaoIrComplemento: '',
+    retencaoIrConta: '',
+    retencaoIss: '',
+    retencaoIssCheck: false,
+    retencaoIssComplemento: '',
+    retencaoIssConta: '',
+    retencaoPis: '',
+    retencaoPisCheck: false,
+    retencaoPisComplemento: '',
+    retencaoPisConta: '',
+    retencaoCofins: '',
+    retencaoCofinsCheck: false,
+    retencaoCofinsComplemento: '',
+    retencaoCofinsConta: '',
+    retencaoCsll: '',
+    retencaoCsllCheck: false,
+    retencaoCsllComplemento: '',
+    retencaoCsllConta: '',
 
     empresas: [],
     empresasOptions: [],
@@ -97,7 +125,8 @@ const estadoInicial = {
         { titulo: 'valor_multa', valor: '' },
         { titulo: 'valor_juros', valor: '' },
         { titulo: 'valor_outros', valor: '' },
-        { titulo: 'valor_pagamento', valor: '' }
+        { titulo: 'valor_pagamento', valor: '' },
+        { titulo: 'tipo_pix', valor: '' }
     ],
     dadosFinaisDarf: [
         { titulo: 'codigo_receita', valor: '' },
@@ -109,9 +138,11 @@ const estadoInicial = {
         { titulo: 'valor_multa', valor: '' },
         { titulo: 'valor_juros', valor: '' },
         { titulo: 'valor_outros', valor: '' },
-        { titulo: 'valor_pagamento', valor: '' }
+        { titulo: 'valor_pagamento', valor: '' },
+        { titulo: 'tipo_pix', valor: '' }
     ],
 
+    contabilizada: 0,
 
     meiosPagamentos: [],
     meiosPagamentosOptions: [],
@@ -146,7 +177,7 @@ class AddConta extends Component {
             await this.setState({ empresa: this.state.usuarioLogado.empresa })
         }
         await this.setState({ chave: id })
-        if (this.props.location.state.tipo) {
+        if (this.props.location && this.props.location.state && this.props.location.state.tipo) {
             this.setState({ tipo: this.props.location.state.tipo })
         }
         if (parseInt(id) !== 0) {
@@ -215,7 +246,7 @@ class AddConta extends Component {
         if (meioPagamentoNome && meioPagamentoNome[0]) {
             await this.setState({ meioPagamentoNome: meioPagamentoNome[0].descricao });
 
-            if (this.state.meioPagamentoNome == 'DARF' || this.state.meioPagamentoNome == 'GPS' || this.state.meioPagamentoNome == 'GRU') {
+            if (this.state.meioPagamentoNome == 'DARF' || this.state.meioPagamentoNome == 'GPS' || this.state.meioPagamentoNome == 'GRU' || this.state.meioPagamentoNome == "PIX") {
                 await this.getContasComplementar();
             }
 
@@ -226,6 +257,12 @@ class AddConta extends Component {
             }
         })
 
+    }
+
+    componentDidUpdate = async (prevProps, prevState) => {
+        if (this.state.pessoa != prevState.pessoa && this.state.tipo == 1) {
+            this.setState({contaProvisao: await loader.getContaPessoa(this.state.pessoa, "provisao")});
+        }
     }
 
     loadAll = async () => {
@@ -247,11 +284,69 @@ class AddConta extends Component {
             meiosPagamentos: await loader.getBase('getMeiosPagamentos.php'),
             meiosPagamentosOptions: await loader.getMeiosPagamentosOptions(),
 
+            parametros: await loader.getBody('getParametros.php', { token: true, empresa: this.state.usuarioLogado.empresa }),
+
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php')
         })
 
+        if (this.state.chave) {
+            const contabilizada = await loader.getBody(`getLancamentoConta.php`, { chavePr: this.state.chave });
+            if (contabilizada[0]) {
+                this.setState({ contabilizada: contabilizada[0].Chave })
+            }
+
+            const contasDescontos = await loader.getBody(`getContasDescontos.php`, {
+                token: true,
+                chave_conta_aberto: this.state.chave
+            });
+
+
+            contasDescontos.map((conta) => {
+                switch (conta.tipo) {
+                    case "DESCONTO":
+                        this.setState({ desconto: conta.valor, descontoComplemento: conta.complemento });
+                        break;
+                    case "INSS":
+                        this.setState({retencaoInss: conta.valor, retencaoInssComplemento: conta.complemento, retencaoInssCheck: true});
+                        break;
+                    case "IR":
+                        this.setState({retencaoIr: conta.valor, retencaoIrComplemento: conta.complemento, retencaoIrCheck: true});
+                        break;
+                    case "ISS":
+                        this.setState({retencaoIss: conta.valor, retencaoIssComplemento: conta.complemento, retencaoIssCheck: true});
+                        break;
+                    case "PIS":
+                        this.setState({retencaoPis: conta.valor, retencaoPisComplemento: conta.complemento, retencaoPisCheck: true});
+                        break;
+                    case "COFINS":
+                        this.setState({retencaoCofins: conta.valor, retencaoCofinsComplemento: conta.complemento, retencaoCofinsCheck: true});
+                        break;
+                    case "CSLL":
+                        this.setState({retencaoCsll: conta.valor, retencaoCsllComplemento: conta.complemento, retencaoCsllCheck: true});
+                        break;
+                }
+            })
+
+            if (this.state.tipo == 1) {
+                this.setState({contaProvisao: await loader.getContaPessoa(this.state.pessoa, "provisao")});
+            }
+
+        }
+
+        const planosContasOptions = this.state.planosContasOptions;
+        planosContasOptions.unshift({ label: "Select...", value: "" });
+
         await this.setState({
+            planosContasOptions,
+            descontoConta: this.state.parametros[0].conta_desconto,
+            parametroInss: this.state.parametros[0].conta_retencao_inss,
+            parametroIr: this.state.parametros[0].conta_retencao_ir,
+            parametroIss: this.state.parametros[0].conta_retencao_iss,
+            parametroPis: this.state.parametros[0].conta_retencao_pis,
+            parametroCofins: this.state.parametros[0].conta_retencao_cofins,
+            parametroCsll: this.state.parametros[0].conta_retencao_csll,
+
             acessosPermissoes: await loader.testaAcesso(this.state.acessos, this.state.permissoes, this.state.usuarioLogado),
             loading: false
         })
@@ -290,7 +385,8 @@ class AddConta extends Component {
                         darfMulta: new Intl.NumberFormat('pt-BR').format(this.state.contaComplementar.valor_multa),
                         darfJuros: new Intl.NumberFormat('pt-BR').format(this.state.contaComplementar.valor_juros),
                         darfOutros: new Intl.NumberFormat('pt-BR').format(this.state.contaComplementar.valor_outros),
-                        darfPagamento: new Intl.NumberFormat('pt-BR').format(this.state.contaComplementar.valor_pagamento)
+                        darfPagamento: new Intl.NumberFormat('pt-BR').format(this.state.contaComplementar.valor_pagamento),
+                        tipoPix: this.state.contaComplementar.tipo_pix
                     })
 
                     await this.setState({
@@ -304,7 +400,8 @@ class AddConta extends Component {
                             { titulo: 'valor_multa', valor: this.state.darfMulta },
                             { titulo: 'valor_juros', valor: this.state.darfJuros },
                             { titulo: 'valor_outros', valor: this.state.darfOutros },
-                            { titulo: 'valor_pagamento', valor: this.state.darfPagamento }
+                            { titulo: 'valor_pagamento', valor: this.state.darfPagamento },
+                            { titulo: 'tipo_pix', valor: this.state.tipoPix }
                         ]
                     })
 
@@ -318,7 +415,32 @@ class AddConta extends Component {
 
 
     salvarConta = async (validForm) => {
-        this.setState({ bloqueado: true });
+        this.setState({ bloqueado: true, loading: true });
+
+        if (this.state.meioPagamentoNome === "PIX") {
+            const contatos = await loader.getBody(`getContatos.php`, { pessoa: this.state.pessoa });
+
+            const chave = contatos.find((cont) => cont.tipo === "PX");
+
+            if (chave) {
+                switch (chave.Campo2) {
+                    case "Telefone":
+                        this.setState({ tipoPix: 1 });
+                        break;
+                    case "E-mail":
+                        this.setState({ tipoPix: 2 });
+                        break;
+                    case "CPF/CNPJ":
+                        this.setState({ tipoPix: 3 });
+                        break;
+                }
+            }
+
+            if (!this.state.tipoPix) {
+                this.setState({ loading: false });
+                return;
+            }
+        }
 
         await this.setState({
             dadosFinais: [
@@ -341,168 +463,305 @@ class AddConta extends Component {
                 { titulo: 'Conta_Bloqueto', valor: this.state.contaBloqueto },
                 { titulo: 'tipodocto', valor: this.state.tipoDocumento },
                 { titulo: 'meio_pagamento', valor: this.state.meioPagamento },
-            ]
+            ],
+            loading: true
         })
 
-        if (parseInt(this.state.chave) === 0 && validForm) {
-            if (this.state.tipo == 0) {
-                await apiEmployee.post(`insertContaCliente.php`, {
-                    token: true,
-                    values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.centroCusto}', '${this.state.contaDesconto}', '${this.state.historico}', '${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${this.state.numBoleto}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}'`,
-                    meioPagamento: this.state.meioPagamentoNome,
-                    valuesDarf: `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`
-                }).then(
-                    async res => {
-                        if (res.data[0].Chave) {
-                            await this.setState({ chave: res.data[0].Chave })
-                            await loader.salvaLogs('contas_aberto', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
-                            if (this.state.meioPagamentoNome == 'DARF' || this.state.meioPagamentoNome == 'GPS' || this.state.meioPagamentoNome == 'GRU') {
-                                await loader.salvaLogs('contas_aberto_complementar', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
-                            }
-                            await this.setState({ finalizaOperacao: true })
-                        } else {
-                            await alert(`Erro ${JSON.stringify(res.data)}`)
-                        }
-                    },
-                    async res => await console.log(`Erro: ${res.data}`)
-                )
-            } else {
-                await apiEmployee.post(`insertContaFornecedor.php`, {
-                    token: true,
-                    values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.codBarras}', '${this.state.centroCusto}', '${this.state.historico}',  '${this.state.contaDesconto}','${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}', ''`,
-                    meioPagamento: this.state.meioPagamentoNome,
-                    valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`
-                }).then(
-                    async res => {
-                        if (res.data[0].Chave) {
-                            await this.setState({ chave: res.data[0].Chave })
-                            await loader.salvaLogs('contas_aberto', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
-                            if (this.state.meioPagamentoNome == 'DARF' || this.state.meioPagamentoNome == 'GPS' || this.state.meioPagamentoNome == 'GRU') {
-                                await loader.salvaLogs('contas_aberto_complementar', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
-                            }
+        if (validForm) {
 
-                            await this.setState({ finalizaOperacao: true })
-                        } else {
-                            await alert(`Erro ${JSON.stringify(res.data)}`)
-                        }
-                    },
-                    async res => await console.log(`Erro: ${res.data}`)
-                )
-            }
-        } else if (validForm) {
-            if (this.state.tipo == 0) {
-                await apiEmployee.post(`updateContaCliente.php`, {
-                    token: true,
-                    Chave: this.state.chave,
-                    Lancto: moment(this.state.lancamento).format('YYYY-MM-DD'),
-                    Tipo: this.state.tipo,
-                    Pessoa: this.state.pessoa,
-                    Conta_Contabil: this.state.contaContabil,
-                    Centro_Custo: this.state.centroCusto,
-                    Conta_Desconto: this.state.contaDesconto,
-                    Historico: this.state.historico,
-                    Parc_Ini: this.state.parcelaInicial,
-                    Parc_Fim: this.state.parcelaFinal,
-                    RepCodBar: this.state.numBoleto,
-                    Valor: parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')),
-                    Saldo: this.state.valorInicial == this.state.saldo ? parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')) : parseFloat(this.state.saldo.replaceAll('.', '').replaceAll(',', '.')),
-                    Vencimento: moment(this.state.vencimento).format('YYYY-MM-DD'),
-                    Vencimento_Original: moment(this.state.vencimentoOrig).format('YYYY-MM-DD'),
-                    Conta_Provisao: this.state.contaProvisao,
-                    Empresa: this.state.empresa,
-                    Docto: this.state.documento,
-                    tipodocto: this.state.tipoDocumento,
-                    meioPagamento: this.state.meioPagamento,
-
-                    meioPagamentoNome: this.state.meioPagamentoNome,
-
-                    codigo_receita: this.state.codigoReceita,
-                    contribuinte: this.state.contribuinte,
-                    codigo_identificador_tributo: this.state.codigoIdentificadorTributo,
-                    mes_compet_num_ref: this.state.mesCompetNumRef,
-                    data_apuracao: this.state.dataApuracao,
-                    darfValor: parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.')),
-                    darfMulta: parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.')),
-                    darfJuros: parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.')),
-                    darfOutros: parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.')),
-                    darfPagamento: parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))
-                }).then(
-                    async res => {
-                        if (res.data === true) {
-                            await loader.salvaLogs('contas_aberto', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `CONTAS EM ABERTO: ${this.state.historico}`);
-                            if (this.state.meioPagamentoNome == 'DARF' || this.state.meioPagamentoNome == 'GPS' || this.state.meioPagamentoNome == 'GRU') {
-                                if (this.state.dadosIniciaisDarf[0].valor == '') {
-                                    await loader.salvaLogs('contas_aberto_complementar', this.state.usuarioLogado.codigo, null, "Inclusão", this.state.chave);
-                                } else {
-                                    await loader.salvaLogs('contas_aberto_complementar', this.state.usuarioLogado.codigo, this.state.dadosIniciaisDarf, this.state.dadosFinaisDarf, this.state.chave, `CONTAS EM ABERTO COMPLEMENTAR: ${this.state.chave}`);
+            if (parseInt(this.state.chave) === 0) {
+                if (this.state.tipo == 0) {
+                    await apiEmployee.post(`insertContaCliente.php`, {
+                        token: true,
+                        values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.centroCusto}', '${this.state.contaDesconto}', '${this.state.historico}', '${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${this.state.numBoleto}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}'`,
+                        meioPagamento: this.state.meioPagamentoNome,
+                        valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`
+                    }).then(
+                        async res => {
+                            if (res.data[0].Chave) {
+                                await this.setState({ chave: res.data[0].Chave })
+                                await loader.salvaLogs('contas_aberto', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
+                                if (this.state.meioPagamentoNome == 'DARF' || this.state.meioPagamentoNome == 'GPS' || this.state.meioPagamentoNome == 'GRU') {
+                                    await loader.salvaLogs('contas_aberto_complementar', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
                                 }
+                                await this.setState({ loading: false, bloqueado: false })
+                            } else {
+                                await alert(`Erro ${JSON.stringify(res.data)}`)
                             }
-                            await this.setState({ finalizaOperacao: true })
-                        } else {
-                            await alert(`Erro ${JSON.stringify(res.data)}`)
-                        }
-                    },
-                    async res => await console.log(`Erro: ${res.data}`)
-                )
-            } else {
-                await apiEmployee.post(`updateContaFornecedor.php`, {
-                    token: true,
-                    Chave: this.state.chave,
-                    Lancto: moment(this.state.lancamento).format('YYYY-MM-DD'),
-                    Tipo: this.state.tipo,
-                    Pessoa: this.state.pessoa,
-                    Conta_Contabil: this.state.contaContabil,
-                    RepCodBar: this.state.codBarras,
-                    Centro_Custo: this.state.centroCusto,
-                    Historico: this.state.historico,
-                    Conta_Desconto: this.state.contaDesconto,
-                    Parc_Ini: this.state.parcelaInicial,
-                    Parc_Fim: this.state.parcelaFinal,
-                    Valor: parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')),
-                    Saldo: this.state.valorInicial == this.state.saldo ? parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')) : parseFloat(this.state.saldo.replaceAll('.', '').replaceAll(',', '.')),
-                    Vencimento: moment(this.state.vencimento).format('YYYY-MM-DD'),
-                    Vencimento_Original: moment(this.state.vencimentoOrig).format('YYYY-MM-DD'),
-                    Conta_Provisao: this.state.contaProvisao,
-                    Empresa: this.state.empresa,
-                    Docto: this.state.documento,
-                    tipodocto: this.state.tipoDocumento,
-                    meioPagamento: this.state.meioPagamento,
-
-                    meioPagamentoNome: this.state.meioPagamentoNome,
-
-                    codigo_receita: this.state.codigoReceita,
-                    contribuinte: this.state.contribuinte,
-                    codigo_identificador_tributo: this.state.codigoIdentificadorTributo,
-                    mes_compet_num_ref: this.state.mesCompetNumRef,
-                    data_apuracao: this.state.dataApuracao,
-                    darfValor: parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.')),
-                    darfMulta: parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.')),
-                    darfJuros: parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.')),
-                    darfOutros: parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.')),
-                    darfPagamento: parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))
-
-                }).then(
-                    async res => {
-                        if (res.data === true) {
-                            await loader.salvaLogs('contas_aberto', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `CONTAS EM ABERTO: ${this.state.historico}`);
-                            if (this.state.meioPagamentoNome == 'DARF' || this.state.meioPagamentoNome == 'GPS' || this.state.meioPagamentoNome == 'GRU') {
-                                if (this.state.dadosIniciaisDarf[0].valor == '') {
-                                    await loader.salvaLogs('contas_aberto_complementar', this.state.usuarioLogado.codigo, null, "Inclusão", this.state.chave);
-                                } else {
-                                    await loader.salvaLogs('contas_aberto_complementar', this.state.usuarioLogado.codigo, this.state.dadosIniciaisDarf, this.state.dadosFinaisDarf, this.state.chave, `CONTAS EM ABERTO COMPLEMENTAR: ${this.state.chave}`);
+                        },
+                        async res => await console.log(`Erro: ${res.data}`)
+                    )
+                } else {
+                    await apiEmployee.post(`insertContaFornecedor.php`, {
+                        token: true,
+                        values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.codBarras}', '${this.state.centroCusto}', '${this.state.historico}',  '${this.state.contaDesconto}','${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}', ''`,
+                        meioPagamento: this.state.meioPagamentoNome,
+                        valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`
+                    }).then(
+                        async res => {
+                            if (res.data[0].Chave) {
+                                await this.setState({ chave: res.data[0].Chave })
+                                await loader.salvaLogs('contas_aberto', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
+                                if (this.state.meioPagamentoNome == 'DARF' || this.state.meioPagamentoNome == 'GPS' || this.state.meioPagamentoNome == 'GRU' || this.state.meioPagamentoNome === "PIX") {
+                                    await loader.salvaLogs('contas_aberto_complementar', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
                                 }
-                            }
-                            await this.setState({ finalizaOperacao: true })
-                        } else {
-                            await alert(`Erro ${JSON.stringify(res.data)}`)
-                        }
-                    },
-                    async res => await console.log(`Erro: ${res.data}`)
-                )
-            }
 
+                                await this.setState({ loading: false, bloqueado: false })
+                            } else {
+                                await alert(`Erro ${JSON.stringify(res.data)}`)
+                            }
+                        },
+                        async res => await console.log(`Erro: ${res.data}`)
+                    )
+                }
+            } else {
+                if (this.state.tipo == 0) {
+                    await apiEmployee.post(`updateContaCliente.php`, {
+                        token: true,
+                        Chave: this.state.chave,
+                        Lancto: moment(this.state.lancamento).format('YYYY-MM-DD'),
+                        Tipo: this.state.tipo,
+                        Pessoa: this.state.pessoa,
+                        Conta_Contabil: this.state.contaContabil,
+                        Centro_Custo: this.state.centroCusto,
+                        Conta_Desconto: this.state.contaDesconto,
+                        Historico: this.state.historico,
+                        Parc_Ini: this.state.parcelaInicial,
+                        Parc_Fim: this.state.parcelaFinal,
+                        RepCodBar: this.state.numBoleto,
+                        Valor: parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')),
+                        Saldo: this.state.valorInicial == this.state.saldo ? parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')) : parseFloat(this.state.saldo.replaceAll('.', '').replaceAll(',', '.')),
+                        Vencimento: moment(this.state.vencimento).format('YYYY-MM-DD'),
+                        Vencimento_Original: moment(this.state.vencimentoOrig).format('YYYY-MM-DD'),
+                        Conta_Provisao: this.state.contaProvisao,
+                        Empresa: this.state.empresa,
+                        Docto: this.state.documento,
+                        tipodocto: this.state.tipoDocumento,
+                        meioPagamento: this.state.meioPagamento,
+
+                        meioPagamentoNome: this.state.meioPagamentoNome,
+
+                        codigo_receita: this.state.codigoReceita,
+                        contribuinte: this.state.contribuinte,
+                        codigo_identificador_tributo: this.state.codigoIdentificadorTributo,
+                        mes_compet_num_ref: this.state.mesCompetNumRef,
+                        data_apuracao: this.state.dataApuracao,
+                        darfValor: parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.')),
+                        darfMulta: parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.')),
+                        darfJuros: parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.')),
+                        darfOutros: parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.')),
+                        darfPagamento: parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.')),
+                        tipo_pix: this.state.tipoPix
+                    }).then(
+                        async res => {
+                            if (res.data === true) {
+                                await loader.salvaLogs('contas_aberto', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `CONTAS EM ABERTO: ${this.state.historico}`);
+                                if (this.state.meioPagamentoNome == 'DARF' || this.state.meioPagamentoNome == 'GPS' || this.state.meioPagamentoNome == 'GRU' || this.state.meioPagamentoNome === "PIX") {
+                                    if (this.state.dadosIniciaisDarf[0].valor == '') {
+                                        await loader.salvaLogs('contas_aberto_complementar', this.state.usuarioLogado.codigo, null, "Inclusão", this.state.chave);
+                                    } else {
+                                        await loader.salvaLogs('contas_aberto_complementar', this.state.usuarioLogado.codigo, this.state.dadosIniciaisDarf, this.state.dadosFinaisDarf, this.state.chave, `CONTAS EM ABERTO COMPLEMENTAR: ${this.state.chave}`);
+                                    }
+                                }
+                                await this.setState({ loading: false, bloqueado: false })
+                            } else {
+                                await alert(`Erro ${JSON.stringify(res.data)}`)
+                            }
+                        },
+                        async res => await console.log(`Erro: ${res.data}`)
+                    )
+                } else {
+                    await apiEmployee.post(`updateContaFornecedor.php`, {
+                        token: true,
+                        Chave: this.state.chave,
+                        Lancto: moment(this.state.lancamento).format('YYYY-MM-DD'),
+                        Tipo: this.state.tipo,
+                        Pessoa: this.state.pessoa,
+                        Conta_Contabil: this.state.contaContabil,
+                        RepCodBar: this.state.codBarras,
+                        Centro_Custo: this.state.centroCusto,
+                        Historico: this.state.historico,
+                        Conta_Desconto: this.state.contaDesconto,
+                        Parc_Ini: this.state.parcelaInicial,
+                        Parc_Fim: this.state.parcelaFinal,
+                        Valor: parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')),
+                        Saldo: this.state.valorInicial == this.state.saldo ? parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')) : parseFloat(this.state.saldo.replaceAll('.', '').replaceAll(',', '.')),
+                        Vencimento: moment(this.state.vencimento).format('YYYY-MM-DD'),
+                        Vencimento_Original: moment(this.state.vencimentoOrig).format('YYYY-MM-DD'),
+                        Conta_Provisao: this.state.contaProvisao,
+                        Empresa: this.state.empresa,
+                        Docto: this.state.documento,
+                        tipodocto: this.state.tipoDocumento,
+                        meioPagamento: this.state.meioPagamento,
+
+                        meioPagamentoNome: this.state.meioPagamentoNome,
+
+                        codigo_receita: this.state.codigoReceita,
+                        contribuinte: this.state.contribuinte,
+                        codigo_identificador_tributo: this.state.codigoIdentificadorTributo,
+                        mes_compet_num_ref: this.state.mesCompetNumRef,
+                        data_apuracao: this.state.dataApuracao,
+                        darfValor: parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.')),
+                        darfMulta: parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.')),
+                        darfJuros: parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.')),
+                        darfOutros: parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.')),
+                        darfPagamento: parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.')),
+                        tipo_pix: this.state.tipoPix
+
+                    }).then(
+                        async res => {
+                            if (res.data === true) {
+                                await loader.salvaLogs('contas_aberto', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `CONTAS EM ABERTO: ${this.state.historico}`);
+                                if (this.state.meioPagamentoNome == 'DARF' || this.state.meioPagamentoNome == 'GPS' || this.state.meioPagamentoNome == 'GRU' || this.state.meioPagamentoNome === "PIX") {
+                                    if (this.state.dadosIniciaisDarf[0].valor == '') {
+                                        await loader.salvaLogs('contas_aberto_complementar', this.state.usuarioLogado.codigo, null, "Inclusão", this.state.chave);
+                                    } else {
+                                        await loader.salvaLogs('contas_aberto_complementar', this.state.usuarioLogado.codigo, this.state.dadosIniciaisDarf, this.state.dadosFinaisDarf, this.state.chave, `CONTAS EM ABERTO COMPLEMENTAR: ${this.state.chave}`);
+                                    }
+                                }
+                                await this.setState({ loading: false, bloqueado: false })
+                            } else {
+                                await alert(`Erro ${JSON.stringify(res.data)}`)
+                            }
+                        },
+                        async res => await console.log(`Erro: ${res.data}`)
+                    )
+                }
+            }
+            this.salvaRetencoes();
         }
 
+    }
+
+    salvaRetencoes = async () => {
+        const descontos = [
+            {
+                valor: this.state.desconto,
+                complemento: this.state.descontoComplemento,
+                conta: this.state.descontoConta,
+                check: true,
+                tipo: "DESCONTO"
+            }, {
+                valor: this.state.retencaoInss,
+                complemento: this.state.retencaoInssComplemento,
+                conta: this.state.retencaoInssConta,
+                check: this.state.retencaoInssCheck,
+                tipo: "INSS"
+            }, {
+                valor: this.state.retencaoIr,
+                complemento: this.state.retencaoIrComplemento,
+                conta: this.state.retencaoIrConta,
+                check: this.state.retencaoIrCheck,
+                tipo: "IR"
+            }, {
+                valor: this.state.retencaoIss,
+                complemento: this.state.retencaoIssComplemento,
+                conta: this.state.retencaoIssConta,
+                check: this.state.retencaoIssCheck,
+                tipo: "ISS"
+            }, {
+                valor: this.state.retencaoPis,
+                complemento: this.state.retencaoPisComplemento,
+                conta: this.state.retencaoPisConta,
+                check: this.state.retencaoPisCheck,
+                tipo: "PIS"
+            }, {
+                valor: this.state.retencaoCofins,
+                complemento: this.state.retencaoCofinsComplemento,
+                conta: this.state.retencaoCofinsConta,
+                check: this.state.retencaoCofinsCheck,
+                tipo: "COFINS"
+            }, {
+                valor: this.state.retencaoCsll,
+                complemento: this.state.retencaoCsllComplemento,
+                conta: this.state.retencaoCsllConta,
+                check: this.state.retencaoCsllCheck,
+                tipo: "CSLL"
+            }
+        ]
+
+        await loader.postContasDescontos(descontos, this.state.chave);
+
+
+    }
+
+    contabilizarConta = async (validForm) => {
+        await this.salvarConta(validForm);
+
+        this.setState({ bloqueado: true, loading: true });
+
+        const descontos = [
+            {
+                valor: this.state.desconto,
+                complemento: this.state.descontoComplemento,
+                conta: this.state.descontoConta,
+                check: true
+            }, , {
+                valor: this.state.retencaoInss,
+                complemento: this.state.retencaoInssComplemento,
+                conta: this.state.retencaoInssConta,
+                check: this.state.retencaoInssCheck,
+            }, {
+                valor: this.state.retencaoIr,
+                complemento: this.state.retencaoIrComplemento,
+                conta: this.state.retencaoIrConta,
+                check: this.state.retencaoIrCheck,
+            }, {
+                valor: this.state.retencaoIss,
+                complemento: this.state.retencaoIssComplemento,
+                conta: this.state.retencaoIssConta,
+                check: this.state.retencaoIssCheck,
+            }, {
+                valor: this.state.retencaoPis,
+                complemento: this.state.retencaoPisComplemento,
+                conta: this.state.retencaoPisConta,
+                check: this.state.retencaoPisCheck,
+            }, {
+                valor: this.state.retencaoCofins,
+                complemento: this.state.retencaoCofinsComplemento,
+                conta: this.state.retencaoCofinsConta,
+                check: this.state.retencaoCofinsCheck,
+            }, {
+                valor: this.state.retencaoCsll,
+                complemento: this.state.retencaoCsllComplemento,
+                conta: this.state.retencaoCsllConta,
+                check: this.state.retencaoCsllCheck,
+            }
+        ]
+
+        if (validForm) {
+            await apiEmployee.post(`contabilizaContasAberto.php`, {
+                token: true,
+                data: this.state.lancamento,
+                conta_credito: this.state.tipo == 1 ? this.state.contaContabil : this.state.contaProvisao,
+                conta_debito: this.state.tipo == 1 ? this.state.contaProvisao : this.state.contaContabil,
+                tipo_documento: this.state.tipoDocumento,
+                centro_custo: this.state.centroCusto,
+                historico_padrao: this.state.historicoPadrao,
+                historico: this.state.historico,
+                pessoa: this.state.pessoa,
+                valor: parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')),
+                chavePr: this.state.chave,
+                usuario_inclusao: this.state.usuarioLogado.codigo,
+                usuario_alteracao: this.state.usuarioLogado.codigo,
+                data_inclusao: moment().format("YYYY-MM-DD"),
+                data_alteracao: moment().format("YYYY-MM-DD"),
+                extras: descontos
+            }).then(
+                async res => {
+                    if (res.data[0] && res.data[0][0].Chave) {
+                        await this.setState({ contabilizada: res.data[0].Chave })
+                        await loader.salvaLogs('lancamentos', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
+
+                        //alert('Serviço Inserido!')
+                        await this.setState({ loading: false, bloqueado: false })
+                    } else {
+                        //alert(`Erro: ${res.data}`)
+                    }
+                },
+                async res => await console.log(`Erro: ${res.data}`)
+            )
+        }
     }
 
     alteraModal = async (valor) => {
@@ -551,6 +810,98 @@ class AddConta extends Component {
         await this.setState({ modalLog: true })
     }
 
+    mudaRetencao = async (tipo) => {
+        if (tipo == "INSS") {
+            if (this.state.retencaoInssCheck) {
+                await this.setState({
+                    retencaoInssCheck: false,
+                    retencaoInssConta: 0,
+                    retencaoInss: '',
+                    retencaoInssComplemento: ''
+                })
+            } else {
+                await this.setState({
+                    retencaoInssCheck: true,
+                    retencaoInssConta: this.state.parametroInss
+                })
+            }
+        } else if (tipo == "IR") {
+            if (this.state.retencaoIrCheck) {
+                await this.setState({
+                    retencaoIrCheck: false,
+                    retencaoIrConta: 0,
+                    retencaoIr: '',
+                    retencaoIrComplemento: ''
+                })
+            } else {
+                await this.setState({
+                    retencaoIrCheck: true,
+                    retencaoIrConta: this.state.parametroIr
+                })
+            }
+        } else if (tipo == "ISS") {
+            if (this.state.retencaoIssCheck) {
+                await this.setState({
+                    retencaoIssCheck: false,
+                    retencaoIssConta: 0,
+                    retencaoIss: '0',
+                    retencaoIssComplemento: ''
+                })
+            } else {
+                await this.setState({
+                    retencaoIssCheck: true,
+                    retencaoIssConta: this.state.parametroIss
+                })
+            }
+        } else if (tipo == "PIS") {
+            if (this.state.retencaoPisCheck) {
+                await this.setState({
+                    retencaoPisCheck: false,
+                    retencaoPisConta: 0,
+                    retencaoPis: '',
+                    retencaoPisComplemento: ''
+                })
+            } else {
+                await this.setState({
+                    retencaoPisCheck: true,
+                    retencaoPisConta: this.state.parametroPis
+                })
+            }
+        } else if (tipo == "COFINS") {
+            if (this.state.retencaoCofinsCheck) {
+                await this.setState({
+                    retencaoCofinsCheck: false,
+                    retencaoCofinsConta: 0,
+                    retencaoCofins: '',
+                    retencaoCofinsComplemento: ''
+                })
+            } else {
+                await this.setState({
+                    retencaoCofinsCheck: true,
+                    retencaoCofinsConta: this.state.parametroCofins
+                })
+            }
+        } else if (tipo == "CSLL") {
+            if (this.state.retencaoCsllCheck) {
+                await this.setState({
+                    retencaoCsllCheck: false,
+                    retencaoCsllConta: 0,
+                    retencaoCsll: '',
+                    retencaoCsllComplemento: ''
+                })
+            } else {
+                await this.setState({
+                    retencaoCsllCheck: true,
+                    retencaoCsllConta: this.state.parametroCsll
+                })
+            }
+        }
+    }
+
+    testaValores = () => {
+        return parseFloat(this.state.desconto) + parseFloat(this.state.retencaoPis) + parseFloat(this.state.retencaoCofins) + parseFloat(this.state.retencaoCsll) + parseFloat(this.state.retencaoInss) + parseFloat(this.state.retencaoIr) + parseFloat(this.state.retencaoIss) > parseFloat(this.state.valor);
+    }
+
 
     render() {
 
@@ -584,13 +935,6 @@ class AddConta extends Component {
 
                 {this.state.redirect &&
                     <Redirect to={'/'} />
-                }
-
-                {this.state.finalizaOperacao && this.props.location.state.to &&
-                    <Redirect to={{ pathname: `/financeiro/${this.props.location.state.to}`, state: { chave: this.state.chave } }} />
-                }
-                {this.state.finalizaOperacao && !this.props.location.state.to &&
-                    <Redirect to={`/financeiro`} />
                 }
 
                 {!this.state.loading &&
@@ -650,6 +994,261 @@ class AddConta extends Component {
                             acessosPermissoes={this.state.acessosPermissoes}
                             closeModal={() => { this.setState({ modalAberto: false }) }}
                         />
+
+                        <Modal
+                            aria-labelledby="transition-modal-title"
+                            aria-describedby="transition-modal-description"
+                            style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
+                            open={this.state.descontosModal}
+                            onClose={async () => { await this.setState({ descontosModal: false }) }}
+                        >
+                            <div className='modalContainer'>
+                                <div className='modalCriar'>
+                                    <div className='containersairlistprodmodal'>
+                                        <div className='botaoSairModal' onClick={async () => await this.setState({ descontosModal: false })}>
+                                            <span>X</span>
+                                        </div>
+                                    </div>
+                                    <div className="modalContent">
+                                        <div className='modalForm'>
+                                            <Formik
+                                                initialValues={{
+                                                    name: '',
+                                                }}
+                                                onSubmit={async values => {
+                                                    await new Promise(r => setTimeout(r, 1000))
+                                                }}
+                                            >
+                                                <Form className="contact-form" >
+
+
+                                                    <div className="row">
+
+                                                        <div className="row addservicos">
+                                                            <div className="col-12 checkboxesDiv">
+                                                                <div>
+                                                                    <label className='smallCheckbox'>INSS</label>
+                                                                    <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoInssCheck} onChange={async (e) => { await this.mudaRetencao("INSS") }} />
+                                                                </div>
+                                                                <div>
+                                                                    <label className='smallCheckbox'>IR</label>
+                                                                    <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoIrCheck} onChange={async (e) => { await this.mudaRetencao("IR") }} />
+                                                                </div>
+                                                                <div>
+                                                                    <label className='smallCheckbox'>ISS</label>
+                                                                    <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoIssCheck} onChange={async (e) => { await this.mudaRetencao("ISS") }} />
+                                                                </div>
+                                                                <div>
+                                                                    <label className='smallCheckbox'>PIS</label>
+                                                                    <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoPisCheck} onChange={async (e) => { await this.mudaRetencao("PIS") }} />
+                                                                </div>
+                                                                <div>
+                                                                    <label className='smallCheckbox'>COFINS</label>
+                                                                    <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoCofinsCheck} onChange={async (e) => { await this.mudaRetencao("COFINS") }} />
+                                                                </div>
+                                                                <div>
+                                                                    <label className='smallCheckbox'>CSLL</label>
+                                                                    <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoCsllCheck} onChange={async (e) => { await this.mudaRetencao("CSLL") }} />
+                                                                </div>
+                                                            </div>
+                                                            <div className='col-1 errorMessage'>
+                                                            </div>
+                                                            <div><hr /></div>
+                                                            <div className='col-12 text-center' style={{ height: '25px' }}>
+                                                                <label>Desconto</label>
+                                                            </div>
+                                                            <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                <label>Conta</label>
+                                                            </div>
+                                                            <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                <label>Valor</label>
+                                                            </div>
+                                                            <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                <label>Complem.</label>
+                                                            </div>
+                                                            <div className="col-4">
+                                                                <Select isDisabled className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.descontoConta)[0]} />
+                                                            </div>
+                                                            <div className='col-4'>
+                                                                <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.desconto} onChange={async e => { this.setState({ desconto: e.currentTarget.value }) }} onBlur={async e => { this.setState({ desconto: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                            </div>
+                                                            <div className='col-4'>
+                                                                <Field className="form-control nextToSelect" type="text" value={this.state.descontoComplemento} onChange={async e => { this.setState({ descontoComplemento: e.currentTarget.value }) }} />
+                                                            </div>
+                                                            {this.state.retencaoInssCheck &&
+                                                                <>
+                                                                    <div><hr /></div>
+                                                                    <div className='col-12 text-center' style={{ height: '25px' }}>
+                                                                        <label>Retenção INSS</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Conta</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Valor</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Complem.</label>
+                                                                    </div>
+                                                                    <div className="col-4">
+                                                                        <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.retencaoInssConta)[0]} search={true} isDisabled />
+                                                                    </div>
+                                                                    <div className='col-4'>
+                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoInss} onChange={async e => { this.setState({ retencaoInss: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoInss: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                    </div>
+                                                                    <div className='col-4'>
+                                                                        <Field className="form-control nextToSelect" type="text" value={this.state.retencaoInssComplemento} onChange={async e => { this.setState({ retencaoInssComplemento: e.currentTarget.value }) }} />
+
+                                                                    </div>
+                                                                </>
+                                                            }
+                                                            {this.state.retencaoIrCheck &&
+                                                                <>
+                                                                    <div><hr /></div>
+                                                                    <div className='col-12 text-center' style={{ height: '25px' }}>
+                                                                        <label>Retenção IR</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Conta</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Valor</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Complem.</label>
+                                                                    </div>
+                                                                    <div className="col-4">
+                                                                        <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.retencaoIrConta)[0]} search={true} isDisabled />
+                                                                    </div>
+                                                                    <div className='col-4'>
+                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoIr} onChange={async e => { this.setState({ retencaoIr: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoIr: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                    </div>
+                                                                    <div className='col-4'>
+                                                                        <Field className="form-control nextToSelect" type="text" value={this.state.retencaoIrComplemento} onChange={async e => { this.setState({ retencaoIrComplemento: e.currentTarget.value }) }} />
+
+                                                                    </div>
+                                                                </>
+                                                            }
+                                                            {this.state.retencaoIssCheck &&
+                                                                <>
+                                                                    <div><hr /></div>
+                                                                    <div className='col-12 text-center' style={{ height: '25px' }}>
+                                                                        <label>Retenção ISS</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Conta</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Valor</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Complem.</label>
+                                                                    </div>
+                                                                    <div className="col-4">
+                                                                        <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.retencaoIssConta)[0]} search={true} isDisabled />
+                                                                    </div>
+                                                                    <div className='col-4'>
+                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoIss} onChange={async e => { this.setState({ retencaoIss: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoIss: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                    </div>
+                                                                    <div className='col-4'>
+                                                                        <Field className="form-control nextToSelect" type="text" value={this.state.retencaoIssComplemento} onChange={async e => { this.setState({ retencaoIssComplemento: e.currentTarget.value }) }} />
+
+                                                                    </div>
+                                                                </>
+                                                            }
+                                                            {this.state.retencaoPisCheck &&
+                                                                <>
+                                                                    <div><hr /></div>
+                                                                    <div className='col-12 text-center' style={{ height: '25px' }}>
+                                                                        <label>Retenção PIS</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Conta</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Valor</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Complem.</label>
+                                                                    </div>
+                                                                    <div className="col-4">
+                                                                        <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.retencaoPisConta)[0]} search={true} isDisabled />
+                                                                    </div>
+                                                                    <div className='col-4'>
+                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoPis} onChange={async e => { this.setState({ retencaoPis: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoPis: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                    </div>
+                                                                    <div className='col-4'>
+                                                                        <Field className="form-control nextToSelect" type="text" value={this.state.retencaoPisComplemento} onChange={async e => { this.setState({ retencaoPisComplemento: e.currentTarget.value }) }} />
+
+                                                                    </div>
+                                                                </>
+                                                            }
+                                                            {this.state.retencaoCofinsCheck &&
+                                                                <>
+                                                                    <div><hr /></div>
+                                                                    <div className='col-12 text-center' style={{ height: '25px' }}>
+                                                                        <label>Retenção COFINS</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Conta</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Valor</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Complem.</label>
+                                                                    </div>
+                                                                    <div className="col-4">
+                                                                        <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.retencaoCofinsConta)[0]} search={true} isDisabled />
+                                                                    </div>
+                                                                    <div className='col-4'>
+                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoCofins} onChange={async e => { this.setState({ retencaoCofins: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoCofins: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                    </div>
+                                                                    <div className='col-4'>
+                                                                        <Field className="form-control nextToSelect" type="text" value={this.state.retencaoCofinsComplemento} onChange={async e => { this.setState({ retencaoCofinsComplemento: e.currentTarget.value }) }} />
+
+                                                                    </div>
+                                                                </>
+                                                            }
+                                                            {this.state.retencaoCsllCheck &&
+                                                                <>
+                                                                    <div><hr /></div>
+                                                                    <div className='col-12 text-center' style={{ height: '25px' }}>
+                                                                        <label>Retenção CSLL</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Conta</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Valor</label>
+                                                                    </div>
+                                                                    <div className='col-4 text-center' style={{ height: '25px' }}>
+                                                                        <label>Complem.</label>
+                                                                    </div>
+                                                                    <div className="col-4">
+                                                                        <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.retencaoCsllConta)[0]} search={true} isDisabled />
+                                                                    </div>
+                                                                    <div className='col-4'>
+                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoCsll} onChange={async e => { this.setState({ retencaoCsll: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoCsll: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                    </div>
+                                                                    <div className='col-4'>
+                                                                        <Field className="form-control nextToSelect" type="text" value={this.state.retencaoCsllComplemento} onChange={async e => { this.setState({ retencaoCsllComplemento: e.currentTarget.value }) }} />
+
+                                                                    </div>
+                                                                </>
+                                                            }
+                                                        </div>
+                                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                                                    </div>
+
+                                                </Form>
+                                            </Formik>
+                                        </div>
+
+                                    </div >
+                                </div>
+                            </div >
+                        </Modal >
 
                         <div className="contact-section">
 
@@ -761,34 +1360,13 @@ class AddConta extends Component {
                                                             </>
                                                         }
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Conta Contabil</label>
+                                                            <label>Conta Débito</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.contaContabil)[0]} search={true} onChange={(e) => { this.setState({ contaContabil: e.value, }) }} />
                                                         </div>
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Provisão</label>
-                                                        </div>
-                                                        <div className='col-1'></div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <input className='form_control' checked={this.state.provisaoCheck} onChange={async (e) => { await this.setState({ provisaoCheck: e.target.checked }); if (this.state.provisaoCheck && this.state.pessoa && this.state.tipo == 1) { await this.setState({ contaProvisao: await loader.getContaPessoa(this.state.pessoa, 'provisao') }) } else { await this.setState({ contaProvisao: '' }) } }} type="checkbox" />
-                                                        </div>
-                                                        {this.state.provisaoCheck &&
-                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                <label>Conta Provisão</label>
-                                                            </div>
-                                                        }
-                                                        {this.state.provisaoCheck &&
-                                                            <div className='col-1 errorMessage'>
-                                                            </div>
-                                                        }
-                                                        {this.state.provisaoCheck &&
-                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                <Select className='SearchSelect' isDisabled={this.state.tipo == 1} options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} value={this.state.planosContasOptions.filter(option => option.value == this.state.contaProvisao)[0]} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} search={true} onChange={(e) => { if (this.state.tipo != 1) { this.setState({ contaProvisao: e.value, }) } }} />
-                                                            </div>
-                                                        }
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Centro de Custo</label>
                                                         </div>
@@ -926,7 +1504,7 @@ class AddConta extends Component {
                                                             </div>
                                                         }
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Conta Baixa</label>
+                                                            <label>Banco</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
                                                             {!this.state.contaDesconto &&
@@ -1074,16 +1652,36 @@ class AddConta extends Component {
                                             </div>
 
                                             <div className="row">
-                                                <div className="col-2"></div>
-                                                <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                <div className="col-1"></div>
+                                                <div className="col-4" style={{ display: 'flex', justifyContent: 'center' }}>
                                                     <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
                                                 </div>
                                                 <div className="col-2"></div>
+                                                <div className="col-4" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                    <button disabled={!validForm || this.state.chave == 0 || this.state.contabilizada != 0 || this.testaValores() } title={this.state.contabilizada ? "Já foi contabilizada" : this.testaValores() ? "Valores de retenções ultrapassam o valor da conta" : ""} onClick={() => { this.contabilizarConta(validForm && this.state.chave != 0 && this.state.contabilizada == 0 && !this.testaValores()); }} style={validForm && this.state.chave != 0 && this.state.contabilizada == 0 && !this.testaValores() ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Contabilizar</button>
+                                                </div>
+                                                <div className="col-1"></div>
                                             </div>
 
                                         </Form>
                                     </Formik>
                                 </div>
+
+                                <br />
+
+                                {this.state.chave != 0 &&
+                                    <>
+                                        <div className="centerDiv">
+                                            <div className="relatoriosSection centerDiv">
+                                                <div className="relatorioButton">
+                                                    <button className="btn btn-danger" onClick={() => this.setState({ descontosModal: true })}>Descontos e Retenções</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </>
+                                }
+
                             </div>
 
                         </div>

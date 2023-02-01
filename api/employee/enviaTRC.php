@@ -32,6 +32,8 @@ if ($objData != NULL) {
     $contas = new Contas();
     $informacoesBancarias = $contas->getInformacoesBancarias($empresa, 1);
 
+    $codigosBB = $contas->getCodigosBB();
+
     /*$body = [];
     $body["numeroRequisicao"] = intval($codigo);
     //$body["numeroContratoPagamento"] = intval($informacoesBancarias[0]["codigo_contrato"]);
@@ -56,8 +58,8 @@ if ($objData != NULL) {
             $agenciaCredito = intval($contato["Campo1"]);
         }
         if ($contato["Tipo"] == "CC") {
-            $contaCorrenteCredito = intval($contato["Campo1"]);
-            $digitoVerificadorContaCorrente = intval($contato["Campo2"]);
+            $contaCorrenteCredito = substr($contato["Campo1"], 0, strlen($contaCorrenteCredito)-1);
+            $digitoVerificadorContaCorrente = substr($contato["Campo1"], -1);            
         }
     }
 
@@ -71,7 +73,11 @@ if ($objData != NULL) {
     }
 
     $dataTransferencia = date_create($conta->{"Vencimento"});
-    
+
+    if (intval($conta->{"compe"}) != 1) {
+        $body["listaTransferencias"][0]["codigoFinalidadeTED"] = 10;
+    }
+
     $body = [
         "numeroRequisicao" => intval($codigo),
         "numeroContratoPagamento" => intval($informacoesBancarias[0]["codigo_contrato"]),
@@ -83,7 +89,7 @@ if ($objData != NULL) {
             "numeroCOMPE" => intval($conta->{"compe"}),
             "numeroISP" => intval($conta->{"ispb"}),
             "valorTransferencia" => floatval($conta->{"Valor"}),
-            "codigoFinalidadeTED" => 10,
+            "codigoFinalidadeTED" => $finalidadeTED,
             "agenciaCredito" => $agenciaCredito,
             "contaCorrenteCredito" => $contaCorrenteCredito,
             "digitoVerificadorContaCorrente" => $digitoVerificadorContaCorrente,
@@ -105,7 +111,7 @@ if ($objData != NULL) {
         $status = "Nenhuma conta corrente encontrada";
     }
 
-    if (!$body["listaTransferencias"][0]["digitoVerificadorContaCorrente"] && $body["listaTransferencias"][0]["digitoVerificadorContaCorrente"] !== 0 && $body["listaTransferencias"][0]["digitoVerificadorContaCorrente"] !== '0' ) {
+    if (!$body["listaTransferencias"][0]["digitoVerificadorContaCorrente"] && $body["listaTransferencias"][0]["digitoVerificadorContaCorrente"] !== 0 && $body["listaTransferencias"][0]["digitoVerificadorContaCorrente"] !== '0') {
         $statusId = 0;
         $status = "Nenhum digito de verificação para a conta encontrada";
     }
@@ -133,9 +139,9 @@ if ($objData != NULL) {
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', "Authorization: Bearer $bearer"));
         curl_setopt($ch, CURLOPT_SSLCERT, $pathToCertificate);
-        curl_setopt($ch, CURLOPT_SSLKEY, $pathToKey);                                                                    
+        curl_setopt($ch, CURLOPT_SSLKEY, $pathToKey);
         curl_setopt($ch, CURLOPT_SSLKEYPASSWD, "12345678");
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST"); 
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
 
@@ -154,6 +160,14 @@ if ($objData != NULL) {
             $statusId = 0;
 
             $status = $returnJSON->{"erros"}[0]->{"mensagem"};
+        } else if ($returnJSON->{"transferencias"}[0]->{"erros"}[0]) {
+            $statusId = 0;
+
+            for ($i = 0; $i < count($codigosBB); $i++) {
+                if ($returnJSON->{"transferencias"}[0]->{"erros"}[0] == $codigosBB[$i]["codigo"] && $codigosBB[$i]["tipo"] == "erro") {
+                    $status = $codigosBB[$i]["mensagem"];
+                }
+            }
         } else {
             $status = "Requisição enviada com Numero de Requisição: $codigo";
         }
@@ -170,5 +184,5 @@ if ($objData != NULL) {
 } else {
 }
 
-echo json_encode($body);
+echo ($return);
 exit;

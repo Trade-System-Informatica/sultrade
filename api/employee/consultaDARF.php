@@ -11,6 +11,7 @@ $data = file_get_contents("php://input");
 $objData = json_decode($data);
 $pathToCertificate = '/var/www/html/sultrade/sultrade_cert.crt';
 $pathToKey = '/var/www/html/sultrade/sultrade_cert.key';
+$statusId = 1;
 
 if ($objData != NULL) {
     $url = prepareInput($objData->url);
@@ -57,6 +58,22 @@ if ($objData != NULL) {
             $statusId = 0;
             $status = $returnJSON->{"erroMsg"};
         }        
+
+        if ($statusId != 0) {
+            $id = $returnJSON->{"lancamentos"}[0]->{"pagamento"}[0]->{"id"};
+            
+            curl_setopt($ch, CURLOPT_URL, "https://api-ip.bb.com.br/pagamentos-lote/v1/darf-preto/$id?gw-dev-app-key=".$informacoesBancarias[0]["chave_api"]);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', "Authorization: Bearer $bearer"));
+            curl_setopt($ch, CURLOPT_SSLCERT, $pathToCertificate);
+            curl_setopt($ch, CURLOPT_SSLKEY, $pathToKey);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+            curl_setopt($ch, CURLOPT_SSLKEYPASSWD, "12345678");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+
+            $return = curl_exec($ch);
+            
+        }
+
         if (!$return) {
             $return = curl_error($ch);
         }  
