@@ -18,6 +18,8 @@ if($objData != NULL){
     $valor1 = prepareInput($objData->valor1);
     $repasse = prepareInput($objData->repasse);
     $emissao = prepareInput($objData->emissao);
+    $documento = prepareInput($objData->documento);
+    $tipo_documento = prepareInput($objData->tipo_documento);
     $vencimento = prepareInput($objData->vencimento);
     $desconto_valor = prepareInput($objData->desconto_valor);
     $desconto_cpl = prepareInput($objData->desconto_cpl);
@@ -44,7 +46,7 @@ if($objData != NULL){
 
     $os = new OS();
 
-        $result = $os->updateServicoItemFinanceiro($chave, $Moeda, $valor, $valor1, $repasse, $emissao, $vencimento, $desconto_valor, $desconto_cpl, $desconto_conta, $retencao_inss_valor, $retencao_inss_cpl, $retencao_inss_conta, $retencao_ir_valor, $retencao_ir_cpl, $retencao_ir_conta, $retencao_iss_valor, $retencao_iss_cpl, $retencao_iss_conta, $retencao_pis_valor, $retencao_pis_cpl, $retencao_pis_conta, $retencao_cofins_valor, $retencao_cofins_cpl, $retencao_cofins_conta, $retencao_csll_valor, $retencao_csll_cpl, $retencao_csll_conta, $complemento);
+        $result = $os->updateServicoItemFinanceiro($chave, $Moeda, $valor, $valor1, $repasse, $emissao, $vencimento, $documento, $tipo_documento, $desconto_valor, $desconto_cpl, $desconto_conta, $retencao_inss_valor, $retencao_inss_cpl, $retencao_inss_conta, $retencao_ir_valor, $retencao_ir_cpl, $retencao_ir_conta, $retencao_iss_valor, $retencao_iss_cpl, $retencao_iss_conta, $retencao_pis_valor, $retencao_pis_cpl, $retencao_pis_conta, $retencao_cofins_valor, $retencao_cofins_cpl, $retencao_cofins_conta, $retencao_csll_valor, $retencao_csll_cpl, $retencao_csll_conta, $complemento);
 } else {
     $result = "false";
 }

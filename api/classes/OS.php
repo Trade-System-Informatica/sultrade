@@ -324,10 +324,61 @@ class OS {
 
     }
 
+    public static function gerarRelatorioOS($where)
+    {
+        $database = new Database();
+
+        if ($where != "") {
+            $result = $database->doSelect(
+                "os
+                LEFT JOIN os_navios ON os.chave_navio = os_navios.chave
+                LEFT JOIN os_portos ON os.porto = os_portos.chave
+                LEFT JOIN pessoas ON os.Chave_Cliente = pessoas.chave
+                LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os
+                LEFT JOIN os_tipos_servicos ON os.chave_tipo_servico = os_tipos_servicos.chave",
+                "os.codigo,
+                os_navios.nome AS navioNome,
+                os_portos.Descricao AS portoNome,
+                os.eta AS ETA,
+                os.etb AS ETB,
+                os.atb AS ETS,
+                ((IFNULL((SELECT SUM(os_servicos_itens.valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0) / os.ROE) + IFNULL((SELECT SUM(os_servicos_itens.valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0)) as valor,
+                ((IFNULL((SELECT SUM(os_servicos_itens.desconto_valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0) / os.ROE) + IFNULL((SELECT SUM(os_servicos_itens.desconto_valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0)) as desconto,
+                pessoas.Nome AS pessoaNome,
+                pessoas.Nome_Fantasia AS pessoaNomeFantasia,
+                os_tipos_servicos.descricao AS tipoServicoNome",
+                "$where GROUP BY os.chave"
+            );
+            $database->closeConection();
+        } else {
+            $result = $database->doSelect(
+                "os
+                LEFT JOIN os_navios ON os.chave_navio = os_navios.chave
+                LEFT JOIN os_portos ON os.porto = os_portos.chave
+                LEFT JOIN pessoas ON os.Chave_Cliente = pessoas.chave
+                LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os
+                LEFT JOIN os_tipos_servicos ON os.chave_tipo_servico = os_tipos_servicos.chave",
+                "os.codigo,
+                os_navios.nome AS navioNome,
+                os_portos.Descricao AS portoNome,
+                os.eta AS ETA,
+                os.etb AS ETB,
+                os.atb AS ETS,
+                ((IFNULL((SELECT SUM(os_servicos_itens.valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0) / os.ROE) + IFNULL((SELECT SUM(os_servicos_itens.valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0)) as valor,
+                ((IFNULL((SELECT SUM(os_servicos_itens.desconto_valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0) / os.ROE) + IFNULL((SELECT SUM(os_servicos_itens.desconto_valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0)) as desconto,
+                pessoas.Nome AS pessoaNome,
+                pessoas.Nome_Fantasia AS pessoaNomeFantasia,
+                os_tipos_servicos.descricao AS tipoServicoNome",
+                "GROUP BY os.chave"
+            );
+        }
+        return $result;
+    }
+
     public static function insertOS($values, $codigo, $tipo){
         $database = new Database();
 
-        $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador';
+        $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador';
 
         $result = $database->doInsert('os', $cols, $values);
 
@@ -350,10 +401,23 @@ class OS {
         return $result;
     }
 
-    public static function insertServicoItemBasico($values){
+    public static function insertServicoItemBasico($values, $codigo, $tipo, $chave_os, $ordem){
         $database = new Database();
 
-        $cols = 'chave_os, data, fornecedor, taxa, descricao, ordem, tipo_sub, Fornecedor_Custeio, remarks, Moeda, valor, valor1, repasse';
+        $cols = 'chave_os, data, fornecedor, taxa, descricao, tipo_sub, Fornecedor_Custeio, remarks, Moeda, valor, valor1, repasse, ordem';
+        $values .= ", '$ordem'";
+
+        if ($chave_os) {
+            $os = $database->doSelect("os_servicos_itens", "os_servicos_itens", "chave_os = $chave_os");
+
+            foreach ($os as $item) {
+                if ($item["ordem"] >= $ordem) {
+                    $item["ordem"]++;
+
+                    $database->doUpdate("os_servicos_itens", "os_servicos_itens.ordem = '".$item["ordem"]."'", "chave = '".$item["chave"]."'");
+                }
+            }
+        }
 
         $result = $database->doInsert('os_servicos_itens', $cols, $values);
 
@@ -476,6 +540,16 @@ class OS {
 
         $query = "chave_os = '".$chave_os."', data = '".$data."', fornecedor = '".$fornecedor."', taxa = '".$taxa."', descricao = '".$descricao."', ordem = '".$ordem."', tipo_sub = '".$tipo_sub."', Fornecedor_Custeio = '".$Fornecedor_Custeio."', remarks = '".$remarks."', Moeda = '$Moeda', valor = '$valor', valor1 = '$valor1', repasse = '$repasse'";
         
+        $eventos = $database->doSelect("os_servicos_itens", "os_servicos_itens.*", "chave_os = $chave_os");
+
+        foreach ($eventos as $evento) {
+            if ($evento["ordem"] >= $ordem) {
+                $evento["ordem"]++;
+
+                $database->doUpdate("os_servicos_itens", "ordem = '".$evento["ordem"]."'", "chave = '".$evento["chave"]."'");
+            }
+        }
+
         $result = $database->doUpdate('os_servicos_itens', $query, 'chave = '.$chave);
 
         $result = $database->doSelect('os_servicos_itens', "os_servicos_itens.*", 'chave = '.$chave);
@@ -487,10 +561,10 @@ class OS {
         }
     }
 
-    public static function updateServicoItemFinanceiro($chave, $Moeda, $valor, $valor1, $repasse, $emissao, $vencimento, $desconto_valor, $desconto_cpl, $desconto_conta, $retencao_inss_valor, $retencao_inss_cpl, $retencao_inss_conta, $retencao_ir_valor, $retencao_ir_cpl, $retencao_ir_conta, $retencao_iss_valor, $retencao_iss_cpl, $retencao_iss_conta, $retencao_pis_valor, $retencao_pis_cpl, $retencao_pis_conta, $retencao_cofins_valor, $retencao_cofins_cpl, $retencao_cofins_conta, $retencao_csll_valor, $retencao_csll_cpl, $retencao_csll_conta, $complemento){
+    public static function updateServicoItemFinanceiro($chave, $Moeda, $valor, $valor1, $repasse, $emissao, $vencimento, $documento, $tipo_documento, $desconto_valor, $desconto_cpl, $desconto_conta, $retencao_inss_valor, $retencao_inss_cpl, $retencao_inss_conta, $retencao_ir_valor, $retencao_ir_cpl, $retencao_ir_conta, $retencao_iss_valor, $retencao_iss_cpl, $retencao_iss_conta, $retencao_pis_valor, $retencao_pis_cpl, $retencao_pis_conta, $retencao_cofins_valor, $retencao_cofins_cpl, $retencao_cofins_conta, $retencao_csll_valor, $retencao_csll_cpl, $retencao_csll_conta, $complemento){
         $database = new Database();
 
-        $query = "Moeda = '".$Moeda."', valor = '".$valor."', valor1 = '".$valor1."', repasse = '".$repasse."', emissao = '".$emissao."', vencimento = '".$vencimento."', desconto_valor = '".$desconto_valor."', desconto_cpl = '".$desconto_cpl."', desconto_conta = '".$desconto_conta."', retencao_inss_valor = '".$retencao_inss_valor."', retencao_inss_cpl = '".$retencao_inss_cpl."', retencao_inss_conta = '".$retencao_inss_conta."', retencao_ir_valor = '".$retencao_ir_valor."', retencao_ir_cpl = '".$retencao_ir_cpl."', retencao_ir_conta = '".$retencao_ir_conta."', retencao_iss_valor = '".$retencao_iss_valor."', retencao_iss_cpl = '".$retencao_iss_cpl."', retencao_iss_conta = '".$retencao_iss_conta."', retencao_pis_valor = '".$retencao_pis_valor."', retencao_pis_cpl = '".$retencao_pis_cpl."', retencao_pis_conta = '".$retencao_pis_conta."', retencao_cofins_valor = '".$retencao_cofins_valor."', retencao_cofins_cpl = '".$retencao_cofins_cpl."', retencao_cofins_conta = '".$retencao_cofins_conta."', retencao_csll_valor = '".$retencao_csll_valor."', retencao_csll_cpl = '".$retencao_csll_cpl."', retencao_csll_conta = '".$retencao_csll_conta."', complemento = '".$complemento."'";
+        $query = "Moeda = '".$Moeda."', valor = '".$valor."', valor1 = '".$valor1."', repasse = '".$repasse."', emissao = '".$emissao."', vencimento = '".$vencimento."', documento = '$documento', tipo_documento = '$tipo_documento', desconto_valor = '".$desconto_valor."', desconto_cpl = '".$desconto_cpl."', desconto_conta = '".$desconto_conta."', retencao_inss_valor = '".$retencao_inss_valor."', retencao_inss_cpl = '".$retencao_inss_cpl."', retencao_inss_conta = '".$retencao_inss_conta."', retencao_ir_valor = '".$retencao_ir_valor."', retencao_ir_cpl = '".$retencao_ir_cpl."', retencao_ir_conta = '".$retencao_ir_conta."', retencao_iss_valor = '".$retencao_iss_valor."', retencao_iss_cpl = '".$retencao_iss_cpl."', retencao_iss_conta = '".$retencao_iss_conta."', retencao_pis_valor = '".$retencao_pis_valor."', retencao_pis_cpl = '".$retencao_pis_cpl."', retencao_pis_conta = '".$retencao_pis_conta."', retencao_cofins_valor = '".$retencao_cofins_valor."', retencao_cofins_cpl = '".$retencao_cofins_cpl."', retencao_cofins_conta = '".$retencao_cofins_conta."', retencao_csll_valor = '".$retencao_csll_valor."', retencao_csll_cpl = '".$retencao_csll_cpl."', retencao_csll_conta = '".$retencao_csll_conta."', complemento = '".$complemento."'";
         
         $result = $database->doUpdate('os_servicos_itens', $query, 'chave = '.$chave);
         $database->closeConection();

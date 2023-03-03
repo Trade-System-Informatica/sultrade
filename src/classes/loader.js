@@ -449,6 +449,8 @@ export default class loader {
     //
     static async testaAcesso(acessos, permissoes, usuarioLogado) {
         let permissao = '';
+        console.log(acessos)
+        console.log(permissoes)
 
         const acessosPermissoes = acessos.map((e, i) => {
             permissao = permissoes.filter((permissao) => {

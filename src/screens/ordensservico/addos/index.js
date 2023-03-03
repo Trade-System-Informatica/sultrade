@@ -210,8 +210,8 @@ class AddOS extends Component {
                 eta: moment(this.state.os.eta).format('YYYY-MM-DD'),
                 atb: moment(this.state.os.atb).format('YYYY-MM-DD'),
                 etb: moment(this.state.os.etb).format('YYYY-MM-DD'),
+                saida: moment(this.state.os.Data_Saida).format("YYYY-MM-DD") != "Invalid date" ? moment(this.state.os.Data_Saida).format('YYYY-MM-DD') : 'T.B.I.',
 
-                saida: moment(this.state.os.Data_Faturamento).format("YYYY-MM-DD") != "Invalid date" ? moment(this.state.os.Data_Saida).format('YYYY-MM-DD') : 'T.B.I.',
                 encerramento: moment(this.state.os.Data_Encerramento).format("YYYY-MM-DD") != "Invalid date" ? moment(this.state.os.Data_Encerramento).format('YYYY-MM-DD') : 'T.B.I.',
                 faturamento: moment(this.state.os.Data_Faturamento).format("YYYY-MM-DD") != "Invalid date" ? moment(this.state.os.Data_Faturamento).format('YYYY-MM-DD') : 'T.B.I.',
                 centroCusto: this.state.os.centro_custo,
@@ -657,18 +657,18 @@ class AddOS extends Component {
             await this.getCodigo();
             await apiEmployee.post(`insertOS.php`, {
                 token: true,
-                values: `'${this.state.usuarioLogado.codigo}', '${this.state.descricao}', 'ST${this.state.codigo.Proximo}', '${this.state.cliente}', '${this.state.navio}', '${moment(this.state.abertura).format('YYYY-MM-DD')}', '${moment(this.state.chegada).format('YYYY-MM-DD')}', '${this.state.tipoServico}', '${this.state.viagem}', '${this.state.porto}', '${this.state.encerradoPor}', '${this.state.faturadoPor}', '${this.state.empresa}', '${this.state.eta}', '${this.state.atb}', '${this.state.etb}', '${this.state.governmentTaxes ? parseFloat(this.state.governmentTaxes.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.bankCharges ? parseFloat(this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.operador}'`,
+                values: `'${this.state.usuarioLogado.codigo}', '${this.state.descricao}', 'ST${this.state.codigo.Proximo}', '${this.state.cliente}', '${this.state.navio}', '${moment(this.state.abertura).format('YYYY-MM-DD')}', '${moment(this.state.chegada).format('YYYY-MM-DD')}', '${moment(this.state.saida).format('YYYY-MM-DD')}', '${this.state.tipoServico}', '${this.state.viagem}', '${this.state.porto}', '${this.state.encerradoPor}', '${this.state.faturadoPor}', '${this.state.empresa}', '${this.state.eta}', '${this.state.atb}', '${this.state.etb}', '${this.state.governmentTaxes ? parseFloat(this.state.governmentTaxes.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.bankCharges ? parseFloat(this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.operador}'`,
                 codigo: this.state.codigo.Proximo,
                 tipo: this.state.codigo.Tipo
             }).then(
                 async res => {
                     if (res.data[0].Chave) {
-                        await this.setState({ codigo: res.data[0].codigo, chave: res.data[0].chave })
+                        await this.setState({ codigo: res.data[0].codigo, chave: res.data[0].Chave, os: res.data[0] })
                         await this.GerarEtiqueta(res.data[0].codigo);
                         await loader.salvaLogs('os', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
 
                         await this.setState({ loading: false, bloqueado: false });
-                        this.finalizaSalvamento();
+                        this.setState({ recarregaPagina: true });
                     } else {
                         console.log(res.data)
                     }
@@ -819,127 +819,128 @@ class AddOS extends Component {
 
     //ALERTA: As funções abaixo (CapaVoucher, FaturamentoCusteio, RelatorioVoucher e CloseToReal) possuem valores e styles hardcoded e uma dependência depreciada; Sua existência e difícil manutenção é um lembrete para que isso não ocorra novamente. 
     CapaVoucher = async (codigo, validForm) => {
-        if (!validForm) {
-            await this.setState({ error: { type: "error", msg: "Verifique se as informações estão corretas!" } });
-            return;
-        }
-
-        await this.salvarOS(validForm)
-
-        this.setState({ pdfNome: "Capa" })
-        if (!this.state.moedas) {
-            await this.getMoedas();
-        }
-
-        await this.setState({ loading: true })
-        await apiEmployee.post(`getCapaVoucher.php`, {
-            token: true,
-            codigo: codigo
-        })
-            .then(
-                async response => { await this.setState({ pdfContent: response.data }) },
-                async response => { console.log(response) }
-            )
-
-        if (!this.state.pdfContent || !this.state.pdfContent[0]) {
-            return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
-        }
-
-        if (this.state.pdfContent.find((os) => !os.chavTaxa)) {
-            return this.setState({ error: { type: "error", msg: "Há eventos sem taxas" }, loading: false })
-        }
-
-        const vouchers = [];
-        this.state.pdfContent.filter((content) => content.tipo != 2).map((content) => {
-            if (!vouchers.includes(content.chavTaxa)) {
-                vouchers.push(content.chavTaxa)
-            }
-        })
-
-        let backgroundColor = '#ffffff';
-
-        let operador = '';
-        if (this.state.pdfContent[0]) {
-            operador = this.state.operadores.filter((e) => e.Codigo == this.state.pdfContent[0].faturadoPor)[0];
-        }
-        let pdf = '';
-        let totalFinal = 0;
-        let totalFinalDolar = 0;
-        let descontoFinal = 0;
-        let descontoFinalDolar = 0;
-
-        let company = util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].cliente);
-        let address = `${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].complemento)} ${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].rua)} ${this.state.pdfContent[0].numero && this.state.pdfContent[0].numero != "0" ? this.state.pdfContent[0].numero : ""} ${this.state.pdfContent[0].cep && this.state.pdfContent[0].cep != "0" ? this.state.pdfContent[0].cep : ""}`;
-
-        if (this.state.pdfContent[0].cabecalho) {
-            const cabecalho = JSON.parse(this.state.pdfContent[0].cabecalho);
-
-            if (cabecalho.company) {
-                company = cabecalho.company;
+        try {
+            if (!validForm) {
+                await this.setState({ error: { type: "error", msg: "Verifique se as informações estão corretas!" } });
+                return;
             }
 
-            if (cabecalho.address) {
-                address = cabecalho.address;
+            await this.salvarOS(validForm)
+
+            this.setState({ pdfNome: "Capa" })
+            if (!this.state.moedas) {
+                await this.getMoedas();
             }
-        }
 
-        if (this.state.pdfContent[0].GT && ["SIM", "S"].includes(this.state.pdfContent[0].GT.toUpperCase())) {
-            totalFinal += parseFloat(this.state.pdfContent[0].governmentTaxes);
-            totalFinalDolar += parseFloat(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe).toFixed(2));
-        }
+            await this.setState({ loading: true })
+            await apiEmployee.post(`getCapaVoucher.php`, {
+                token: true,
+                codigo: codigo
+            })
+                .then(
+                    async response => { await this.setState({ pdfContent: response.data }) },
+                    async response => { console.log(response) }
+                )
 
-        if (this.state.pdfContent[0].BK && ["SIM", "S"].includes(this.state.pdfContent[0].BK.toUpperCase())) {
-            totalFinal += parseFloat(this.state.pdfContent[0].bankCharges);
-            totalFinalDolar += parseFloat(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe).toFixed(2));
-        }
+            if (!this.state.pdfContent || !this.state.pdfContent[0]) {
+                return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
+            }
 
-        if (this.state.pdfContent[0]) {
-            pdf =
-                <div key={546546554654}>
-                    <br />
-                    <h5 style={{ width: "100%", textAlign: "center" }}><b>AGENT DISBURSEMENT ACCOUNT</b></h5>
-                    <h4 style={{ width: "100%", textAlign: "center" }}>SULTRADE SHIPPING AGENCY</h4>
-                    <div className='voucherImagem'>
-                        <img className="img-fluid" src="https://i.ibb.co/n69ZD86/logo-Vertical.png" alt="logo-lpc" border="0" style={{ width: '130px', height: '100px' }} />
-                    </div>
-                    <br />
-                    {/*
+            if (this.state.pdfContent.find((os) => !os.chavTaxa)) {
+                return this.setState({ error: { type: "error", msg: "Há eventos sem taxas" }, loading: false })
+            }
+
+            const vouchers = [];
+            this.state.pdfContent.filter((content) => content.tipo != 2).map((content) => {
+                if (!vouchers.includes(content.chavTaxa)) {
+                    vouchers.push(content.chavTaxa)
+                }
+            })
+
+            let backgroundColor = '#ffffff';
+
+            let operador = '';
+            if (this.state.pdfContent[0]) {
+                operador = this.state.operadores.filter((e) => e.Codigo == this.state.pdfContent[0].faturadoPor)[0];
+            }
+            let pdf = '';
+            let totalFinal = 0;
+            let totalFinalDolar = 0;
+            let descontoFinal = 0;
+            let descontoFinalDolar = 0;
+
+            let company = util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].cliente);
+            let address = `${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].complemento)} ${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].rua)} ${this.state.pdfContent[0].numero && this.state.pdfContent[0].numero != "0" ? this.state.pdfContent[0].numero : ""} ${this.state.pdfContent[0].cep && this.state.pdfContent[0].cep != "0" ? this.state.pdfContent[0].cep : ""}`;
+
+            if (this.state.pdfContent[0].cabecalho) {
+                const cabecalho = JSON.parse(this.state.pdfContent[0].cabecalho);
+
+                if (cabecalho.company) {
+                    company = cabecalho.company;
+                }
+
+                if (cabecalho.address) {
+                    address = cabecalho.address;
+                }
+            }
+
+            if (this.state.pdfContent[0].GT && ["SIM", "S"].includes(this.state.pdfContent[0].GT.toUpperCase())) {
+                totalFinal += parseFloat(this.state.pdfContent[0].governmentTaxes);
+                totalFinalDolar += parseFloat(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe).toFixed(2));
+            }
+
+            if (this.state.pdfContent[0].BK && ["SIM", "S"].includes(this.state.pdfContent[0].BK.toUpperCase())) {
+                totalFinal += parseFloat(this.state.pdfContent[0].bankCharges);
+                totalFinalDolar += parseFloat(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe).toFixed(2));
+            }
+
+            if (this.state.pdfContent[0]) {
+                pdf =
+                    <div key={546546554654}>
+                        <br />
+                        <h5 style={{ width: "100%", textAlign: "center" }}><b>AGENT DISBURSEMENT ACCOUNT</b></h5>
+                        <h4 style={{ width: "100%", textAlign: "center" }}>SULTRADE SHIPPING AGENCY</h4>
+                        <div className='voucherImagem'>
+                            <img className="img-fluid" src="https://i.ibb.co/n69ZD86/logo-Vertical.png" alt="logo-lpc" border="0" style={{ width: '130px', height: '100px' }} />
+                        </div>
+                        <br />
+                        {/*
                     <div className='pdfHeader'>
                         <img className="img-fluid" src="https://i.ibb.co/vmKJkx4/logo.png" alt="logo-lpc" border="0" style={{ width: '30%', height: '150px' }} />
                         <h3 className='pdfTitle'>AGENT DISBURSEMENT ACCOUNT</h3>
                         <h3>SULTRADE SHIPPING AGENCY</h3>
                     </div>
         */}
-                    <div style={{ width: "80%", marginLeft: "5%" }}>
-                        <table>
-                            <tr>
-                                <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Company:</b> {company}</td>
-                            </tr>
-                            <tr>
-                                <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Address:</b> {address}</td>
-                            </tr>
-                            <tr>
-                                <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Vessel Name:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomeNavio)}</td>
-                            </tr>
-                            <tr>
-                                <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Name of Port:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomePorto)}</td>
-                            </tr>
-                            <tr>
-                                <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Arrived:</b> {moment(this.state.pdfContent[0].data_chegada).format('MMMM DD, YYYY') != "Invalid date" ? moment(this.state.pdfContent[0].data_chegada).format('MMMM DD, YYYY') : 'T.B.I.'}</td>
-                            </tr>
-                            <tr>
-                                <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Sailed:</b> {moment(this.state.pdfContent[0].data_saida).format('MMMM DD, YYYY') != "Invalid date" ? moment(this.state.pdfContent[0].data_saida).format('MMMM DD, YYYY') : 'T.B.I.'}</td>
-                            </tr>
-                            <tr>
-                                <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Date of Billing:</b> {moment(this.state.pdfContent[0].data_faturamento).format('MMMM DD, YYYY') != "Invalid date" ? moment(this.state.pdfContent[0].data_faturamento).format('MMMM DD, YYYY') : 'T.B.I.'}</td>
-                                <td colSpan={2} style={{ padding: "0px 3px 0px 3px", textAlign: "right" }}><b>PO:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].codigo)}</td>
-                            </tr>
-                        </table>
-                    </div>
-                    <br />
-                    <div className='pdfContent'>
-                        <div>
-                            {/* <table className='pdfTable'>
+                        <div style={{ width: "80%", marginLeft: "5%" }}>
+                            <table>
+                                <tr>
+                                    <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Company:</b> {company}</td>
+                                </tr>
+                                <tr>
+                                    <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Address:</b> {address}</td>
+                                </tr>
+                                <tr>
+                                    <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Vessel Name:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomeNavio)}</td>
+                                </tr>
+                                <tr>
+                                    <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Name of Port:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomePorto)}</td>
+                                </tr>
+                                <tr>
+                                    <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Arrived:</b> {moment(this.state.pdfContent[0].data_chegada).format('MMMM DD, YYYY') != "Invalid date" ? moment(this.state.pdfContent[0].data_chegada).format('MMMM DD, YYYY') : 'T.B.I.'}</td>
+                                </tr>
+                                <tr>
+                                    <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Sailed:</b> {moment(this.state.pdfContent[0].data_saida).format('MMMM DD, YYYY') != "Invalid date" ? moment(this.state.pdfContent[0].data_saida).format('MMMM DD, YYYY') : 'T.B.I.'}</td>
+                                </tr>
+                                <tr>
+                                    <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Date of Billing:</b> {moment(this.state.pdfContent[0].data_faturamento).format('MMMM DD, YYYY') != "Invalid date" ? moment(this.state.pdfContent[0].data_faturamento).format('MMMM DD, YYYY') : 'T.B.I.'}</td>
+                                    <td colSpan={2} style={{ padding: "0px 3px 0px 3px", textAlign: "right" }}><b>PO:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].codigo)}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <br />
+                        <div className='pdfContent'>
+                            <div>
+                                {/* <table className='pdfTable'>
                                 <tr>
                                     <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2' className=' pdfTitle'>COMPANY: {company}</td>
                                 </tr>
@@ -967,43 +968,55 @@ class AddOS extends Component {
 
 
                             </table>*/}
-                            <br />
+                                <br />
 
-                            <table className={`voucherTable`}>
-                                <tr>
-                                    <td className='pdfTitle' style={{ width: 75 }}>Voucher</td>
-                                    <td colSpan='2' className='pdfTitle'>Description</td>
-                                    <td className='pdfTitle'>Expense Type</td>
-                                    <td className='pdfTitle'>Final USD</td>
-                                    <td className='pdfTitle'>Final BRL</td>
-                                </tr>
-                                {vouchers.map((voucher, index) => {
-                                    const voucherInfo = this.state.pdfContent.find((e) => e.chavTaxa == voucher);
-                                    if (index % 2 == 0) {
-                                        backgroundColor = '#FFFFFF';
-                                    } else {
-                                        backgroundColor = '#BBBBBB';
-                                    }
+                                <table className={`voucherTable`}>
+                                    <tr>
+                                        <td className='pdfTitle' style={{ width: 75 }}>Voucher</td>
+                                        <td colSpan='2' className='pdfTitle'>Description</td>
+                                        <td className='pdfTitle'>Expense Type</td>
+                                        <td className='pdfTitle'>Final USD</td>
+                                        <td className='pdfTitle'>Final BRL</td>
+                                    </tr>
+                                    {vouchers.map((voucher, index) => {
+                                        const voucherInfo = this.state.pdfContent.find((e) => e.chavTaxa == voucher);
+                                        if (index % 2 == 0) {
+                                            backgroundColor = '#FFFFFF';
+                                        } else {
+                                            backgroundColor = '#BBBBBB';
+                                        }
 
-                                    let valorTotal = 0;
+                                        let valorTotal = 0;
 
 
 
-                                    return (
-                                        <>
-                                            {this.state.pdfContent.filter((e) => e.tipo != 2 && e.chavTaxa == voucher).map((e, i) => {
+                                        return (
+                                            <>
+                                                {this.state.pdfContent.filter((e) => e.tipo != 2 && e.chavTaxa == voucher).map((e, i) => {
 
-                                                if (e.tipo != 3) {
-                                                    if (e.moeda == 5) {
-                                                        valorTotal += parseFloat(e.valor);
-                                                        totalFinal += parseFloat(e.valor);
-                                                        totalFinalDolar += parseFloat(parseFloat(e.valor / this.state.pdfContent[0].roe).toFixed(2));
+                                                    if (e.tipo != 3) {
+                                                        if (e.moeda == 5) {
+                                                            valorTotal += parseFloat(e.valor);
+                                                            totalFinal += parseFloat(e.valor);
+                                                            totalFinalDolar += parseFloat(parseFloat(e.valor / this.state.pdfContent[0].roe).toFixed(2));
+                                                        } else {
+                                                            valorTotal += parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
+                                                            totalFinal += parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
+                                                            totalFinalDolar += parseFloat(e.valor);
+                                                        }
                                                     } else {
-                                                        valorTotal += parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
-                                                        totalFinal += parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
-                                                        totalFinalDolar += parseFloat(e.valor);
+                                                        if (e.moeda == 5) {
+                                                            valorTotal -= parseFloat(e.valor);
+                                                            descontoFinal += parseFloat(e.valor);
+                                                            descontoFinalDolar += parseFloat(parseFloat(e.valor / this.state.pdfContent[0].roe).toFixed(2));
+                                                        } else {
+                                                            valorTotal -= parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
+                                                            descontoFinal += parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
+                                                            descontoFinalDolar += parseFloat(e.valor);
+                                                        }
                                                     }
-                                                } else {
+                                                })}
+                                                {this.state.pdfContent.filter((e) => e.tipo == 2).map((e) => {
                                                     if (e.moeda == 5) {
                                                         valorTotal -= parseFloat(e.valor);
                                                         descontoFinal += parseFloat(e.valor);
@@ -1013,118 +1026,106 @@ class AddOS extends Component {
                                                         descontoFinal += parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
                                                         descontoFinalDolar += parseFloat(e.valor);
                                                     }
-                                                }
-                                            })}
-                                            {this.state.pdfContent.filter((e) => e.tipo == 2).map((e) => {
-                                                if (e.moeda == 5) {
-                                                    valorTotal -= parseFloat(e.valor);
-                                                    descontoFinal += parseFloat(e.valor);
-                                                    descontoFinalDolar += parseFloat(parseFloat(e.valor / this.state.pdfContent[0].roe).toFixed(2));
-                                                } else {
-                                                    valorTotal -= parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
-                                                    descontoFinal += parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
-                                                    descontoFinalDolar += parseFloat(e.valor);
-                                                }
-                                            })}
+                                                })}
 
-                                            <tr>
-                                                <td style={{ backgroundColor: backgroundColor, padding: "0px 3px 0px 3px", fontSize: 13 }}>{voucherInfo.chavTaxa}</td>
-                                                <td colSpan='2' style={{ backgroundColor: backgroundColor, padding: "0px 3px 0px 3px", paddingRight: 25, fontSize: 13 }}>{voucherInfo.descSubgrupo}</td>
-                                                <td style={{ backgroundColor: backgroundColor, padding: "0px 3px 0px 3px", paddingRight: 25, fontSize: 13 }}>{voucherInfo.descGrupo}</td>
-                                                <td style={{ backgroundColor: backgroundColor, padding: "0px 3px 0px 3px", fontSize: 13 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(valorTotal / this.state.pdfContent[0].roe))}</td>
-                                                <td style={{ backgroundColor: backgroundColor, padding: "0px 3px 0px 3px", fontSize: 13 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(valorTotal))}</td>
-                                            </tr>
+                                                <tr>
+                                                    <td style={{ backgroundColor: backgroundColor, padding: "0px 3px 0px 3px", fontSize: 13 }}>{voucherInfo.chavTaxa}</td>
+                                                    <td colSpan='2' style={{ backgroundColor: backgroundColor, padding: "0px 3px 0px 3px", paddingRight: 25, fontSize: 13 }}>{voucherInfo.descSubgrupo}</td>
+                                                    <td style={{ backgroundColor: backgroundColor, padding: "0px 3px 0px 3px", paddingRight: 25, fontSize: 13 }}>{voucherInfo.descGrupo}</td>
+                                                    <td style={{ backgroundColor: backgroundColor, padding: "0px 3px 0px 3px", fontSize: 13 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(valorTotal / this.state.pdfContent[0].roe))}</td>
+                                                    <td style={{ backgroundColor: backgroundColor, padding: "0px 3px 0px 3px", fontSize: 13 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(valorTotal))}</td>
+                                                </tr>
 
 
-                                        </>
-                                    )
-                                })
-                                }
-                                {this.state.pdfContent[0].GT && ["SIM", "S"].includes(this.state.pdfContent[0].GT.toUpperCase()) &&
+                                            </>
+                                        )
+                                    })
+                                    }
+                                    {this.state.pdfContent[0].GT && ["SIM", "S"].includes(this.state.pdfContent[0].GT.toUpperCase()) &&
+                                        <tr>
+                                            <td></td>
+                                            <td colSpan='2' style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }}>GOVERNMENT TAXES</td>
+                                            <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }}></td>
+                                            <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe))}</td>
+                                            <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes))}</td>
+                                        </tr>
+                                    }
+                                    {this.state.pdfContent[0].BK && ["SIM", "S"].includes(this.state.pdfContent[0].BK.toUpperCase()) &&
+                                        <tr>
+                                            <td></td>
+                                            <td colSpan='2' style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }}>BANK CHARGES</td>
+                                            <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }}></td>
+                                            <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe))}</td>
+                                            <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges))}</td>
+                                        </tr>
+                                    }
+
+                                </table>
+                                <br />
+                                <table className='voucherTableFinal'>
                                     <tr>
-                                        <td></td>
-                                        <td colSpan='2' style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }}>GOVERNMENT TAXES</td>
-                                        <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }}></td>
-                                        <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe))}</td>
-                                        <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes))}</td>
+                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} colSpan='4' className='pdfTitle'>Total Final Costs</td>
+                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(totalFinalDolar))}</td>
+                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(totalFinal))}</td>
                                     </tr>
-                                }
-                                {this.state.pdfContent[0].BK && ["SIM", "S"].includes(this.state.pdfContent[0].BK.toUpperCase()) &&
                                     <tr>
-                                        <td></td>
-                                        <td colSpan='2' style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }}>BANK CHARGES</td>
-                                        <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }}></td>
-                                        <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe))}</td>
-                                        <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 14 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges))}</td>
+                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} colSpan='4' className='pdfTitle'>Total Final Discounts</td>
+                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinal))}</td>
+                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinalDolar))}</td>
                                     </tr>
-                                }
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} colSpan='4' className='pdfTitle'>Final Blce/Debit Customer</td>
+                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(totalFinalDolar) - parseFloat(descontoFinalDolar))}</td>
+                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(totalFinal) - parseFloat(descontoFinal))}</td>
+                                    </tr>
+                                </table>
+                                <table className='pdfTable' style={{ width: "80%", marginLeft: "5%" }}>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px" }}>ISSUED BY:</td>
+                                        <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'>{operador ? operador.Nome : ''}</td>
+                                        <td style={{ padding: "0px 3px 0px 3px" }}>ROE:</td>
+                                        <td style={{ padding: "0px 3px 0px 3px" }}>{util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].roe.replaceAll('.', ','))}</td>
+                                    </tr>
+                                </table>
+                                <br />
+                                <br />
+                                <br />
 
-                            </table>
-                            <br />
-                            <table className='voucherTableFinal'>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} colSpan='4' className='pdfTitle'>Total Final Costs</td>
-                                    <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(totalFinalDolar))}</td>
-                                    <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(totalFinal))}</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} colSpan='4' className='pdfTitle'>Total Final Discounts</td>
-                                    <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinal))}</td>
-                                    <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinalDolar))}</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} colSpan='4' className='pdfTitle'>Final Blce/Debit Customer</td>
-                                    <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(totalFinalDolar) - parseFloat(descontoFinalDolar))}</td>
-                                    <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(totalFinal) - parseFloat(descontoFinal))}</td>
-                                </tr>
-                            </table>
-                            <table className='pdfTable' style={{ width: "80%", marginLeft: "5%" }}>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px" }}>ISSUED BY:</td>
-                                    <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'>{operador ? operador.Nome : ''}</td>
-                                    <td style={{ padding: "0px 3px 0px 3px" }}>ROE:</td>
-                                    <td style={{ padding: "0px 3px 0px 3px" }}>{util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].roe.replaceAll('.', ','))}</td>
-                                </tr>
-                            </table>
-                            <br />
-                            <br />
-                            <br />
+                                <h5 style={{ width: "100%", textAlign: "center" }}>BANKING DETAILS</h5>
+                                <table style={{ width: "80%", marginLeft: "5%" }}>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Bank's name:</b> Banco do Brasil</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Branch's name:</b> Rio Grande</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Address:</b> Benjamin Constant St, 72</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Swift Code:</b> BRASBRRJCTA</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>IBAN:</b> BR640000000002694000161440C1</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Branch's number:</b> 2694-8</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Account number:</b> 161441-X</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Account name:</b> SUL TRADE AGENCIAMENTOS MARITIMOS LTDA-ME</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Phone:</b> +55 53 3235 3500</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>CNPJ:</b> 10.432.546/0001-75</td>
+                                    </tr>
 
-                            <h5 style={{ width: "100%", textAlign: "center" }}>BANKING DETAILS</h5>
-                            <table style={{ width: "80%", marginLeft: "5%" }}>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Bank's name:</b> Banco do Brasil</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Branch's name:</b> Rio Grande</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Address:</b> Benjamin Constant St, 72</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Swift Code:</b> BRASBRRJCTA</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>IBAN:</b> BR640000000002694000161440C1</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Branch's number:</b> 2694-8</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Account number:</b> 161441-X</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Account name:</b> SUL TRADE AGENCIAMENTOS MARITIMOS LTDA-ME</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Phone:</b> +55 53 3235 3500</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>CNPJ:</b> 10.432.546/0001-75</td>
-                                </tr>
-
-                            </table>
-                            {/*
+                                </table>
+                                {/*
                             <div><span className='pdfTitle'>Bank's name:</span> <span>Banco do Brasil S/A</span></div>
                             <div><span className='pdfTitle'>Branch's name:</span> <span>Rio Grande</span></div>
                             <div><span className='pdfTitle'>Address:</span> <span>Benjamin Constant St, 72</span></div>
@@ -1136,460 +1137,504 @@ class AddOS extends Component {
                             <div><span className='pdfTitle'>Phone:</span> <span>+55 53 3235 3500</span></div>
                             <div><span className='pdfTitle'>CNPJ:</span> <span>10.432.546/0001-75</span></div>
 */}
+                            </div>
                         </div>
+
                     </div>
 
-                </div>
-
-        } else {
-            await this.setState({ erro: "Sem as informações necessárias para criar o pdf", loading: false });
-            return;
+            } else {
+                await this.setState({ erro: "Sem as informações necessárias para criar o pdf", loading: false });
+                return;
+            }
+            await this.setState({ pdfgerado: pdf })
+            this.handleExportWithComponent()
+        } catch (err) {
+            await this.setState({ erro: "Erro ao criar pdf", loading: false });
         }
-        await this.setState({ pdfgerado: pdf })
-        this.handleExportWithComponent()
     }
 
     FaturamentoCusteio = async (codigo, validForm) => {
-        if (!validForm) {
-            await this.setState({ error: { type: "error", msg: "Verifique se as informações estão corretas!" } });
-            return;
-        }
-
-        await this.salvarOS(validForm)
-
-        this.setState({ pdfNome: "Relatorio_liquidos" })
-        if (!this.state.moedas) {
-            await this.getMoedas();
-        }
-
-        await this.setState({
-            loading: true,
-            pdfContent: await loader.getBody(`faturamentoCusteio.php`, { token: true, codigo: codigo })
-        })
-
-        if (!this.state.pdfContent || !this.state.pdfContent[0]) {
-            return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
-        }
-
-        let totalConsolidado = 0;
-        let valorTotal = 0;
-        let valorTotalCobrar = 0;
-        let valorTotalPago = 0;
-        let pdf = '';
-
-        const { pdfContent } = this.state;
-
-        const pdfCusteio = [];
-
-        pdfContent.map((content) => {
-            if (!pdfCusteio.includes(content.fornecedor_custeio)) {
-                pdfCusteio.push(content.fornecedor_custeio);
+        try {
+            if (!validForm) {
+                await this.setState({ error: { type: "error", msg: "Verifique se as informações estão corretas!" } });
+                return;
             }
-        })
 
-        let roe = 5;
+            await this.salvarOS(validForm)
 
-        if (pdfContent[0].ROE && pdfContent[0].ROE != 0) {
-            roe = pdfContent[0].ROE;
-        }
+            this.setState({ pdfNome: "Relatorio_liquidos" })
+            if (!this.state.moedas) {
+                await this.getMoedas();
+            }
 
-        if (pdfContent) {
-            pdf =
-                <div style={{ zoom: 1 }} key={546546554654}>
+            await this.setState({
+                loading: true,
+                pdfContent: await loader.getBody(`faturamentoCusteio.php`, { token: true, codigo: codigo })
+            })
 
-                    <div className={`faturamentoCabecalho`}>NAVIO: {pdfContent[0].nome_navio ? pdfContent[0].nome_navio.toUpperCase() : ""}</div>
-                    <br />
-                    {pdfCusteio.map((custeio) => {
-                        valorTotalCobrar = 0;
-                        valorTotalPago = 0;
-                        valorTotal = 0;
+            console.log(this.state.pdfContent);
 
-                        if (custeio) {
-                            return (
-                                <>
-                                    <div className={`faturamentoTitulo`}>FATURAMENTO <span style={{ marginLeft: 10 }}>{custeio}</span></div>
-                                    <table style={{ width: "100%", padding: "0px 3px 0px 3px" }}>
-                                        <tr>
-                                            <th colSpan={2} style={{ border: "1px solid black", padding: "0px 3px 0px 3px" }}>EVENTO</th>
-                                            <th style={{ border: "1px solid black", padding: "0px 3px 0px 3px" }}>VALOR A COBRAR</th>
-                                            <th style={{ border: "1px solid black", padding: "0px 3px 0px 3px" }}>VALOR PAGO</th>
-                                            <th style={{ border: "1px solid black", padding: "0px 3px 0px 3px" }}>VALOR LIQUIDO</th>
-                                        </tr>
-                                        {pdfContent.filter((content) => content.fornecedor_custeio == custeio).map((content, index) => {
-                                            let valor_cobrar = content.valor_cobrar;
-                                            let valor_pago = content.valor_pago;
+            if (!this.state.pdfContent || !this.state.pdfContent[0]) {
+                return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
+            }
 
-                                            if (content.moeda == 6) {
-                                                valor_cobrar = parseFloat((parseFloat(valor_cobrar) * parseFloat(roe)).toFixed(2));
-                                            }
+            let totalConsolidado = 0;
+            let valorTotal = 0;
+            let valorTotalCobrar = 0;
+            let valorTotalPago = 0;
+            let pdf = '';
 
-                                            valorTotalCobrar += parseFloat(valor_cobrar);
-                                            valorTotalPago += parseFloat(valor_pago);
+            const { pdfContent } = this.state;
 
-                                            let valor_liquido = parseFloat(valor_cobrar) - parseFloat(valor_pago);
+            const pdfCusteio = [];
 
-                                            valorTotal += valor_liquido;
-                                            totalConsolidado += valor_liquido;
+            if (!pdfContent[0]) {
+                await this.setState({ erro: 'Sem as informações necessárias para gerar o pdf!', loading: false })
+                return;
+            }
 
-                                            return (
-                                                <>
-                                                    <tr>
-                                                        <td colSpan={2} style={{ border: "1px solid black", padding: "0px 3px 0px 3px", paddingRight: 75 }}>{content.evento}</td>
-                                                        <td style={{ border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor_cobrar)}</td>
-                                                        <td style={{ border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor_pago)}</td>
-                                                        <td style={{ border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor_liquido)}</td>
-                                                    </tr>
-                                                </>
-                                            )
-                                        })}
-                                        <tr style={{ backgroundColor: "#9a9a9a" }}>
-                                            <td colSpan={2} style={{ border: "1px solid black" }}><b>VALOR DA NF A SER EMITIDA</b></td>
-                                            <td style={{ border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'><b>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalCobrar)}</b></td>
-                                            <td style={{ border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'><b>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalPago)}</b></td>
-                                            <td style={{ border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'><b>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotal)}</b></td>
-                                        </tr>
-                                    </table>
-                                </>
-                            )
-                        }
-                    })}
-                    <div className="faturamentoFooter">
-                        VALOR CONSOLIDADO: R$<span style={{ marginLeft: "40px" }}>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalConsolidado)}</span>
+            pdfContent.map((content) => {
+                if (!pdfCusteio.includes(content.fornecedor_custeio)) {
+                    pdfCusteio.push(content.fornecedor_custeio);
+                }
+            })
+
+            let roe = 5;
+
+            if (pdfContent[0].ROE && pdfContent[0].ROE != 0) {
+                roe = pdfContent[0].ROE;
+            }
+
+            if (pdfContent) {
+                pdf =
+                    <div style={{ zoom: 1 }} key={546546554654}>
+
+                        <div className={`faturamentoCabecalho`}>NAVIO: {pdfContent[0].nome_navio ? pdfContent[0].nome_navio.toUpperCase() : ""}</div>
+                        <br />
+                        {pdfCusteio.map((custeio) => {
+                            valorTotalCobrar = 0;
+                            valorTotalPago = 0;
+                            valorTotal = 0;
+
+                            if (custeio) {
+                                return (
+                                    <>
+                                        <div className={`faturamentoTitulo`}>FATURAMENTO <span style={{ marginLeft: 10 }}>{custeio}</span></div>
+                                        <table style={{ width: "100%", padding: "0px 3px 0px 3px" }}>
+                                            <tr>
+                                                <th colSpan={2} style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }}>EVENTO</th>
+                                                <th style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }}>CONTA</th>
+                                                <th style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }}>VALOR A COBRAR</th>
+                                                <th style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }}>VALOR PAGO</th>
+                                                <th style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }}>VALOR LIQUIDO</th>
+                                            </tr>
+                                            {pdfContent.filter((content) => content.fornecedor_custeio == custeio).map((content, index) => {
+                                                let valor_cobrar = content.valor_cobrar;
+                                                let valor_pago = content.valor_pago;
+
+                                                if (content.moeda == 6) {
+                                                    valor_cobrar = parseFloat((parseFloat(valor_cobrar) * parseFloat(roe)).toFixed(2));
+                                                }
+
+                                                valorTotalCobrar += parseFloat(valor_cobrar);
+                                                valorTotalPago += parseFloat(valor_pago);
+
+                                                let valor_liquido = parseFloat(valor_cobrar) - parseFloat(valor_pago);
+
+                                                valorTotal += valor_liquido;
+                                                totalConsolidado += valor_liquido;
+
+                                                return (
+                                                    <>
+                                                        <tr>
+                                                            <td colSpan={2} style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px", paddingRight: 75 }}>{content.evento}</td>
+                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>{content.uf == 81 ? content.contaEstrangeiraNome : content.contaNome}</td>
+                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor_cobrar)}</td>
+                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor_pago)}</td>
+                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor_liquido)}</td>
+                                                        </tr>
+                                                    </>
+                                                )
+                                            })}
+                                            <tr style={{ backgroundColor: "#9a9a9a" }}>
+                                                <td colSpan={2} style={{ fontSize: '0.95em', border: "1px solid black" }}><b>VALOR DA NF A SER EMITIDA</b></td>
+                                                <td style={{ fontSize: '0.95em', border: "1px solid black" }}></td>
+                                                <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'><b>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalCobrar)}</b></td>
+                                                <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'><b>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalPago)}</b></td>
+                                                <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'><b>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotal)}</b></td>
+                                            </tr>
+                                        </table>
+                                    </>
+                                )
+                            }
+                        })}
+                        <div className="faturamentoFooter">
+                            VALOR CONSOLIDADO: R$<span style={{ marginLeft: "40px" }}>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalConsolidado)}</span>
+                        </div>
                     </div>
-                </div>
-        } else {
-            await this.setState({ erro: 'Sem as informações necessárias para gerar o pdf!', loading: false })
-            return;
-        }
+            } else {
+                await this.setState({ erro: 'Sem as informações necessárias para gerar o pdf!', loading: false })
+                return;
+            }
 
-        await this.setState({ pdfgerado: pdf })
-        this.handleExportWithComponent()
+            await this.setState({ pdfgerado: pdf })
+            this.handleExportWithComponent()
+        } catch (err) {
+            await this.setState({ erro: "Erro ao criar o pdf", loading: false });
+        }
     }
 
     RelatorioVoucher = async (codigo, validForm) => {
-        if (!validForm) {
-            await this.setState({ error: { type: "error", msg: "Verifique se as informações estão corretas!" } });
-            return;
-        }
-
-        await this.salvarOS(validForm)
-
-        this.setState({ pdfNome: "Vouchers" })
-        if (!this.state.moedas) {
-            await this.getMoedas();
-        }
-
-        await this.setState({
-            loading: true,
-            pdfContent: await loader.getBody(`relatorioVoucher.php`, { token: true, codigo: codigo })
-        })
-
-        if (!this.state.pdfContent || !this.state.pdfContent.itens || !this.state.pdfContent.chaves) {
-            return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
-        }
-        if (this.state.pdfContent.itens.find((os) => !os.codsubgrupo_taxas)) {
-            return this.setState({ error: { type: "error", msg: "Há eventos sem taxas" }, loading: false })
-        }
-
-        const pdfContent = this.state.pdfContent.itens;
-        const pdfChaves = this.state.pdfContent.chaves;
-
-
-        const getDescricaoItem = (item) => {
-            if (item.tipo_op == 'R') {
-                if (item.fornecedor_custeio && item.descricao_item) {
-                    return `Expenses incurred with ${item.descricao_item}, as per attached bill from ${item.fornecedor_custeio}`
-                } else {
-                    return `Expenses incurred with ${item.descricao_item}, as per attached bill from ${item.fornecedor}`
-                }
-            } else if (item.repasse != 0) {
-                if (item.fornecedor && item.descricao_item) {
-                    return `Expenses incurred with ${item.descricao_item}, as per attached bill from ${item.fornecedor}`
-                }
-            } else {
-                if (item.fornecedor_custeio && item.descricao_item) {
-                    return `Expenses incurred with ${item.descricao_item}, as per attached bill from ${item.fornecedor_custeio}`
-                } else {
-                    return `Expenses incurred with ${item.descricao_item}, as per attached bill from ${item.fornecedor}`
-                }
-            }
-        }
-
-        const getValorItemReal = (item) => {
-            if (item.moeda_item == 6 && item.ROE != 0) {
-                return item.valor_item * item.ROE
-            } else {
-                return item.valor_item
-            }
-        }
-
-        const getValorItemDolar = (item) => {
-            if (item.moeda_item == 5 && item.ROE != 0) {
-                return item.valor_item / item.ROE
-            } else {
-                return item.valor_item
-            }
-        }
-
-        const mconversao = () => {
-            if (pdfContent[0].ROE != 0) {
-                return `Exchange Rate US$ 1,00 = R$${pdfContent[0].ROE}`;
-            }
-        }
-
-        let valorTotalReais = 0;
-        let valorTotalDolares = 0;
-        let pdf = '';
-
-        if (pdfContent) {
-            pdf =
-                <div style={{ zoom: 1 }} key={546546554654}>
-
-                    {pdfChaves.map((chave, index) => {
-                        let company = chave.company;
-                        let address = chave.address;
-
-                        if (chave.cabecalho) {
-                            const cabecalho = JSON.parse(chave.cabecalho);
-
-                            if (cabecalho.company) {
-                                company = cabecalho.company;
-                            }
-
-                            if (cabecalho.address) {
-                                address = cabecalho.address;
-                            }
-                        }
-
-                        valorTotalReais = 0;
-                        valorTotalDolares = 0;
-                        return (
-                            <>
-                                <br />
-                                <div className={`voucherCabecalho ${index == 0 ? "" : "page-break"}`} style={{ marginRight: 55 }}>Voucher nr. {chave.codsubgrupo}</div>
-                                <br />
-                                <div style={{ float: "right", marginRight: 55, marginTop: 25 }}>
-                                    <img className="img-fluid" src="https://i.ibb.co/n69ZD86/logo-Vertical.png" alt="logo-lpc" border="0" style={{ width: '130px', height: '100px' }} />
-                                </div>
-                                <div style={{ width: "70%", marginLeft: "5%" }}>
-                                    <table style={{ width: "100%" }}>
-                                        <tr>
-                                            <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Company:</b> {company}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colSpan={3} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Address:</b> {address}</td>
-                                            <td colSpan={1} style={{ padding: "0px 3px 0px 3px", textAlign: "right", paddingRight: 5 }}><b>PO:</b> {chave.codigo}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Date of Billing:</b> {moment(chave.data_faturamento).format('DD/MM/YYYY')}</td>
-                                            <td colSpan={2} style={{ padding: "0px 3px 0px 3px", textAlign: "right" }}><b>Arrived:</b> {moment(chave.eta).format('DD/MM/YYYY')}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Vessel Name:</b> {chave.vessel_name}</td>
-                                            <td colSpan={2} style={{ padding: "0px 3px 0px 3px", textAlign: "right" }}><b>Sailed:</b> {moment(chave.Data_Saida).format('DD/MM/YYYY')}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Name of Port:</b> {chave.name_of_port}</td>
-                                            <td colSpan={2} style={{ padding: "0px 3px 0px 3px", textAlign: "right", paddingRight: 8 }}>{mconversao()}</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <br />
-                                <br />
-                                <br />
-                                <div className='voucherContent'>
-
-                                    <div className='center'>{chave.subgrupos}</div>
-                                    <table>
-                                        <tr>
-                                            <th style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }} colSpan={2}>Services</th>
-                                            <th style={{ padding: "0px 3px 0px 3px" }}>Debit BRL</th>
-                                            <th style={{ padding: "0px 3px 0px 3px" }}>Debit USD</th>
-                                        </tr>
-                                        {pdfContent.filter((e) => e.codsubgrupo_taxas == chave.codsubgrupo_taxas).map((e, i) => {
-                                            valorTotalReais += parseFloat(parseFloat(getValorItemReal(e)).toFixed(2));
-                                            valorTotalDolares += parseFloat(parseFloat(getValorItemDolar(e)).toFixed(2));
-                                            return (
-                                                <tr>
-                                                    <td style={{ padding: "0px 3px 0px 3px", paddingRight: 50 }} colSpan={2}>{getDescricaoItem(e)}</td>
-                                                    <td style={{ padding: "0px 3px 0px 3px" }}>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(getValorItemReal(e))}</td>
-                                                    <td style={{ padding: "0px 3px 0px 3px" }}>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(getValorItemDolar(e))}</td>
-                                                </tr>
-
-                                            )
-                                        })
-                                        }
-                                        <tr>
-                                            <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 50 }}><b>TOTAL</b></td>
-                                            <td style={{ padding: "0px 3px 0px 3px" }}><b>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalReais)}</b></td>
-                                            <td style={{ padding: "0px 3px 0px 3px" }}><b>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalDolares)}</b></td>
-                                        </tr>
-
-                                    </table>
-                                </div>
-
-                                <div className='voucherFooter'>Comments: {chave.Comentario_Voucher}</div>
-                            </>
-                        )
-                    })}
-                </div>
-        } else {
-            await this.setState({ erro: 'Sem as informações necessárias para gerar o pdf!', loading: false })
-            return;
-        }
-
-        await this.setState({ pdfgerado: pdf })
-        this.handleExportWithComponent()
-    }
-
-    CloseToReal = async (codigo, validForm) => {
-        if (!validForm) {
-            await this.setState({ error: { type: "error", msg: "Verifique se as informações estão corretas!" } });
-            return;
-        }
-
-        await this.salvarOS(validForm)
-
-        this.setState({ pdfNome: "Close_to_Real" })
-        if (!this.state.moedas) {
-            await this.getMoedas();
-        }
-        await this.setState({ loading: true })
-        await apiEmployee.post(`getCloseToReal.php`, {
-            token: true,
-            codigo: codigo
-        })
-            .then(
-                async response => {
-                    await this.setState({ pdfContent: response.data })
-                },
-                async response => { console.log(response) }
-            )
-        let valorTotal = 0;
-        let valorTotalDolar = 0;
-        let pdf = '';
-
-
-        if (!this.state.pdfContent || !this.state.pdfContent[0]) {
-            return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
-        }
-
-        if (this.state.pdfContent[0]) {
-            if (this.state.pdfContent[0].governmentTaxes > 0) {
-                valorTotal += parseFloat(this.state.pdfContent[0].governmentTaxes);
-                valorTotalDolar += parseFloat(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe).toFixed(2));
-            }
-            if (this.state.pdfContent[0].bankCharges > 0) {
-                valorTotal += parseFloat(this.state.pdfContent[0].bankCharges);
-                valorTotalDolar += parseFloat(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe));
+        try {
+            if (!validForm) {
+                await this.setState({ error: { type: "error", msg: "Verifique se as informações estão corretas!" } });
+                return;
             }
 
-            if (this.state.pdfContent.find((os) => !os.chavTaxa)) {
+            await this.salvarOS(validForm)
+
+            this.setState({ pdfNome: "Vouchers" })
+            if (!this.state.moedas) {
+                await this.getMoedas();
+            }
+
+            await this.setState({
+                loading: true,
+                pdfContent: await loader.getBody(`relatorioVoucher.php`, { token: true, codigo: codigo })
+            })
+
+            if (!this.state.pdfContent || !this.state.pdfContent.itens || !this.state.pdfContent.chaves) {
+                return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
+            }
+            if (this.state.pdfContent.itens.find((os) => !os.codsubgrupo_taxas)) {
                 return this.setState({ error: { type: "error", msg: "Há eventos sem taxas" }, loading: false })
             }
 
-            pdf =
-                <div style={{ zoom: 1 }} key={546546554654}>
+            const pdfContent = this.state.pdfContent.itens;
+            const pdfChaves = this.state.pdfContent.chaves;
 
-                    <div className='pdfHeader'>
-                        <img className="img-fluid" src="https://i.ibb.co/vmKJkx4/logo.png" alt="logo-lpc" border="0" style={{ width: '24%', height: '150px' }} />
-                        <h3 className='pdfTitle'></h3>
-                        <h4>Close to Real</h4>
+
+            const getDescricaoItem = (item) => {
+                if (item.tipo_op == 'R') {
+                    if (item.fornecedor_custeio && item.descricao_item) {
+                        return `Expenses incurred with ${item.descricao_item}, as per attached bill from ${item.fornecedor_custeio}`
+                    } else {
+                        return `Expenses incurred with ${item.descricao_item}, as per attached bill from ${item.fornecedor}`
+                    }
+                } else if (item.repasse != 0) {
+                    if (item.fornecedor && item.descricao_item) {
+                        return `Expenses incurred with ${item.descricao_item}, as per attached bill from ${item.fornecedor}`
+                    }
+                } else {
+                    if (item.fornecedor_custeio && item.descricao_item) {
+                        return `Expenses incurred with ${item.descricao_item}, as per attached bill from ${item.fornecedor_custeio}`
+                    } else {
+                        return `Expenses incurred with ${item.descricao_item}, as per attached bill from ${item.fornecedor}`
+                    }
+                }
+            }
+
+            const getValorItemReal = (item) => {
+                if (item.moeda_item == 6 && item.ROE != 0) {
+                    return item.valor_item * item.ROE
+                } else {
+                    return item.valor_item
+                }
+            }
+
+            const getValorItemDolar = (item) => {
+                if (item.moeda_item == 5 && item.ROE != 0) {
+                    return item.valor_item / item.ROE
+                } else {
+                    return item.valor_item
+                }
+            }
+
+            const mconversao = () => {
+                if (pdfContent[0].ROE != 0) {
+                    return `Exchange Rate US$ 1,00 = R$${pdfContent[0].ROE}`;
+                }
+            }
+
+            let valorTotalReais = 0;
+            let valorTotalDolares = 0;
+            let pdf = '';
+
+            if (pdfContent) {
+                pdf =
+                    <div style={{ zoom: 1 }} key={546546554654}>
+
+                        {pdfChaves.map((chave, index) => {
+                            let company = chave.company;
+                            let address = chave.address;
+
+                            if (chave.cabecalho) {
+                                const cabecalho = JSON.parse(chave.cabecalho);
+
+                                if (cabecalho.company) {
+                                    company = cabecalho.company;
+                                }
+
+                                if (cabecalho.address) {
+                                    address = cabecalho.address;
+                                }
+                            }
+
+                            valorTotalReais = 0;
+                            valorTotalDolares = 0;
+                            return (
+                                <>
+                                    <br />
+                                    <div className={`voucherCabecalho ${index == 0 ? "" : "page-break"}`} style={{ marginRight: 55 }}>Voucher nr. {chave.codsubgrupo}</div>
+                                    <br />
+                                    <div style={{ float: "right", marginRight: 55, marginTop: 25 }}>
+                                        <img className="img-fluid" src="https://i.ibb.co/n69ZD86/logo-Vertical.png" alt="logo-lpc" border="0" style={{ width: '130px', height: '100px' }} />
+                                    </div>
+                                    <div style={{ width: "70%", marginLeft: "5%" }}>
+                                        <table style={{ width: "100%" }}>
+                                            <tr>
+                                                {company &&
+                                                    <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Company:</b> {company}</td>
+                                                }
+                                            </tr>
+                                            <tr>
+                                                {address &&
+                                                    <td colSpan={3} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Address:</b> {address}</td>
+                                                }
+                                                {chave.codigo &&
+                                                    <td colSpan={1} style={{ padding: "0px 3px 0px 3px", textAlign: address ? "right" : "left", paddingRight: 5 }}><b>PO:</b> {chave.codigo}</td>
+                                                }
+                                            </tr>
+                                            <tr>
+                                                {chave.data_faturamento && moment(chave.data_faturamento).format("DD/MM/YYYY") != "Invalid date" &&
+                                                    <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Date of Billing:</b> {moment(chave.data_faturamento).format('DD/MM/YYYY')}</td>
+                                                }
+                                                {chave.eta && moment(chave.eta).format("DD/MM/YYYY") != "Invalid date" &&
+                                                    <td colSpan={2} style={{ padding: "0px 3px 0px 3px", textAlign: chave.data_faturamento && moment(chave.data_faturamento).format("DD/MM/YYYY") != "Invalid date" ? "right" : "left" }}><b>Arrived:</b> {moment(chave.eta).format('DD/MM/YYYY')}</td>
+                                                }
+                                            </tr>
+                                            <tr>
+                                                {chave.vessel_name && moment(chave.vessel_name).format("DD/MM/YYYY") != "Invalid date" &&
+                                                    <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Vessel Name:</b> {chave.vessel_name}</td>
+                                                }
+                                                {chave.data_saida && moment(chave.data_saida).format("DD/MM/YYYY") != "Invalid date" &&
+                                                    <td colSpan={2} style={{ padding: "0px 3px 0px 3px", textAlign: chave.vessel_name && moment(chave.vessel_name).format("DD/MM/YYYY") != "Invalid date" ? "right" : "left" }}><b>Sailed:</b> {moment(chave.Data_Saida).format('DD/MM/YYYY')}</td>
+                                                }
+                                            </tr>
+                                            <tr>
+                                                {chave.name_of_port && moment(chave.name_of_port).format("DD/MM/YYYY") != "Invalid date" &&
+                                                    <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Name of Port:</b> {chave.name_of_port}</td>
+                                                }
+                                                <td colSpan={2} style={{ padding: "0px 3px 0px 3px", textAlign: chave.name_of_port && moment(chave.name_of_port).format("DD/MM/YYYY") != "Invalid date" ? "right" : "left", paddingRight: 8 }}>{mconversao()}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <br />
+                                    <br />
+                                    <br />
+                                    <div className='voucherContent'>
+
+                                        <div className='center'>{chave.subgrupos}</div>
+                                        <table>
+                                            <tr>
+                                                <th style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }} colSpan={2}>Services</th>
+                                                <th style={{ padding: "0px 3px 0px 3px" }}>Debit BRL</th>
+                                                <th style={{ padding: "0px 3px 0px 3px" }}>Debit USD</th>
+                                            </tr>
+                                            {pdfContent.filter((e) => e.codsubgrupo_taxas == chave.codsubgrupo_taxas).map((e, i) => {
+                                                valorTotalReais += parseFloat(parseFloat(getValorItemReal(e)).toFixed(2));
+                                                valorTotalDolares += parseFloat(parseFloat(getValorItemDolar(e)).toFixed(2));
+                                                return (
+                                                    <tr>
+                                                        <td style={{ padding: "0px 3px 0px 3px", paddingRight: 50 }} colSpan={2}>{getDescricaoItem(e)}</td>
+                                                        <td style={{ padding: "0px 3px 0px 3px" }}>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(getValorItemReal(e))}</td>
+                                                        <td style={{ padding: "0px 3px 0px 3px" }}>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(getValorItemDolar(e))}</td>
+                                                    </tr>
+
+                                                )
+                                            })
+                                            }
+                                            <tr>
+                                                <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 50 }}><b>TOTAL</b></td>
+                                                <td style={{ padding: "0px 3px 0px 3px" }}><b>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalReais)}</b></td>
+                                                <td style={{ padding: "0px 3px 0px 3px" }}><b>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalDolares)}</b></td>
+                                            </tr>
+
+                                        </table>
+                                    </div>
+
+                                    <div className='voucherFooter'>Comments: {chave.Comentario_Voucher}</div>
+                                </>
+                            )
+                        })}
                     </div>
-                    <hr />
-                    <div className='pdfContent'>
+            } else {
+                await this.setState({ erro: 'Sem as informações necessárias para gerar o pdf!', loading: false })
+                return;
+            }
+
+            await this.setState({ pdfgerado: pdf })
+            this.handleExportWithComponent()
+        } catch (err) {
+            console.log(err);
+            await this.setState({ erro: "Erro ao criar o pdf", loading: false });
+        }
+    }
+
+    CloseToReal = async (codigo, validForm) => {
+        try {
+            if (!validForm) {
+                await this.setState({ error: { type: "error", msg: "Verifique se as informações estão corretas!" } });
+                return;
+            }
+
+            await this.salvarOS(validForm)
+
+            this.setState({ pdfNome: "Close_to_Real" })
+            if (!this.state.moedas) {
+                await this.getMoedas();
+            }
+            await this.setState({ loading: true })
+            await apiEmployee.post(`getCloseToReal.php`, {
+                token: true,
+                codigo: codigo
+            })
+                .then(
+                    async response => {
+                        await this.setState({ pdfContent: response.data })
+                    },
+                    async response => { console.log(response) }
+                )
+            let valorTotal = 0;
+            let valorTotalDolar = 0;
+            let pdf = '';
+
+
+            if (!this.state.pdfContent || !this.state.pdfContent[0]) {
+                return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
+            }
+
+            if (this.state.pdfContent[0]) {
+                if (this.state.pdfContent[0].governmentTaxes > 0) {
+                    valorTotal += parseFloat(this.state.pdfContent[0].governmentTaxes);
+                    valorTotalDolar += parseFloat(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe).toFixed(2));
+                }
+                if (this.state.pdfContent[0].bankCharges > 0) {
+                    valorTotal += parseFloat(this.state.pdfContent[0].bankCharges);
+                    valorTotalDolar += parseFloat(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe));
+                }
+
+                if (this.state.pdfContent.find((os) => !os.chavTaxa)) {
+                    return this.setState({ error: { type: "error", msg: "Há eventos sem taxas" }, loading: false })
+                }
+
+                pdf =
+                    <div style={{ zoom: 1 }} key={546546554654}>
+
+                        <div className='pdfHeader'>
+                            <img className="img-fluid" src="https://i.ibb.co/vmKJkx4/logo.png" alt="logo-lpc" border="0" style={{ width: '24%', height: '150px' }} />
+                            <h3 className='pdfTitle'></h3>
+                            <h4>Close to Real</h4>
+                        </div>
+                        <hr />
+                        <div className='pdfContent'>
+                            <div>
+                                <table className='pdfTableCabecalho'>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>COMPANY:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].cliente)}</td>
+                                        <td style={{ padding: "0px 3px 0px 3px" }}></td>
+                                        <td style={{ padding: "0px 3px 0px 3px" }}></td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>ADDRESS:</b> {`${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].complemento)} ${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].rua)} ${this.state.pdfContent[0].numero && this.state.pdfContent[0].numero != "0" ? this.state.pdfContent[0].numero : ""} ${this.state.pdfContent[0].cep && this.state.pdfContent[0].cep != "0" ? this.state.pdfContent[0].cep : ""}`}</td>
+                                        <td style={{ padding: "0px 3px 0px 3px" }}></td>
+                                        <td style={{ padding: "0px 3px 0px 3px" }}></td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>Vessel Name:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomeNavio)}</td>
+                                        <td style={{ padding: "0px 3px 0px 3px", textAlign: "right" }} colSpan='2'><b style={{ paddingRight: 5 }}>Name of Port:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomePorto)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>Arrived:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].data_chegada)).format('MMMM DD, YYYY')}</td>
+                                        {this.state.pdfContent[0].data_saida && moment(this.state.pdfContent[0].data_saida).format("DD/MM/YYYY") != "Invalid date" &&
+                                            <td style={{ padding: "0px 3px 0px 3px", textAlign: "right" }} colSpan='2'><b style={{ paddingRight: 5 }}>Sailed:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].data_saida)).format('MMMM DD, YYYY')}</td>
+                                        }
+                                    </tr>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>PO:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].codigo)}</td>
+                                        <td style={{ padding: "0px 3px 0px 3px", textAlign: "right" }} colSpan='2'><b style={{ paddingRight: 5 }}>O.C.C:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].centro_custo)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>ROE:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].roe.replaceAll('.', ','))}</td>
+                                        <td style={{ padding: "0px 3px 0px 3px" }}></td>
+                                        <td style={{ padding: "0px 3px 0px 3px" }}></td>
+                                    </tr>
+                                </table>
+                                <br />
+                            </div>
+                        </div>
                         <div>
-                            <table className='pdfTableCabecalho'>
+                            <table style={{ width: "90%", marginLeft: "5%" }}>
                                 <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>COMPANY:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].cliente)}</td>
+                                    <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2' className=' pdfTitle'></td>
                                     <td style={{ padding: "0px 3px 0px 3px" }}></td>
                                     <td style={{ padding: "0px 3px 0px 3px" }}></td>
                                 </tr>
                                 <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>ADDRESS:</b> {`${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].complemento)} ${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].rua)} ${this.state.pdfContent[0].numero && this.state.pdfContent[0].numero != "0" ? this.state.pdfContent[0].numero : ""} ${this.state.pdfContent[0].cep && this.state.pdfContent[0].cep != "0" ? this.state.pdfContent[0].cep : ""}`}</td>
-                                    <td style={{ padding: "0px 3px 0px 3px" }}></td>
-                                    <td style={{ padding: "0px 3px 0px 3px" }}></td>
                                 </tr>
                                 <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>Vessel Name:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomeNavio)}</td>
-                                    <td style={{ padding: "0px 3px 0px 3px", textAlign: "right" }} colSpan='2'><b style={{ paddingRight: 5 }}>Name of Port:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomePorto)}</td>
+                                    <td colSpan='2' style={{ padding: "0px 3px 0px 3px", paddingRight: 25, backgroundColor: "#ff5555" }}>DESCRICAO:</td>
+                                    <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25, backgroundColor: "#ff5555" }}>VALOR (USD)</td>
+                                    <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25, backgroundColor: "#ff5555" }}>VALOR (R$)</td>
                                 </tr>
+                                {this.state.pdfContent.map((e, index) => {
+                                    if (e.moeda == 5) {
+                                        valorTotal += parseFloat(e.valor);
+                                        valorTotalDolar += parseFloat(parseFloat(e.valor / this.state.pdfContent[0].roe).toFixed(2))
+                                    } else {
+                                        valorTotal += parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
+                                        valorTotalDolar += parseFloat(e.valor)
+                                    }
+                                    return (
+                                        <tr style={{ background: index % 2 == 0 ? "white" : "#dddddd" }}>
+                                            <td colSpan='2' className='' style={{ padding: "0px 3px 0px 3px", background: index % 2 == 0 ? "white" : "#ccc", paddingRight: 50 }}>{e.descos}</td>
+                                            <td className='text-right' style={{ padding: "0px 3px 0px 3px", background: index % 2 == 0 ? "white" : "#ccc", paddingRight: 25 }}>{e.moeda == 5 ? util.formataDinheiroBrasileiro(parseFloat(e.valor / this.state.pdfContent[0].roe)) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
+                                            <td className='text-right' style={{ padding: "0px 3px 0px 3px", background: index % 2 == 0 ? "white" : "#ccc", paddingRight: 25 }}>{e.moeda == 6 ? util.formataDinheiroBrasileiro(parseFloat(e.valor * this.state.pdfContent[0].roe)) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
+                                        </tr>
+                                    )
+                                })}
+                                {this.state.pdfContent[0].governmentTaxes > 0 &&
+                                    <tr>
+                                        <td colSpan='2' className='' style={{ padding: "0px 3px 0px 3px" }}><b>GOVERNMENT TAXES</b></td>
+                                        <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25 }}><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe))}</b></td>
+                                        <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25 }}><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes))}</b></td>
+                                    </tr>
+                                }
+                                {this.state.pdfContent[0].bankCharges > 0 &&
+                                    <tr styles={{ padding: "37px 0px 37px 0px" }}>
+                                        <td colSpan='2' className='' style={{ padding: "0px 3px 0px 3px" }}><b>BANK CHARGES</b></td>
+                                        <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25 }}><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe))}</b></td>
+                                        <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25 }}><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges))}</b></td>
+                                    </tr>
+                                }
                                 <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>Arrived:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].data_chegada)).format('MMMM DD, YYYY')}</td>
-                                    <td style={{ padding: "0px 3px 0px 3px", textAlign: "right" }} colSpan='2'><b style={{ paddingRight: 5 }}>Sailed:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].data_saida)).format('MMMM DD, YYYY')}</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>PO:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].codigo)}</td>
-                                    <td style={{ padding: "0px 3px 0px 3px", textAlign: "right" }} colSpan='2'><b style={{ paddingRight: 5 }}>O.C.C:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].centro_custo)}</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>ROE:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].roe.replaceAll('.', ','))}</td>
-                                    <td style={{ padding: "0px 3px 0px 3px" }}></td>
-                                    <td style={{ padding: "0px 3px 0px 3px" }}></td>
+                                    <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2' className=' pdfTitle'>Total</td>
+                                    <td style={{ padding: "0px 3px 0px 3px", paddingRight: 25 }} className='text-right'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotalDolar))}</b></td>
+                                    <td style={{ padding: "0px 3px 0px 3px", paddingRight: 25 }} className='text-right'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotal))}</b></td>
                                 </tr>
                             </table>
-                            <br />
                         </div>
                     </div>
-                    <div>
-                        <table style={{ width: "90%", marginLeft: "5%" }}>
-                            <tr>
-                                <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2' className=' pdfTitle'></td>
-                                <td style={{ padding: "0px 3px 0px 3px" }}></td>
-                                <td style={{ padding: "0px 3px 0px 3px" }}></td>
-                            </tr>
-                            <tr>
-                            </tr>
-                            <tr>
-                                <td colSpan='2' style={{ padding: "0px 3px 0px 3px", paddingRight: 25, backgroundColor: "#ff5555" }}>DESCRICAO:</td>
-                                <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25, backgroundColor: "#ff5555" }}>VALOR (USD)</td>
-                                <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25, backgroundColor: "#ff5555" }}>VALOR (R$)</td>
-                            </tr>
-                            {this.state.pdfContent.map((e, index) => {
-                                if (e.moeda == 5) {
-                                    valorTotal += parseFloat(e.valor);
-                                    valorTotalDolar += parseFloat(parseFloat(e.valor / this.state.pdfContent[0].roe).toFixed(2))
-                                } else {
-                                    valorTotal += parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
-                                    valorTotalDolar += parseFloat(e.valor)
-                                }
-                                return (
-                                    <tr style={{ background: index % 2 == 0 ? "white" : "#dddddd" }}>
-                                        <td colSpan='2' className='' style={{ padding: "0px 3px 0px 3px", background: index % 2 == 0 ? "white" : "#ccc", paddingRight: 50 }}>{e.descos}</td>
-                                        <td className='text-right' style={{ padding: "0px 3px 0px 3px", background: index % 2 == 0 ? "white" : "#ccc", paddingRight: 25 }}>{e.moeda == 5 ? util.formataDinheiroBrasileiro(parseFloat(e.valor / this.state.pdfContent[0].roe)) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
-                                        <td className='text-right' style={{ padding: "0px 3px 0px 3px", background: index % 2 == 0 ? "white" : "#ccc", paddingRight: 25 }}>{e.moeda == 6 ? util.formataDinheiroBrasileiro(parseFloat(e.valor * this.state.pdfContent[0].roe)) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
-                                    </tr>
-                                )
-                            })}
-                            {this.state.pdfContent[0].governmentTaxes > 0 &&
-                                <tr>
-                                    <td colSpan='2' className='' style={{ padding: "0px 3px 0px 3px" }}><b>GOVERNMENT TAXES</b></td>
-                                    <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25 }}><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe))}</b></td>
-                                    <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25 }}><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes))}</b></td>
-                                </tr>
-                            }
-                            {this.state.pdfContent[0].bankCharges > 0 &&
-                                <tr styles={{ padding: "37px 0px 37px 0px" }}>
-                                    <td colSpan='2' className='' style={{ padding: "0px 3px 0px 3px" }}><b>BANK CHARGES</b></td>
-                                    <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25 }}><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe))}</b></td>
-                                    <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25 }}><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges))}</b></td>
-                                </tr>
-                            }
-                            <tr>
-                                <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2' className=' pdfTitle'>Total</td>
-                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 25 }} className='text-right'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotalDolar))}</b></td>
-                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 25 }} className='text-right'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotal))}</b></td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-        } else {
-            await this.setState({ erro: 'Sem as informações necessárias para gerar o pdf!', loading: false })
-            return;
-        }
+            } else {
+                await this.setState({ erro: 'Sem as informações necessárias para gerar o pdf!', loading: false })
+                return;
+            }
 
-        await this.setState({ pdfgerado: pdf })
-        this.handleExportWithComponent()
+            await this.setState({ pdfgerado: pdf })
+            this.handleExportWithComponent()
+        } catch (err) {
+            await this.setState({ erro: "Erro ao criar o pdf", loading: false });
+        }
     }
     //
 
@@ -1773,7 +1818,7 @@ class AddOS extends Component {
 
                 {this.state.recarregaPagina &&
                     <>
-                        <Redirect to={{ pathname: '/ordensservico/addos/0', state: { ... this.props.location.state, os: {} } }} />
+                        <Redirect to={{ pathname: `/ordensservico/addos/${this.state.chave}`, state: { ... this.props.location.state, os: {... this.state.os} } }} />
                         {window.location.reload()}
                     </>
                 }
@@ -2211,6 +2256,15 @@ class AddOS extends Component {
                                                                 <Field className="form-control" type="date" value={this.state.etb} onChange={async e => { this.setState({ etb: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>E.T.S</label>
+                                                            </div>
+                                                            <div className="col-1 errorMessage">
+                                                            </div>
+                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                                <Field className="form-control" type="date" value={this.state.saida} onChange={async e => { this.setState({ saida: e.currentTarget.value }) }} />
+                                                            </div>
+                                                            <div className="col-1"></div>
                                                             {this.state.governmentTaxes &&
                                                                 <>
                                                                     <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -2413,6 +2467,15 @@ class AddOS extends Component {
                                                                 <Field className="form-control" type="date" value={this.state.etb} onChange={async e => { this.setState({ etb: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>E.T.S</label>
+                                                            </div>
+                                                            <div className="col-1 errorMessage">
+                                                            </div>
+                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                                <Field className="form-control" type="date" value={this.state.saida} onChange={async e => { this.setState({ saida: e.currentTarget.value }) }} />
+                                                            </div>
+                                                            <div className="col-1"></div>
                                                             {this.state.governmentTaxes &&
                                                                 <>
                                                                     <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -2444,15 +2507,6 @@ class AddOS extends Component {
                                                             <div>
                                                                 <hr />
                                                             </div>
-                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                <label>E.T.S</label>
-                                                            </div>
-                                                            <div className="col-1 errorMessage">
-                                                            </div>
-                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="date" value={this.state.saida} onChange={async e => { this.setState({ saida: e.currentTarget.value }) }} />
-                                                            </div>
-                                                            <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 <label>Data Encerramento</label>
                                                             </div>
@@ -2606,7 +2660,7 @@ class AddOS extends Component {
                                                                             </th>
                                                                             <th className='text-center'>
                                                                                 <span>
-                                                                                    {!this.state.eventos[0] &&
+                                                                                    {!this.state.eventos[1] &&
 
                                                                                         <Link to=
                                                                                             {{

@@ -47,7 +47,7 @@ function savePicture($picture ,$name, $format, $ext){
     } 
 
     $link = $name.'.'.$ext;
-    $link = "pictures/" . $link;
+    $link = "documents/pictures/" . $link;
 
     $img = $picture;
     $img = str_replace('data:'.$format.';base64,', '', $img);
@@ -58,6 +58,7 @@ function savePicture($picture ,$name, $format, $ext){
 
     return $name;
 }
+
 function savePDF($picture, $name = null){
     if($name == null){
         $name = date('m-d-Y-H-i-s', time());
@@ -65,7 +66,7 @@ function savePDF($picture, $name = null){
     } 
 
     $link = $name;
-    $link = "pictures/" . $link;
+    $link = "documents/docs/" . $link;
 
     $img = $picture;
     $img = str_replace('data:application/pdf;base64,', '', $img);

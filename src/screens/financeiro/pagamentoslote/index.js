@@ -296,7 +296,6 @@ class PagamentosLote extends Component {
                     async res => {
                         console.log(res);
                         console.log(res.data);
-
                         const requisicoes = this.state.requisicoesCarregando;
                         if (res.data.erros) {
                             requisicoes.push(`Conta ${e.Historico} (chave ${e.Chave}) - "Rejeitada"`);
@@ -515,6 +514,7 @@ class PagamentosLote extends Component {
                             dadosBase: {
                                 chave: e.Chave,
                                 data: e.Vencimento,
+                                liberado: e.liberado,
                                 historico: e.Historico,
                                 transacao_chave: e.transacao_chave,
                                 valor: e.Valor,
@@ -542,6 +542,7 @@ class PagamentosLote extends Component {
                             dadosBase: {
                                 chave: e.Chave,
                                 data: e.data_hora_envio,
+                                liberado: e.liberado,
                                 historico: e.Historico,
                                 transacao_chave: e.transacao_chave,
                                 valor: e.Valor,
@@ -571,6 +572,7 @@ class PagamentosLote extends Component {
                             dadosBase: {
                                 chave: e.Chave,
                                 data: e.data_hora_envio,
+                                liberado: e.liberado,
                                 historico: e.Historico,
                                 transacao_chave: e.transacao_chave,
                                 valor: e.Valor,
@@ -600,6 +602,7 @@ class PagamentosLote extends Component {
                             dadosBase: {
                                 chave: e.Chave,
                                 data: e.data_hora_envio,
+                                liberado: e.liberado,
                                 historico: e.Historico,
                                 transacao_chave: e.transacao_chave,
                                 valor: e.Valor,
@@ -629,6 +632,7 @@ class PagamentosLote extends Component {
                             dadosBase: {
                                 chave: e.Chave,
                                 data: e.data_hora_envio,
+                                liberado: e.liberado,
                                 historico: e.Historico,
                                 transacao_chave: e.transacao_chave,
                                 valor: e.Valor,
@@ -658,6 +662,7 @@ class PagamentosLote extends Component {
                             dadosBase: {
                                 chave: e.Chave,
                                 data: e.data_hora_envio,
+                                liberado: e.liberado,
                                 historico: e.Historico,
                                 transacao_chave: e.transacao_chave,
                                 valor: e.Valor,
@@ -687,6 +692,7 @@ class PagamentosLote extends Component {
                             dadosBase: {
                                 chave: e.Chave,
                                 data: e.data_hora_envio,
+                                liberado: e.liberado,
                                 historico: e.Historico,
                                 transacao_chave: e.transacao_chave,
                                 valor: e.Valor,
@@ -871,27 +877,50 @@ class PagamentosLote extends Component {
                                     console.log(response);
 
                                     if (response) {
-                                        const newStatusId = this.state.bbTrc.find((e) => e.codigo == response.estadoPagamento).status;
-                                        console.log(newStatusId)
-                                        console.log(e.dadosBase.statusId)
+                                        if (response.estadoRequisicao) {
+                                            
+                                            const newStatusId = this.state.bbGet.find((e) => e.codigo == response.estadoRequisicao).status;
+                                            console.log(newStatusId)
+                                            console.log(e.dadosBase.statusId)
 
-                                        status.push({
-                                            conta: e.dadosBase.chave,
-                                            transacao_chave: e.dadosBase.transacao_chave,
-                                            transacao: e.dadosBase.transacao,
-                                            existe: e.dadosBase.existe,
-                                            valor: e.dadosBase.valor,
-                                            saldo: e.dadosBase.saldo,
-                                            status: this.state.bbTrc.find((e) => e.codigo == response.estadoPagamento).mensagem,
-                                            statusId: newStatusId == 3 && e.dadosBase.statusId == 2 ? 2 : newStatusId,
-                                            errors: ''
-                                        })
-                                        const requisicoes = this.state.requisicoesCarregando;
+                                            status.push({
+                                                conta: e.dadosBase.chave,
+                                                transacao_chave: e.dadosBase.transacao_chave,
+                                                transacao: e.dadosBase.transacao,
+                                                existe: e.dadosBase.existe,
+                                                valor: e.dadosBase.valor,
+                                                saldo: e.dadosBase.saldo,
+                                                status: this.state.bbGet.find((e) => e.codigo == response.estadoRequisicao).mensagem,
+                                                statusId: newStatusId == 3 && e.dadosBase.liberado == 0 ? 2 : newStatusId,
+                                                errors: ''
+                                            })
+                                            
+                                            const requisicoes = this.state.requisicoesCarregando;
 
-                                        requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${newStatusId == 3 || newStatusId == 2 ? "Aceita" : newStatusId == 0 ? "Rejeitada" : "Paga"}`);
-                                        await this.setState({ requisicoesCarregando: requisicoes })
+                                            requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${newStatusId == 3 || newStatusId == 2 ? "Aceita" : newStatusId == 0 ? "Rejeitada" : "Paga"}`);
+                                            await this.setState({ requisicoesCarregando: requisicoes })
+                                        } else {
+                                            const newStatusId = this.state.bbTrc.find((e) => e.codigo == response.estadoPagamento).status;
+                                            console.log(newStatusId)
+                                            console.log(e.dadosBase.statusId)
 
+                                            status.push({
+                                                conta: e.dadosBase.chave,
+                                                transacao_chave: e.dadosBase.transacao_chave,
+                                                transacao: e.dadosBase.transacao,
+                                                existe: e.dadosBase.existe,
+                                                valor: e.dadosBase.valor,
+                                                saldo: e.dadosBase.saldo,
+                                                status: this.state.bbTrc.find((e) => e.codigo == response.estadoPagamento).mensagem,
+                                                statusId: newStatusId == 3 && e.dadosBase.statusId == 2 ? 2 : newStatusId,
+                                                errors: ''
+                                            })
+                                            const requisicoes = this.state.requisicoesCarregando;
 
+                                            requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${newStatusId == 3 || newStatusId == 2 ? "Aceita" : newStatusId == 0 ? "Rejeitada" : "Paga"}`);
+                                            await this.setState({ requisicoesCarregando: requisicoes })
+
+                                        }
                                     } else {
 
                                         status.push({
@@ -1530,14 +1559,14 @@ class PagamentosLote extends Component {
                     if (!res.data.error) {
                         console.log("BOL");
                         const response = await Util.constroiJsonBB(res.data)
-                        
+
                         const nomeBanco = this.state.bancos.find((banco) => parseInt(banco.compe) == parseInt(response.numeroCOMPE));
                         if (nomeBanco) {
                             response.nomeBanco = nomeBanco.Titular;
                         }
-                        
+
                         this.comprovanteBOL(response, dados.transacao);
-                        
+
                         console.log(response)
                     } else {
                         await this.setState({ error: { type: "error", msg: "Muitas requisições!\nAguarde alguns minutos, por favor..." } });

@@ -138,6 +138,8 @@ class AddEventoFinanceiro extends Component {
                 moeda: this.state.evento.Moeda,
                 valor: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.evento.valor),
                 vlrc: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.evento.valor1),
+                documento: this.state.evento.documento,
+                tipoDocumento:  this.state.evento.tipo_documento,
                 repasse: this.state.evento.repasse == 1 ? true : false,
                 emissao: moment(this.state.evento.emissao).format('YYYY-MM-DD'),
                 vencimento: moment(this.state.evento.vencimento).format('YYYY-MM-DD'),
@@ -174,7 +176,7 @@ class AddEventoFinanceiro extends Component {
             })
 
             this.setState({
-                historico: `VLR ${this.state.fornecedorNome} ST ${this.state.evento.centroCusto} NAVIO ${this.state.navio}`
+                historico: `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}`
             })
 
             if (!this.state.descontoConta || this.state.descontoConta == '0') {
@@ -284,6 +286,16 @@ class AddEventoFinanceiro extends Component {
         await this.getOSUma();
     }
 
+    alteraComplementoRetencoes = () => {
+        this.setState({
+            historico: `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}`,
+            descontoComplemento: this.state.desconto > 0 ? `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}` : "",
+            retencaoCsllComplemento: this.state.retencaoCsllCheck ? `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}` : "",
+            retencaoInssComplemento: this.state.retencaoInssCheck ? `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}` : "",
+            retencaoIrComplemento: this.state.retencaoIrCheck ? `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}` : "",
+            retencaoIssComplemento: this.state.retencaoIssCheck ? `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}` : "",        })
+    }
+
     salvarServicoItem = async (validForm) => {
         this.setState({ bloqueado: true });
 
@@ -334,6 +346,8 @@ class AddEventoFinanceiro extends Component {
                 repasse: this.state.repasse ? 1 : 0,
                 emissao: moment(this.state.emissao).format('YYYY-MM-DD'),
                 vencimento: moment(this.state.vencimento).format('YYYY-MM-DD'),
+                documento: this.state.documento,
+                tipo_documento: this.state.tipo_documento,
                 desconto_valor: parseFloat(this.state.desconto.replaceAll('.', '').replaceAll(',', '.')),
                 desconto_cpl: this.state.descontoComplemento,
                 desconto_conta: this.state.descontoConta,
@@ -386,20 +400,80 @@ class AddEventoFinanceiro extends Component {
         await this.salvarServicoItem(validForm);
     }
 
+    transformaRetencoes = async () => {
+        const retencoes = [];
+
+        if (this.state.desconto > 0) {
+            retencoes.push(`'${this.state.descontoConta}', ${this.state.desconto.replaceAll(".", "").replaceAll(",", ".")}, '${this.state.descontoComplemento}', 'DESCONTO'`);
+        }
+        if (this.state.retencaoCofinsCheck) {
+            retencoes.push(`'${this.state.retencaoCofinsConta}', ${this.state.retencaoCofins.replaceAll(".", "").replaceAll(",", ".")}, '${this.state.retencaoCofinsComplemento}', 'COFINS'`);
+        }
+        if (this.state.retencaoCsllCheck) {
+            retencoes.push(`'${this.state.retencaoCsllConta}', ${this.state.retencaoCsll.replaceAll(".", "").replaceAll(",", ".")}, '${this.state.retencaoCsllComplemento}', 'CRF'`);
+        }
+        if (this.state.retencaoInssCheck) {
+            retencoes.push(`'${this.state.retencaoInssConta}', ${this.state.retencaoInss.replaceAll(".", "").replaceAll(",", ".")}, '${this.state.retencaoCofinsInss}', 'INSS'`);
+        }
+        if (this.state.retencaoIrCheck) {
+            retencoes.push(`'${this.state.retencaoIrConta}', ${this.state.retencaoIr.replaceAll(".", "").replaceAll(",", ".")}, '${this.state.retencaoIrComplemento}', 'IR'`);
+        }
+        if (this.state.retencaoIssCheck) {
+            retencoes.push(`'${this.state.retencaoIssConta}', ${this.state.retencaoIss.replaceAll(".", "").replaceAll(",", ".")}, '${this.state.retencaoIssComplemento}', 'ISS'`);
+        }
+        if (this.state.retencaoPisCheck) {
+            retencoes.push(`'${this.state.retencaoPisConta}', ${this.state.retencaoPis.replaceAll(".", "").replaceAll(",", ".")}, '${this.state.retencaoPisComplemento}', 'PIS'`);
+        }
+
+        return retencoes;
+    }
+
+    calculaValor = async () => {
+        let valor = parseFloat(this.state.vlrc.replaceAll(".", "").replaceAll(",", "."));
+
+        if (this.state.desconto > 0) {
+            valor -= parseFloat(this.state.desconto.replaceAll(".", "").replaceAll(",", "."));
+        }
+        if (this.state.retencaoCofinsCheck) {
+            valor -= parseFloat(this.state.retencaoCofins.replaceAll(".", "").replaceAll(",", "."));
+        }
+        if (this.state.retencaoCsllCheck) {
+            valor -= parseFloat(this.state.retencaoCsll.replaceAll(".", "").replaceAll(",", "."));
+        }
+        if (this.state.retencaoInssCheck) {
+            valor -= parseFloat(this.state.retencaoInss.replaceAll(".", "").replaceAll(",", "."));
+        }
+        if (this.state.retencaoIrCheck) {
+            valor -= parseFloat(this.state.retencaoIr.replaceAll(".", "").replaceAll(",", "."));
+        }
+        if (this.state.retencaoIssCheck) {
+            valor -= parseFloat(this.state.retencaoIss.replaceAll(".", "").replaceAll(",", "."));
+        }
+        if (this.state.retencaoPisCheck) {
+            valor -= parseFloat(this.state.retencaoPis.replaceAll(".", "").replaceAll(",", "."));
+        }
+
+        return valor;
+    }
+
     salvarConta = async (validFormContabiliza) => {
 
         this.setState({ bloqueadoContabiliza: true, loading: true });
 
+        const retencoes = await this.transformaRetencoes();
+        const valorFinal = await this.calculaValor();
+
         if (validFormContabiliza) {
             await apiEmployee.post(`insertContaFornecedor.php`, {
                 token: true,
-                values: `'${this.state.emissao}', '${this.state.tipo}', '${this.state.evento.fornecedor}', '${this.state.evento.contaContabil}', '${this.state.codBarras}', '${this.state.evento.centroCusto}', '${this.state.historico}',  '${this.state.contaDesconto}','${1}', '${1}', '${parseFloat(this.state.vlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimento}', '${this.state.contaProvisao}', '${parseFloat(this.state.vlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}', '${this.state.chave}'`,
+                values: `'${this.state.emissao}', '${this.state.tipo}', '${this.state.evento.fornecedor}', '${this.state.evento.contaContabil}', '${this.state.codBarras}', '${this.state.evento.centroCusto}', '${this.state.historico}',  '${this.state.contaDesconto}','${1}', '${1}', '${parseFloat(valorFinal)}', '${this.state.vencimento}', '${this.state.vencimento}', '${this.state.contaProvisao}', '${valorFinal}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}', '${this.state.chave}'`,
                 meioPagamento: this.state.meioPagamentoNome,
-                valuesDarf: `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`
+                valuesDarf: `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
+                valuesRet: retencoes
             }).then(
                 async res => {
                     if (res.data[0]) {
-                        await this.setState({chavePr: res.data[0].Chave});
+                        await this.setState({ chavePr: res.data[0].Chave });
                         await loader.salvaLogs('os_contas_aberto', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
 
                     } else {
@@ -415,15 +489,12 @@ class AddEventoFinanceiro extends Component {
                 tipoEvento: this.state.evento.tipo_sub,
                 tipo: this.state.tipo,
                 values: `'${moment().format("YYYY-MM-DD")}', '${this.state.tipoDocumento}', '${this.state.evento.centroCusto}', '${this.state.historicoPadrao}', '${this.state.os.Chave_Cliente}', '${this.state.chavePr}', '${this.state.usuarioLogado.codigo}', '${this.state.usuarioLogado.codigo}', '${moment().format('YYYY-MM-DD')}', '${moment().format('YYYY-MM-DD')}'`,
-                historico: `'${this.state.historico}'`,
+                historico: `${this.state.historico}`,
                 chave_evento: this.state.chave,
                 chave_taxa: this.state.evento.taxa,
-                contaDebito: this.state.contaDesconto,
+                contaDebito: this.state.contaDebito,
             }).then(
                 async res => {
-                    console.log(res);
-                    console.log(res.data);
-                    console.log(res.data[0]);
                 },
                 async res => await console.log(`Erro: ${res.data}`)
             )
@@ -445,7 +516,8 @@ class AddEventoFinanceiro extends Component {
             } else {
                 await this.setState({
                     retencaoInssCheck: true,
-                    retencaoInssConta: this.state.parametroInss
+                    retencaoInssConta: this.state.parametroInss,
+                    retencaoInssComplemento: `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}`,
                 })
             }
         } else if (tipo == "IR") {
@@ -454,12 +526,13 @@ class AddEventoFinanceiro extends Component {
                     retencaoIrCheck: false,
                     retencaoIrConta: 0,
                     retencaoIr: '',
-                    retencaoIrComplemento: ''
+                    retencaoIrComplemento: '',
                 })
             } else {
                 await this.setState({
                     retencaoIrCheck: true,
-                    retencaoIrConta: this.state.parametroIr
+                    retencaoIrConta: this.state.parametroIr,
+                    retencaoIrComplemento: `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}`
                 })
             }
         } else if (tipo == "ISS") {
@@ -473,7 +546,8 @@ class AddEventoFinanceiro extends Component {
             } else {
                 await this.setState({
                     retencaoIssCheck: true,
-                    retencaoIssConta: this.state.parametroIss
+                    retencaoIssConta: this.state.parametroIss,
+                    retencaoIssComplemento: `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}`
                 })
             }
         } else if (tipo == "PIS") {
@@ -487,7 +561,8 @@ class AddEventoFinanceiro extends Component {
             } else {
                 await this.setState({
                     retencaoPisCheck: true,
-                    retencaoPisConta: this.state.parametroPis
+                    retencaoPisConta: this.state.parametroPis,
+                    retencaoPisComplemento: `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}`
                 })
             }
         } else if (tipo == "COFINS") {
@@ -501,7 +576,8 @@ class AddEventoFinanceiro extends Component {
             } else {
                 await this.setState({
                     retencaoCofinsCheck: true,
-                    retencaoCofinsConta: this.state.parametroCofins
+                    retencaoCofinsConta: this.state.parametroCofins,
+                    retencaoCofinsComplemento: `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}`
                 })
             }
         } else if (tipo == "CSLL") {
@@ -515,7 +591,8 @@ class AddEventoFinanceiro extends Component {
             } else {
                 await this.setState({
                     retencaoCsllCheck: true,
-                    retencaoCsllConta: this.state.parametroCsll
+                    retencaoCsllConta: this.state.parametroCsll,
+                    retencaoCsllComplemento: `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}`
                 })
             }
         }
@@ -609,7 +686,7 @@ class AddEventoFinanceiro extends Component {
     }
 
     testaValores = () => {
-        return parseFloat(this.state.desconto) + parseFloat(this.state.retencaoPis) + parseFloat(this.state.retencaoCofins) + parseFloat(this.state.retencaoCsll) + parseFloat(this.state.retencaoInss) + parseFloat(this.state.retencaoIr) + parseFloat(this.state.retencaoIss) > parseFloat(this.state.valor);
+        return parseFloat(this.state.desconto.replaceAll(".", "").replaceAll(",", ".")) + parseFloat(this.state.retencaoPis.replaceAll(".", "").replaceAll(",", ".")) + parseFloat(this.state.retencaoCofins.replaceAll(".", "").replaceAll(",", ".")) + parseFloat(this.state.retencaoCsll.replaceAll(".", "").replaceAll(",", ".")) + parseFloat(this.state.retencaoInss.replaceAll(".", "").replaceAll(",", ".")) + parseFloat(this.state.retencaoIr.replaceAll(".", "").replaceAll(",", ".")) + parseFloat(this.state.retencaoIss.replaceAll(".", "").replaceAll(",", ".")) > parseFloat(this.state.vlrc.replaceAll(".", "").replaceAll(",", "."));
     }
 
 
@@ -708,28 +785,6 @@ class AddEventoFinanceiro extends Component {
 
                                                             <div className="row addservicos">
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                    <label>Documento</label>
-                                                                </div>
-                                                                <div className='col-1 errorMessage'>
-                                                                    {!this.state.documento &&
-                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                                    }
-                                                                </div>
-                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Field className="form-control" type="text" value={this.state.documento} onChange={async e => { this.setState({ documento: e.currentTarget.value }) }} />
-                                                                </div>
-                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                    <label>Tipo de Documento</label>
-                                                                </div>
-                                                                <div className='col-1 errorMessage'>
-                                                                    {!this.state.tipoDocumento &&
-                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                                    }
-                                                                </div>
-                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Select className='SearchSelect' options={this.state.tiposDocumentosOptions.filter(e => this.filterSearch(e, this.state.tiposDocumentosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ tiposDocumentosOptionsTexto: e }) }} value={this.state.tiposDocumentosOptions.filter(option => option.label == this.state.tipoDocumento)[0]} search={true} onChange={(e) => { this.setState({ tipoDocumento: e.value }) }} />
-                                                                </div>
-                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                     <label>Histórico Padrão</label>
                                                                 </div>
                                                                 <div className='col-1'></div>
@@ -745,30 +800,6 @@ class AddEventoFinanceiro extends Component {
                                                                     <Field className="form-control" type="text" value={this.state.historico} onChange={async e => { this.setState({ historico: e.currentTarget.value }) }} />
                                                                 </div>
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                    <label>Provisão</label>
-                                                                </div>
-                                                                <div className='col-1'></div>
-                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <input className='form_control' checked={this.state.provisaoCheck} onChange={async (e) => { await this.setState({ provisaoCheck: e.target.checked }); if (this.state.provisaoCheck) { await this.setState({ contaProvisao: await loader.getContaPessoa(this.state.evento.fornecedor, 'provisao') }) } else { await this.setState({ contaProvisao: '' }) } }} type="checkbox" />
-                                                                </div>
-                                                                {this.state.provisaoCheck &&
-                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                        <label>Conta Provisão</label>
-                                                                    </div>
-                                                                }
-                                                                {this.state.provisaoCheck &&
-                                                                    <div className='col-1 errorMessage'>
-                                                                        {!this.state.contaProvisao &&
-                                                                            <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                                        }
-                                                                    </div>
-                                                                }
-                                                                {this.state.provisaoCheck &&
-                                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                        <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.contaProvisao)[0]} search={true} onChange={(e) => { this.setState({ contaProvisao: e.value, }) }} />
-                                                                    </div>
-                                                                }
-                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                     <label>Cód. Barras</label>
                                                                 </div>
                                                                 <div className='col-1 errorMessage'>
@@ -780,7 +811,7 @@ class AddEventoFinanceiro extends Component {
                                                                     <label>Conta Débito</label>
                                                                 </div>
                                                                 <div className='col-1 errorMessage'>
-                                                                    {!this.state.contaDesconto &&
+                                                                    {!this.state.contaDebito &&
                                                                         <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
                                                                     }
                                                                 </div>
@@ -789,9 +820,9 @@ class AddEventoFinanceiro extends Component {
                                                                         isDisabled={!(this.state.evento.tipo_sub != 2 && !this.state.repasse && this.state.tipo == 1)}
                                                                         options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)}
                                                                         onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }}
-                                                                        value={this.state.planosContasOptions.filter(option => option.value == this.state.contaDesconto)[0]}
+                                                                        value={this.state.planosContasOptions.filter(option => option.value == this.state.contaDebito)[0]}
                                                                         search={true}
-                                                                        onChange={(e) => { if (this.state.tipo != 0 || !this.state.repasse) { this.setState({ contaDesconto: e.value, }) } }}
+                                                                        onChange={(e) => { if (this.state.tipo != 0 || !this.state.repasse) { this.setState({ contaDebito: e.value, }) } }}
                                                                     />
                                                                 </div> <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                     <label>Conta Crédito</label>
@@ -1014,8 +1045,22 @@ class AddEventoFinanceiro extends Component {
                                                         </div>
                                                         <div className='col-1 errorMessage'>
                                                         </div>
-
-
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Documento</label>
+                                                        </div>
+                                                        <div className='col-1 errorMessage'>
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Field className="form-control" type="text" value={this.state.documento} onChange={async e => { this.setState({ documento: e.currentTarget.value }); this.alteraComplementoRetencoes(); }} />
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Tipo de Documento</label>
+                                                        </div>
+                                                        <div className='col-1 errorMessage'>
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Select className='SearchSelect' options={this.state.tiposDocumentosOptions.filter(e => this.filterSearch(e, this.state.tiposDocumentosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ tiposDocumentosOptionsTexto: e }) }} value={this.state.tiposDocumentosOptions.filter(option => option.label == this.state.tipoDocumento)[0]} search={true} onChange={(e) => { this.setState({ tipoDocumento: e.value }) }} />
+                                                        </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Vencimento</label>
                                                         </div>
@@ -1045,15 +1090,7 @@ class AddEventoFinanceiro extends Component {
                                                                 <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoIssCheck} onChange={async (e) => { await this.mudaRetencao("ISS") }} />
                                                             </div>
                                                             <div>
-                                                                <label className='smallCheckbox'>PIS</label>
-                                                                <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoPisCheck} onChange={async (e) => { await this.mudaRetencao("PIS") }} />
-                                                            </div>
-                                                            <div>
-                                                                <label className='smallCheckbox'>COFINS</label>
-                                                                <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoCofinsCheck} onChange={async (e) => { await this.mudaRetencao("COFINS") }} />
-                                                            </div>
-                                                            <div>
-                                                                <label className='smallCheckbox'>CSLL</label>
+                                                                <label className='smallCheckbox'>CRF</label>
                                                                 <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoCsllCheck} onChange={async (e) => { await this.mudaRetencao("CSLL") }} />
                                                             </div>
                                                         </div>
@@ -1124,7 +1161,7 @@ class AddEventoFinanceiro extends Component {
                                                                     <label>Complem.</label>
                                                                 </div>
                                                                 <div className="col-4">
-                                                                    <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.retencaoIrConta)[0]} search={true} isDisabled />
+                                                                    <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.retencaoIrConta)[0]} search={true} onChange={(e) => this.setState({ retencaoIrConta: e.value })} />
                                                                 </div>
                                                                 <div className='col-4'>
                                                                     <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoIr} onChange={async e => { this.setState({ retencaoIr: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoIr: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
@@ -1220,7 +1257,7 @@ class AddEventoFinanceiro extends Component {
                                                             <>
                                                                 <div><hr /></div>
                                                                 <div className='col-12 text-center' style={{ height: '25px' }}>
-                                                                    <label>Retenção CSLL</label>
+                                                                    <label>Retenções CRF</label>
                                                                 </div>
                                                                 <div className='col-4 text-center' style={{ height: '25px' }}>
                                                                     <label>Conta</label>
@@ -1258,7 +1295,7 @@ class AddEventoFinanceiro extends Component {
                                                             </div>
                                                         </>
                                                     }
-                                                    {!(!this.state.conta && this.state.evento.centroCusto != '0' && (this.state.tipo == 1 && (this.state.repasse && this.state.contaCliente && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || (!this.state.repasse && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || this.state.tipo == 0 && (this.state.contaCliente && this.state.contaTaxa)) && this.testaValores()) &&
+                                                    {!(!this.state.conta && this.state.evento.centroCusto != '0' && (this.state.tipo == 1 && (this.state.repasse && this.state.contaCliente && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || (!this.state.repasse && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || this.state.tipo == 0 && (this.state.contaCliente && this.state.contaTaxa)) && !this.testaValores()) &&
                                                         <>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                                                 <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>

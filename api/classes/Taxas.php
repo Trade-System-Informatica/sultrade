@@ -328,7 +328,7 @@ class Taxas {
         }
     }
 
-    public static function setTaxasPortos($taxa, $chaves, $portos, $contas) {
+    public static function setTaxasPortos($taxa, $chaves, $portos, $contas, $contas_est) {
         $database = new Database();
 
         if (count($chaves) != count($portos) || count($portos) != count($contas)) {
@@ -338,12 +338,12 @@ class Taxas {
         
         for ($i = 0; $i < count($chaves); $i++) {
             if ($chaves[$i] == 0 ) {
-                $values = "'$taxa', '".$portos[$i]."', '".$contas[$i]."'";
-                $cols = "taxa, porto, conta";
+                $values = "'$taxa', '".$portos[$i]."', '".$contas[$i]."', '".$contas_est[$i]."'";
+                $cols = "taxa, porto, conta, conta_estrangeira";
 
                 $result = $database->doInsert("os_taxas_portos", $cols, $values);
             } else {
-                $query = "taxa = '$taxa', porto = '".$portos[$i]."', conta = '".$contas[$i]."'";
+                $query = "taxa = '$taxa', porto = '".$portos[$i]."', conta = '".$contas[$i]."', conta_estrangeira = '".$contas_est[$i]."'";
 
                 $result = $database->doUpdate('os_taxas_portos', $query, 'chave = '.$chaves[$i]);
             }

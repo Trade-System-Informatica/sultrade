@@ -14,12 +14,12 @@ if($objData != NULL){
     $values = prepareInput($objData->values);
     $meioPagamento = prepareInput($objData->meioPagamento);
     $valuesDarf = prepareInput($objData->valuesDarf);
-
+    $valuesRet = ($objData->valuesRet);
 
     $contas = new Contas();
 
 
-    $result = $contas->insertContaFornecedor($values, $meioPagamento, $valuesDarf);
+    $result = $contas->insertContaFornecedor($values, $meioPagamento, $valuesDarf, $valuesRet);
 
 } else {
     $result = "false";

@@ -54,6 +54,7 @@ import AddOperador from './screens/utilitarios/addoperador'
 
 import OS from './screens/ordensservico/os'
 import Eventos from './screens/ordensservico/eventos'
+import RelatorioOS from './screens/ordensservico/relatorio'
 
 import AddOS from './screens/ordensservico/addos'
 import AddEvento from './screens/ordensservico/addevento'
@@ -72,6 +73,7 @@ import ContasPagas from './screens/financeiro/contaspagas'
 import Relatorio from './screens/financeiro/relatorio'
 import Faturas from './screens/financeiro/faturas'
 import Lancamentos from './screens/financeiro/lancamentos'
+import ExportarLancamentos from './screens/financeiro/exportarlancamentos'
 
 import AddConta from './screens/financeiro/addconta'
 import AddFatura from './screens/financeiro/addfatura'
@@ -134,6 +136,7 @@ export default function Routes(){
 
                 <Route path="/ordensservico/os" component={OS} />
                 <Route path="/ordensservico/eventos" component={Eventos} />
+                <Route path="/ordensservico/relatorio" component={RelatorioOS} />
                 
                 <Route path="/ordensservico/addos/:id/" component={AddOS} />
                 <Route path="/ordensservico/addevento/:id/" component={AddEvento} />
@@ -152,6 +155,7 @@ export default function Routes(){
                 <Route path="/financeiro/relatorio" component={Relatorio} />
                 <Route path="/financeiro/faturas" component={Faturas} />
                 <Route path="/financeiro/lancamentos" component={Lancamentos} />
+                <Route path="/financeiro/exportarlancamentos" component={ExportarLancamentos} />          
 
                 <Route path="/financeiro/addconta/:id/" component={AddConta} />
                 <Route path="/financeiro/addfatura/:id/" component={AddFatura} />

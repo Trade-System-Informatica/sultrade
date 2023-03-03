@@ -122,7 +122,7 @@ class OS extends Component {
     }
 
     deleteOS = async (chave, nome) => {
-        this.setState({deleteOS: true})
+        this.setState({ deleteOS: true })
         confirmAlert({
             customUI: ({ onClose }) => {
                 return (
@@ -188,7 +188,7 @@ class OS extends Component {
 
     filtrarPesquisa = (os) => {
         let osFiltrada = os;
-        
+
         if (this.state.situacao == 2) {
             osFiltrada = ((!os.Data_Encerramento || moment(os.Data_Encerramento).format() == "Invalid date") && os.cancelada == '0') ? os : '';
         } else if (this.state.situacao == 3) {
@@ -200,7 +200,7 @@ class OS extends Component {
         } else if (this.state.situacao == 6) {
             osFiltrada = ((!os.Data_Faturamento || moment(os.Data_Faturamento).format() == "Invalid date") && os.cancelada == '0') ? os : '';
         }
-        
+
         if (osFiltrada) {
             return osFiltrada;
         }
@@ -256,11 +256,12 @@ class OS extends Component {
                                                 <option value={4}>Porto</option>
                                             </select>
                                             <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={async e => { await this.pesquisa(e.currentTarget.value) }} />
+                                            <div>
+                                                <Link to={{ pathname: `/ordensservico/relatorio` }}><button className="btn btn-success">Relatorio</button></Link>
+                                            </div>
                                         </div>
-                                        {!this.state.os[0] &&
-                                            <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
-                                                <Link to={{ pathname: `/ordensservico/addos/0` }}><button className="btn btn-success">Adicionar OS</button></Link>
-                                            </div>}
+                                        <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
+                                        </div>
                                     </div>
                                     <div className='col-1 col-sm-2 col-md-2 col-lg-4 col-xl-4'>
                                     </div>
@@ -277,7 +278,8 @@ class OS extends Component {
                                             <option value={6}>Não Faturadas</option>
                                         </select>
                                     </div>
-                                    <div className="col-0 col-sm-0 col-md-3 col-lg-3 col-xl-3"></div>
+                                    <div className="col-0 col-sm-0 col-md-3 col-lg-3 col-xl-3">
+                                    </div>
                                     <div>
                                     </div>
 
@@ -285,6 +287,7 @@ class OS extends Component {
                             </div>
 
 
+                                        
                             <div className="row deleteMargin" id="product-list">
                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
                                 <div className="col-lg-8 col-md-8 col-sm-12 col-12 mix all dresses bags">
@@ -306,8 +309,8 @@ class OS extends Component {
                                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
                                                     <span className="subtituloships">Serviço</span>
                                                 </div>
-                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-right">
-                                                    <span className="subtituloships"></span>
+                                                <div style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}} className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-right">
+                                                    <span className="subtituloships"><Link to={{ pathname: `/ordensservico/addos/0` }}><FontAwesomeIcon icon={faPlus} /></Link></span>
                                                 </div>
                                             </div>
                                         }
@@ -350,8 +353,8 @@ class OS extends Component {
                                     </div>
                                 </div>
                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
-                             
-                             </div>
+
+                            </div>
 
                             <div id="product-list">
                                 {this.state.pesquisa == '' &&

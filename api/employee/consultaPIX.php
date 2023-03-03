@@ -61,8 +61,6 @@ if ($objData != NULL) {
 
     if ($statusId != 0) {
         $id = $returnJSON->{"listaTransferencias"}[0]->{"identificadorPagamento"};
-        echo $id;
-        exit;
 
         curl_setopt($ch, CURLOPT_URL, "https://api-ip.bb.com.br/pagamentos-lote/v1/pix/$id?gw-dev-app-key=" . $informacoesBancarias[0]["chave_api"]);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', "Authorization: Bearer $bearer"));
@@ -72,15 +70,20 @@ if ($objData != NULL) {
         curl_setopt($ch, CURLOPT_SSLKEYPASSWD, "12345678");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 
-        $return = curl_exec($ch);
+        $return2 = curl_exec($ch);
     }
 
-    if (!$return) {
-        $return = curl_error($ch);
+    if (!$return2) {
+        $return2 = curl_error($ch);
     }
     curl_close($ch);
 } else {
 }
 
-echo json_encode($return);
-exit;
+if ($return2) {
+    echo json_encode($return2);
+    exit;
+} else {
+    echo $return;
+    exit;
+}

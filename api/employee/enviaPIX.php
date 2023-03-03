@@ -160,7 +160,7 @@ if ($objData != NULL) {
         $statusId = 0;
         $status = "Nenhum Telefone encontrado";
     }
-    //
+    //    
 
     if ($statusId != 0) {
         $url .= "?gw-dev-app-key=" . $informacoesBancarias[0]["chave_api"];

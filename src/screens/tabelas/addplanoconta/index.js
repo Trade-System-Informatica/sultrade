@@ -167,12 +167,14 @@ class AddPlanoConta extends Component {
             async res => {
                 await this.setState({ planosContas: res.data })
 
-                const options = this.state.planosContas.filter((e) => (e.Nivel < 7 && e.Descricao && e.Codigo && e.Indicador == 'S')).map((e) => {
-                    return { label: e.Descricao, value: e.Codigo, nivel: e.Nivel }
-                })
-                options.unshift({ label: 'Nenhum', value: 0, nivel: 0 })
-
-                await this.setState({ planosContasOptions: options })
+                if (this.state.planosContas[0]) {
+                    const options = this.state.planosContas.filter((e) => (e.Nivel < 7 && e.Descricao && e.Codigo && e.Indicador == 'S')).map((e) => {
+                        return { label: e.Descricao, value: e.Codigo, nivel: e.Nivel }
+                    })
+                    options.unshift({ label: 'Nenhum', value: 0, nivel: 0 })
+                    
+                    await this.setState({ planosContasOptions: options })
+                }
             },
             async err => console.log(`erro: ` + err)
         )
@@ -419,6 +421,9 @@ class AddPlanoConta extends Component {
 
                 <section>
                     <Header voltarPlanosContas titulo="Planos de Contas" chave={this.state.codigo != 0 ? this.state.codigo : ''}/>
+                    <br/>
+                    <br/>
+                    <br/>
                 </section>
 
                 {this.state.chave !=0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&

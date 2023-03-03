@@ -259,11 +259,11 @@ class Lancamentos extends Component {
     }
 
     returnEditLink = (index, tipo) => {
-        
+
         if (tipo == "chave") {
-        const item = this.state.lancamentos.filter(this.filtrarPesquisa).splice(0, this.state.load)[index];
-        return {
-            pathname: `/financeiro/addlancamento/${item.Lote}`,
+            const item = this.state.lancamentos.filter(this.filtrarPesquisa).splice(0, this.state.load)[index];
+            return {
+                pathname: `/financeiro/addlancamento/${item.Lote}`,
                 state: { lancamento: { ...item }, tipo: "lote" }
             }
         } else if (tipo == "lote") {
@@ -321,14 +321,16 @@ class Lancamentos extends Component {
                                                 <option value={5}>Lote</option>
                                             </select>
                                             <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
+                                            <Link to={{ pathname: `/financeiro/exportarlancamentos`}}><button className="btn btn-success">Exportar</button></Link>
                                         </div>
                                     </div>
                                     <div className='col-1 col-sm-2 col-md-2 col-lg-4 col-xl-4'>
+
                                     </div>
-                                    <div className='col-3 col-sm-3 col-md-2 col-lg-2 col-xl-2'>
+                                    <div className='col-5 col-sm-2 col-md-2 col-lg-2 col-xl-2'>
                                         <label style={{ fontSize: '1.1em', marginTop: 3, fontWeight: 'bold' }}>Procurar: </label>
                                     </div>
-                                    <div className='col-5 col-sm-5 col-md-4 col-lg-2 col-xl-2'>
+                                    <div className='col-5 col-sm-3 col-md-2 col-lg-2 col-xl-2'>
                                         <select className='form-control' value={this.state.tipo} onChange={(e) => { this.setState({ tipo: e.currentTarget.value }) }}>
                                             <option value={0}>Por Chave</option>
                                             <option value={1}>Por Lote</option>
@@ -343,58 +345,62 @@ class Lancamentos extends Component {
 
 
                             {this.state.tipo == 0 &&
-                            <TableList
-                            list={this.state.lancamentos.filter(this.filtrarPesquisa).splice(0, this.state.load)}
-                                items={[
-                                    { title: "Chave", size: 2, field: "Chave", type: "key" },
-                                    { title: "Lote", size: 2, field: "Lote", type: "text" },
-                                    { title: "Histórico", size: 3, field: "Historico", type: "title" },
-                                    { title: "Conta Débito", size: 4, field: "conta_Debito", type: "text"},
-                                    { title: "Conta Crédito", size: 4, field: "conta_Credito", type: "text"},
-                                    { title: "Data", size: 3, field: "Vencimento", type: "date" },
-                                    { title: "Valor", size: 2, field: "Valor", type: "money", moneySymbol: "R$"},
-                                ]}
-                                addLink={() => { return {
-                                    pathname: `/financeiro/addlancamento/0`,
-                                    state: { lancamento: {} }
-                                }}}
-                                editLink={(index) => this.returnEditLink(index, "chave")}
-                                deleteFunction={(chave, nome) => this.deleteLancamento(chave, nome)}
-                                revertFunction={() => this.reverterItens()}
-                                permissions={{
-                                    delete: this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1,
-                                    add: this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoInsere)[0] == 1,
-                                    edit: this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoAltera)[0] == 1
-                                }}
-                                direction={this.state.direcaoTabela}
-                                focus={this.state.chaveFocus}
+                                <TableList
+                                    list={this.state.lancamentos.filter(this.filtrarPesquisa).splice(0, this.state.load)}
+                                    items={[
+                                        { title: "Chave", size: 2, field: "Chave", type: "key" },
+                                        { title: "Lote", size: 2, field: "Lote", type: "text" },
+                                        { title: "Histórico", size: 3, field: "Historico", type: "title" },
+                                        { title: "Conta Débito", size: 4, field: "conta_Debito", type: "text" },
+                                        { title: "Conta Crédito", size: 4, field: "conta_Credito", type: "text" },
+                                        { title: "Data", size: 3, field: "Vencimento", type: "date" },
+                                        { title: "Valor", size: 2, field: "Valor", type: "money", moneySymbol: "R$" },
+                                    ]}
+                                    addLink={() => {
+                                        return {
+                                            pathname: `/financeiro/addlancamento/0`,
+                                            state: { lancamento: {} }
+                                        }
+                                    }}
+                                    editLink={(index) => this.returnEditLink(index, "chave")}
+                                    deleteFunction={(chave, nome) => this.deleteLancamento(chave, nome)}
+                                    revertFunction={() => this.reverterItens()}
+                                    permissions={{
+                                        delete: this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1,
+                                        add: this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoInsere)[0] == 1,
+                                        edit: this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoAltera)[0] == 1
+                                    }}
+                                    direction={this.state.direcaoTabela}
+                                    focus={this.state.chaveFocus}
                                 />
                             }
                             {this.state.tipo == 1 &&
-                            <TableList
-                            list={this.state.lotes.filter(this.filtrarPesquisa).splice(0, this.state.load)}
-                                items={[
-                                    { title: "Lote", size: 2, field: "Lote", type: "key" },
-                                    { title: "Histórico", size: 3, field: "Historico", type: "title" },
-                                    { title: "Data", size: 3, field: "Vencimento", type: "date" },
-                                    { title: "Conta Débito", size: 4, field: "conta_Debito", type: "text"},
-                                    { title: "Conta Crédito", size: 4, field: "conta_Credito", type: "text"},
-                                    { title: "Valor", size: 2, field: "Valor", type: "money", moneySymbol: "R$"},
-                                ]}
-                                addLink={() => { return {
-                                    pathname: `/financeiro/addlancamento/0`,
-                                    state: { lancamento: {}, tipo: "lote" }
-                                }}}
-                                editLink={(index) => this.returnEditLink(index, "lote")}
-                                deleteFunction={(lote, nome) => this.deleteLote(lote, nome)}
-                                revertFunction={() => this.reverterItens()}
-                                permissions={{
-                                    delete: this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1,
-                                    add: this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoInsere)[0] == 1,
-                                    edit: this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoAltera)[0] == 1
-                                }}
-                                direction={this.state.direcaoTabela}
-                                focus={this.state.chaveFocus}
+                                <TableList
+                                    list={this.state.lotes.filter(this.filtrarPesquisa).splice(0, this.state.load)}
+                                    items={[
+                                        { title: "Lote", size: 2, field: "Lote", type: "key" },
+                                        { title: "Histórico", size: 3, field: "Historico", type: "title" },
+                                        { title: "Data", size: 3, field: "Vencimento", type: "date" },
+                                        { title: "Conta Débito", size: 4, field: "conta_Debito", type: "text" },
+                                        { title: "Conta Crédito", size: 4, field: "conta_Credito", type: "text" },
+                                        { title: "Valor", size: 2, field: "Valor", type: "money", moneySymbol: "R$" },
+                                    ]}
+                                    addLink={() => {
+                                        return {
+                                            pathname: `/financeiro/addlancamento/0`,
+                                            state: { lancamento: {}, tipo: "lote" }
+                                        }
+                                    }}
+                                    editLink={(index) => this.returnEditLink(index, "lote")}
+                                    deleteFunction={(lote, nome) => this.deleteLote(lote, nome)}
+                                    revertFunction={() => this.reverterItens()}
+                                    permissions={{
+                                        delete: this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1,
+                                        add: this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoInsere)[0] == 1,
+                                        edit: this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoAltera)[0] == 1
+                                    }}
+                                    direction={this.state.direcaoTabela}
+                                    focus={this.state.chaveFocus}
                                 />
                             }
 

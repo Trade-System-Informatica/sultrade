@@ -69,7 +69,17 @@ class Operadores {
                                     );
         $database->closeConection();
         return $result;
+    }
 
+    public static function getControleDados($empresa){
+        $database = new Database();
+
+        $result = $database->doSelect('controle',
+                                      'controle.*',
+                                      "controle.Chave = $empresa"
+                                    );
+        $database->closeConection();
+        return $result;
     }
 
     public static function testaNome($Nome){

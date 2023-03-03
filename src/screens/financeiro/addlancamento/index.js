@@ -229,7 +229,7 @@ class AddLancamento extends Component {
         for (let i = 0; i < this.state.numeroContas; i++) {
             const contaDebito = this.state.contaDebito[i];
             const contaCredito = this.state.contaCredito[i];
-            const valor = this.state.valor[i];
+            const valor = this.state.valor[i].replaceAll(".","").replaceAll(",",".");
             const historicoPadrao = this.state.historicoPadrao[i];
             const historico = this.state.historico[i];
             const chave = this.state.chave[i];
@@ -341,9 +341,9 @@ class AddLancamento extends Component {
         
         [...Array(this.state.numeroContas)].map((conta, contaIndex) => {
             if (this.state.contaDebito[contaIndex] != 0 && this.state.contaCredito[contaIndex] == 0) {
-                valorDebito += parseFloat(this.state.valor[contaIndex]);
+                valorDebito += parseFloat(this.state.valor[contaIndex].replaceAll(".","").replaceAll(",","."));
             } else if (this.state.contaCredito[contaIndex] != 0 && this.state.contaDebito[contaIndex] == 0) {
-                valorCredito += parseFloat(this.state.valor[contaIndex]);
+                valorCredito += parseFloat(this.state.valor[contaIndex].replaceAll(".","").replaceAll(",","."));
             }
         })
         

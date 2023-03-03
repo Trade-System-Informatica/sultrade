@@ -11,6 +11,7 @@ import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import { apiEmployee } from '../../../services/apiamrg'
 import ModalLogs from '../../../components/modalLogs'
+import { Skeleton } from '@mui/material'
 const estadoInicial = {
     porto: 0,
     thumb: [],
@@ -62,7 +63,7 @@ class AddPessoa extends Component {
         if (this.state.usuarioLogado.empresa != 0) {
             await this.setState({ empresa: this.state.usuarioLogado.empresa });
         }
-        if (parseInt(id) !== 0) {
+        if (parseInt(id) != 0) {
             await this.setState({ operador: this.props.location.state.operador })
             //console.log('Servicos: ' + JSON.stringify(this.state.tiposervico))
             //await this.loadData(this.state.tiposervico)
@@ -143,7 +144,7 @@ class AddPessoa extends Component {
             Nome: this.state.nome
         }).then(
             async res => {
-                if (res.data[0] || res.data[0] && this.state.codigo != res.data[0].Codigo) {
+                if (!res.data[0] || res.data[0] && this.state.codigo != res.data[0].Codigo) {
                     await this.setState({ bloqueado: true, nomeRepetido: true })
                 }
             }
@@ -152,6 +153,7 @@ class AddPessoa extends Component {
 
     salvarOperador = async (validForm) => {
         //this.getMaxNews()
+        this.setState({ loading: true });
         const senha = util.encrypt(this.state.senha)
 
         await this.setState({
@@ -251,9 +253,9 @@ class AddPessoa extends Component {
                     <Header voltarOperadores titulo="Operadores" chave={this.state.codigo != 0 ? this.state.codigo : ''} />
                 </section>
 
-                <br/>
-                <br/>
-                <br/>
+                <br />
+                <br />
+                <br />
 
                 {this.state.codigo != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                     <div className="logButton">
@@ -269,137 +271,141 @@ class AddPessoa extends Component {
                     modalAberto={this.state.modalLog}
                 />
 
+                {this.state.loading &&
+                    <Skeleton />
+                }
+                {!this.state.loading &&
+                    <div className="contact-section">
 
-                <div className="contact-section">
+                        <div className="row">
+                            <div className="col-lg-12">
+                                <Formik
+                                    initialValues={{
+                                        name: '',
+                                    }}
+                                    onSubmit={async values => {
+                                        await new Promise(r => setTimeout(r, 1000))
+                                        this.salvarOperador(validForm)
+                                    }}
+                                >
+                                    <Form className="contact-form">
 
-                    <div className="row">
-                        <div className="col-lg-12">
-                            <Formik
-                                initialValues={{
-                                    name: '',
-                                }}
-                                onSubmit={async values => {
-                                    await new Promise(r => setTimeout(r, 1000))
-                                    this.salvarOperador(validForm)
-                                }}
-                            >
-                                <Form className="contact-form">
+                                        <div className="row">
+                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"></div>
 
-                                    <div className="row">
-                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"></div>
+                                            <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12 ">
 
-                                        <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12 ">
+                                                <div className="row addservicos">
+                                                    {this.state.codigo != 0 &&
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
+                                                            <label>Codigo</label>
+                                                        </div>
+                                                    }
+                                                    {this.state.codigo != 0 &&
+                                                        <div className='col-1'></div>
+                                                    }
+                                                    {this.state.codigo != 0 &&
+                                                        <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10">
+                                                            <Field className="form-control" style={{ textAlign: 'center', backgroundColor: '#dddddd' }} type="text" disabled value={this.state.codigo} />
+                                                        </div>
+                                                    }
+                                                    {this.state.codigo != 0 &&
+                                                        <div className="col-4">
+                                                        </div>
+                                                    }
 
-                                            <div className="row addservicos">
-                                                {this.state.codigo != 0 &&
-                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
-                                                        <label>Codigo</label>
+                                                    <div className={this.state.codigo == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
+                                                        <label>Nome</label>
                                                     </div>
-                                                }
-                                                {this.state.codigo != 0 &&
-                                                    <div className='col-1'></div>
-                                                }
-                                                {this.state.codigo != 0 &&
-                                                    <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10">
-                                                        <Field className="form-control" style={{ textAlign: 'center', backgroundColor: '#dddddd' }} type="text" disabled value={this.state.codigo} />
+                                                    <div className='col-1 errorMessage'>
+                                                        {!this.state.nome &&
+                                                            <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                        }
                                                     </div>
-                                                }
-                                                {this.state.codigo != 0 &&
-                                                    <div className="col-4">
+                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                        <Field className="form-control" type="text" value={this.state.nome} onChange={async e => { this.setState({ nome: e.currentTarget.value }) }} />
                                                     </div>
-                                                }
 
-                                                <div className={this.state.codigo == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
-                                                    <label>Nome</label>
-                                                </div>
-                                                <div className='col-1 errorMessage'>
-                                                    {!this.state.nome &&
-                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                    {this.state.codigo != 0 &&
+                                                        <div className="col-4"></div>
+                                                    }
+                                                    {this.state.codigo != 0 &&
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Trocar Senha?</label>
+                                                        </div>
+                                                    }
+                                                    {this.state.codigo != 0 &&
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <Field type="checkbox" checked={this.state.trocarSenha} onChange={async e => { this.setState({ trocarSenha: e.target.checked }) }} />
+                                                        </div>
+                                                    }
+                                                    {this.state.codigo != 0 &&
+                                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                                                    }
+                                                    {this.state.trocarSenha &&
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Senha</label>
+                                                        </div>
+                                                    }
+                                                    {this.state.trocarSenha &&
+                                                        <div className='col-1 errorMessage'>
+                                                            {!this.state.senha &&
+                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                            }
+                                                        </div>
+                                                    }
+                                                    {this.state.trocarSenha &&
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Field className="form-control" type="password" value={this.state.senha} onChange={async e => { this.setState({ senha: e.currentTarget.value }) }} />
+                                                        </div>
+                                                    }
+                                                    {this.state.trocarSenha &&
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Confirmar Senha</label>
+                                                        </div>
+                                                    }
+                                                    {this.state.trocarSenha &&
+                                                        <div className='col-1 errorMessage'>
+                                                            {!this.state.senhaRepetida &&
+                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                            }
+                                                            {this.state.senhaRepetida && this.state.senhaRepetida != this.state.senha &&
+                                                                <FontAwesomeIcon title='Senhas não coincidem' icon={faExclamationTriangle} />
+                                                            }
+                                                        </div>
+                                                    }
+                                                    {this.state.trocarSenha &&
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Field className="form-control" type="password" value={this.state.senhaRepetida} onChange={async e => { this.setState({ senhaRepetida: e.currentTarget.value }) }} />
+                                                        </div>
                                                     }
                                                 </div>
-                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                    <Field className="form-control" type="text" value={this.state.nome} onChange={async e => { this.setState({ nome: e.currentTarget.value }) }} />
-                                                </div>
 
-                                                {this.state.codigo != 0 &&
-                                                    <div className="col-4"></div>
-                                                }
-                                                {this.state.codigo != 0 &&
-                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                        <label>Trocar Senha?</label>
-                                                    </div>
-                                                }
-                                                {this.state.codigo != 0 &&
-                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                        <Field type="checkbox" checked={this.state.trocarSenha} onChange={async e => { this.setState({ trocarSenha: e.target.checked }) }} />
-                                                    </div>
-                                                }
-                                                {this.state.codigo != 0 &&
-                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
-                                                }
-                                                {this.state.trocarSenha &&
-                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                        <label>Senha</label>
-                                                    </div>
-                                                }
-                                                {this.state.trocarSenha &&
-                                                    <div className='col-1 errorMessage'>
-                                                        {!this.state.senha &&
-                                                            <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                        }
-                                                    </div>
-                                                }
-                                                {this.state.trocarSenha &&
-                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                        <Field className="form-control" type="password" value={this.state.senha} onChange={async e => { this.setState({ senha: e.currentTarget.value }) }} />
-                                                    </div>
-                                                }
-                                                {this.state.trocarSenha &&
-                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                        <label>Confirmar Senha</label>
-                                                    </div>
-                                                }
-                                                {this.state.trocarSenha &&
-                                                    <div className='col-1 errorMessage'>
-                                                        {!this.state.senhaRepetida &&
-                                                            <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                        }
-                                                        {this.state.senhaRepetida && this.state.senhaRepetida != this.state.senha &&
-                                                            <FontAwesomeIcon title='Senhas não coincidem' icon={faExclamationTriangle} />
-                                                        }
-                                                    </div>
-                                                }
-                                                {this.state.trocarSenha &&
-                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                        <Field className="form-control" type="password" value={this.state.senhaRepetida} onChange={async e => { this.setState({ senhaRepetida: e.currentTarget.value }) }} />
-                                                    </div>
-                                                }
+
                                             </div>
-
-
+                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
                                         </div>
-                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
-                                    </div>
 
-                                    <div className="row">
-                                        <div className="col-1"></div>
+                                        <div className="row">
+                                            <div className="col-1"></div>
                                             <div className='col-1 errorMessage'>
                                                 {this.state.nomeRepetido &&
                                                     <FontAwesomeIcon title='Nome em uso!' icon={faExclamationTriangle} />
                                                 }
                                             </div>
-                                        <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                            <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
+                                            <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
+                                            </div>
+                                            <div className="col-2"></div>
                                         </div>
-                                        <div className="col-2"></div>
-                                    </div>
 
-                                </Form>
-                            </Formik>
+                                    </Form>
+                                </Formik>
+                            </div>
                         </div>
-                    </div>
 
-                </div>
+                    </div>
+                }
                 <Rodape />
             </div>
         )

@@ -239,13 +239,20 @@ class Navios
         left join os_servicos_itens on os.chave = os_servicos_itens.chave_os
         left join os_navios on os_navios.chave = os.chave_navio
         left join pessoas on os_servicos_itens.Fornecedor_Custeio = pessoas.chave
+        left join pessoas_enderecos on pessoas_enderecos.Chave_Pessoa = pessoas.Chave AND tipo = 0
+        left join os_taxas_portos on os_taxas_portos.taxa = os_servicos_itens.taxa AND os_taxas_portos.porto = os.porto
+        left join planocontas on planocontas.chave = os_taxas_portos.conta
+        left join planocontas AS planocontas_estrangeiras ON planocontas_estrangeiras.chave = os_taxas_portos.conta_estrangeira
         left join moedas on moedas.chave=os_servicos_itens.moeda",
             "os.*,
             os_servicos_itens.descricao as evento, 
+            planocontas.Descricao as contaNome, 
+            planocontas_estrangeiras.Descricao as contaEstrangeiraNome, 
             os_servicos_itens.valor as valor_cobrar, 
             os_servicos_itens.valor1 as valor_pago, 
             os_servicos_itens.moeda as moeda, 
             pessoas.nome as fornecedor_custeio, 
+            pessoas_enderecos.uf AS UF,
             os_navios.nome as nome_navio",
             "os.codigo='" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 ORDER BY os_servicos_itens.ordem ASC"
         );

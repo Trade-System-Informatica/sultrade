@@ -49,6 +49,8 @@ const estadoInicial = {
     logs: [],
     modalLog: false,
 
+    obs: '',
+    
     dadosIniciais: '',
     dadosFinais: '',
 
@@ -564,7 +566,8 @@ class AddEvento extends Component {
             os: this.state.osOptions.find((e) => e.value == this.state.chave_os).label,
             navio: this.state.osOptions.find((e) => e.value == this.state.chave_os).navioNome,
             porto: this.state.osOptions.find((e) => e.value == this.state.chave_os).portoNome,
-            evento: this.state.chave
+            evento: this.state.chave,
+            obs: this.state.obs
         }).then(
             async res => {
                 const { failures, successes } = res.data;
@@ -607,7 +610,10 @@ class AddEvento extends Component {
         }).then(
             async response => {
                 await this.setState({ contatos: response.data, fornecedorEmail: response.data.find((e) => e.Tipo == "EM") ? response.data.find((e) => e.Tipo == "EM").Campo1 : "" })
-                await this.setState({ emails: this.state.fornecedorEmail.split("; ") })
+                const emails = this.state.emails[0] ? this.state.emails : [];
+                const emailsFornecedores = this.state.fornecedorEmail ? this.state.fornecedorEmail.split("; ") : [];
+                console.log({emails, emailsFornecedores});
+                await this.setState({ emails: [...emails, ...emailsFornecedores] })
                 await this.setState({ loading: false })
             },
             response => { this.erroApi(response) }
@@ -724,11 +730,11 @@ class AddEvento extends Component {
         if (parseInt(this.state.chave) === 0 && validForm) {
             await apiEmployee.post(`insertServicoItemBasico.php`, {
                 token: true,
-                values: `'${this.state.chave_os}', '${this.state.data}', '${this.state.fornecedor}', '${this.state.taxa}', '${this.state.descricao}', '${this.state.ordem.replaceAll(',', '.')}', '${this.state.tipo}', '${this.state.fornecedorCusteio}', '${this.state.remarks}', '${this.state.moeda}', '${parseFloat(this.state.valor == "" ? 0 : this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.vlrc == "" ? 0 : this.state.vlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.repasse ? 1 : 0}'`
+                values: `'${this.state.chave_os}', '${this.state.data}', '${this.state.fornecedor}', '${this.state.taxa}', '${this.state.descricao}', '${this.state.tipo}', '${this.state.fornecedorCusteio}', '${this.state.remarks}', '${this.state.moeda}', '${parseFloat(this.state.valor == "" ? 0 : this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.vlrc == "" ? 0 : this.state.vlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.repasse ? 1 : 0}'`,
+                chave_os: this.state.chave_os,
+                ordem: this.state.ordem.replaceAll(',', '.')
             }).then(
                 async res => {
-                    console.log(res)
-                    console.log(res.data);
                     await this.setState({
                         evento: res.data[0],
 
@@ -747,6 +753,7 @@ class AddEvento extends Component {
                         }
                     } else {
                         await this.getPessoaContatos(this.state.fornecedor)
+                        await this.getPessoaContatos(this.state.fornecedorCusteio)
                         await this.setState({ bloqueado: false, emailModal: true })
                         this.finalizaSalvamento()
                     }
@@ -784,8 +791,10 @@ class AddEvento extends Component {
                                 this.finalizaSalvamento()
                             }
                         } else {
-                            await this.setState({ bloqueado: false, emailModal: true })
-                            this.finalizaSalvamento()
+                            this.setState({emails: ""});
+                            await this.getPessoaContatos(this.state.fornecedor)
+                            await this.getPessoaContatos(this.state.fornecedorCusteio)
+                            await this.setState({ bloqueado: false, emailModal: true, loading: false })
                         }
                     } else {
                         await alert(`Erro ${JSON.stringify(res)}`)
@@ -1119,6 +1128,16 @@ class AddEvento extends Component {
                                                                     <Field className="form-control" type="text" value={this.state.emails.join('; ')} onChange={async e => { this.setState({ emails: e.currentTarget.value.split('; ') }) }} />
                                                                 </div>
                                                                 <div className="col-1"></div>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstlabel">
+                                                                    <label>Observações</label>
+                                                                </div>
+                                                                <div className="col-1 errorMessage">
+
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control" type="text" component="textarea" value={this.state.obs} onChange={async e => { this.setState({ obs: e.currentTarget.value }) }} />
+                                                                </div>
+                                                                <div className="col-1"></div>
                                                                 {this.state.failures[0] &&
                                                                     <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                         <label>Emails inválidos:</label>
@@ -1291,7 +1310,7 @@ class AddEvento extends Component {
                                                         </div>
 
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.taxasOptions.filter(e => this.filterSearch(e, this.state.taxasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ taxasOptionsTexto: e }) }} value={this.state.taxasOptions.filter(option => option.value == this.state.taxa)[0]} search={true} onChange={(e) => { if (!this.state.valor || parseFloat(this.state.valor.replaceAll('.', "").replaceAll(",", ".")) == 0) { this.setState({ taxa: e.value, valor: e.money }) } else {this.setState({taxa: e.value})}}} />
+                                                            <Select className='SearchSelect' options={this.state.taxasOptions.filter(e => this.filterSearch(e, this.state.taxasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ taxasOptionsTexto: e }) }} value={this.state.taxasOptions.filter(option => option.value == this.state.taxa)[0]} search={true} onChange={(e) => { if (!this.state.valor || parseFloat(this.state.valor.replaceAll('.', "").replaceAll(",", ".")) == 0) { this.setState({ taxa: e.value, valor: e.money.replaceAll(",","").replaceAll(".",",") }) } else {this.setState({taxa: e.value})}}} />
                                                         </div>
                                                         <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
                                                             {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'TAXAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
@@ -1377,7 +1396,7 @@ class AddEvento extends Component {
                                                                     <option value={e.Chave}>{e.Sigla}</option>
                                                                 ))}
                                                             </select>
-                                                            <Field disabled={this.state.repasse} className="form-control fieldDividido_2 text-right " type="text" onClick={(e) => e.target.select()} value={this.state.valor} onChange={async e => { if (!this.state.repasse) { this.setState({ valor: e.currentTarget.value }) } }} onBlur={async e => { this.setState({ valor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }) }} />
+                                                            <Field disabled={this.state.repasse} className="form-control fieldDividido_2 text-right " type="text" onClick={(e) => e.target.select()} value={this.state.valor} onChange={async e => { if (!this.state.repasse) { this.setState({ valor: e.currentTarget.value }) } }} onBlur={async e => { this.setState({ valor: e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.') ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }) }} />
                                                         </div>
 
                                                         <div className='col-1'></div>
@@ -1390,7 +1409,7 @@ class AddEvento extends Component {
                                                                 <div className='col-1 errorMessage'>
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Field className="form-control text-right" type="text" step="0.1" value={this.state.vlrc} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ vlrc: e.currentTarget.value }) }} onBlur={async e => { this.setState({ vlrc: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }) }} />
+                                                                    <Field className="form-control text-right" type="text" step="0.1" value={this.state.vlrc} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ vlrc: e.currentTarget.value }) }} onBlur={async e => { this.setState({ vlrc: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }) }} />
                                                                 </div>
                                                                 <div className='col-1 errorMessage'>
                                                                 </div>

@@ -21,9 +21,13 @@ $remarks = $objData->remarks;
 $os = $objData->os;
 $navio = $objData->navio;
 $porto = $objData->porto;
+$obs = $objData->obs;
 $mensagemPadrao = "Para melhor identificacao dos processos internos de pagamento, solicitamos que toda prestacao de servico e/ou venda tenha destacada na nota fiscal numero da ordem de servico, nome do navio e porto (Neste caso: ".$os." - ".$navio." - PORTO: ".$porto.")";
 $return = ['successes' => [], 'failures' => [], 'warnings' => []];
 
+if ($obs) {
+    $obs = "<br/><br/>$os";
+}
 //Create an instance; passing `true` enables exceptions
 $mail = new PHPMailer;
 $mail->CharSet="UTF-8";
@@ -57,9 +61,9 @@ try {
         
         //Content
         $mail->isHTML(true);                                  //Set email format to HTML
-        $mail->Subject = 'Nomeacao de Servico '.$os;
+        $mail->Subject = 'Apontamento de OS '.$os;
         $mail->Body    = "<div style='width: 100%; display: flex; justify-content: center; align-items: center;'><img src='https://i.ibb.co/G5Z8qmT/logo.png' alt='logo' border='0'></div>
-            <br><div style='font-size: 1.1em'><b>".str_replace( "\n", "<br>", $remarks)."</b><br><br>".$mensagemPadrao.",
+            <br><div style='font-size: 1.1em'><b>".str_replace( "\n", "<br>", $remarks)."</b>$os<br><br>".$mensagemPadrao.",
         <br><br>Permanecemos a disposicao.<br><br>Saudacoes,</div>";
         $mail->AltBody = $remarks."\n\n".$mensagemPadrao.",
         \n\nPermanecemos a disposição.\n\nSaudações,";

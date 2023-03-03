@@ -529,7 +529,7 @@ class Contas
         return $result;
     }
 
-    public static function getLancamentosPorLote($lote) 
+    public static function getLancamentosPorLote($lote)
     {
         $database = new Database();
 
@@ -671,7 +671,7 @@ class Contas
         return $result;
     }
 
-    public static function insertContaFornecedor($values, $meioPagamento, $valuesDarf)
+    public static function insertContaFornecedor($values, $meioPagamento, $valuesDarf, $valuesRet = null)
     {
         $database = new Database();
 
@@ -690,7 +690,18 @@ class Contas
                 $cols = "tipo_pix, chave_contas_aberto";
             }
 
-            $result2 = $database->doInsert('contas_aberto_complementar', $cols, $values2);
+            $database->doInsert('contas_aberto_complementar', $cols, $values2);
+        }
+
+        if ($result && $valuesRet) {
+            $chave = $database->doSelect('contas_aberto', 'contas_aberto.*', '1=1 ORDER BY chave DESC');
+            
+            foreach ($valuesRet as $ret) {
+                $values3 = $chave[0]['Chave'].", $ret";
+                $cols = "chave_conta_aberto, chave_conta, valor, complemento, tipo";
+
+                $database->doInsert('contas_aberto_cc', $cols, $values3);
+            }
         }
 
         $database->closeConection();
@@ -764,12 +775,12 @@ class Contas
             $database->doUpdate('codigos', 'Proximo = ' . ($lote[0]["Proximo"] + 1), "Tipo = 'LT'");
             $lote = $lote[0]["Proximo"];
         }
-        
+
         $values .= ", '" . $lote . "'";
         $cols = 'Data, ContaDebito, ContaCredito, TipoDocto, CentroControle, Historico_Padrao, Historico, Pessoa, Valor, ChavePr, Usuario_Inclusao, Usuario_Alteracao, Data_Inclusao, Data_Alteracao, Conciliado, atualizado, Lote';
 
         $result = $database->doInsert('lancamentos', $cols, $values);
-        
+
 
         $database->closeConection();
         return $result;
@@ -781,6 +792,7 @@ class Contas
 
         $contaCredito = 0;
         $lote = $database->doSelect('codigos', 'codigos.Proximo', "Tipo = 'LT'");
+        $database->doUpdate('codigos', 'Proximo = ' . ($lote[0]["Proximo"] + 1), "Tipo = 'LT'");
         $lote = $lote[0]["Proximo"];
 
         $evento = $database->doSelect('os_servicos_itens', 'os_servicos_itens.*', "os_servicos_itens.chave = '$chave_evento'");
@@ -788,45 +800,45 @@ class Contas
 
         $result = [];
 
-        $valor = $evento["valor"];
-        $valor = (float)str_replace(",", ".", $valor);
+        $valor = $evento["valor1"];
+        
         $cols = "Data, TipoDocto, CentroControle, Historico_Padrao, Pessoa, ChavePr, Usuario_Inclusao, Usuario_Alteracao, Data_Inclusao, Data_Alteracao, Historico, Lote, ContaDebito, ContaCredito, Valor, Deletado, tipo, atualizado";
 
 
         if ($evento["desconto_valor"] != 0) {
             $valuesNew = $values . ", '" . $evento["desconto_cpl"] . "', '$lote', '0', '" . $evento["desconto_conta"] . "', '" . $evento['desconto_valor'] . "', 0, 0, 0";
             $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
-            $valor -= (float)str_replace(",", ".", $evento["desconto_valor"]);
+            $valor -= $evento["desconto_valor"];
         }
         if ($evento["retencao_inss_valor"] != 0) {
             $valuesNew = $values . ", '" . $evento["retencao_inss_cpl"] . "', '$lote', '0', '" . $evento["retencao_inss_conta"] . "', '" . $evento['retencao_inss_valor'] . "', 0, 0, 0";
             $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
-            $valor -= (float)str_replace(",", ".", $evento["retencao_inss_valor"]);
+            $valor -= $evento["retencao_inss_valor"];
         }
         if ($evento["retencao_ir_valor"] != 0) {
             $valuesNew = $values . ", '" . $evento["retencao_ir_cpl"] . "', '$lote', '0', '" . $evento["retencao_ir_conta"] . "', '" . $evento['retencao_ir_valor'] . "', 0, 0, 0";
             $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
-            $valor -= (float)str_replace(",", ".", $evento["retencao_ir_valor"]);
+            $valor -= $evento["retencao_ir_valor"];
         }
         if ($evento["retencao_iss_valor"] != 0) {
             $valuesNew = $values . ", '" . $evento["retencao_iss_cpl"] . "', '$lote', '0', '" . $evento["retencao_iss_conta"] . "', '" . $evento['retencao_iss_valor'] . "', 0, 0, 0";
             $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
-            $valor -= (float)str_replace(",", ".", $evento["retencao_iss_valor"]);
+            $valor -= $evento["retencao_iss_valor"];
         }
         if ($evento["retencao_pis_valor"] != 0) {
             $valuesNew = $values . ", '" . $evento["retencao_pis_cpl"] . "', '$lote', '0', '" . $evento["retencao_pis_conta"] . "', '" . $evento['retencao_pis_valor'] . "', 0, 0, 0";
             $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
-            $valor -= (float)str_replace(",", ".", $evento["retencao_pis_valor"]);
+            $valor -= $evento["retencao_pis_valor"];
         }
         if ($evento["retencao_cofins_valor"] != 0) {
             $valuesNew = $values . ", '" . $evento["retencao_cofins_cpl"] . "', '$lote', '0', '" . $evento["retencao_cofins_conta"] . "', '" . $evento['retencao_cofins_valor'] . "', 0, 0, 0";
             $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
-            $valor -= (float)str_replace(",", ".", $evento["retencao_cofins_valor"]);
+            $valor -= $evento["retencao_cofins_valor"];
         }
         if ($evento["retencao_csll_valor"] != 0) {
             $valuesNew = $values . ", '" . $evento["retencao_csll_cpl"] . "', '$lote', '0', '" . $evento["retencao_csll_conta"] . "', '" . $evento['retencao_csll_valor'] . "', 0, 0, 0";
             $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
-            $valor -= (float)str_replace(",", ".", $evento["retencao_csll_valor"]);
+            $valor -= $evento["retencao_csll_valor"];
         }
 
         if ($repasse == false) {
@@ -847,12 +859,12 @@ class Contas
         }*/
 
         if (count($result) == 0) {
-            $valuesNew = $values . ", '$historico', '$lote', '$contaDebito', '$contaCredito', '".$evento["valor"]."', 0, 0, 0";
+            $valuesNew = $values . ", '$historico', '$lote', '$contaDebito', '$contaCredito', '" . $evento["valor1"] . "', 0, 0, 0";
         } else {
             $valuesNew = $values . ", '$historico', '$lote', '0', '$contaCredito', '$valor', 0, 0, 0";
             $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
 
-            $valuesNew = $values . ", '$historico', '$lote', '$contaDebito', '0', '".$evento["valor"]."', 0, 0, 0";
+            $valuesNew = $values . ", '$historico', '$lote', '$contaDebito', '0', '" . $evento["valor1"] . "', 0, 0, 0";
         }
 
         $result[count($result)] = $database->doInsert('lancamentos', $cols, $valuesNew);
@@ -879,7 +891,7 @@ class Contas
             if ($item->{"check"}) {
                 $values = $baseValues . ", '" . $item->{"complemento"} . "', '$lote', 0, '" . $item->{"conta"} . "', '" . $item->{"valor"} . "', 0, 0, 0";
                 $result[count($result)] = $database->doInsert('lancamentos', $cols, $values);
-                $valor -= (float)str_replace(",", ".", $item->{"valor"});
+                $valor -= $item->{"valor"};
             }
         }
 

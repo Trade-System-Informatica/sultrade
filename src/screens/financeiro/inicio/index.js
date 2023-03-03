@@ -7,7 +7,7 @@ import './styles.css'
 import { apiEmployee } from '../../../services/apiamrg'
 import { connect } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCommentDollar, faMoneyCheck, faBoxOpen, faArchive, faIdCard, faTable } from '@fortawesome/free-solid-svg-icons'
+import { faCommentDollar, faMoneyCheck, faBoxOpen, faArchive, faIdCard, faTable, faReceipt } from '@fortawesome/free-solid-svg-icons'
 
 class Financeiro extends Component {
 
@@ -147,7 +147,7 @@ class Financeiro extends Component {
                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                             <li className=" text-left itemMenu list-group-item ">
                                                 <Link className="semTextDecoration" to={{ pathname: `/financeiro/lancamentos` }}>
-                                                    <FontAwesomeIcon icon={faIdCard} size="2x" color="tomato" />
+                                                    <FontAwesomeIcon icon={faReceipt} size="2x" color="tomato" />
                                                     <h4 className="textoMenu">Lançamentos</h4>
                                                 </Link>
                                             </li>

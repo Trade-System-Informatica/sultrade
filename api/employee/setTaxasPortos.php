@@ -15,13 +15,14 @@ if($objData != NULL){
     $chaves = $objData->chaves;
     $portos = $objData->portos;
     $contas = $objData->contas;
+    $contas_est = $objData->contas_est;
 
     //$employees = new Employees();
     $taxas = new Taxas();
 
     //$result = $employees->checkToken($token);
     //if($result == 'true'){
-    $result = $taxas->setTaxasPortos($taxa, $chaves, $portos, $contas);
+    $result = $taxas->setTaxasPortos($taxa, $chaves, $portos, $contas, $contas_est);
     //}
 } else {
     $result = "false";

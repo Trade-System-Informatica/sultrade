@@ -135,7 +135,7 @@ class AddTaxa extends Component {
             subgruposOptions: await loader.getBaseOptions('getSubgrupos.php', 'descricao', 'chave'),
             planosContas: await loader.getBase('getPlanosContasAnaliticas.php'),
             historicos: await loader.getBase('getHistoricos.php'),
-            historicosOptions: await loader.getBaseOptions('getHistoricos.php', 'Decricao', 'chave'),
+            historicosOptions: await loader.getBaseOptions('getHistoricos.php', 'Descricao', 'chave'),
             portos: await loader.getBase('getPortos.php'),
         });
 
@@ -157,14 +157,21 @@ class AddTaxa extends Component {
         });
     }
 
-    mudaTaxaPorto = async (value, porto) => {
+    mudaTaxaPorto = async (value, porto, tipo) => {
         if (this.state.portosContas.find((portoC) => portoC.porto === porto.Chave)) {
             const portosContas = this.state.portosContas.map((portoC) => {
                 if (portoC.porto === porto.Chave) {
-                    return ({
-                        ...portoC,
-                        conta: value
-                    })
+                    if (tipo == "local") {
+                        return ({
+                            ...portoC,
+                            conta: value
+                        })
+                    } else if (tipo == "estrangeira") {
+                        return ({
+                            ...portoC,
+                            conta_estrangeira: value
+                        })
+                    }
                 } else {
                     return portoC;
                 }
@@ -172,7 +179,11 @@ class AddTaxa extends Component {
             this.setState({ portosContas });
         } else {
             const { portosContas } = this.state;
-            portosContas.push({ chave: 0, taxa: this.state.chave, porto: porto.Chave, conta: value });
+            if (tipo == "local") {
+                portosContas.push({ chave: 0, taxa: this.state.chave, porto: porto.Chave, conta: value });
+            } else if (tipo == "estrangeira") {
+                portosContas.push({ chave: 0, taxa: this.state.chave, porto: porto.Chave, conta_estrangeira: value });
+            }
             this.setState({ portosContas });
         }
 
@@ -264,10 +275,12 @@ class AddTaxa extends Component {
             portos: portosContas.map((portos) => portos.porto),
             taxa: this.state.chave,
             contas: portosContas.map((portos) => portos.conta),
+            contas_est: portosContas.map((portos) => portos.conta_estrangeira)
         }).then(
             async res => {
                 console.log(res);
                 console.log(res.data);
+                window.location.reload();
             },
             async res => await console.log(`Erro: ${res.data}`)
         )
@@ -304,7 +317,7 @@ class AddTaxa extends Component {
 
         if (e.label) {
             const text = state.toUpperCase();
-            return (e.label.toUpperCase().includes(text))
+            return (e.label.toUpperCase().includes(text) || `${e.value}`.toUpperCase().includes(text))
         }
     }
 
@@ -464,7 +477,7 @@ class AddTaxa extends Component {
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                     <input className='form_control' checked={this.state.variavel} onChange={(e) => { this.setState({ variavel: e.target.checked }) }} type="checkbox" />
                                                 </div>
-                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                {/* <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                     <label>Conta Contabil</label>
                                                 </div>
                                                 <div className='col-1'></div>
@@ -491,7 +504,7 @@ class AddTaxa extends Component {
                                                 <div className='col-1'></div>
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                     <Field className="form-control" type="number" value={this.state.formula_ate} onChange={async e => { this.setState({ formula_ate: e.currentTarget.value }) }} />
-                                                </div>
+                                                </div> */}
                                             </div>
 
 
@@ -516,23 +529,32 @@ class AddTaxa extends Component {
                         <div>
                             <table className="taxaPortoTable">
                                 <tr className="taxaPortoTr" style={{ cursor: "pointer" }} onClick={() => this.setState({ hideTaxaPortos: !this.state.hideTaxaPortos })}>
-                                    <th className='taxaPortoTh' colSpan={2}>Contas por Portos</th>
+                                    <th className='taxaPortoTh' colSpan={3}>Contas por Portos</th>
                                 </tr>
                                 {!this.state.hideTaxaPortos &&
                                     <>
                                         <tr className="taxaPortoTr">
                                             <th className='taxaPortoTh' style={{ backgroundColor: "black", color: "white" }}>Porto</th>
                                             <th className='taxaPortoTh' style={{ backgroundColor: "black", color: "white" }}>Conta</th>
+                                            <th className='taxaPortoTh' style={{ backgroundColor: "black", color: "white" }}>Conta (estrangeira)</th>
                                         </tr>
                                         {this.state.portos.map((porto, portoIndex) => (
                                             <tr className={`taxaPortoTr ${portoIndex % 2 == 0 ? "taxaPortoPar" : "taxaPortoImpar"}`}>
                                                 <td className='taxaPortoTd'>{porto.Descricao}</td>
                                                 <td className='taxaPortoTd keepColor'>
                                                     <Select
-                                                        options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)}
+                                                        options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 60)}
                                                         onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }}
                                                         value={this.state.portosContas.find((taxaPorto) => taxaPorto.porto === porto.Chave) ? this.state.planosContasOptions.find(option => option.value == this.state.portosContas.find((taxaPorto) => taxaPorto.porto === porto.Chave).conta) : ""}
-                                                        onChange={(e) => this.mudaTaxaPorto(e.value, porto)}
+                                                        onChange={(e) => this.mudaTaxaPorto(e.value, porto, "local")}
+                                                    />
+                                                </td>
+                                                <td className='taxaPortoTd keepColor'>
+                                                    <Select
+                                                        options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 60)}
+                                                        onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }}
+                                                        value={this.state.portosContas.find((taxaPorto) => taxaPorto.porto === porto.Chave) ? this.state.planosContasOptions.find(option => option.value == this.state.portosContas.find((taxaPorto) => taxaPorto.porto === porto.Chave).conta_estrangeira) : ""}
+                                                        onChange={(e) => this.mudaTaxaPorto(e.value, porto, "estrangeira")}
                                                     />
                                                 </td>
                                             </tr>

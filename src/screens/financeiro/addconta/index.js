@@ -322,7 +322,7 @@ class AddConta extends Component {
                     case "COFINS":
                         this.setState({retencaoCofins: conta.valor, retencaoCofinsComplemento: conta.complemento, retencaoCofinsCheck: true});
                         break;
-                    case "CSLL":
+                    case "CRF":
                         this.setState({retencaoCsll: conta.valor, retencaoCsllComplemento: conta.complemento, retencaoCsllCheck: true});
                         break;
                 }
@@ -659,7 +659,7 @@ class AddConta extends Component {
                 conta: this.state.retencaoIssConta,
                 check: this.state.retencaoIssCheck,
                 tipo: "ISS"
-            }, {
+            },/* {
                 valor: this.state.retencaoPis,
                 complemento: this.state.retencaoPisComplemento,
                 conta: this.state.retencaoPisConta,
@@ -671,12 +671,12 @@ class AddConta extends Component {
                 conta: this.state.retencaoCofinsConta,
                 check: this.state.retencaoCofinsCheck,
                 tipo: "COFINS"
-            }, {
+            },*/ {
                 valor: this.state.retencaoCsll,
                 complemento: this.state.retencaoCsllComplemento,
                 conta: this.state.retencaoCsllConta,
                 check: this.state.retencaoCsllCheck,
-                tipo: "CSLL"
+                tipo: "CRF"
             }
         ]
 
@@ -899,7 +899,7 @@ class AddConta extends Component {
     }
 
     testaValores = () => {
-        return parseFloat(this.state.desconto) + parseFloat(this.state.retencaoPis) + parseFloat(this.state.retencaoCofins) + parseFloat(this.state.retencaoCsll) + parseFloat(this.state.retencaoInss) + parseFloat(this.state.retencaoIr) + parseFloat(this.state.retencaoIss) > parseFloat(this.state.valor);
+        return parseFloat(this.state.desconto.replaceAll(".","").replaceAll(",",".")) + parseFloat(this.state.retencaoPis.replaceAll(".","").replaceAll(",",".")) + parseFloat(this.state.retencaoCofins.replaceAll(".","").replaceAll(",",".")) + parseFloat(this.state.retencaoCsll.replaceAll(".","").replaceAll(",",".")) + parseFloat(this.state.retencaoInss.replaceAll(".","").replaceAll(",",".")) + parseFloat(this.state.retencaoIr.replaceAll(".","").replaceAll(",",".")) + parseFloat(this.state.retencaoIss.replaceAll(".","").replaceAll(",",".")) > parseFloat(this.state.valor.replaceAll(".","").replaceAll(",","."));
     }
 
 
@@ -1039,15 +1039,7 @@ class AddConta extends Component {
                                                                     <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoIssCheck} onChange={async (e) => { await this.mudaRetencao("ISS") }} />
                                                                 </div>
                                                                 <div>
-                                                                    <label className='smallCheckbox'>PIS</label>
-                                                                    <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoPisCheck} onChange={async (e) => { await this.mudaRetencao("PIS") }} />
-                                                                </div>
-                                                                <div>
-                                                                    <label className='smallCheckbox'>COFINS</label>
-                                                                    <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoCofinsCheck} onChange={async (e) => { await this.mudaRetencao("COFINS") }} />
-                                                                </div>
-                                                                <div>
-                                                                    <label className='smallCheckbox'>CSLL</label>
+                                                                    <label className='smallCheckbox'>CRF</label>
                                                                     <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoCsllCheck} onChange={async (e) => { await this.mudaRetencao("CSLL") }} />
                                                                 </div>
                                                             </div>
@@ -1214,7 +1206,7 @@ class AddConta extends Component {
                                                                 <>
                                                                     <div><hr /></div>
                                                                     <div className='col-12 text-center' style={{ height: '25px' }}>
-                                                                        <label>Retenção CSLL</label>
+                                                                        <label>Retenções CRF</label>
                                                                     </div>
                                                                     <div className='col-4 text-center' style={{ height: '25px' }}>
                                                                         <label>Conta</label>
