@@ -1,0 +1,7 @@
+.nonLink {
+    color: inherit;
+}
+
+.nonLink:hover {
+    color: inherit;
+}

@@ -6,6 +6,7 @@ import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import ModalItem from '../../../components/modalItem'
 import Skeleton from '../../../components/skeleton'
+import AddButton from '../../../components/addButton';
 import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { NOME_EMPRESA } from '../../../config'
@@ -211,21 +212,23 @@ class HistoricosPadrao extends Component {
                                 acessosPermissoes={this.state.acessosPermissoes}
                             />
 
+                            <AddButton addLink={{ pathname: `/tabelas/addhistorico/0` }}/>
+
                             <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-left">
                                 <div className="row mobileajuster3">
                                     <div className="col-1 col-sm-1 col-md-1 col-lg-1 col-xl-1 sumir">
                                     </div>
 
                                     <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
+                                            <div className='col-2'></div>
                                         <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
                                             <option value={1}>Descrição</option>
                                             <option value={2}>Chave</option>
                                         </select>
                                         <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
-                                        {!this.state.historicos[0] &&
                                             <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
-                                                <Link to={{ pathname: `/tabelas/addhistorico/0` }}><button className="btn btn-success">Adicionar Histórico</button></Link>
-                                            </div>}
+                                                <Link to={{ pathname: `/tabelas/addhistorico/0` }}><button className="btn btn-success">+</button></Link>
+                                            </div>
                                     </div>
 
                                 </div>

@@ -55,10 +55,12 @@ import AddOperador from './screens/utilitarios/addoperador'
 import OS from './screens/ordensservico/os'
 import Eventos from './screens/ordensservico/eventos'
 import RelatorioOS from './screens/ordensservico/relatorio'
+import Anexos from './screens/ordensservico/anexos'
 
 import AddOS from './screens/ordensservico/addos'
 import AddEvento from './screens/ordensservico/addevento'
 import AddEventoFinanceiro from './screens/ordensservico/addeventofinanceiro'
+import AddAnexo from './screens/ordensservico/addanexo'
 
 
 import PagamentosLote from './screens/financeiro/pagamentoslote'
@@ -137,10 +139,12 @@ export default function Routes(){
                 <Route path="/ordensservico/os" component={OS} />
                 <Route path="/ordensservico/eventos" component={Eventos} />
                 <Route path="/ordensservico/relatorio" component={RelatorioOS} />
+                <Route path="/ordensservico/anexos" component={Anexos} />
                 
                 <Route path="/ordensservico/addos/:id/" component={AddOS} />
                 <Route path="/ordensservico/addevento/:id/" component={AddEvento} />
                 <Route path="/ordensservico/addeventoFinanceiro/:id/" component={AddEventoFinanceiro} />
+                <Route path="/ordensservico/addanexo/:id/" component={AddAnexo} />          
 
 
                 <Route path="/financeiro/pagamentoslote" component={PagamentosLote} />

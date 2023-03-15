@@ -43,7 +43,7 @@ const estadoInicial = {
     governmentTaxes: false,
     bankCharges: false,
 
-    saida: '',
+    data_saida: '',
     encerramento: '',
     faturamento: '',
     centroCusto: '',
@@ -210,7 +210,7 @@ class AddOS extends Component {
                 eta: moment(this.state.os.eta).format('YYYY-MM-DD'),
                 atb: moment(this.state.os.atb).format('YYYY-MM-DD'),
                 etb: moment(this.state.os.etb).format('YYYY-MM-DD'),
-                saida: moment(this.state.os.Data_Saida).format("YYYY-MM-DD") != "Invalid date" ? moment(this.state.os.Data_Saida).format('YYYY-MM-DD') : 'T.B.I.',
+                data_saida: moment(this.state.os.Data_Saida).format("YYYY-MM-DD") != "Invalid date" ? moment(this.state.os.Data_Saida).format('YYYY-MM-DD') : 'T.B.I.',
 
                 encerramento: moment(this.state.os.Data_Encerramento).format("YYYY-MM-DD") != "Invalid date" ? moment(this.state.os.Data_Encerramento).format('YYYY-MM-DD') : 'T.B.I.',
                 faturamento: moment(this.state.os.Data_Faturamento).format("YYYY-MM-DD") != "Invalid date" ? moment(this.state.os.Data_Faturamento).format('YYYY-MM-DD') : 'T.B.I.',
@@ -224,8 +224,20 @@ class AddOS extends Component {
                 operador: this.state.os.operador
             })
 
+            if (this.state.faturamento != "T.B.I.") {
+                let permissao = false;
+                this.state.acessosPermissoes.map((e) => {
+                    if ((e.acessoAcao == "EVENTOS_FINANCEIRO" && e.permissaoEdita == 0)) {
+                        permissao = true;
+                    }
+                })
+
+                if (!permissao) {
+                    this.setState({ bloqueado: true });
+                }
+            }
+
             if (this.state.cabecalho) {
-                console.log(this.state.os);
                 const cabecalho = JSON.parse(this.state.cabecalho);
 
                 await this.setState({
@@ -251,7 +263,7 @@ class AddOS extends Component {
                     { titulo: 'governmentTaxes', valor: this.state.governmentTaxes },
                     { titulo: 'bankCharges', valor: this.state.bankCharges },
                     { titulo: 'etb', valor: this.state.etb },
-                    { titulo: 'Data_Saida', valor: this.state.saida },
+                    { titulo: 'Data_Saida', valor: this.state.data_saida },
                     { titulo: 'Data_Encerramento', valor: this.state.encerramento },
                     { titulo: 'Data_Faturamento', valor: this.state.faturamento },
                     { titulo: 'centro_custo', valor: this.state.centroCusto },
@@ -639,7 +651,7 @@ class AddOS extends Component {
                 { titulo: 'etb', valor: this.state.etb },
                 { titulo: 'governmentTaxes', valor: this.state.governmentTaxes },
                 { titulo: 'bankCharges', valor: this.state.bankCharges },
-                { titulo: 'Data_Saida', valor: this.state.saida },
+                { titulo: 'Data_Saida', valor: this.state.data_saida },
                 { titulo: 'Data_Encerramento', valor: this.state.encerramento },
                 { titulo: 'Data_Faturamento', valor: this.state.faturamento },
                 { titulo: 'centro_custo', valor: this.state.centroCusto },
@@ -657,7 +669,7 @@ class AddOS extends Component {
             await this.getCodigo();
             await apiEmployee.post(`insertOS.php`, {
                 token: true,
-                values: `'${this.state.usuarioLogado.codigo}', '${this.state.descricao}', 'ST${this.state.codigo.Proximo}', '${this.state.cliente}', '${this.state.navio}', '${moment(this.state.abertura).format('YYYY-MM-DD')}', '${moment(this.state.chegada).format('YYYY-MM-DD')}', '${moment(this.state.saida).format('YYYY-MM-DD')}', '${this.state.tipoServico}', '${this.state.viagem}', '${this.state.porto}', '${this.state.encerradoPor}', '${this.state.faturadoPor}', '${this.state.empresa}', '${this.state.eta}', '${this.state.atb}', '${this.state.etb}', '${this.state.governmentTaxes ? parseFloat(this.state.governmentTaxes.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.bankCharges ? parseFloat(this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.operador}'`,
+                values: `'${this.state.usuarioLogado.codigo}', '${this.state.descricao}', 'ST${this.state.codigo.Proximo}', '${this.state.cliente}', '${this.state.navio}', '${moment(this.state.abertura).format('YYYY-MM-DD')}', '${moment(this.state.chegada).format('YYYY-MM-DD')}', '${moment(this.state.data_saida).format('YYYY-MM-DD')}', '${this.state.tipoServico}', '${this.state.viagem}', '${this.state.porto}', '${this.state.encerradoPor}', '${this.state.faturadoPor}', '${this.state.empresa}', '${this.state.eta}', '${this.state.atb}', '${this.state.etb}', '${this.state.governmentTaxes ? parseFloat(this.state.governmentTaxes.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.bankCharges ? parseFloat(this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.operador}'`,
                 codigo: this.state.codigo.Proximo,
                 tipo: this.state.codigo.Tipo
             }).then(
@@ -677,6 +689,11 @@ class AddOS extends Component {
             )
 
         } else if (validForm) {
+            if (this.state.os.Data_Faturamento && this.state.faturamento) {
+                //await this.faturaOS();
+            }
+
+
             await apiEmployee.post(`updateOS.php`, {
                 token: true,
                 Chave: this.state.chave,
@@ -693,9 +710,9 @@ class AddOS extends Component {
                 atb: this.state.atb ? moment(this.state.atb).format('YYYY-MM-DD') : '',
                 etb: this.state.etb ? moment(this.state.etb).format('YYYY-MM-DD') : '',
 
-                Data_Saida: this.state.saida ? moment(this.state.saida).format('YYYY-MM-DD') : '',
+                Data_Saida: this.state.data_saida ? moment(this.state.data_saida).format('YYYY-MM-DD') : '',
                 Data_Encerramento: this.state.encerramento ? moment(this.state.encerramento).format('YYYY-MM-DD') : '',
-                Data_Faturamento: this.state.abertura ? moment(this.state.faturamento).format('YYYY-MM-DD') : '',
+                Data_Faturamento: this.state.faturamento ? moment(this.state.faturamento).format('YYYY-MM-DD') : '',
                 centro_custo: this.state.centroCusto,
                 ROE: this.state.roe,
                 Comentario_Voucher: this.state.comentario,
@@ -720,6 +737,45 @@ class AddOS extends Component {
 
         }
 
+    }
+
+    faturaOS = async () => {
+        const valor = this.calculaTotal();
+
+        await apiEmployee.post(`insertContaFornecedor.php`, {
+            token: true,
+            values: `'${this.state.faturamento}', '0', '${this.state.cliente}', '0', '0', '${this.state.centroCusto}', '',  0,0, 0, '${parseFloat(valor.replaceAll('.', '').replaceAll(',', '.'))}', '0', '0', '0', '${0}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', 0, 0, 0, ''`,
+        }).then(
+            async res => {
+                console.log(res.data);
+            },
+            async res => await console.log(`Erro: ${res.data}`)
+        )
+    }
+
+    calculaValorTotal = async () => {
+        const values = await loader.valoresOS(this.state.chave);
+
+        let valorTotal = 0;
+
+        if (values[0].governmentTaxes > 0) {
+            valorTotal += parseFloat(values[0].governmentTaxes);
+        }
+        if (values[0].bankCharges > 0) {
+            valorTotal += parseFloat(this.state.pdfContent[0].bankCharges);
+        }
+
+        {
+            values.map((e, index) => {
+                if (e.moeda == 5) {
+                    valorTotal += parseFloat(e.valor);
+                } else {
+                    valorTotal += parseFloat(parseFloat(e.valor * this.state.roe).toFixed(2));
+                }
+            })
+        }
+
+        return valorTotal;
     }
 
     salvarCabecalho = async () => {
@@ -1648,7 +1704,7 @@ class AddOS extends Component {
             porto: this.state.portosOptions.find((porto) => porto.value == this.state.porto) ? this.state.portosOptions.find((porto) => porto.value == this.state.porto).label : "",
             eta: moment(this.state.eta).format("DD/MM/YYYY") != "Invalid date" ? moment(this.state.eta).format("DD/MM/YYYY") : "T.B.I.",
             etb: moment(this.state.etb).format("DD/MM/YYYY") != "Invalid date" ? moment(this.state.etb).format("DD/MM/YYYY") : "T.B.I.",
-            data_saida: moment(this.state.atb).format("DD/MM/YYYY") != "Invalid date" ? moment(this.state.data_saida).format("DD/MM/YYYY") : "T.B.I."
+            data_saida: moment(this.state.data_saida).format("DD/MM/YYYY") != "Invalid date" ? moment(this.state.data_saida).format("DD/MM/YYYY") : "T.B.I."
         })
     }
 
@@ -1818,7 +1874,7 @@ class AddOS extends Component {
 
                 {this.state.recarregaPagina &&
                     <>
-                        <Redirect to={{ pathname: `/ordensservico/addos/${this.state.chave}`, state: { ... this.props.location.state, os: {... this.state.os} } }} />
+                        <Redirect to={{ pathname: `/ordensservico/addos/${this.state.chave}`, state: { ... this.props.location.state, os: { ... this.state.os } } }} />
                         {window.location.reload()}
                     </>
                 }
@@ -2262,7 +2318,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="date" value={this.state.saida} onChange={async e => { this.setState({ saida: e.currentTarget.value }) }} />
+                                                                <Field className="form-control" type="date" value={this.state.data_saida} onChange={async e => { this.setState({ data_saida: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             {this.state.governmentTaxes &&
@@ -2473,7 +2529,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="date" value={this.state.saida} onChange={async e => { this.setState({ saida: e.currentTarget.value }) }} />
+                                                                <Field className="form-control" type="date" value={this.state.data_saida} onChange={async e => { this.setState({ data_saida: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             {this.state.governmentTaxes &&

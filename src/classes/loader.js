@@ -370,7 +370,6 @@ export default class loader {
     }
 
     static async getContaPessoa(chave, tipo) {
-        console.log(chave);
         return await apiEmployee.post('getPessoa.php', {
             token: true,
             chave
@@ -449,8 +448,6 @@ export default class loader {
     //
     static async testaAcesso(acessos, permissoes, usuarioLogado) {
         let permissao = '';
-        console.log(acessos)
-        console.log(permissoes)
 
         const acessosPermissoes = acessos.map((e, i) => {
             permissao = permissoes.filter((permissao) => {
@@ -528,5 +525,50 @@ export default class loader {
         )
 
     }
+
+    //
+    static async testaAnexosVencimentos() {
+        return await apiEmployee.post("anexosVencimentos.php",{
+            token: true
+        }).then(
+            async res => {
+                return res.data;
+            },
+            async err => {
+                console.log(err);
+            }
+        )
+    }
+
+    static async anexosVencidosEmails(anexos) {
+        const chaves = anexos.map((e) => e.chave);
+
+        return await apiEmployee.post("emailAnexosVencidos.php",{
+            token: true,
+            chaves
+        }).then(
+            async res => {
+                return res.data;
+            },
+            async err => {
+                console.log(err);
+            }
+        )
+    }
+
+    static async valoresOS(chave) {
+        return await apiEmployee.post("getValoresOS.php",{
+            token: true,
+            chave
+        }).then(
+            async res => {
+                return res.data;
+            },
+            async err => {
+                console.log(err);
+            }
+        )
+    }
+    //
 
 }

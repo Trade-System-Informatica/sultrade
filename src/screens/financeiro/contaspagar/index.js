@@ -5,6 +5,7 @@ import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import Skeleton from '../../../components/skeleton'
 import loader from '../../../classes/loader'
+import AddButton from '../../../components/addButton';
 import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { NOME_EMPRESA } from '../../../config'
@@ -119,7 +120,7 @@ class ContasPagar extends Component {
     }
 
     deleteConta = async (chave, nome) => {
-        this.setState({deleteConta: true})
+        this.setState({ deleteConta: true })
         confirmAlert({
             customUI: ({ onClose }) => {
                 return (
@@ -171,16 +172,16 @@ class ContasPagar extends Component {
     }
 
     reverterItens = async () => {
-        await this.setState({loading: true})
+        await this.setState({ loading: true })
         const contas = this.state.contas.reverse();
 
         if (this.state.direcaoTabela == faChevronDown) {
-            await this.setState({direcaoTabela: faChevronUp});
+            await this.setState({ direcaoTabela: faChevronUp });
         } else {
-            await this.setState({direcaoTabela: faChevronDown});
-        } 
+            await this.setState({ direcaoTabela: faChevronDown });
+        }
 
-        await this.setState({contas, loading: false});
+        await this.setState({ contas, loading: false });
     }
 
     filtrarPesquisa = (conta) => {
@@ -245,6 +246,13 @@ class ContasPagar extends Component {
                                             <div>
                                                 <Link to={{ pathname: `/financeiro/relatorio`, state: { backTo: 'contasPagar' } }}><button className="btn btn-success">Relatorio</button></Link>
                                             </div>
+                                            <div style={{marginLeft: 15}}>
+                                                <Link to={{
+                                                    pathname: `/financeiro/addconta/0`,
+                                                    state: { conta: {}, tipo: 1, to: 'contaspagar' }
+                                                }}><button className="btn btn-success">+</button></Link>
+                                            </div>
+
                                         </div>
                                     </div>
 
@@ -254,7 +262,6 @@ class ContasPagar extends Component {
 
                                 </div>
                             </div>
-
 
                             <div className="row deleteMargin" id="product-list">
                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
@@ -273,13 +280,10 @@ class ContasPagar extends Component {
                                             <div className="col-2 text-left">
                                                 <span className="subtituloships">Valor</span>
                                             </div>
-                                            <div className="col-2 text-center revertItem" onClick={() => {if (this.state.contas[0]) { this.reverterItens() }}}>
-                                                {!this.state.contas[0] && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_ABERTAS') { return e } }).map((e) => e.permissaoInsere)[0] == 1 &&
-                                                    <span className="subtituloships"><Link to={{ pathname: `/financeiro/addconta/0`, state: { tipo: 1, to: 'contaspagar' } }}><FontAwesomeIcon icon={faPlus} /></Link></span>
-                                                }
-                                                {this.state.contas[0] && 
-                                                    <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela}/></span>
-                                                
+                                            <div className="col-2 text-center revertItem" onClick={() => { if (this.state.contas[0]) { this.reverterItens() } }}>
+                                                {this.state.contas[0] &&
+                                                    <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela} /></span>
+
                                                 }
                                             </div>
                                         </div>
@@ -287,6 +291,11 @@ class ContasPagar extends Component {
                                 </div>
                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
                             </div>
+
+                            <AddButton addLink={{
+                                pathname: `/financeiro/addconta/0`,
+                                state: { conta: {}, tipo: 1, to: 'contaspagar' }
+                            }} />
 
                             <div id="product-list">
                                 {this.state.contas[0] != undefined && this.state.contas.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (

@@ -5,6 +5,7 @@ import Header from '../../../components/header'
 import loader from '../../../classes/loader'
 import Rodape from '../../../components/rodape'
 import Skeleton from '../../../components/skeleton'
+import AddButton from '../../../components/addButton'
 import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { PRECISA_LOGAR, NOME_EMPRESA } from '../../../config'
@@ -195,10 +196,9 @@ class Operadores extends Component {
                                             <option value={2}>Codigo</option>
                                         </select>
                                         <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
-                                        {!this.state.operadores[0] &&
-                                            <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
-                                                <Link to={{ pathname: `/utilitarios/addoperador/0` }}><button className="btn btn-success">Adicionar Operador</button></Link>
-                                            </div>}
+                                        <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
+                                            <Link to={{ pathname: `/utilitarios/addoperador/0` }}><button className="btn btn-success">+</button></Link>
+                                        </div>
                                     </div>
 
                                     <div className="col-0 col-sm-0 col-md-3 col-lg-3 col-xl-3"></div>
@@ -208,6 +208,10 @@ class Operadores extends Component {
                                 </div>
                             </div>
 
+                            <AddButton addLink={{
+                                pathname: `/utilitarios/addoperador/0`,
+                                state: { operador: {} }
+                            }} />
 
                             <div className="row deleteMargin" id="product-list">
                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>

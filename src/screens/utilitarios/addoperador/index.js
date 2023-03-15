@@ -144,7 +144,8 @@ class AddPessoa extends Component {
             Nome: this.state.nome
         }).then(
             async res => {
-                if (!res.data[0] || res.data[0] && this.state.codigo != res.data[0].Codigo) {
+                console.log(res.data);
+                if (res.data[0] && this.state.codigo != res.data[0].Codigo) {
                     await this.setState({ bloqueado: true, nomeRepetido: true })
                 }
             }
@@ -165,6 +166,7 @@ class AddPessoa extends Component {
 
         await this.testaNome();
         if (this.state.bloqueado || !validForm) {
+            this.setState({loading:false});
             return;
         }
 
@@ -175,6 +177,7 @@ class AddPessoa extends Component {
                 values: `'${this.state.nome}', '${senha}', ${this.state.empresa}`
             }).then(
                 async res => {
+                    console.log(res.data);
                     if (res.data[0].Codigo) {
                         await this.setState({ codigo: res.data[0].Codigo })
                         await loader.salvaLogs('operadores', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Codigo);

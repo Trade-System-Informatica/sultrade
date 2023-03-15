@@ -18,6 +18,7 @@ import ModalItem from '../../../components/modalItem'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import ModalLogs from '../../../components/modalLogs'
 import { Skeleton } from '@mui/material'
+import util from '../../../classes/util'
 
 const estadoInicial = {
     porto: 0,
@@ -238,18 +239,20 @@ class AddPessoa extends Component {
     }
 
     getPessoaEnderecos = async () => {
-        await apiEmployee.post(`getEnderecos.php`, {
-            token: true,
-            pessoa: this.props.match.params.id
-        }).then(
-            async response => {
-                await this.setState({ enderecos: response.data })
-                //console.log(response.data)
-                await this.setState({ loading: false })
-            },
-            response => { this.erroApi(response) }
+        if (this.state.chave) {
+            await apiEmployee.post(`getEnderecos.php`, {
+                token: true,
+                pessoa: this.props.match.params.id
+            }).then(
+                async response => {
+                    await this.setState({ enderecos: response.data })
+                    //console.log(response.data)
+                    await this.setState({ loading: false })
+                },
+                response => { this.erroApi(response) }
 
-        )
+            )
+        }
     }
 
     erroApi = async () => {
@@ -310,17 +313,19 @@ class AddPessoa extends Component {
     }
 
     getPessoaContatos = async () => {
-        await apiEmployee.post(`getContatos.php`, {
-            token: true,
-            pessoa: this.props.match.params.id
-        }).then(
-            async response => {
-                await this.setState({ contatos: response.data })
-                await this.setState({ loading: false })
-            },
-            response => { this.erroApi(response) }
+        if (this.state.chave) {
+            await apiEmployee.post(`getContatos.php`, {
+                token: true,
+                pessoa: this.props.match.params.id
+            }).then(
+                async response => {
+                    await this.setState({ contatos: response.data })
+                    await this.setState({ loading: false })
+                },
+                response => { this.erroApi(response) }
 
-        )
+            )
+        }
     }
 
     getTipos = async () => {
@@ -450,7 +455,7 @@ class AddPessoa extends Component {
             Cnpj_Cpf: this.state.cnpj_cpfLimpo
         }).then(
             async res => {
-                if (!res.data[0] || res.data[0].Chave == this.state.chave) {
+                if (!res.data[0] || res.data[0].Chave == this.state.chave || this.state.cnpj_cpfLimpo.trim() == "") {
                     await this.setState({ cpfAprovado: true })
                 } else {
                     await this.setState({ pessoa: res.data[0] });
@@ -471,6 +476,8 @@ class AddPessoa extends Component {
 
 
     salvarPessoa = async (validForm) => {
+        this.setState({ ...util.cleanStates(this.state) });
+
         let categoria = [this.state.categoria.cliente ? 1 : 0, this.state.categoria.fornecedor ? 1 : 0, this.state.categoria.prestador_servico ? 1 : 0, this.state.categoria.transportador ? 1 : 0, this.state.categoria.banco ? 1 : 0, this.state.categoria.adm_cartao ? 1 : 0, this.state.categoria.adm_convenio ? 1 : 0]
         categoria = categoria.join('');
 
@@ -478,12 +485,13 @@ class AddPessoa extends Component {
             return;
         }
 
-        if (this.state.cnpj_cpfLimpo) {
+        if (this.state.cnpj_cpfLimpo.trim() != "") {
             await this.testaCpf();
             if (!this.state.cpfAprovado) {
                 return;
             }
         }
+
         this.setState({ bloqueado: true })
 
         this.setState({
@@ -502,10 +510,10 @@ class AddPessoa extends Component {
             loading: true
         })
 
-        if (parseInt(this.state.chave) === 0) {
+        if (this.state.chave == 0) {
             await apiEmployee.post(`insertPessoa.php`, {
                 token: true,
-                values: `'${this.state.nome}', '${this.state.nome_fantasia}', '${this.state.cnpj_cpfLimpo}', '${this.state.rg_ie}', '${this.state.inscricao_municipal}', '${this.state.nascimento}', '${this.state.inclusao}', '${categoria}', '${this.state.contaContabil}', '${this.state.contaProvisao}', '${this.state.contaFaturar}'`
+                values: `"${this.state.nome.replaceAll("'", "\'")}", '${this.state.nome_fantasia.replaceAll("'", "\'")}', '${this.state.cnpj_cpfLimpo}', '${this.state.rg_ie}', '${this.state.inscricao_municipal}', '${this.state.nascimento}', '${this.state.inclusao}', '${categoria}', '${this.state.contaContabil}', '${this.state.contaProvisao}', '${this.state.contaFaturar}'`
             }).then(
                 async res => {
                     if (res.data[0].Chave) {
@@ -521,8 +529,8 @@ class AddPessoa extends Component {
             await apiEmployee.post(`updatePessoa.php`, {
                 token: true,
                 Chave: this.state.chave,
-                Nome: this.state.nome,
-                Nome_Fantasia: this.state.nome_fantasia,
+                Nome: this.state.nome.replaceAll("'", "\'"),
+                Nome_Fantasia: this.state.nome_fantasia.replaceAll("'", "\'"),
                 Cnpj_Cpf: this.state.cnpj_cpfLimpo,
                 Rg_Ie: this.state.rg_ie,
                 Inscricao_Municipal: this.state.inscricao_municipal,
@@ -548,6 +556,29 @@ class AddPessoa extends Component {
 
         }
 
+    }
+
+    alertSaved = async () => {
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return (
+                    <div className='custom-ui text-center'>
+                        <h1>{NOME_EMPRESA}</h1>
+                        <p>Pessoa salva!</p>
+                        <button
+                            style={{ textAlign: "center" }}
+                            className="btn btn-success w-25"
+                            onClick={
+                                async () => {
+                                    this.setState({ redirectSaved: true });
+                                    onClose()
+                                }
+                            }
+                        >Ok</button>
+                    </div>
+                )
+            }
+        })
     }
 
     erroApi = async (res) => {
@@ -810,7 +841,7 @@ class AddPessoa extends Component {
                                             </Form>
                                         </Formik>
                                     </div>
-                                    {this.props.match.params.id != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_ENDERECOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                    {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_ENDERECOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
 
                                         <div>
 
@@ -840,7 +871,7 @@ class AddPessoa extends Component {
 
                                                                                     <Link to=
                                                                                         {{
-                                                                                            pathname: `/tabelas/addpessoaendereco/${this.props.match.params.id}/0`,
+                                                                                            pathname: `/tabelas/addpessoaendereco/${this.state.chave}/0`,
                                                                                             state: { endereco: {}, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
                                                                                         }}
                                                                                     >
@@ -861,7 +892,7 @@ class AddPessoa extends Component {
 
                                                                                     <Link to=
                                                                                         {{
-                                                                                            pathname: `/tabelas/addpessoaendereco/${this.props.match.params.id}/0`,
+                                                                                            pathname: `/tabelas/addpessoaendereco/${this.state.chave}/0`,
                                                                                             state: { endereco: {}, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
                                                                                         }}
                                                                                     >
@@ -1002,12 +1033,12 @@ class AddPessoa extends Component {
                                             <hr />
                                         </div>
                                     }
-                                    {this.props.match.params.id != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_ENDERECOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_CONTATOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                    {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_ENDERECOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_CONTATOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                         <div style={{ display: `flex`, justifyContent: `center`, alignItems: `center` }}>
                                             <hr style={{ width: `50%` }} />
                                         </div>
                                     }
-                                    {this.props.match.params.id != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_CONTATOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                    {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_CONTATOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                         <div>
                                             <div>
                                                 <div>
@@ -1036,7 +1067,7 @@ class AddPessoa extends Component {
                                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
                                                                                 <Link to=
                                                                                     {{
-                                                                                        pathname: `/tabelas/addpessoacontato/${this.props.match.params.id}/0`,
+                                                                                        pathname: `/tabelas/addpessoacontato/${this.state.chave}/0`,
                                                                                         state: { contato: {}, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
                                                                                     }}
                                                                                 >
@@ -1056,7 +1087,7 @@ class AddPessoa extends Component {
                                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
                                                                                 <Link to=
                                                                                     {{
-                                                                                        pathname: `/tabelas/addpessoacontato/${this.props.match.params.id}/0`,
+                                                                                        pathname: `/tabelas/addpessoacontato/${this.state.chave}/0`,
                                                                                         state: { contato: {}, pessoa: { ...this.state.pessoa }, backTo: `addpessoa` }
                                                                                     }}
                                                                                 >

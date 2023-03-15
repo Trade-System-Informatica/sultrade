@@ -645,11 +645,16 @@ class Contas
         return $result;
     }
 
-    public static function insertContaCliente($values, $meioPagamento, $valuesDarf)
+    public static function insertContaCliente($values, $meioPagamento, $valuesDarf, $dadosManuais = null)
     {
         $database = new Database();
 
         $cols = 'Lancto, Tipo, Pessoa, Conta_Contabil, Centro_Custo, Conta_Desconto, Historico, Parc_Ini, Parc_Fim, RepCodBar, Valor, Vencimento, Vencimento_Original, Conta_Provisao, Saldo, Operador, Empresa, Docto, tipodocto, meio_pagamento';
+
+        if ($dadosManuais) {
+            $values = $values . ", " . $dadosManuais;
+            $cols = "os_manual, navio_manual, porto_manual";
+        }
 
         $result = $database->doInsert('contas_aberto', $cols, $values);
 
@@ -671,11 +676,16 @@ class Contas
         return $result;
     }
 
-    public static function insertContaFornecedor($values, $meioPagamento, $valuesDarf, $valuesRet = null)
+    public static function insertContaFornecedor($values, $meioPagamento, $valuesDarf, $valuesRet = null, $dadosManuais = null)
     {
         $database = new Database();
 
         $cols = 'Lancto, Tipo, Pessoa, Conta_Contabil, RepCodBar, Centro_Custo, Historico, Conta_Desconto, Parc_Ini, Parc_Fim, Valor, Vencimento, Vencimento_Original, Conta_Provisao, Saldo, Operador, Empresa, Docto, tipodocto, meio_pagamento, docto_origem';
+
+        if ($dadosManuais) {
+            $values = $values . ", " . $dadosManuais;
+            $cols = "os_manual, navio_manual, porto_manual";
+        }
 
         $result = $database->doInsert('contas_aberto', $cols, $values);
 
@@ -695,9 +705,9 @@ class Contas
 
         if ($result && $valuesRet) {
             $chave = $database->doSelect('contas_aberto', 'contas_aberto.*', '1=1 ORDER BY chave DESC');
-            
+
             foreach ($valuesRet as $ret) {
-                $values3 = $chave[0]['Chave'].", $ret";
+                $values3 = $chave[0]['Chave'] . ", $ret";
                 $cols = "chave_conta_aberto, chave_conta, valor, complemento, tipo";
 
                 $database->doInsert('contas_aberto_cc', $cols, $values3);
@@ -801,7 +811,7 @@ class Contas
         $result = [];
 
         $valor = $evento["valor1"];
-        
+
         $cols = "Data, TipoDocto, CentroControle, Historico_Padrao, Pessoa, ChavePr, Usuario_Inclusao, Usuario_Alteracao, Data_Inclusao, Data_Alteracao, Historico, Lote, ContaDebito, ContaCredito, Valor, Deletado, tipo, atualizado";
 
 
@@ -943,11 +953,21 @@ class Contas
         }
     }
 
-    public static function updateContaCliente($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $Centro_Custo, $Conta_Desconto, $Historico, $Parc_Ini, $Parc_Fim, $RepCodBar, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix)
+    public static function updateContaCliente($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $Centro_Custo, $Conta_Desconto, $Historico, $Parc_Ini, $Parc_Fim, $RepCodBar, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix, $os_manual, $navio_manual, $porto_manual)
     {
         $database = new Database();
 
         $query = "Lancto = '" . $Lancto . "', Tipo = '" . $Tipo . "', Pessoa = '" . $Pessoa . "', Conta_Contabil = '" . $Conta_Contabil . "', Centro_Custo = '" . $Centro_Custo . "', Conta_Desconto = '" . $Conta_Desconto . "', Historico = '" . $Historico . "', Parc_Ini = '" . $Parc_Ini . "', Parc_Fim = '" . $Parc_Fim . "', RepCodBar = '" . $RepCodBar . "', Valor = '" . $Valor . "', Saldo = '" . $Saldo . "', Vencimento = '" . $Vencimento . "', Vencimento_Original =  '" . $Vencimento_Original . "', Conta_Provisao = '" . $Conta_Provisao . "', Empresa = '" . $Empresa . "', Docto = '" . $Docto . "', tipodocto = '" . $tipodocto . "', meio_pagamento = '" . $meioPagamento . "'";
+
+        if ($os_manual) {
+            $query = $query . ", os_manual = '$os_manual'";
+        }
+        if ($navio_manual) {
+            $query = $query . ", navio_manual = '$navio_manual'";
+        }
+        if ($porto_manual) {
+            $query = $query . ", porto_manual = '$porto_manual'";
+        }
 
         $result = $database->doUpdate('contas_aberto', $query, 'Chave = ' . $Chave);
 
@@ -989,11 +1009,21 @@ class Contas
         }
     }
 
-    public static function updateContaFornecedor($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $RepCodBar, $Centro_Custo, $Historico, $Conta_Desconto, $Parc_Ini, $Parc_Fim, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix)
+    public static function updateContaFornecedor($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $RepCodBar, $Centro_Custo, $Historico, $Conta_Desconto, $Parc_Ini, $Parc_Fim, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix, $os_manual = null, $navio_manual = null, $porto_manual = null)
     {
         $database = new Database();
 
         $query = "Lancto = '" . $Lancto . "', Tipo = '" . $Tipo . "', Pessoa = '" . $Pessoa . "', Conta_Contabil = '" . $Conta_Contabil . "', RepCodBar = '" . $RepCodBar . "', Centro_Custo = '" . $Centro_Custo . "', Historico = '" . $Historico . "', Conta_Desconto = '" . $Conta_Desconto . "', Parc_Ini = '" . $Parc_Ini . "', Parc_Fim = '" . $Parc_Fim . "', Valor = '" . $Valor . "', Saldo = '" . $Saldo . "', Vencimento = '" . $Vencimento . "', Vencimento_Original =  '" . $Vencimento_Original . "', Conta_Provisao = '" . $Conta_Provisao . "', Empresa = '" . $Empresa . "', Docto = '" . $Docto . "', tipodocto = '" . $tipodocto . "', meio_pagamento = '" . $meioPagamento . "'";
+
+        if ($os_manual) {
+            $query = $query . ", os_manual = '$os_manual'";
+        }
+        if ($navio_manual) {
+            $query = $query . ", navio_manual = '$navio_manual'";
+        }
+        if ($porto_manual) {
+            $query = $query . ", porto_manual = '$porto_manual'";
+        }
 
         $result = $database->doUpdate('contas_aberto', $query, 'Chave = ' . $Chave);
 
@@ -1225,7 +1255,9 @@ class Contas
                                           GROUP_CONCAT((SELECT SUM(os_servicos_itens.valor1) FROM os LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os WHERE os.centro_custo = contas_aberto.centro_custo AND os_servicos_itens.cancelada != 1 AND os_servicos_itens.tipo_sub = '2'  ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS recieved,
                                           GROUP_CONCAT((SELECT os_servicos_itens.Moeda FROM os LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS os_moeda,
                                           GROUP_CONCAT((SELECT os_navios.nome FROM os LEFT JOIN os_navios ON os.chave_navio = os_navios.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio,
-                                          GROUP_CONCAT((SELECT os_portos.Descricao FROM os LEFT JOIN os_portos ON os.porto = os_portos.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto",
+                                          GROUP_CONCAT((SELECT os_portos.Descricao FROM os LEFT JOIN os_portos ON os.porto = os_portos.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto,                                          GROUP_CONCAT((SELECT os_navios.nome FROM os LEFT JOIN os_navios ON os.chave_navio = os_navios.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio,
+                                          GROUP_CONCAT((SELECT os_navios.nome FROM contas_aberto AS Cont LEFT JOIN os_navios ON Cont.navio_manual = os_navios.chave WHERE Cont.chave = contas_aberto.chave ORDER BY Cont.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio_manual,                                          GROUP_CONCAT((SELECT os_navios.nome FROM os LEFT JOIN os_navios ON os.chave_navio = os_navios.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio_manual,
+                                          GROUP_CONCAT((SELECT os_portos.Descricao FROM contas_aberto AS Cont LEFT JOIN os_portos ON Cont.porto_manual = os_portos.chave WHERE Cont.chave = contas_aberto.chave ORDER BY Cont.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto_manual",
                 $where . " " . $groupBy
             );
             $database->closeConection();
@@ -1252,7 +1284,9 @@ class Contas
                         GROUP_CONCAT((SELECT SUM(os_servicos_itens.valor1) FROM os LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os WHERE os.centro_custo = contas_aberto.centro_custo AND os_servicos_itens.cancelada != 1 AND os_servicos_itens.tipo_sub = '2'  ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS recieved,
                         GROUP_CONCAT((SELECT os_servicos_itens.Moeda FROM os LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS os_moeda,
                         GROUP_CONCAT((SELECT os_navios.nome FROM os LEFT JOIN os_navios ON os.chave_navio = os_navios.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio,
-                        GROUP_CONCAT((SELECT os_portos.Descricao FROM os LEFT JOIN os_portos ON os.porto = os_portos.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto",
+                        GROUP_CONCAT((SELECT os_portos.Descricao FROM os LEFT JOIN os_portos ON os.porto = os_portos.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto,                                          GROUP_CONCAT((SELECT os_navios.nome FROM os LEFT JOIN os_navios ON os.chave_navio = os_navios.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio,
+                        GROUP_CONCAT((SELECT os_navios.nome FROM contas_aberto AS Cont LEFT JOIN os_navios ON Cont.navio_manual = os_navios.chave WHERE Cont.chave = contas_aberto.chave ORDER BY Cont.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio_manual,                                          GROUP_CONCAT((SELECT os_navios.nome FROM os LEFT JOIN os_navios ON os.chave_navio = os_navios.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio_manual,
+                        GROUP_CONCAT((SELECT os_portos.Descricao FROM contas_aberto AS Cont LEFT JOIN os_portos ON Cont.porto_manual = os_portos.chave WHERE Cont.chave = contas_aberto.chave ORDER BY Cont.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto_manual",
                 "1=1 " . $groupBy
             );
         }

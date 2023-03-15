@@ -6,6 +6,7 @@ import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import Skeleton from '../../../components/skeleton'
 import loader from '../../../classes/loader'
+import AddButton from '../../../components/addButton';
 import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { NOME_EMPRESA } from '../../../config'
@@ -119,11 +120,11 @@ class Faturas extends Component {
                                 async () => {
                                     const formularios = await loader.getBase('getFormularios.php');
 
-                                    
+
                                     const nfe = formularios.find((form) => form.Codigo === "NFE");
 
                                     if (nfe) {
-                                        this.setState({loading:true})
+                                        this.setState({ loading: true })
                                         await apiEmployee.post(`insertFatura.php`, {
                                             token: true,
                                             values: `'${moment(body.Emissao).format('YYYY-MM-DD')}', '${moment(body.Vencto).format('YYYY-MM-DD')}', '${body.Praca_Pagto}', '${body.Cliente}', '${body.Valor}', '${body.Obs}', '${nfe.chave}', '${body.Cobranca}', '${body.discriminacaoservico}', '${body.empresa}', '${body.atividade}'`,
@@ -132,17 +133,17 @@ class Faturas extends Component {
                                             async response => {
                                                 if (response.data[0]) {
                                                     await loader.salvaLogs('faturas', this.state.usuarioLogado.codigo, null, "Inserir", response.data[0].chave);
-                                                    
+
                                                     document.location.reload()
                                                 }
                                             },
                                             async response => {
                                                 this.erroApi(response)
                                             }
-                                            )
-                                            this.setState({loading:false});
-                                        }
-                                        onClose()
+                                        )
+                                        this.setState({ loading: false });
+                                    }
+                                    onClose()
                                 }
                             }
 
@@ -180,8 +181,8 @@ class Faturas extends Component {
                             onClick={
                                 async () => {
                                     if (fatura != 0) {
-                                        this.setState({cancelaModal: true, chaveCancela: chave});
-                                    
+                                        this.setState({ cancelaModal: true, chaveCancela: chave });
+
                                     } else {
                                         await apiEmployee.post(`eraseFatura.php`, {
                                             token: true,
@@ -190,7 +191,7 @@ class Faturas extends Component {
                                             async response => {
                                                 if (response.data == true) {
                                                     await loader.salvaLogs('faturas', this.state.usuarioLogado.codigo, null, "Deleção", this.state.chaveCancela);
-    
+
                                                     document.location.reload()
                                                 }
                                             },
@@ -266,95 +267,95 @@ class Faturas extends Component {
                                 <br />
                             </section>
                             <Modal
-                            aria-labelledby="transition-modal-title"
-                            aria-describedby="transition-modal-description"
-                            style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
-                            open={this.state.cancelaModal}
-                            onClose={async () => { await this.setState({ cancelaModal: false }); }}
-                        >
-                            <div className='modalContainer'>
-                                <div className='modalCriar'>
-                                    <div className='containersairlistprodmodal'>
-                                        <div className='botaoSairModal' onClick={async () => await this.setState({ cabecalhoModal: false })}>
-                                            <span>X</span>
+                                aria-labelledby="transition-modal-title"
+                                aria-describedby="transition-modal-description"
+                                style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
+                                open={this.state.cancelaModal}
+                                onClose={async () => { await this.setState({ cancelaModal: false }); }}
+                            >
+                                <div className='modalContainer'>
+                                    <div className='modalCriar'>
+                                        <div className='containersairlistprodmodal'>
+                                            <div className='botaoSairModal' onClick={async () => await this.setState({ cabecalhoModal: false })}>
+                                                <span>X</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className='modalContent'>
-                                        <div className='tituloModal'>
-                                            <span>Cancelar nota:</span>
-                                        </div>
+                                        <div className='modalContent'>
+                                            <div className='tituloModal'>
+                                                <span>Cancelar nota:</span>
+                                            </div>
 
 
-                                        <div className='modalForm'>
-                                            <Formik
-                                                initialValues={{
-                                                    name: '',
-                                                }}
-                                                onSubmit={async values => {
-                                                    await new Promise(r => setTimeout(r, 1000))
-                                                    await Xml.cancelaXml(this.state.chaveCancela, this.state.motivo);
-                                                    await apiEmployee.post(`deleteFatura.php`, {
-                                                        token: true,
-                                                        chave: this.state.chaveCancela,
-                                                        data: moment().format('YYYY-MM-DD')
-                                                    }).then(
-                                                        async response => {
-                                                            if (response.data == true) {
-                                                                await loader.salvaLogs('faturas', this.state.usuarioLogado.codigo, null, "Cancelamento", this.state.chaveCancela);
-                
-                                                                document.location.reload()
+                                            <div className='modalForm'>
+                                                <Formik
+                                                    initialValues={{
+                                                        name: '',
+                                                    }}
+                                                    onSubmit={async values => {
+                                                        await new Promise(r => setTimeout(r, 1000))
+                                                        await Xml.cancelaXml(this.state.chaveCancela, this.state.motivo);
+                                                        await apiEmployee.post(`deleteFatura.php`, {
+                                                            token: true,
+                                                            chave: this.state.chaveCancela,
+                                                            data: moment().format('YYYY-MM-DD')
+                                                        }).then(
+                                                            async response => {
+                                                                if (response.data == true) {
+                                                                    await loader.salvaLogs('faturas', this.state.usuarioLogado.codigo, null, "Cancelamento", this.state.chaveCancela);
+
+                                                                    document.location.reload()
+                                                                }
+                                                            },
+                                                            async response => {
+                                                                this.erroApi(response)
                                                             }
-                                                        },
-                                                        async response => {
-                                                            this.erroApi(response)
-                                                        }
-                                                    )
-                                                }}
-                                            >
-                                                <Form className="contact-form" >
+                                                        )
+                                                    }}
+                                                >
+                                                    <Form className="contact-form" >
 
 
-                                                    <div className="row">
+                                                        <div className="row">
 
-                                                        <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
+                                                            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
 
-                                                            <div className="row addservicos">
-                                                                <div style={{marginTop: 0}} className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                    <label>Motivo:</label>
-                                                                </div>
-                                                                <div className="col-1 errorMessage">
+                                                                <div className="row addservicos">
+                                                                    <div style={{ marginTop: 0 }} className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                        <label>Motivo:</label>
+                                                                    </div>
+                                                                    <div className="col-1 errorMessage">
 
-                                                                </div>
-                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Field className="form-control" type="text" value={this.state.motivo} onChange={async e => { this.setState({ motivo: e.currentTarget.value }) }} />
+                                                                    </div>
+                                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                        <Field className="form-control" type="text" value={this.state.motivo} onChange={async e => { this.setState({ motivo: e.currentTarget.value }) }} />
+                                                                    </div>
                                                                 </div>
                                                             </div>
+                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
                                                         </div>
-                                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
-                                                    </div>
 
-                                                    <div className="row">
-                                                        <div className="col-2"></div>
-                                                        <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                            <button type="submit" style={{ width: 300 }} >Cancelar</button>
+                                                        <div className="row">
+                                                            <div className="col-2"></div>
+                                                            <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                                <button type="submit" style={{ width: 300 }} >Cancelar</button>
+                                                            </div>
+                                                            <div className="col-2"></div>
                                                         </div>
-                                                        <div className="col-2"></div>
-                                                    </div>
 
-                                                </Form>
-                                            </Formik>
+                                                    </Form>
+                                                </Formik>
 
+                                            </div>
                                         </div>
-                                    </div>
 
 
 
 
+
+                                    </div >
 
                                 </div >
-
-                            </div >
-                        </Modal >
+                            </Modal >
 
                             <div className="row">
                                 <div className="col-2"></div>
@@ -386,6 +387,9 @@ class Faturas extends Component {
                                 </div>
                             </div>
 
+                            <AddButton addLink={{
+                                pathname: `/financeiro/addfatura/0`
+                            }} />
 
                             <div className="row deleteMargin" id="product-list">
                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>

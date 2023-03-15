@@ -1,18 +1,19 @@
-.centerDiv {
-	width: 100%;
+.centerDivAbsolute {
+	width: 100vw;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	position: fixed;
+	top: 25%;
+	z-index: 500;
 }
 
 .alertMessage {
 	display: flex;
 	flex-direction: column;
 	padding: 3px;
-	position: fixed;
-	top: 25%;
-	width: 30%;
 	min-width: 300px;
+	max-width: 30%;
 	background: #FFFFFF;
 	box-shadow: 0px 0px 15px black;
 	font-size: 1.2em;
@@ -23,7 +24,10 @@
 	min-height: 50px;
 	cursor: pointer;
 	user-select: none;
-	z-index: 500;
+}
+
+.alertConfirm {
+	border-top: 3px solid gold;
 }
 
 .alertTitle {
@@ -35,4 +39,14 @@
 
 .alertContent {
 	width: 100%;
+}
+
+.confirmButtons {
+	padding-top: 10px;
+	width: 90%;
+	margin-left: 5%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
 }

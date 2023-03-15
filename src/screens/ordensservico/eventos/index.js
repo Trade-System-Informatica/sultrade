@@ -14,6 +14,7 @@ import 'react-confirm-alert/src/react-confirm-alert.css'
 import moment from 'moment'
 import loader from '../../../classes/loader'
 import ModalItem from '../../../components/modalItem'
+import AddButton from '../../../components/addButton'
 
 const estadoInicial = {
     name: '',
@@ -123,7 +124,7 @@ class Eventos extends Component {
     }
 
     deleteServicoItem = async (chave, nome) => {
-        this.setState({deleteEvento: true})
+        this.setState({ deleteEvento: true })
         confirmAlert({
             customUI: ({ onClose }) => {
                 return (
@@ -276,6 +277,8 @@ class Eventos extends Component {
 
                                 </div>
                             </div>
+
+                            <AddButton addLink={{ pathname: `/ordensservico/addevento/0`, state: { evento: {} } }}/>
 
 
                             <div className="row deleteMargin" id="product-list">

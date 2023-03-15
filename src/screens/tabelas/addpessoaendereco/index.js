@@ -85,6 +85,7 @@ const estadoInicial = {
     acessosPermissoes: [],
 
     bloqueado: false,
+    savedRedirect: false
 }
 
 class AddPessoaEndereco extends Component {
@@ -212,7 +213,7 @@ class AddPessoaEndereco extends Component {
             token: true, chave: this.state.chave_pessoa
         }).then(
             async res => {
-                if (!res.data[0].cpf) {
+                if (!res.data[0] || !res.data[0].cpf) {
                     this.setState({uf: 81, ufNome: "EXTERIOR"});
                 }
             }, 
@@ -289,7 +290,7 @@ class AddPessoaEndereco extends Component {
                         await loader.salvaLogs('pessoas_enderecos', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
 
                         
-                        await this.setState({ loading: false, bloqueado: false })
+                        await this.setState({ loading: false, bloqueado: false, savedRedirect: true })
                     } else {
                         alert(`Erro: ${JSON.stringify(res)}`)
                     }
@@ -316,7 +317,7 @@ class AddPessoaEndereco extends Component {
                     if (res.data === true) {
                         await loader.salvaLogs('pessoas_enderecos', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `ENDERECO: ${this.state.endereco}`);
 
-                        await this.setState({ loading: false, bloqueado: false })
+                        await this.setState({ loading: false, bloqueado: false, savedRedirect: true })
                     } else {
                         await alert(`Erro ${JSON.stringify(res)}`)
                     }
@@ -389,6 +390,12 @@ class AddPessoaEndereco extends Component {
             <div className='allContent'>
                 {this.state.redirect &&
                     <Redirect to={'/'} />
+                }
+                {this.state.savedRedirect && this.props.location.state.backTo == "enderecos" &&
+                    <Redirect to={{ pathname: `/tabelas/pessoaenderecos/${this.state.chave_pessoa}` }} />
+                }
+                {this.state.savedRedirect && this.props.location.state.backTo == "addpessoa" &&
+                    <Redirect to={{ pathname: `/tabelas/addpessoa/${this.state.chave_pessoa}` }} />
                 }
 
                 <section>

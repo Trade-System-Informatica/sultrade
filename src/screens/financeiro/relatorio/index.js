@@ -445,9 +445,9 @@ class Relatorio extends Component {
                                             if (parseFloat(balance.replaceAll('.', '').replaceAll(",", ".")) > 0) {
                                                 return (
                                                     <tr style={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#999999" }}>
-                                                        <td style={{ backgroundColor: "inherit" }}>{e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : ''}</td>
+                                                        <td style={{ backgroundColor: "inherit" }}>{e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : e.navio_manual ? util.removeAcentos(e.navio_manual.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ backgroundColor: "inherit" }}>{e.porto ? util.removeAcentos(e.porto.split('@.@')[index]) : ''}</td>
+                                                        <td style={{ backgroundColor: "inherit" }}>{e.porto ? util.removeAcentos(e.porto.split('@.@')[index]) : e.porto_manual ? util.removeAcentos(e.porto_manual.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.sailed ? moment(e.sailed.split('@.@')[index]).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.sailed.split('@.@')[index]).format("DD/MM/YYYY") : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {FDA}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.ROE ? e.ROE.split("@.@")[index] : ""}</td>

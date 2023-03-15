@@ -1,0 +1,19 @@
+.emailLinks {
+    color: white; 
+    font-size: 0.7;
+    cursor: pointer;
+}
+
+.emailLinks:hover {
+    text-decoration: underline;
+}
+
+.selectedList {
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.selectedList:hover {
+    text-decoration: underline;
+}

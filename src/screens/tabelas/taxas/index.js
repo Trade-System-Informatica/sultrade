@@ -6,7 +6,8 @@ import Rodape from '../../../components/rodape'
 import loader from '../../../classes/loader'
 import ModalItem from '../../../components/modalItem'
 import Skeleton from '../../../components/skeleton'
-import { Link,  Redirect } from 'react-router-dom'
+import AddButton from '../../../components/addButton';
+import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { PRECISA_LOGAR, NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -100,7 +101,7 @@ class Taxas extends Component {
     }
 
     deleteTaxa = async (chave, nome) => {
-        this.setState({deleteTaxa: true})
+        this.setState({ deleteTaxa: true })
         confirmAlert({
             customUI: ({ onClose }) => {
                 return (
@@ -152,16 +153,16 @@ class Taxas extends Component {
     }
 
     reverterItens = async () => {
-        await this.setState({loading: true})
+        await this.setState({ loading: true })
         const taxas = this.state.taxas.reverse();
 
         if (this.state.direcaoTabela == faChevronDown) {
-            await this.setState({direcaoTabela: faChevronUp});
+            await this.setState({ direcaoTabela: faChevronUp });
         } else {
-            await this.setState({direcaoTabela: faChevronDown});
-        } 
+            await this.setState({ direcaoTabela: faChevronDown });
+        }
 
-        await this.setState({taxas, loading: false});
+        await this.setState({ taxas, loading: false });
     }
 
     filtrarPesquisa = (taxas) => {
@@ -195,7 +196,7 @@ class Taxas extends Component {
                     {!this.state.loading &&
                         <div>
                             <section>
-                                <Header voltarTabelas taxas titulo="Taxas"/>
+                                <Header voltarTabelas taxas titulo="Taxas" />
 
                                 <br />
                             </section>
@@ -219,22 +220,25 @@ class Taxas extends Component {
                                     </div>
 
                                     <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
+                                            <div className='col-2'></div>
                                         <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
                                             <option value={1}>Descrição</option>
                                             <option value={2}>Valor</option>
                                             <option value={3}>Chave</option>
                                         </select>
                                         <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
-                                        {!this.state.taxas[0] &&
                                             <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-center">
-                                                <Link to={{ pathname: `/tabelas/addtaxa/0` }}><button className="btn btn-success">Adicionar Taxa</button></Link>
-                                            </div>}
+                                                <Link to={{ pathname: `/tabelas/addtaxa/0` }}><button className="btn btn-success">+</button></Link>
+                                            </div>
                                     </div>
 
                                 </div>
                             </div>
 
-
+                            <AddButton addLink={{
+                                pathname: `/tabelas/addtaxa/0`,
+                                state: { taxa: { } }
+                            }} />
 
                             <div className="row deleteMargin" id="product-list">
                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
@@ -284,7 +288,7 @@ class Taxas extends Component {
                                 {this.state.taxas[0] != undefined && this.state.taxas.filter(this.filtrarPesquisa).map((feed, index) => (
                                     <div key={feed.id} className="row row-list">
                                         <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
-                                        <div ref={feed.chave ==  this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-8 col-md-8 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.chave == this.state.chaveFocus ? "par focusLight" : "par ": feed.chave == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
+                                        <div ref={feed.chave == this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-8 col-md-8 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.chave == this.state.chaveFocus ? "par focusLight" : "par " : feed.chave == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
                                             {window.innerWidth >= 500 &&
                                                 <div className="row deleteMargin alignCenter">
                                                     <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">

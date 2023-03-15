@@ -5,6 +5,7 @@ import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import Skeleton from '../../../components/skeleton'
 import SkeletonPesquisa from '../../../components/skeletonpesquisa'
+import AddButton from '../../../components/addButton';
 import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -58,7 +59,7 @@ class Ships extends Component {
             if (this.refs.focusMe) {
                 await this.refs.focusMe.focus();
             } else {
-                await this.setState({pesquisa: this.state.chaveFocus, tipoPesquisa: 3})
+                await this.setState({ pesquisa: this.state.chaveFocus, tipoPesquisa: 3 })
             }
         }
 
@@ -130,7 +131,7 @@ class Ships extends Component {
     }
 
     deleteShip = async (id, nome) => {
-        this.setState({deleteNavio: true})
+        this.setState({ deleteNavio: true })
         confirmAlert({
             customUI: ({ onClose }) => {
                 return (
@@ -192,16 +193,16 @@ class Ships extends Component {
     }
 
     reverterItens = async () => {
-        await this.setState({loading: true})
+        await this.setState({ loading: true })
         const navios = this.state.navios.reverse();
 
         if (this.state.direcaoTabela == faChevronDown) {
-            await this.setState({direcaoTabela: faChevronUp});
+            await this.setState({ direcaoTabela: faChevronUp });
         } else {
-            await this.setState({direcaoTabela: faChevronDown});
-        } 
+            await this.setState({ direcaoTabela: faChevronDown });
+        }
 
-        await this.setState({navios, loading: false});
+        await this.setState({ navios, loading: false });
     }
 
     filtrarPesquisa = (navios) => {
@@ -256,16 +257,16 @@ class Ships extends Component {
                                         </div>
 
                                         <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
+                                            <div className='col-2'></div>
                                             <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
                                                 <option value={1}>Nome</option>
                                                 <option value={2}>Bandeira</option>
                                                 <option value={3}>Chave</option>
                                             </select>
                                             <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
-                                            {!this.state.navios[0] &&
                                                 <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
-                                                    <Link to={{ pathname: `/tabelas/addship/0` }}><button className="btn btn-success">Adicionar Navio</button></Link>
-                                                </div>}
+                                                    <Link to={{ pathname: `/tabelas/addship/0` }}><button className="btn btn-success">+</button></Link>
+                                                </div>
                                         </div>
 
                                     </div>
@@ -276,6 +277,11 @@ class Ships extends Component {
                             {this.state.loadingPesquisa &&
                                 <SkeletonPesquisa />
                             }
+
+                            <AddButton addLink={{
+                                pathname: `/tabelas/addship/0`,
+                                state: { ship: {} }
+                            }} />
 
                             <div className="row deleteMargin" id="product-list">
                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
@@ -319,7 +325,7 @@ class Ships extends Component {
                                 <div className="col-lg-2 col-md-2 col-sm-0 col-0"></div>
                                 <div className="col-lg-8 col-md-8 col-sm-12 mobileajuste14 ">
                                     {this.state.navios[0] != undefined && this.state.navios.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (
-                                        <div ref={feed.chave ==  this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-12 col-md-12 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.chave == this.state.chaveFocus ? "par focusLight" : "par ": feed.chave == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
+                                        <div ref={feed.chave == this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-12 col-md-12 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.chave == this.state.chaveFocus ? "par focusLight" : "par " : feed.chave == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
 
                                             {window.innerWidth >= 500 &&
                                                 <div className="row ">

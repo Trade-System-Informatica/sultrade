@@ -324,6 +324,25 @@ class OS {
 
     }
 
+    public static function getValoresOS($chave){
+        $database = new Database();
+
+        $result = $database->doSelect('os 
+        left join os_servicos_itens on os.chave=os_servicos_itens.chave_os',
+
+            'os.bankCharges,
+            os.governmentTaxes,
+        os_servicos_itens.valor,
+        os_servicos_itens.moeda',
+
+            "os.chave = '" . $chave . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0
+            ORDER BY os_servicos_itens.ordem ASC"
+                                    );
+        $database->closeConection();
+        return $result;
+
+    }
+
     public static function gerarRelatorioOS($where)
     {
         $database = new Database();
@@ -341,7 +360,7 @@ class OS {
                 os_portos.Descricao AS portoNome,
                 os.eta AS ETA,
                 os.etb AS ETB,
-                os.atb AS ETS,
+                os.data_saida AS ETS,
                 ((IFNULL((SELECT SUM(os_servicos_itens.valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0) / os.ROE) + IFNULL((SELECT SUM(os_servicos_itens.valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0)) as valor,
                 ((IFNULL((SELECT SUM(os_servicos_itens.desconto_valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0) / os.ROE) + IFNULL((SELECT SUM(os_servicos_itens.desconto_valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0)) as desconto,
                 pessoas.Nome AS pessoaNome,
@@ -408,7 +427,7 @@ class OS {
         $values .= ", '$ordem'";
 
         if ($chave_os) {
-            $os = $database->doSelect("os_servicos_itens", "os_servicos_itens", "chave_os = $chave_os");
+            $os = $database->doSelect("os_servicos_itens", "os_servicos_itens.*", "chave_os = $chave_os");
 
             foreach ($os as $item) {
                 if ($item["ordem"] >= $ordem) {

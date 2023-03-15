@@ -14,6 +14,7 @@ import 'react-confirm-alert/src/react-confirm-alert.css'
 import moment from 'moment'
 import loader from '../../../classes/loader'
 import ModalItem from '../../../components/modalItem'
+import AddButton from '../../../components/addButton'
 
 
 const estadoInicial = {
@@ -249,6 +250,7 @@ class OS extends Component {
 
                                     <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
                                         <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
+                                            <div className='col-2'></div>
                                             <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={async (e) => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
                                                 <option value={1}>Codigo</option>
                                                 <option value={2}>Navio</option>
@@ -258,6 +260,9 @@ class OS extends Component {
                                             <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={async e => { await this.pesquisa(e.currentTarget.value) }} />
                                             <div>
                                                 <Link to={{ pathname: `/ordensservico/relatorio` }}><button className="btn btn-success">Relatorio</button></Link>
+                                            </div>
+                                            <div style={{ marginLeft: 15 }}>
+                                                <Link to={{pathname: "/ordensservico/addos/0"}}><button className="btn btn-success">+</button></Link>
                                             </div>
                                         </div>
                                         <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
@@ -286,7 +291,7 @@ class OS extends Component {
                                 </div>
                             </div>
 
-
+                            <AddButton addlink={{pathname: "/ordensservico/addos/0"}}/>
                                         
                             <div className="row deleteMargin" id="product-list">
                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>

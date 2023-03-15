@@ -811,7 +811,7 @@ class ModalListas extends Component {
             Cnpj_Cpf: this.state.clienteCpfLimpo
         }).then(
             async res => {
-                if (!res.data[0] || res.data[0].Chave == this.state.clienteChave) {
+                if (!res.data[0] || res.data[0].Chave == this.state.clienteChave || !this.state.clienteCpfLimpo) {
                     await this.setState({ cpfAprovado: true })
                 } else {
                     this.setState({

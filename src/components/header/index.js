@@ -14,6 +14,8 @@ import 'react-confirm-alert/src/react-confirm-alert.css'
 import moment from 'moment'
 
 import './styles.css'
+import loader from '../../classes/loader'
+import Alert from '../alert'
 
 class Header extends Component {
     state = {
@@ -26,7 +28,10 @@ class Header extends Component {
         usuarioLogado: this.props.user,
         acessos: [],
         permissoes: [],
-        acessosPermissoes: []
+        acessosPermissoes: [],
+
+        anexosVencidos: [],
+        alert: {msg: "", type: ""}
     }
 
     fazerLogout = async () => {
@@ -81,19 +86,45 @@ class Header extends Component {
         await this.setState({ redirect: true })
     }
 
+    sendEmails = async () => {
+        this.setState({alert: {msg: "", type: ""}})
+        
+        await loader.anexosVencidosEmails(this.state.anexosVencidos);
+    }
+
     componentDidMount = async () => {
+        await this.carregaTiposAcessos()
+        await this.carregaPermissoes()
+        await this.testaAcesso()
+
         if (!this.props.user.codigo) {
             await this.setState({ redirect: true })
         } else {
+            if (this.props.user.justLogged) {
+                let permission = false;
+                this.state.acessosPermissoes.map((e) => {
+                    if ((e.acessoAcao == "ANEXOS" && e.permissaoEdita != 0)) {
+                        permission = true;
+                    }
+                })
+
+                if (permission) {
+                    const anexos = await loader.testaAnexosVencimentos();
+                    
+                    if (anexos[0]) {
+                        this.setState({anexosVencidos: anexos});
+                        this.setState({alert: {type: "confirm", msg: `Há tarifas vencidas. Deseja enviar emails automáticamente?
+                        Vencimentos: (${anexos.map((anexo) => anexo.fornecedorNome).join(", ")})`}});
+                    }
+                }
+            }
+
             if (this.props.user.expiry && moment().isSameOrBefore(this.props.user.expiry)) {
                 await this.props.extendExpiration({ ...this.props.user });
             } else if (this.props.user.expiry) {
                 await this.expirarSessao();
             }
         }
-        await this.carregaTiposAcessos()
-        await this.carregaPermissoes()
-        await this.testaAcesso()
     }
 
     carregaTiposAcessos = async () => {
@@ -152,6 +183,11 @@ class Header extends Component {
                     <Redirect to={'/'} />
                 }
                 <div className="header">
+                        <Alert
+                            alert={this.state.alert}
+                            setAlert={(e) => this.setState({alert: e})}
+                            alertFunction={() => this.sendEmails()}
+                        />
 
                     <div className="headerSimbolos">
                         <div className="setaAcima">
@@ -259,6 +295,11 @@ class Header extends Component {
                             }
                             {this.props.voltarTiposDocumentos &&
                                 <Link to={{ pathname: `/tabelas/tiposdocumentos`, state: { chave: this.props.chave } }}>
+                                    <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
+                                </Link>
+                            }
+                            {this.props.voltarAnexos &&
+                                <Link to={{ pathname: `/ordensservico/anexos`, state: { chave: this.props.chave } }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
@@ -469,6 +510,11 @@ class Header extends Component {
                                                     {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                                         <Link className="dropdown-item" to={{ pathname: `/ordensservico/eventos` }}>
                                                             Solitações de Serviço
+                                                        </Link>
+                                                    }
+                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'ANEXOS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                        <Link className="dropdown-item" to={{ pathname: `/ordensservico/anexos` }}>
+                                                            Tarifas de fornecedores
                                                         </Link>
                                                     }
                                                 </ul>

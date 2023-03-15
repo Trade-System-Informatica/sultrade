@@ -123,6 +123,15 @@ class Pessoas {
         $database->closeConection();
         return $result;
     }
+    
+    public static function getAnexos() {
+        $database = new Database();
+
+        $result = $database->doSelect("fornecedor_anexos LEFT JOIN pessoas ON fornecedor_anexos.fornecedor = pessoas.chave LEFT JOIN os_portos ON fornecedor_anexos.porto = os_portos.chave", "fornecedor_anexos.fornecedor, fornecedor_anexos.chave, GROUP_CONCAT(fornecedor_anexos.porto SEPARATOR '@') as porto, fornecedor_anexos.anexo, fornecedor_anexos.vencimento, fornecedor_anexos.servico, fornecedor_anexos.email_enviado, fornecedor_anexos.preferencial, pessoas.nome AS fornecedorNome, GROUP_CONCAT(os_portos.descricao SEPARATOR '@') AS portoNome", "1=1 GROUP BY fornecedor_anexos.fornecedor, fornecedor_anexos.vencimento, fornecedor_anexos.servico, fornecedor_anexos.preferencial ORDER BY fornecedor_anexos.preferencial DESC");
+
+        $database->closeConection();
+        return $result;
+    }
 
     public static function getEnderecos($pessoa) {
         $database = new Database();
@@ -140,6 +149,36 @@ class Pessoas {
 
         $database->closeConection();
         return $result;
+    }
+
+    public static function anexosVencimentos() {
+        $database = new Database();
+
+        $dataAtual = date("Y-m-d");
+
+        $result = $database->doSelect('fornecedor_anexos LEFT JOIN pessoas ON pessoas.chave = fornecedor_anexos.fornecedor', "fornecedor_anexos.fornecedor, fornecedor_anexos.anexo, fornecedor_anexos.servico, fornecedor_anexos.email_enviado, fornecedor_anexos.preferencial, GROUP_CONCAT(fornecedor_anexos.porto SEPARATOR '@') AS porto, pessoas.nome AS fornecedorNome", "fornecedor_anexos.vencimento < '$dataAtual' AND fornecedor_anexos.email_enviado = 0 GROUP BY fornecedor, servico, vencimento, preferencial");
+
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function getFornecedoresAnexosInfo($chave) {
+        $database = new Database();
+
+        $result = $database->doSelect("fornecedor_anexos LEFT JOIN pessoas ON pessoas.chave = fornecedor_anexos.fornecedor LEFT JOIN pessoas_contatos as emails ON emails.chave_pessoa = fornecedor_anexos.fornecedor AND emails.Tipo = 'EM'",'fornecedor_anexos.*, emails.Campo1 AS email, pessoas.nome AS nome', "fornecedor_anexos.chave = '$chave'");
+
+        $database->closeConection();
+        return $result;        
+    }
+
+    public static function anexosEnviados($chave) {
+        $database = new Database();
+
+        
+        $result = $database->doUpdate("fornecedor_anexos", "email_enviado = 1", "chave = '$chave'");
+
+        $database->closeConection();
+        return $result;        
     }
 
     public static function insertPessoa($values) {
@@ -186,6 +225,19 @@ class Pessoas {
         $cols = 'Tipo, Endereco, Numero, Complemento, Cidade, Cep, UF, bairro, Cidade_Descricao, pais, Chave_Pessoa';
     
         $result = $database->doInsert('pessoas_enderecos', $cols, $values);
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function insertAnexo($values, $portos) {
+        $database = new Database();
+        $cols = 'fornecedor, servico, anexo, vencimento, preferencial, porto';
+
+        foreach ($portos as $porto) {
+            $baseValues = $values.", $porto";
+            
+            $result = $database->doInsert('fornecedor_anexos', $cols, $baseValues);
+        }
         $database->closeConection();
         return $result;
     }
@@ -237,6 +289,53 @@ class Pessoas {
         }
     }
 
+    public static function updateAnexo($chave, $fornecedor, $anexo, $portos, $servico, $vencimento, $preferencial, $portosDeletados){
+        $database = new Database();
+
+        foreach ($portos as $porto) {
+            $itemExists = $database->doSelect('fornecedor_anexos', "fornecedor_anexos.chave", "porto = '$porto' AND fornecedor = '$fornecedor'");
+
+            if ($itemExists[0]) {
+                $query = "fornecedor = '" . $fornecedor . "', porto = '" . $porto . "', servico = '".$servico."', vencimento = '$vencimento', email_enviado = 0, preferencial = $preferencial";
+                
+                if ($anexo) {
+                    $query .= ", anexo = '$anexo'";
+                }
+                
+                $result = $database->doUpdate('fornecedor_anexos', $query, 'chave = '.$chave);
+            } else {
+
+                if ($anexo) {   
+                    $values = "'$fornecedor', '$porto', '$servico', '$anexo', '$vencimento', $preferencial";
+                } else {
+                    $brotherValue = $database->doSelect('fornecedor_anexos','fornecedor_anexos.anexo', "vencimento = '$vencimento' AND servico = '$servico' AND fornecedor = '$fornecedor'");
+                    if ($brotherValue[0]) {
+                        $values = "'$fornecedor', '$porto', '$servico', '".$brotherValue[0]["anexo"]."', '$vencimento', $preferencial";
+                    } else {
+                        $values = "'$fornecedor', '$porto', '$servico', '', '$vencimento', $preferencial";
+                    }
+                }
+
+
+                $cols = "fornecedor, porto, servico, anexo, vencimento, preferencial";
+
+                $result = $database->doInsert('fornecedor_anexos', $cols, $values);
+            }
+        }
+
+        foreach ($portosDeletados as $porto) {
+            $database->doDelete('fornecedor_anexos', "porto = '$porto' AND fornecedor = '$fornecedor' AND servico = '$servico' AND vencimento = '$vencimento'");
+        }
+
+
+        $database->closeConection();
+        if($result == NULL){
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+
     public static function deletePessoa($chave){
         $database = new Database();
     
@@ -263,5 +362,11 @@ class Pessoas {
         return $result;
     }
 
+    public static function deleteAnexo($chave){
+        $database = new Database();
+    
+        $result = $database->doDelete('fornecedor_anexos', 'chave = '.$chave);
+        $database->closeConection();
+        return $result;
+    }
 }
-?>

@@ -5,6 +5,7 @@ import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import loader from '../../../classes/loader'
 import Skeleton from '../../../components/skeleton'
+import AddButton from '../../../components/addButton';
 import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { NOME_EMPRESA } from '../../../config'
@@ -73,7 +74,6 @@ class ContasPagas extends Component {
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php'),
         })
-        console.log(this.state.contas);
 
         await this.getPessoas();
 
@@ -247,6 +247,10 @@ class ContasPagas extends Component {
                                             <div>
                                                 <Link to={{ pathname: `/financeiro/relatorio`, state: {backTo: 'contasPagas'} }}><button className="btn btn-success">Relatorio</button></Link>
                                             </div>
+                                            
+                                            <div style={{marginLeft: 15}}>
+                                                <Link to={{ pathname: `/financeiro/addconta/0`, state: { tipo: 1, to: 'contaspagas' } }}><button className="btn btn-success">+</button></Link>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -257,6 +261,7 @@ class ContasPagas extends Component {
                                 </div>
                             </div>
 
+                            <AddButton addLink={{ pathname: `/financeiro/addconta/0`, state: { tipo: 1, to: 'contaspagas' } }}/>
 
                             <div className="row deleteMargin" id="product-list">
                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>

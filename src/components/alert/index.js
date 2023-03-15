@@ -12,9 +12,9 @@ class Alert extends Component {
     }
 
     componentDidUpdate = async (prevprops, prevstate) => {
-        if (this.props != prevprops) {
+        if (this.props != prevprops && this.props.alert.type !== "confirm") {
             if (this.props.alert.msg) {
-                this.setState({timer: setTimeout(() => this.props.setAlert({type: "", msg: ""}), 10000)});
+                this.setState({ timer: setTimeout(() => this.props.setAlert({ type: "", msg: "" }), 10000) });
             } else {
                 clearTimeout(this.state.timer);
             }
@@ -24,20 +24,29 @@ class Alert extends Component {
     render() {
         return (
             <>
-            {this.props.alert.msg &&
-            <div className="centerDiv" onClick={() => this.props.setAlert({type: "", msg: ""})}>
-                <div className="alertMessage">
-                    <div className="alertTitle" style={{color: this.props.alert.type === "error" ? "red" : "green"}}>{this.props.alert.type}</div>
-                    <div>
-                        {this.props.alert.type === "error" &&
-                            <FontAwesomeIcon style={{color: "red"}} icon={faExclamationTriangle}/>
-                        }
-                        {this.props.alert.msg}
-                    </div>    
-                </div>
-            </div>
-            }
-        </>
+                {this.props.alert.msg &&
+                    <div className="centerDivAbsolute" onClick={() => this.props.alert.type == "confirm" ? {} : this.props.setAlert({ type: "", msg: "" })}>
+                        <div className={`alertMessage ${this.props.alert.type === "confirm" ? "alertConfirm" : ""}`}>
+                            <div className="alertTitle" style={{ color: this.props.alert.type === "error" ? "red" : "gold" }}>{this.props.alert.type == "error" ? "Erro" : ""}</div>
+                            <div>
+                                {this.props.alert.type === "confirm" &&
+                                    <FontAwesomeIcon style={{ color: "gold" }} icon={faExclamationTriangle} />
+                                }
+                                {this.props.alert.type === "error" &&
+                                    <FontAwesomeIcon style={{ color: "red" }} icon={faExclamationTriangle} />
+                                }
+                                {this.props.alert.msg}
+                                {this.props.alert.type === "confirm" &&
+                                    <div className="confirmButtons">
+                                        <button className="btn btn-success" style={{paddingLeft: 15, paddingRight: 15}} onClick={() => this.props.alertFunction()}>Sim</button>
+                                        <button className="btn btn-danger" style={{paddingLeft: 15, paddingRight: 15}} onClick={() => this.props.setAlert({type: "", msg: ""})}>Não</button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </>
         )
     }
 }

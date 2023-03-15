@@ -47,6 +47,7 @@ const estadoInicial = {
     acessosPermissoes: [],
 
     bloqueado: false,
+    savedRedirect: false
 }
 
 class AddPessoaContato extends Component {
@@ -181,7 +182,7 @@ class AddPessoaContato extends Component {
                         await this.setState({ chave: res.data[0].Chave })
                         await loader.salvaLogs('pessoas_contatos', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
 
-                        await this.setState({ loading: false, bloqueado: false })
+                        await this.setState({ loading: false, bloqueado: false, savedRedirect: true })
                     } else {
                         //alert(`Erro: ${res.data}`)
                     }
@@ -201,7 +202,7 @@ class AddPessoaContato extends Component {
                     if (res.data === true) {
                         await loader.salvaLogs('pessoas_contatos', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `CONTATO: ${this.state.campo1}`);
 
-                        await this.setState({ loading: false, bloqueado: false })
+                        await this.setState({ loading: false, bloqueado: false, savedRedirect: true })
                     } else {
                         //await alert(`Erro`)
                     }
@@ -247,6 +248,13 @@ class AddPessoaContato extends Component {
                 {this.state.redirect &&
                     <Redirect to={'/'} />
                 }
+                {this.state.savedRedirect && this.props.location.state.backTo == "contatos" &&
+                    <Redirect to={{ pathname: `/tabelas/pessoacontatos/${this.state.chave_pessoa}` }} />
+                }
+                {this.state.savedRedirect && this.props.location.state.backTo == "addpessoa" &&
+                    <Redirect to={{ pathname: `/tabelas/addpessoa/${this.state.chave_pessoa}` }} />
+                }
+
 
                 <section>
                     {this.props.location.state.backTo == 'addpessoa' &&
@@ -341,6 +349,7 @@ class AddPessoaContato extends Component {
                                                     }
                                                     {this.state.tipo == "PX" &&
                                                         <select className="form-control" value={this.state.campo2} onChange={async e => { this.setState({ campo2: e.currentTarget.value }) }}>
+                                                            <option value=""></option>
                                                             <option value="E-mail">E-mail</option>
                                                             <option value="Telefone">Celular</option>
                                                             <option value="CPF/CNPJ">CPF/CNPJ</option>

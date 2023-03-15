@@ -49,8 +49,13 @@ const estadoInicial = {
     logs: [],
     modalLog: false,
 
-    obs: '',
-    
+    corpo: '',
+    assunto: '',
+    anexos: [],
+    anexosNomes: [],
+    formats: [],
+    exts: [],
+
     dadosIniciais: '',
     dadosFinais: '',
 
@@ -116,7 +121,7 @@ const estadoInicial = {
     emailEnviado: [],
     dataEmail: '',
     emailsIniciais: [],
-    emailsFinais: []
+    emailsFinais: [],
 
 }
 
@@ -558,6 +563,7 @@ class AddEvento extends Component {
         if (!validFormEmail) {
             return;
         }
+
         await this.setState({ emailBloqueado: true, loading: true });
         await apiEmployee.post(`enviaEmail.php`, {
             token: true,
@@ -567,10 +573,14 @@ class AddEvento extends Component {
             navio: this.state.osOptions.find((e) => e.value == this.state.chave_os).navioNome,
             porto: this.state.osOptions.find((e) => e.value == this.state.chave_os).portoNome,
             evento: this.state.chave,
-            obs: this.state.obs
+            corpo: this.state.corpo,
+            assunto: this.state.assunto,
+            anexos: this.state.anexos,
+            anexosNomes: this.state.anexosNomes,
         }).then(
             async res => {
                 const { failures, successes } = res.data;
+
 
                 await this.setState({ evento: await loader.getOne(`getSolicitacao.php`, this.state.chave) });
                 await this.setState({
@@ -612,13 +622,49 @@ class AddEvento extends Component {
                 await this.setState({ contatos: response.data, fornecedorEmail: response.data.find((e) => e.Tipo == "EM") ? response.data.find((e) => e.Tipo == "EM").Campo1 : "" })
                 const emails = this.state.emails[0] ? this.state.emails : [];
                 const emailsFornecedores = this.state.fornecedorEmail ? this.state.fornecedorEmail.split("; ") : [];
-                console.log({emails, emailsFornecedores});
+                console.log({ emails, emailsFornecedores });
                 await this.setState({ emails: [...emails, ...emailsFornecedores] })
                 await this.setState({ loading: false })
             },
             response => { this.erroApi(response) }
 
         )
+    }
+
+    addAnexo = async (target) => {
+        const anexos = this.state.anexos;
+        const nomes = this.state.anexosNomes;
+        const formats = this.state.formats;
+        const exts = this.state.exts;
+
+        const nome = target.files[0].name;
+        const anexo = await util.getBase64(target.files[0]);
+
+        anexos.push(anexo)
+        formats.push(target.type);
+        exts.push(nome.split('.')[nome.split('.').length - 1]);
+        nomes.push(nome);
+
+        this.setState({
+            anexos,
+            anexosNomes: nomes,
+            formats,
+            exts
+        });
+    }
+
+    removeAnexo = async (index) => {
+        const anexos = this.state.anexos.filter((e, i) => i != index);
+        const nomes = this.state.anexosNomes.filter((e, i) => i != index);
+        const formats = this.state.formats.filter((e, i) => i != index);
+        const exts = this.state.exts.filter((e, i) => i != index);
+
+        this.setState({
+            anexos,
+            anexosNomes: nomes,
+            formats,
+            exts
+        });
     }
 
     registraEmails = async (emails) => {
@@ -735,6 +781,7 @@ class AddEvento extends Component {
                 ordem: this.state.ordem.replaceAll(',', '.')
             }).then(
                 async res => {
+                    console.log(res.data);
                     await this.setState({
                         evento: res.data[0],
 
@@ -791,7 +838,7 @@ class AddEvento extends Component {
                                 this.finalizaSalvamento()
                             }
                         } else {
-                            this.setState({emails: ""});
+                            this.setState({ emails: "" });
                             await this.getPessoaContatos(this.state.fornecedor)
                             await this.getPessoaContatos(this.state.fornecedorCusteio)
                             await this.setState({ bloqueado: false, emailModal: true, loading: false })
@@ -1129,15 +1176,42 @@ class AddEvento extends Component {
                                                                 </div>
                                                                 <div className="col-1"></div>
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstlabel">
-                                                                    <label>Observações</label>
+                                                                    <label>Assunto</label>
                                                                 </div>
                                                                 <div className="col-1 errorMessage">
-
+                                                                    {!this.state.assunto &&
+                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                    }
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Field className="form-control" type="text" component="textarea" value={this.state.obs} onChange={async e => { this.setState({ obs: e.currentTarget.value }) }} />
+                                                                    <Field className="form-control" type="text" value={this.state.assunto} onChange={async e => { this.setState({ assunto: e.currentTarget.value }) }} />
                                                                 </div>
                                                                 <div className="col-1"></div>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstlabel">
+                                                                    <label>Corpo</label>
+                                                                </div>
+                                                                <div className="col-1 errorMessage">
+                                                                    {!this.state.corpo &&
+                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                    }
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control" type="text" rows="4" component="textarea" value={this.state.corpo} onChange={async e => { this.setState({ corpo: e.currentTarget.value }) }} />
+                                                                </div>
+                                                                <div className="col-1"></div>
+
+                                                                <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
+                                                                    <label>Anexo</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'></div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                                    <Field className="form-control" type="file" value={""} onChange={async e => { this.addAnexo(e.currentTarget) }} />
+                                                                    <div>
+                                                                        {this.state.anexosNomes.map((e, i) => (
+                                                                            <span className="emailLinks" onClick={() => this.removeAnexo(i)}>{e}; </span>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
                                                                 {this.state.failures[0] &&
                                                                     <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                         <label>Emails inválidos:</label>
@@ -1300,6 +1374,19 @@ class AddEvento extends Component {
                                                             </select>
                                                         </div>
 
+                                                        {this.state.tipo == 0 &&
+                                                            <>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Repasse (reembolso)</label>
+                                                                </div>
+                                                                <div className='col-1'></div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <input className='form_control' checked={this.state.repasse} onChange={(e) => { this.setState({ repasse: e.target.checked, pessoa: '', tipo: '', contaDesconto: '', fornecedorCusteio: "", vlrc: e.target.checked ? this.state.valor : '0,00' }) }} type="checkbox" />
+                                                                </div>
+                                                                <div className='col-1'></div>
+                                                            </>
+                                                        }
+
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Taxa</label>
                                                         </div>
@@ -1310,7 +1397,7 @@ class AddEvento extends Component {
                                                         </div>
 
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.taxasOptions.filter(e => this.filterSearch(e, this.state.taxasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ taxasOptionsTexto: e }) }} value={this.state.taxasOptions.filter(option => option.value == this.state.taxa)[0]} search={true} onChange={(e) => { if (!this.state.valor || parseFloat(this.state.valor.replaceAll('.', "").replaceAll(",", ".")) == 0) { this.setState({ taxa: e.value, valor: e.money.replaceAll(",","").replaceAll(".",",") }) } else {this.setState({taxa: e.value})}}} />
+                                                            <Select className='SearchSelect' options={this.state.taxasOptions.filter(e => this.filterSearch(e, this.state.taxasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ taxasOptionsTexto: e }) }} value={this.state.taxasOptions.filter(option => option.value == this.state.taxa)[0]} search={true} onChange={(e) => { if (!this.state.valor || parseFloat(this.state.valor.replaceAll('.', "").replaceAll(",", ".")) == 0) { this.setState({ taxa: e.value, valor: e.money.replaceAll(",", "").replaceAll(".", ",") }) } else { this.setState({ taxa: e.value }) } }} />
                                                         </div>
                                                         <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
                                                             {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'TAXAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
@@ -1325,15 +1412,13 @@ class AddEvento extends Component {
                                                                 <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
                                                             }
                                                         </div>
-                                                        <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Select className='SearchSelect' isDisabled={this.state.tipo == 1} options={this.state.pessoasOptions.filter(e => this.filterSearch(e, this.state.pessoasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ pessoasOptionsTexto: e }) }} value={this.state.pessoasOptions.filter(option => option.value == this.state.fornecedor)[0]} search={true} onChange={(e) => { if (this.state.tipo != 1) { this.setState({ fornecedor: e.value }) } }} />
                                                         </div>
                                                         <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
                                                             {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 && this.state.tipo != 1 &&
                                                                 <div className='insideFormButton' onClick={() => { this.setState({ modalAberto: true, modal: 'listarCliente', modalPesquisa: this.state.fornecedor, modalLista: this.state.pessoas, fornecedorCusteioAtivo: false }) }}>...</div>
                                                             }
-                                                        </div>
-                                                        <div className='col-1'>
                                                         </div>
                                                         {!this.state.repasse &&
                                                             <>
@@ -1401,28 +1486,16 @@ class AddEvento extends Component {
 
                                                         <div className='col-1'></div>
 
-                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'EVENTOS_FINANCEIRO') { return e } }).map((e) => e.permissaoInsere)[0] == 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'EVENTOS_FINANCEIRO') { return e } }).map((e) => e.permissaoEdita)[0] == 1 &&
-                                                            <>
-                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                    <label>VCP</label>
-                                                                </div>
-                                                                <div className='col-1 errorMessage'>
-                                                                </div>
-                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Field className="form-control text-right" type="text" step="0.1" value={this.state.vlrc} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ vlrc: e.currentTarget.value }) }} onBlur={async e => { this.setState({ vlrc: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }) }} />
-                                                                </div>
-                                                                <div className='col-1 errorMessage'>
-                                                                </div>
-                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                    <label>Repasse (reembolso)</label>
-                                                                </div>
-                                                                <div className='col-1'></div>
-                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <input className='form_control' checked={this.state.repasse} onChange={(e) => { this.setState({ repasse: e.target.checked, pessoa: '', tipo: '', contaDesconto: '', fornecedorCusteio: "", vlrc: e.target.checked ? this.state.valor : '0,00' }) }} type="checkbox" />
-                                                                </div>
-                                                                <div className='col-1'></div>
-                                                            </>
-                                                        }
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>VCP</label>
+                                                        </div>
+                                                        <div className='col-1 errorMessage'>
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Field className="form-control text-right" type="text" step="0.1" value={this.state.vlrc} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ vlrc: e.currentTarget.value }) }} onBlur={async e => { this.setState({ vlrc: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }) }} />
+                                                        </div>
+                                                        <div className='col-1 errorMessage'>
+                                                        </div>
 
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Remarks</label>

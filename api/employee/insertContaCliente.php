@@ -15,13 +15,15 @@ if($objData != NULL){
     $meioPagamento = prepareInput($objData->meioPagamento);
     $valuesDarf = prepareInput($objData->valuesDarf);
 
+    $dadosManuais = prepareInput($objData->dadosManuais);
+
 
 
     $contas = new Contas();
 
 
 
-    $result = $contas->insertContaCliente($values, $meioPagamento, $valuesDarf);
+    $result = $contas->insertContaCliente($values, $meioPagamento, $valuesDarf, $dadosManuais);
 
 } else {
     $result = "false";

@@ -7,6 +7,7 @@ import Rodape from '../../../components/rodape'
 import ModalItem from '../../../components/modalItem'
 import Skeleton from '../../../components/skeleton'
 import SkeletonPesquisa from '../../../components/skeletonpesquisa'
+import AddButton from '../../../components/addButton';
 import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -96,7 +97,7 @@ class TiposDocumentos extends Component {
     }
 
     deleteTipoDocumento = async (id, nome) => {
-        this.setState({deleteTipoDocumento: true})
+        this.setState({ deleteTipoDocumento: true })
         confirmAlert({
             customUI: ({ onClose }) => {
                 return (
@@ -156,16 +157,16 @@ class TiposDocumentos extends Component {
     }
 
     reverterItens = async () => {
-        await this.setState({loading: true})
+        await this.setState({ loading: true })
         const tiposDocumentos = this.state.tiposDocumentos.reverse();
 
         if (this.state.direcaoTabela == faChevronDown) {
-            await this.setState({direcaoTabela: faChevronUp});
+            await this.setState({ direcaoTabela: faChevronUp });
         } else {
-            await this.setState({direcaoTabela: faChevronDown});
-        } 
+            await this.setState({ direcaoTabela: faChevronDown });
+        }
 
-        await this.setState({tiposDocumentos, loading: false});
+        await this.setState({ tiposDocumentos, loading: false });
     }
 
     filtrarPesquisa = (item) => {
@@ -193,7 +194,7 @@ class TiposDocumentos extends Component {
                     {!this.state.loading &&
                         <div>
                             <section>
-                                <Header voltarTabelas titulo="Tipos de Documentos"/>
+                                <Header voltarTabelas titulo="Tipos de Documentos" />
                                 <br />
 
                             </section>
@@ -210,7 +211,7 @@ class TiposDocumentos extends Component {
                                 itemDelete={this.state.itemDelete}
                                 acessosPermissoes={this.state.acessosPermissoes}
                             />
-                            
+
                             <div>
                                 <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-left">
                                     <div className="row mobileajuster3">
@@ -218,15 +219,16 @@ class TiposDocumentos extends Component {
                                         </div>
 
                                         <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
+                                            <div className='col-2'></div>
                                             <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
                                                 <option value={1}>Descricao</option>
                                                 <option value={2}>Chave</option>
                                             </select>
                                             <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
-                                            {!this.state.tiposDocumentos[0] &&
+
                                                 <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
-                                                    <Link to={{ pathname: `/tabelas/addtipodocumento/0` }}><button className="btn btn-success">Adicionar Tipo de Documento</button></Link>
-                                                </div>}
+                                                    <Link to={{ pathname: `/tabelas/addtipodocumento/0` }}><button className="btn btn-success">+</button></Link>
+                                                </div>
                                         </div>
 
                                     </div>
@@ -236,6 +238,11 @@ class TiposDocumentos extends Component {
                             {this.state.loadingPesquisa &&
                                 <SkeletonPesquisa />
                             }
+
+                            <AddButton addLink={{
+                                pathname: `/tabelas/addtipodocumento/0`,
+                                state: { tipoDocumento: {} }
+                            }} />
 
                             <div className="row deleteMargin" id="product-list">
                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
@@ -273,7 +280,7 @@ class TiposDocumentos extends Component {
                                 <div className="col-lg-2 col-md-2 col-sm-0 col-0"></div>
                                 <div className="col-lg-8 col-md-8 col-sm-12 mobileajuste14 ">
                                     {this.state.tiposDocumentos[0].Descricao != undefined && this.state.tiposDocumentos.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (
-                                        <div ref={feed.Chave ==  this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-12 col-md-12 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.Chave == this.state.chaveFocus ? "par focusLight" : "par ": feed.Chave == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
+                                        <div ref={feed.Chave == this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-12 col-md-12 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.Chave == this.state.chaveFocus ? "par focusLight" : "par " : feed.Chave == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
 
                                             {window.innerWidth >= 500 &&
                                                 <div className="row ">

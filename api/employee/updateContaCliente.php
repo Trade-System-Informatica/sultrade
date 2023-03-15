@@ -46,12 +46,16 @@ if($objData != NULL){
     $darfOutros = prepareInput($objData->darfOutros);
     $darfPagamento = prepareInput($objData->darfPagamento);
     $tipo_pix = prepareInput($objData->tipo_pix);
+
+    $os_manual = prepareInput($objData->os_manual);
+    $navio_manual = prepareInput($objData->navio_manual);
+    $porto_manual = prepareInput($objData->porto_manual);
     
     
     $contas = new Contas();
 
 
-    $result = $contas->updateContaCliente($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $Centro_Custo, $Conta_Bloqueto, $Historico, $Parc_Ini, $Parc_Fim, $RepCodBar, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix);
+    $result = $contas->updateContaCliente($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $Centro_Custo, $Conta_Bloqueto, $Historico, $Parc_Ini, $Parc_Fim, $RepCodBar, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix, $os_manual, $navio_manual, $porto_manual);
 
     } else {
     $result = "false";

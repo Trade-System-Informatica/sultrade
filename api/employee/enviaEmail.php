@@ -16,14 +16,40 @@ require_once '../libraries/utils.php';
 
 $data = file_get_contents("php://input");
 $objData = json_decode($data);
+$urlFaturamento = "../documents/docs/instrucao_fat.pdf";
+
 $emails = $objData->emails;
 $remarks = $objData->remarks;
 $os = $objData->os;
 $navio = $objData->navio;
 $porto = $objData->porto;
-$obs = $objData->obs;
+$anexos = $objData->anexos;
+$anexosNomes = $objData->anexosNomes;
+$corpo = prepareInput($objData->corpo);
+$assunto = prepareInput($objData->assunto);
 $mensagemPadrao = "Para melhor identificacao dos processos internos de pagamento, solicitamos que toda prestacao de servico e/ou venda tenha destacada na nota fiscal numero da ordem de servico, nome do navio e porto (Neste caso: ".$os." - ".$navio." - PORTO: ".$porto.")";
 $return = ['successes' => [], 'failures' => [], 'warnings' => []];
+
+if ($corpo) {
+    $body = "<div style='width: 100%; display: flex; justify-content: center; align-items: center;'><img src='https://i.ibb.co/G5Z8qmT/logo.png' alt='logo' border='0'></div>
+        <br><div style='font-size: 1.1em'><pre>".$corpo."</pre></div>";
+} else {
+    $body = "<div style='width: 100%; display: flex; justify-content: center; align-items: center;'><img src='https://i.ibb.co/G5Z8qmT/logo.png' alt='logo' border='0'></div>
+        <br><div style='font-size: 1.1em'><b>".str_replace( "\n", "<br>", $remarks)."</b>$os<br><br>".$mensagemPadrao.",
+    <br><br>Permanecemos a disposicao.<br><br>Saudacoes,</div>";
+}
+
+if (!is_array($emails)) {
+    echo $return;
+    exit;
+}
+
+if ($assunto) {
+    $subject = $assunto;
+} else {
+    $subject = 'Apontamento de OS '.$os;
+}
+
 
 if ($obs) {
     $obs = "<br/><br/>$os";
@@ -36,6 +62,10 @@ for ($i=0; $i<count($emails); $i++) {
 try {
     //Server settings
     //$mail->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
+    if ($i > 5) {
+        echo $return;
+        exit;
+    }
     $mail->isSMTP();       //Send using SMTP
     $mail->SMTPOptions = [
         'ssl' => [
@@ -56,15 +86,26 @@ try {
     $mail->setFrom('no-reply@tradesystem.com.br', 'Sultrade');
 
         $mail->addAddress($emails[$i]);     //Add a recipient
+        //$mail->addAddress("sultrade@sultradeagency.com");     //Add a recipient
         $mail->addCC('no-reply@tradesystem.com.br');
         $mail->addBCC('no-reply@tradesystem.com.br');
         
+        for ($e = 0; $e < count($anexos); $e++) {
+            if ($e > 10) {
+                echo $return;
+                exit;
+            }
+            $anexo = explode(",", $anexos[$e])[1];
+            $anexoNome = $anexosNomes[$e];
+            $type = str_replace("data:","",explode(";", $anexos[$e])[0]);
+    
+            $mail->AddStringAttachment(base64_decode($anexo), $anexoNome, "base64", $type);
+        }
+        $mail->addStringAttachment(file_get_contents($urlFaturamento), 'Instrução de Faturamento.pdf');
         //Content
         $mail->isHTML(true);                                  //Set email format to HTML
-        $mail->Subject = 'Apontamento de OS '.$os;
-        $mail->Body    = "<div style='width: 100%; display: flex; justify-content: center; align-items: center;'><img src='https://i.ibb.co/G5Z8qmT/logo.png' alt='logo' border='0'></div>
-            <br><div style='font-size: 1.1em'><b>".str_replace( "\n", "<br>", $remarks)."</b>$os<br><br>".$mensagemPadrao.",
-        <br><br>Permanecemos a disposicao.<br><br>Saudacoes,</div>";
+        $mail->Subject = $subject;
+        $mail->Body    = $body;
         $mail->AltBody = $remarks."\n\n".$mensagemPadrao.",
         \n\nPermanecemos a disposição.\n\nSaudações,";
         

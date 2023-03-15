@@ -7,7 +7,7 @@ import './styles.css'
 import { apiEmployee } from '../../../services/apiamrg'
 import { connect } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChartBar, faFileContract } from '@fortawesome/free-solid-svg-icons'
+import { faChartBar, faFileContract, faPaperclip } from '@fortawesome/free-solid-svg-icons'
 
 class OrdensServico extends Component {
 
@@ -71,7 +71,7 @@ class OrdensServico extends Component {
         })
 
         await this.setState({ acessosPermissoes: acessosPermissoes });
-        
+
 
 
     }
@@ -91,7 +91,7 @@ class OrdensServico extends Component {
         )
         await this.setState({ loading: false })
     }
-    
+
     erroApi = async (res) => {
         await this.setState({ isLogado: false })
         //alert('Você precisa estar logado para poder acessar esta página!')
@@ -110,9 +110,9 @@ class OrdensServico extends Component {
                     {this.state.loading &&
                         <Skeleton />
                     }
-                    <Header voltar movimentacao titulo="Ordens de Serviço"/>
-                    <br/>
-                    <br/>
+                    <Header voltar movimentacao titulo="Ordens de Serviço" />
+                    <br />
+                    <br />
                     {!this.state.loading &&
                         <div className="product-filter row">
                             <div className="col-12 text-center">
@@ -121,17 +121,27 @@ class OrdensServico extends Component {
                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                             <li className=" text-left itemMenu list-group-item  ">
                                                 <Link to={{ pathname: `/ordensservico/os` }} className="semTextDecoration">
-                                                <FontAwesomeIcon icon={faChartBar} size="2x" color="tomato" />
+                                                    <FontAwesomeIcon icon={faChartBar} size="2x" color="tomato" />
                                                     <h4 className="textoMenu">OS</h4>
                                                 </Link>
                                             </li>
                                         }
-                                        
+
                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                             <li className=" text-left itemMenu list-group-item ">
                                                 <Link className="semTextDecoration" to={{ pathname: `/ordensservico/eventos` }}>
                                                     <FontAwesomeIcon icon={faFileContract} size="2x" color="tomato" />
                                                     <h4 className="textoMenu">Eventos</h4>
+                                                </Link>
+                                            </li>
+                                        }
+
+
+                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'ANEXOS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                            <li className=" text-left itemMenu list-group-item ">
+                                                <Link className="semTextDecoration" to={{ pathname: `/ordensservico/anexos` }}>
+                                                    <FontAwesomeIcon icon={faPaperclip} size="2x" color="tomato" />
+                                                    <h4 className="textoMenu">Tarifas de Fornecedores</h4>
                                                 </Link>
                                             </li>
                                         }

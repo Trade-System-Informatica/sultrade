@@ -5,7 +5,9 @@ const initialState = {
     nome: '',
     email: '',
     chave: null,
-    token: ''
+    token: '',
+    expiry: 0,
+    justLogged: false,
 }
 
 const reducer = (state = initialState, action) => {
@@ -17,7 +19,8 @@ const reducer = (state = initialState, action) => {
                 codigo: action.payload.codigo,
                 empresa: action.payload.empresa,
                 token: null,
-                expiry: moment().add(40,'minutes')
+                expiry: moment().add(40,'minutes'),
+                justLogged: true
             } 
         case USER_EXTEND_EXPIRATION: 
             return {
@@ -26,7 +29,8 @@ const reducer = (state = initialState, action) => {
                 codigo: action.payload.codigo,
                 empresa: action.payload.empresa,
                 token: null,
-                expiry: moment().add(40,'minutes')
+                expiry: moment().add(40,'minutes'),
+                justLogged: false
             }
         case USER_LOGGED_OUT:
             return{

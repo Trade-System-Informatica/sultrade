@@ -122,7 +122,11 @@ export default class Util {
     }
 
     static completarPictures(valor) {
-        return `http://ftptrade.ddns.net/lpc/api/pictures/${valor}.png`
+        return `http://ftptrade.ddns.net/sultrade/api/documents/pictures/${valor}.png`
+    }
+    
+    static completarDocuments(valor) {
+        return `http://ftptrade.ddns.net/sultrade/api/documents/${valor}`
     }
 
     static testaCPF(strCPF) {
@@ -233,6 +237,22 @@ export default class Util {
         }
         
         return `${input.substring(0, 2)}/${input.substring(2, 4)}/${input.substring(4)}`;   
+    }
+
+    static cleanStates(states, exceptions = null) {
+        const keys = Object.keys(states);
+        
+        let returnObj = {};
+
+        keys.map((k) => {
+            if (exceptions && exceptions[0] && exceptions.includes(k)) {
+                returnObj[k] = states[k];
+            } else {
+                returnObj[k] = typeof states[k] == "string" ? states[k].replaceAll("'","\'").replaceAll('"','\"').trim() : states[k];
+            }
+        });
+
+        return returnObj;
     }
 
 }

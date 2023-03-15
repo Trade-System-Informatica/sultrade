@@ -23,8 +23,8 @@ const estadoInicial = {
     porto: '',
     centroCusto: '',
     navio: '',
-    periodoInicial: moment().startOf('month').format('YYYY-MM-DD'),
-    periodoFinal: moment().endOf('month').format('YYYY-MM-DD'),
+    periodoInicial: moment('2000-01-01').format('YYYY-MM-DD'),
+    periodoFinal: moment().format('YYYY-MM-DD'),
     lancamentoInicial: moment('1900-1-1').format('YYYY-MM-DD'),
     lancamentoFinal: moment('2100-12-31').format('YYYY-MM-DD'),
     excluirTipos: false,
@@ -174,8 +174,6 @@ class RelatorioOS extends Component {
                             <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ETA</th>
                             <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ETB</th>
                             <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ETS</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Valor</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Descontos</th>
                             <th colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Cliente</th>
                             <th colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Tipo de Serviço</th>
                         </tr>
@@ -188,8 +186,6 @@ class RelatorioOS extends Component {
                             <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{moment(e.ETA).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.ETA).format("DD/MM/YYYY")}</td>
                             <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{moment(e.ETB).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.ETB).format("DD/MM/YYYY")}</td>
                             <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{moment(e.ETS).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.ETS).format("DD/MM/YYYY")}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>USD{e.valor ? util.formataDinheiroBrasileiro(e.valor) : "0,00" }</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>USD{e.desconto ? util.formataDinheiroBrasileiro(e.desconto) : "0,00" }</td>
                             <td colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.pessoaNomeFantasia ? e.pessoaNomeFantasia : e.pessoaNome}</td>
                             <td colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.tipoServicoNome}</td>
                         </tr>

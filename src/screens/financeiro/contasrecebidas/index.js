@@ -5,6 +5,7 @@ import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import loader from '../../../classes/loader'
 import Skeleton from '../../../components/skeleton'
+import AddButton from '../../../components/addButton'
 import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { NOME_EMPRESA } from '../../../config'
@@ -121,7 +122,7 @@ class ContasRecebidas extends Component {
     }
 
     deleteConta = async (chave, nome) => {
-        this.setState({deleteConta: true})
+        this.setState({ deleteConta: true })
         confirmAlert({
             customUI: ({ onClose }) => {
                 return (
@@ -173,16 +174,16 @@ class ContasRecebidas extends Component {
     }
 
     reverterItens = async () => {
-        await this.setState({loading: true})
+        await this.setState({ loading: true })
         const contas = this.state.contas.reverse();
 
         if (this.state.direcaoTabela == faChevronDown) {
-            await this.setState({direcaoTabela: faChevronUp});
+            await this.setState({ direcaoTabela: faChevronUp });
         } else {
-            await this.setState({direcaoTabela: faChevronDown});
-        } 
+            await this.setState({ direcaoTabela: faChevronDown });
+        }
 
-        await this.setState({contas, loading: false});
+        await this.setState({ contas, loading: false });
     }
 
     filtrarPesquisa = (conta) => {
@@ -219,7 +220,7 @@ class ContasRecebidas extends Component {
                     {!this.state.loading &&
                         <div>
                             <section>
-                                <Header voltarContasLiquidadas titulo="Contas Recebidas"/>
+                                <Header voltarContasLiquidadas titulo="Contas Recebidas" />
 
 
                                 <br />
@@ -245,7 +246,11 @@ class ContasRecebidas extends Component {
                                             </select>
                                             <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
                                             <div>
-                                                <Link to={{ pathname: `/financeiro/relatorio/`, state: {backTo: 'contasRecebidas'} }}><button className="btn btn-success">Relatorio</button></Link>
+                                                <Link to={{ pathname: `/financeiro/relatorio/`, state: { backTo: 'contasRecebidas' } }}><button className="btn btn-success">Relatorio</button></Link>
+                                            </div>
+
+                                            <div style={{ marginLeft: 15 }}>
+                                                <Link to={{ pathname: `/financeiro/addconta/0`, state: { tipo: 0, to: 'contasrecebidas' } }}><button className="btn btn-success">+</button></Link>
                                             </div>
                                         </div>
                                     </div>
@@ -257,6 +262,10 @@ class ContasRecebidas extends Component {
                                 </div>
                             </div>
 
+                            <AddButton addLink={{
+                                pathname: `/financeiro/addconta/0`,
+                                state: { conta: {}, tipo: 0, to: 'contasrecebidas' }
+                            }} />
 
                             <div className="row deleteMargin" id="product-list">
                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
@@ -275,13 +284,13 @@ class ContasRecebidas extends Component {
                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
                                                 <span className="subtituloships">Valor</span>
                                             </div>
-                                            <div className="col-2 text-center revertItem" onClick={() => {if (this.state.contas[0]) { this.reverterItens() }}}>
+                                            <div className="col-2 text-center revertItem" onClick={() => { if (this.state.contas[0]) { this.reverterItens() } }}>
                                                 {!this.state.contas[0] && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_LIQUIDADAS') { return e } }).map((e) => e.permissaoInsere)[0] == 1 &&
                                                     <span className="subtituloships"><Link to={{ pathname: `/financeiro/addconta/0`, state: { tipo: 0, to: 'contasrecebidas' } }}><FontAwesomeIcon icon={faPlus} /></Link></span>
                                                 }
-                                                {this.state.contas[0] && 
-                                                    <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela}/></span>
-                                                
+                                                {this.state.contas[0] &&
+                                                    <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela} /></span>
+
                                                 }
                                             </div>
                                         </div>

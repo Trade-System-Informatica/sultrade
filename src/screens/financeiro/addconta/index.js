@@ -159,6 +159,15 @@ const estadoInicial = {
     modalLista: '',
     modalPesquisa: '',
 
+    os: "",
+    navio: "",
+    porto: "",
+
+    naviosOptions: [],
+    portosOptions: [],
+    optionsTexto: "",
+
+    manual: false,
     bloqueado: false,
     loading: true
 }
@@ -206,7 +215,10 @@ class AddConta extends Component {
                 empresa: this.state.conta.Empresa,
                 documento: this.state.conta.Docto,
                 tipoDocumento: this.state.conta.tipodocto,
-                meioPagamento: this.state.conta.meio_pagamento
+                meioPagamento: this.state.conta.meio_pagamento,
+                os: this.state.conta.os_manual,
+                navio: this.state.conta.navio_manual,
+                porto: this.state.conta.porto_manual
             })
 
             await this.setState({
@@ -261,7 +273,7 @@ class AddConta extends Component {
 
     componentDidUpdate = async (prevProps, prevState) => {
         if (this.state.pessoa != prevState.pessoa && this.state.tipo == 1) {
-            this.setState({contaProvisao: await loader.getContaPessoa(this.state.pessoa, "provisao")});
+            this.setState({ contaProvisao: await loader.getContaPessoa(this.state.pessoa, "provisao") });
         }
     }
 
@@ -286,9 +298,14 @@ class AddConta extends Component {
 
             parametros: await loader.getBody('getParametros.php', { token: true, empresa: this.state.usuarioLogado.empresa }),
 
+            naviosOptions: await loader.getBaseOptions("getNavios.php", "nome", "chave"),
+            portosOptions: await loader.getBaseOptions("getPortos.php", "Descricao", "Chave"),
+
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php')
         })
+        console.log(this.state.naviosOptions);
+        console.log(this.state.portosOptions);
 
         if (this.state.chave) {
             const contabilizada = await loader.getBody(`getLancamentoConta.php`, { chavePr: this.state.chave });
@@ -308,28 +325,28 @@ class AddConta extends Component {
                         this.setState({ desconto: conta.valor, descontoComplemento: conta.complemento });
                         break;
                     case "INSS":
-                        this.setState({retencaoInss: conta.valor, retencaoInssComplemento: conta.complemento, retencaoInssCheck: true});
+                        this.setState({ retencaoInss: conta.valor, retencaoInssComplemento: conta.complemento, retencaoInssCheck: true });
                         break;
                     case "IR":
-                        this.setState({retencaoIr: conta.valor, retencaoIrComplemento: conta.complemento, retencaoIrCheck: true});
+                        this.setState({ retencaoIr: conta.valor, retencaoIrComplemento: conta.complemento, retencaoIrCheck: true });
                         break;
                     case "ISS":
-                        this.setState({retencaoIss: conta.valor, retencaoIssComplemento: conta.complemento, retencaoIssCheck: true});
+                        this.setState({ retencaoIss: conta.valor, retencaoIssComplemento: conta.complemento, retencaoIssCheck: true });
                         break;
                     case "PIS":
-                        this.setState({retencaoPis: conta.valor, retencaoPisComplemento: conta.complemento, retencaoPisCheck: true});
+                        this.setState({ retencaoPis: conta.valor, retencaoPisComplemento: conta.complemento, retencaoPisCheck: true });
                         break;
                     case "COFINS":
-                        this.setState({retencaoCofins: conta.valor, retencaoCofinsComplemento: conta.complemento, retencaoCofinsCheck: true});
+                        this.setState({ retencaoCofins: conta.valor, retencaoCofinsComplemento: conta.complemento, retencaoCofinsCheck: true });
                         break;
                     case "CRF":
-                        this.setState({retencaoCsll: conta.valor, retencaoCsllComplemento: conta.complemento, retencaoCsllCheck: true});
+                        this.setState({ retencaoCsll: conta.valor, retencaoCsllComplemento: conta.complemento, retencaoCsllCheck: true });
                         break;
                 }
             })
 
             if (this.state.tipo == 1) {
-                this.setState({contaProvisao: await loader.getContaPessoa(this.state.pessoa, "provisao")});
+                this.setState({ contaProvisao: await loader.getContaPessoa(this.state.pessoa, "provisao") });
             }
 
         }
@@ -420,7 +437,7 @@ class AddConta extends Component {
         if (this.state.meioPagamentoNome === "PIX") {
             const contatos = await loader.getBody(`getContatos.php`, { pessoa: this.state.pessoa });
 
-            const chave = contatos.find((cont) => cont.tipo === "PX");
+            const chave = contatos.find((cont) => cont.Tipo === "PX");
 
             if (chave) {
                 switch (chave.Campo2) {
@@ -436,8 +453,11 @@ class AddConta extends Component {
                 }
             }
 
+            console.log(chave)
+            console.log(contatos)
             if (!this.state.tipoPix) {
                 this.setState({ loading: false });
+                console.log("aa");
                 return;
             }
         }
@@ -475,9 +495,11 @@ class AddConta extends Component {
                         token: true,
                         values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.centroCusto}', '${this.state.contaDesconto}', '${this.state.historico}', '${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${this.state.numBoleto}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}'`,
                         meioPagamento: this.state.meioPagamentoNome,
-                        valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`
+                        valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
+                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}'` : ""
                     }).then(
                         async res => {
+                            console.log(res.data);
                             if (res.data[0].Chave) {
                                 await this.setState({ chave: res.data[0].Chave })
                                 await loader.salvaLogs('contas_aberto', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
@@ -496,9 +518,11 @@ class AddConta extends Component {
                         token: true,
                         values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.codBarras}', '${this.state.centroCusto}', '${this.state.historico}',  '${this.state.contaDesconto}','${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}', ''`,
                         meioPagamento: this.state.meioPagamentoNome,
-                        valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`
+                        valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
+                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}'` : ""
                     }).then(
                         async res => {
+                            console.log(res.data);
                             if (res.data[0].Chave) {
                                 await this.setState({ chave: res.data[0].Chave })
                                 await loader.salvaLogs('contas_aberto', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
@@ -551,7 +575,11 @@ class AddConta extends Component {
                         darfJuros: parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.')),
                         darfOutros: parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.')),
                         darfPagamento: parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.')),
-                        tipo_pix: this.state.tipoPix
+                        tipo_pix: this.state.tipoPix,
+                        
+                        os_manual: this.state.os,
+                        navio_manual: this.state.navio,
+                        porto_manual: this.state.porto
                     }).then(
                         async res => {
                             if (res.data === true) {
@@ -606,8 +634,11 @@ class AddConta extends Component {
                         darfJuros: parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.')),
                         darfOutros: parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.')),
                         darfPagamento: parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.')),
-                        tipo_pix: this.state.tipoPix
-
+                        tipo_pix: this.state.tipoPix,
+                        
+                        os_manual: this.state.os,
+                        navio_manual: this.state.navio,
+                        porto_manual: this.state.porto
                     }).then(
                         async res => {
                             if (res.data === true) {
@@ -899,7 +930,7 @@ class AddConta extends Component {
     }
 
     testaValores = () => {
-        return parseFloat(this.state.desconto.replaceAll(".","").replaceAll(",",".")) + parseFloat(this.state.retencaoPis.replaceAll(".","").replaceAll(",",".")) + parseFloat(this.state.retencaoCofins.replaceAll(".","").replaceAll(",",".")) + parseFloat(this.state.retencaoCsll.replaceAll(".","").replaceAll(",",".")) + parseFloat(this.state.retencaoInss.replaceAll(".","").replaceAll(",",".")) + parseFloat(this.state.retencaoIr.replaceAll(".","").replaceAll(",",".")) + parseFloat(this.state.retencaoIss.replaceAll(".","").replaceAll(",",".")) > parseFloat(this.state.valor.replaceAll(".","").replaceAll(",","."));
+        return parseFloat(this.state.desconto.replaceAll(".", "").replaceAll(",", ".")) + parseFloat(this.state.retencaoPis.replaceAll(".", "").replaceAll(",", ".")) + parseFloat(this.state.retencaoCofins.replaceAll(".", "").replaceAll(",", ".")) + parseFloat(this.state.retencaoCsll.replaceAll(".", "").replaceAll(",", ".")) + parseFloat(this.state.retencaoInss.replaceAll(".", "").replaceAll(",", ".")) + parseFloat(this.state.retencaoIr.replaceAll(".", "").replaceAll(",", ".")) + parseFloat(this.state.retencaoIss.replaceAll(".", "").replaceAll(",", ".")) > parseFloat(this.state.valor.replaceAll(".", "").replaceAll(",", "."));
     }
 
 
@@ -1506,6 +1537,47 @@ class AddConta extends Component {
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.contaDesconto)[0]} search={true} onChange={(e) => { this.setState({ contaDesconto: e.value, }) }} />
                                                         </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Inserção manual</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <input className='form_control' checked={this.state.manual} onChange={(e) => { this.setState({ manual: e.currentTarget.checked }) }} type="checkbox" />
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        {this.state.manual &&
+                                                            <>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>OS</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control" type="text" value={this.state.os} onChange={async e => { this.setState({ os: e.currentTarget.value }) }} />
+                                                                </div>
+                                                                <div className='col-1'></div>
+
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Navio</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Select className='SearchSelect' options={this.state.naviosOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ optionsTexto: e }) }} value={this.state.naviosOptions.filter(option => option.value == this.state.navio)[0]} search={true} onChange={(e) => { this.setState({ navio: e.value, }) }} />
+                                                                </div>
+                                                                <div className='col-1'></div>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Porto</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Select className='SearchSelect' options={this.state.portosOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ optionsTexto: e }) }} value={this.state.portosOptions.filter(option => option.value == this.state.porto)[0]} search={true} onChange={(e) => { this.setState({ porto: e.value, }) }} />
+                                                                </div>
+                                                                <div className='col-1'></div>
+
+                                                            </>
+                                                        }
 
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Meio de Pagamento</label>
@@ -1650,7 +1722,7 @@ class AddConta extends Component {
                                                 </div>
                                                 <div className="col-2"></div>
                                                 <div className="col-4" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                    <button disabled={!validForm || this.state.chave == 0 || this.state.contabilizada != 0 || this.testaValores() } title={this.state.contabilizada ? "Já foi contabilizada" : this.testaValores() ? "Valores de retenções ultrapassam o valor da conta" : ""} onClick={() => { this.contabilizarConta(validForm && this.state.chave != 0 && this.state.contabilizada == 0 && !this.testaValores()); }} style={validForm && this.state.chave != 0 && this.state.contabilizada == 0 && !this.testaValores() ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Contabilizar</button>
+                                                    <button disabled={!validForm || this.state.chave == 0 || this.state.contabilizada != 0 || this.testaValores()} title={this.state.contabilizada ? "Já foi contabilizada" : this.testaValores() ? "Valores de retenções ultrapassam o valor da conta" : ""} onClick={() => { this.contabilizarConta(validForm && this.state.chave != 0 && this.state.contabilizada == 0 && !this.testaValores()); }} style={validForm && this.state.chave != 0 && this.state.contabilizada == 0 && !this.testaValores() ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Contabilizar</button>
                                                 </div>
                                                 <div className="col-1"></div>
                                             </div>

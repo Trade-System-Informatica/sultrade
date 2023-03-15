@@ -5,6 +5,7 @@ import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import Skeleton from '../../../components/skeleton'
 import loader from '../../../classes/loader'
+import AddButton from '../../../components/addButton'
 import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { NOME_EMPRESA } from '../../../config'
@@ -321,7 +322,13 @@ class Lancamentos extends Component {
                                                 <option value={5}>Lote</option>
                                             </select>
                                             <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
-                                            <Link to={{ pathname: `/financeiro/exportarlancamentos`}}><button className="btn btn-success">Exportar</button></Link>
+                                            <Link to={{ pathname: `/financeiro/exportarlancamentos` }}><button className="btn btn-success">Exportar</button></Link>
+                                            <div style={{ marginLeft: 15 }}>
+                                                <Link to={{
+                                                    pathname: `/financeiro/addlancamento/0`,
+                                                    state: { lancamento: {} }
+                                                }}><button className="btn btn-success">+</button></Link>
+                                            </div>
                                         </div>
                                     </div>
                                     <div className='col-1 col-sm-2 col-md-2 col-lg-4 col-xl-4'>
@@ -342,6 +349,11 @@ class Lancamentos extends Component {
 
                                 </div>
                             </div>
+
+                            <AddButton addLink={{
+                                pathname: `/financeiro/addlancamento/0`,
+                                state: { lancamento: {} }
+                            }} />
 
 
                             {this.state.tipo == 0 &&

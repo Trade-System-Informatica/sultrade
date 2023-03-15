@@ -36,6 +36,7 @@ import Alert from '../../../components/alert';
 
 const estadoInicial = {
     name: '',
+    contasBase: [],
     contas: [],
     bancos: [],
     transacoes: [],
@@ -129,6 +130,7 @@ class PagamentosLote extends Component {
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php'),
             bbCodigos: await loader.getBase('getCodigosBB.php'),
+            historicos: await loader.getBase('getHistoricos.php'),
 
             vencimentoInicial: moment().format('YYYY-MM-DD'),
             vencimentoFinal: moment().format('YYYY-MM-DD'),
@@ -173,10 +175,34 @@ class PagamentosLote extends Component {
         }).then(
             async res => {
                 const contasFiltradas = res.data.filter((e) => e.meio_pagamento != "0" && e.meioPagamento && e.Tipo == 1);
-                const contas = [];
+                this.setState({ contasBase: contasFiltradas });
+                const contasUsadas = [];
+                const contasCombinadas = [];
 
                 for (let i = 0; i < contasFiltradas.length; i++) {
-                    let e = contasFiltradas[i]
+                    const element = contasFiltradas[i];
+                    contasUsadas.push(element.Chave);
+
+                    if (!contasUsadas.includes(element.Chave)) {
+                        contasCombinadas[i] = { ...element, combinacoes: [element.Chave] };
+                    }
+
+                    for (let j = 0; j < contasFiltradas.filter((con) => !contasUsadas.includes(con.Chave)).length; j++) {
+                        const elem = contasFiltradas.filter((con) => !contasUsadas.includes(con.Chave))[j];
+
+                        if (elem.Chave != element.Chave && elem.Pessoa == element.Pessoa && elem.Vencimento == element.Vencimento) {
+                            contasCombinadas[i].Valor = parseFloat(element.Valor) + parseFloat(elem.Valor);
+                            contasCombinadas[i].combinacoes.push(elem.Chave);
+
+                            contasUsadas.push(elem.Chave);
+                        }
+                    }
+                }
+
+                const contas = [];
+
+                for (let i = 0; i < contasCombinadas.length; i++) {
+                    let e = contasCombinadas[i]
 
                     contas.push({
                         ...e,
@@ -513,6 +539,7 @@ class PagamentosLote extends Component {
                         dados.push({
                             dadosBase: {
                                 chave: e.Chave,
+                                chaves: e.combinacoes,
                                 data: e.Vencimento,
                                 liberado: e.liberado,
                                 historico: e.Historico,
@@ -541,6 +568,7 @@ class PagamentosLote extends Component {
                         dados.push({
                             dadosBase: {
                                 chave: e.Chave,
+                                chaves: e.combinacoes,
                                 data: e.data_hora_envio,
                                 liberado: e.liberado,
                                 historico: e.Historico,
@@ -571,6 +599,7 @@ class PagamentosLote extends Component {
                         dados.push({
                             dadosBase: {
                                 chave: e.Chave,
+                                chaves: e.combinacoes,
                                 data: e.data_hora_envio,
                                 liberado: e.liberado,
                                 historico: e.Historico,
@@ -601,6 +630,7 @@ class PagamentosLote extends Component {
                         dados.push({
                             dadosBase: {
                                 chave: e.Chave,
+                                chaves: e.combinacoes,
                                 data: e.data_hora_envio,
                                 liberado: e.liberado,
                                 historico: e.Historico,
@@ -631,6 +661,7 @@ class PagamentosLote extends Component {
                         dados.push({
                             dadosBase: {
                                 chave: e.Chave,
+                                chaves: e.combinacoes,
                                 data: e.data_hora_envio,
                                 liberado: e.liberado,
                                 historico: e.Historico,
@@ -661,6 +692,7 @@ class PagamentosLote extends Component {
                         dados.push({
                             dadosBase: {
                                 chave: e.Chave,
+                                chaves: e.combinacoes,
                                 data: e.data_hora_envio,
                                 liberado: e.liberado,
                                 historico: e.Historico,
@@ -691,6 +723,7 @@ class PagamentosLote extends Component {
                         dados.push({
                             dadosBase: {
                                 chave: e.Chave,
+                                chaves: e.combinacoes,
                                 data: e.data_hora_envio,
                                 liberado: e.liberado,
                                 historico: e.Historico,
@@ -761,6 +794,7 @@ class PagamentosLote extends Component {
                                         }
                                         status.push({
                                             conta: e.dadosBase.chave,
+                                            contasChaves: e.dadosBase.chaves,
                                             transacao_chave: e.dadosBase.transacao_chave,
                                             transacao: e.dadosBase.transacao,
                                             existe: e.dadosBase.existe,
@@ -778,6 +812,7 @@ class PagamentosLote extends Component {
                                     } else {
                                         status.push({
                                             conta: e.dadosBase.chave,
+                                            contasChaves: e.dadosBase.chaves,
                                             transacao_chave: e.dadosBase.transacao_chave,
                                             transacao: e.dadosBase.transacao,
                                             existe: e.dadosBase.existe,
@@ -797,6 +832,7 @@ class PagamentosLote extends Component {
                                     try {
                                         status.push({
                                             conta: e.dadosBase.chave,
+                                            contasChaves: e.dadosBase.chaves,
                                             transacao_chave: e.dadosBase.transacao_chave,
                                             transacao: e.dadosBase.transacao,
                                             existe: e.dadosBase.existe,
@@ -809,6 +845,7 @@ class PagamentosLote extends Component {
                                     } catch (err) {
                                         status.push({
                                             conta: e.dadosBase.chave,
+                                            contasChaves: e.dadosBase.chaves,
                                             transacao_chave: e.dadosBase.transacao_chave,
                                             transacao: e.dadosBase.transacao,
                                             existe: e.dadosBase.existe,
@@ -828,6 +865,7 @@ class PagamentosLote extends Component {
                             } catch (err) {
                                 status.push({
                                     conta: e.dadosBase.chave,
+                                    contasChaves: e.dadosBase.chaves,
                                     transacao_chave: e.dadosBase.transacao_chave,
                                     transacao: e.dadosBase.transacao,
                                     existe: e.dadosBase.existe,
@@ -847,6 +885,7 @@ class PagamentosLote extends Component {
                         async err => {
                             status.push({
                                 conta: e.dadosBase.chave,
+                                contasChaves: e.dadosBase.chaves,
                                 transacao_chave: e.dadosBase.transacao_chave,
                                 transacao: e.dadosBase.transacao,
                                 existe: e.dadosBase.existe,
@@ -878,13 +917,14 @@ class PagamentosLote extends Component {
 
                                     if (response) {
                                         if (response.estadoRequisicao) {
-                                            
+
                                             const newStatusId = this.state.bbGet.find((e) => e.codigo == response.estadoRequisicao).status;
                                             console.log(newStatusId)
                                             console.log(e.dadosBase.statusId)
 
                                             status.push({
                                                 conta: e.dadosBase.chave,
+                                                contasChaves: e.dadosBase.chaves,
                                                 transacao_chave: e.dadosBase.transacao_chave,
                                                 transacao: e.dadosBase.transacao,
                                                 existe: e.dadosBase.existe,
@@ -894,7 +934,7 @@ class PagamentosLote extends Component {
                                                 statusId: newStatusId == 3 && e.dadosBase.liberado == 0 ? 2 : newStatusId,
                                                 errors: ''
                                             })
-                                            
+
                                             const requisicoes = this.state.requisicoesCarregando;
 
                                             requisicoes.push(`Conta ${e.dadosBase.historico} (chave ${e.dadosBase.chave}) - ${newStatusId == 3 || newStatusId == 2 ? "Aceita" : newStatusId == 0 ? "Rejeitada" : "Paga"}`);
@@ -906,6 +946,7 @@ class PagamentosLote extends Component {
 
                                             status.push({
                                                 conta: e.dadosBase.chave,
+                                                contasChaves: e.dadosBase.chaves,
                                                 transacao_chave: e.dadosBase.transacao_chave,
                                                 transacao: e.dadosBase.transacao,
                                                 existe: e.dadosBase.existe,
@@ -925,6 +966,7 @@ class PagamentosLote extends Component {
 
                                         status.push({
                                             conta: e.dadosBase.chave,
+                                            contasChaves: e.dadosBase.chaves,
                                             transacao_chave: e.dadosBase.transacao_chave,
                                             transacao: e.dadosBase.transacao,
                                             existe: e.dadosBase.existe,
@@ -944,6 +986,7 @@ class PagamentosLote extends Component {
 
                                     status.push({
                                         conta: e.dadosBase.chave,
+                                        contasChaves: e.dadosBase.chaves,
                                         transacao_chave: e.dadosBase.transacao_chave,
                                         transacao: e.dadosBase.transacao,
                                         existe: e.dadosBase.existe,
@@ -961,6 +1004,7 @@ class PagamentosLote extends Component {
                                 console.log(err);
                                 status.push({
                                     conta: e.dadosBase.chave,
+                                    contasChaves: e.dadosBase.chaves,
                                     transacao_chave: e.dadosBase.transacao_chave,
                                     transacao: e.dadosBase.transacao,
                                     existe: e.dadosBase.existe,
@@ -979,6 +1023,7 @@ class PagamentosLote extends Component {
                         async err => {
                             status.push({
                                 conta: e.dadosBase.chave,
+                                contasChaves: e.dadosBase.chaves,
                                 transacao_chave: e.dadosBase.transacao_chave,
                                 transacao: e.dadosBase.transacao,
                                 existe: e.dadosBase.existe,
@@ -1012,6 +1057,7 @@ class PagamentosLote extends Component {
 
                                     status.push({
                                         conta: e.dadosBase.chave,
+                                        contasChaves: e.dadosBase.chaves,
                                         transacao_chave: e.dadosBase.transacao_chave,
                                         transacao: e.dadosBase.transacao,
                                         existe: e.dadosBase.existe,
@@ -1031,6 +1077,7 @@ class PagamentosLote extends Component {
 
                                     status.push({
                                         conta: e.dadosBase.chave,
+                                        contasChaves: e.dadosBase.chaves,
                                         transacao_chave: e.dadosBase.transacao_chave,
                                         transacao: e.dadosBase.transacao,
                                         existe: e.dadosBase.existe,
@@ -1048,6 +1095,7 @@ class PagamentosLote extends Component {
                             } catch (err) {
                                 status.push({
                                     conta: e.dadosBase.chave,
+                                    contasChaves: e.dadosBase.chaves,
                                     transacao_chave: e.dadosBase.transacao_chave,
                                     transacao: e.dadosBase.transacao,
                                     existe: e.dadosBase.existe,
@@ -1066,6 +1114,7 @@ class PagamentosLote extends Component {
                         async err => {
                             status.push({
                                 conta: e.dadosBase.chave,
+                                contasChaves: e.dadosBase.chaves,
                                 transacao_chave: e.dadosBase.transacao_chave,
                                 transacao: e.dadosBase.transacao,
                                 existe: e.dadosBase.existe,
@@ -1099,6 +1148,7 @@ class PagamentosLote extends Component {
 
                                     status.push({
                                         conta: e.dadosBase.chave,
+                                        contasChaves: e.dadosBase.chaves,
                                         transacao_chave: e.dadosBase.transacao_chave,
                                         transacao: e.dadosBase.transacao,
                                         existe: e.dadosBase.existe,
@@ -1118,6 +1168,7 @@ class PagamentosLote extends Component {
                                     try {
                                         status.push({
                                             conta: e.dadosBase.chave,
+                                            contasChaves: e.dadosBase.chaves,
                                             transacao_chave: e.dadosBase.transacao_chave,
                                             transacao: e.dadosBase.transacao,
                                             existe: e.dadosBase.existe,
@@ -1131,6 +1182,7 @@ class PagamentosLote extends Component {
                                         console.log(err);
                                         status.push({
                                             conta: e.dadosBase.chave,
+                                            contasChaves: e.dadosBase.chaves,
                                             transacao_chave: e.dadosBase.transacao_chave,
                                             transacao: e.dadosBase.transacao,
                                             existe: e.dadosBase.existe,
@@ -1150,6 +1202,7 @@ class PagamentosLote extends Component {
                                 console.log(err);
                                 status.push({
                                     conta: e.dadosBase.chave,
+                                    contasChaves: e.dadosBase.chaves,
                                     transacao_chave: e.dadosBase.transacao_chave,
                                     transacao: e.dadosBase.transacao,
                                     existe: e.dadosBase.existe,
@@ -1168,6 +1221,7 @@ class PagamentosLote extends Component {
                         async err => {
                             status.push({
                                 conta: e.dadosBase.chave,
+                                contasChaves: e.dadosBase.chaves,
                                 transacao_chave: e.dadosBase.transacao_chave,
                                 transacao: e.dadosBase.transacao,
                                 existe: e.dadosBase.existe,
@@ -1201,6 +1255,7 @@ class PagamentosLote extends Component {
 
                                     status.push({
                                         conta: e.dadosBase.chave,
+                                        contasChaves: e.dadosBase.chaves,
                                         transacao_chave: e.dadosBase.transacao_chave,
                                         transacao: e.dadosBase.transacao,
                                         existe: e.dadosBase.existe,
@@ -1218,6 +1273,7 @@ class PagamentosLote extends Component {
                                 } else {
                                     status.push({
                                         conta: e.dadosBase.chave,
+                                        contasChaves: e.dadosBase.chaves,
                                         transacao_chave: e.dadosBase.transacao_chave,
                                         transacao: e.dadosBase.transacao,
                                         existe: e.dadosBase.existe,
@@ -1236,6 +1292,7 @@ class PagamentosLote extends Component {
                             } catch (err) {
                                 status.push({
                                     conta: e.dadosBase.chave,
+                                    contasChaves: e.dadosBase.chaves,
                                     transacao_chave: e.dadosBase.transacao_chave,
                                     transacao: e.dadosBase.transacao,
                                     existe: e.dadosBase.existe,
@@ -1254,6 +1311,7 @@ class PagamentosLote extends Component {
                         async err => {
                             status.push({
                                 conta: e.dadosBase.chave,
+                                contasChaves: e.dadosBase.chaves,
                                 transacao_chave: e.dadosBase.transacao_chave,
                                 transacao: e.dadosBase.transacao,
                                 existe: e.dadosBase.existe,
@@ -1287,6 +1345,7 @@ class PagamentosLote extends Component {
 
                                     status.push({
                                         conta: e.dadosBase.chave,
+                                        contasChaves: e.dadosBase.chaves,
                                         transacao_chave: e.dadosBase.transacao_chave,
                                         transacao: e.dadosBase.transacao,
                                         existe: e.dadosBase.existe,
@@ -1304,6 +1363,7 @@ class PagamentosLote extends Component {
                                 } else {
                                     status.push({
                                         conta: e.dadosBase.chave,
+                                        contasChaves: e.dadosBase.chaves,
                                         transacao_chave: e.dadosBase.transacao_chave,
                                         transacao: e.dadosBase.transacao,
                                         existe: e.dadosBase.existe,
@@ -1321,6 +1381,7 @@ class PagamentosLote extends Component {
                             } catch (err) {
                                 status.push({
                                     conta: e.dadosBase.chave,
+                                    contasChaves: e.dadosBase.chaves,
                                     transacao_chave: e.dadosBase.transacao_chave,
                                     transacao: e.dadosBase.transacao,
                                     existe: e.dadosBase.existe,
@@ -1339,6 +1400,7 @@ class PagamentosLote extends Component {
                         async err => {
                             status.push({
                                 conta: e.dadosBase.chave,
+                                contasChaves: e.dadosBase.chaves,
                                 transacao_chave: e.dadosBase.transacao_chave,
                                 transacao: e.dadosBase.transacao,
                                 existe: e.dadosBase.existe,
@@ -1372,6 +1434,7 @@ class PagamentosLote extends Component {
 
                                     status.push({
                                         conta: e.dadosBase.chave,
+                                        contasChaves: e.dadosBase.chaves,
                                         transacao_chave: e.dadosBase.transacao_chave,
                                         transacao: e.dadosBase.transacao,
                                         existe: e.dadosBase.existe,
@@ -1389,6 +1452,7 @@ class PagamentosLote extends Component {
                                 } else {
                                     status.push({
                                         conta: e.dadosBase.chave,
+                                        contasChaves: e.dadosBase.chaves,
                                         transacao_chave: e.dadosBase.transacao_chave,
                                         transacao: e.dadosBase.transacao,
                                         existe: e.dadosBase.existe,
@@ -1406,6 +1470,7 @@ class PagamentosLote extends Component {
                             } catch (err) {
                                 status.push({
                                     conta: e.dadosBase.chave,
+                                    contasChaves: e.dadosBase.chaves,
                                     transacao_chave: e.dadosBase.transacao_chave,
                                     transacao: e.dadosBase.transacao,
                                     existe: e.dadosBase.existe,
@@ -1424,6 +1489,7 @@ class PagamentosLote extends Component {
                         async err => {
                             status.push({
                                 conta: e.dadosBase.chave,
+                                contasChaves: e.dadosBase.chaves,
                                 transacao_chave: e.dadosBase.transacao_chave,
                                 transacao: e.dadosBase.transacao,
                                 existe: e.dadosBase.existe,
@@ -1444,6 +1510,7 @@ class PagamentosLote extends Component {
             } else {
                 status.push({
                     conta: e.dadosBase.chave,
+                    contasChaves: e.dadosBase.chaves,
                     valor: e.dadosBase.valor,
                     saldo: e.dadosBase.saldo,
                     transacao: e.transacao,
@@ -1461,43 +1528,74 @@ class PagamentosLote extends Component {
                 errors.push({ conta: e.conta, mensagem: e.error ? e.error : "Erro desconhecido, tente novamente" });
             }
             console.log(e);
-            await apiEmployee.post(`pagarConta.php`, {
-                token: true,
-                chave: e.conta,
-                status: e.status === false ? e.error : `${e.status} ${e.errors[0] ? e.errors.join(' ') : ''}`,
-                transacao: e.transacao,
-                valor: e.statusId != 4 ? 0 : e.valor,
-                data_pagto: moment().format('YYYY-MM-DD'),
-                saldo: e.saldo,
-                id_status: e.statusId
-            }).then(
-                async res => {
-                    if (res.data[0]) {
-                        if (e.statusId == 4) {
+            for (let i = 0; i < e.contasChaves.length; i++) {
+
+                const contaAtual = this.state.contasBase.find((j) => j.Chave == e.contasChaves[i]);
+                
+                await apiEmployee.post(`pagarConta.php`, {
+                    token: true,
+                    chave: e.contasChaves[i],
+                    status: e.status === false ? e.error : `${e.status} ${e.errors[0] ? e.errors.join(' ') : ''}`,
+                    transacao: e.transacao,
+                    valor: e.statusId != 4 ? 0 : contaAtual.valor,
+                    data_pagto: moment().format('YYYY-MM-DD'),
+                    saldo: contaAtual.saldo,
+                    id_status: e.statusId
+                }).then(
+                    async res => {
+                        if (res.data[0]) {
+                            if (e.statusId == 4) {
+                                await loader.salvaLogs(
+                                    'contas_aberto',
+                                    this.state.usuarioLogado.codigo,
+                                    null,
+                                    "Saldo (de)" + (contaAtual.valor) + " (para)" + (parseFloat(contaAtual.saldo) - parseFloat(contaAtual.valor)) + "; Data_Pagto " + moment().format('YYYY-MM-DD') + "; Valor_Pago " + contaAtual.valor + ";",
+                                    e.conta);
+                            }
+
                             await loader.salvaLogs(
-                                'contas_aberto',
+                                'transacoes',
                                 this.state.usuarioLogado.codigo,
                                 null,
-                                "Saldo (de)" + (e.valor) + " (para)" + (parseFloat(e.saldo) - parseFloat(e.valor)) + "; Data_Pagto " + moment().format('YYYY-MM-DD') + "; Valor_Pago " + e.valor + ";",
-                                e.conta);
+                                "status " + (e.status === false ? e.error : `${e.status} ${e.errors[0] ? e.errors.join(' ') : ''}`) + "; id_status " + (e.statusId ? e.statusId : 0),
+                                res.data[0].chave
+                            );
+
+                        } else {
+                            console.log(JSON.stringify(res))
                         }
-
-                        await loader.salvaLogs(
-                            'transacoes',
-                            this.state.usuarioLogado.codigo,
-                            null,
-                            "status " + (e.status === false ? e.error : `${e.status} ${e.errors[0] ? e.errors.join(' ') : ''}`) + "; id_status " + (e.statusId ? e.statusId : 0),
-                            res.data[0].chave
-                        );
-
-                    } else {
-                        console.log(JSON.stringify(res))
+                    },
+                    async err => {
+                        alert(JSON.stringify(err))
                     }
-                },
-                async err => {
-                    alert(JSON.stringify(err))
-                }
-            )
+                )
+
+                await apiEmployee.post(`contabilizaContasAberto.php`, {
+                    token: true,
+                    data: contaAtual.Lancto,
+                    conta_credito: contaAtual.Conta_Contabil,
+                    conta_debito: contaAtual.Conta_Desconto,
+                    tipo_documento: contaAtual.tipodocto,
+                    centro_custo: contaAtual.Centro_Custo,
+                    historico_padrao: this.state.historicos.find((h) => h.Descricao === contaAtual.Historico) ? this.state.historicos.find((h) => h.Descricao === contaAtual.Historico).Chave : 0,
+                    historico: contaAtual.Historico,
+                    pessoa: contaAtual.Pessoa,
+                    valor: parseFloat(contaAtual.Valor.replaceAll('.', '').replaceAll(',', '.')),
+                    chavePr: contaAtual.Chave,
+                    usuario_inclusao: this.state.usuarioLogado.codigo,
+                    usuario_alteracao: this.state.usuarioLogado.codigo,
+                    data_inclusao: moment().format("YYYY-MM-DD"),
+                    data_alteracao: moment().format("YYYY-MM-DD")
+                }).then(
+                    async res => {
+                        if (res.data[0] && res.data[0][0].Chave) {
+                           await loader.salvaLogs('lancamentos', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
+                        } else {
+                        }
+                    },
+                    async res => await console.log(`Erro: ${res.data}`)
+                )
+            }
             await this.setState({ errors })
             await this.getContasAbertas();
         })
