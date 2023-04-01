@@ -25,6 +25,7 @@ $navio = $objData->navio;
 $porto = $objData->porto;
 $anexos = $objData->anexos;
 $anexosNomes = $objData->anexosNomes;
+$fornecedor = prepareInput($objData->fornecedor);
 $corpo = prepareInput($objData->corpo);
 $assunto = prepareInput($objData->assunto);
 $mensagemPadrao = "Para melhor identificacao dos processos internos de pagamento, solicitamos que toda prestacao de servico e/ou venda tenha destacada na nota fiscal numero da ordem de servico, nome do navio e porto (Neste caso: ".$os." - ".$navio." - PORTO: ".$porto.")";
@@ -39,7 +40,9 @@ if ($corpo) {
     <br><br>Permanecemos a disposicao.<br><br>Saudacoes,</div>";
 }
 
-if (!is_array($emails)) {
+$body .= "<br/><br/><br/><span><a href='http://ftptrade.ddns.net:2243/anexos/$os/$fornecedor'>Enviar documentos</a></span>";
+
+if (!is_array($emails) || !is_array($anexos) && $anexos != null) {
     echo $return;
     exit;
 }
@@ -62,10 +65,6 @@ for ($i=0; $i<count($emails); $i++) {
 try {
     //Server settings
     //$mail->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
-    if ($i > 5) {
-        echo $return;
-        exit;
-    }
     $mail->isSMTP();       //Send using SMTP
     $mail->SMTPOptions = [
         'ssl' => [
@@ -91,10 +90,6 @@ try {
         $mail->addBCC('no-reply@tradesystem.com.br');
         
         for ($e = 0; $e < count($anexos); $e++) {
-            if ($e > 10) {
-                echo $return;
-                exit;
-            }
             $anexo = explode(",", $anexos[$e])[1];
             $anexoNome = $anexosNomes[$e];
             $type = str_replace("data:","",explode(";", $anexos[$e])[0]);

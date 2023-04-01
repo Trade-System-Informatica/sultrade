@@ -128,12 +128,12 @@ class AddPessoa extends Component {
         var id = await this.props.match.params.id
         await this.setState({ chave: id, loading: true })
 
-        if (!this.props.location.state || this.props.location.state.pessoa) {
+        if (!this.props.location.state || !this.props.location.state.pessoa) {
             await this.getPessoa()
         } else {
             await this.setState({ pessoa: this.props.location.state.pessoa })
         }
-        if (parseInt(id) !== 0) {
+        if (parseInt(id) !== 0 && this.state.pessoa) {
             //console.log('Servicos: ' + JSON.stringify(this.state.tiposervico))
             //await this.loadData(this.state.tiposervico)
 

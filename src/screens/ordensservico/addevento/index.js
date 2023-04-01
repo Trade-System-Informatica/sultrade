@@ -123,6 +123,14 @@ const estadoInicial = {
     emailsIniciais: [],
     emailsFinais: [],
 
+
+    anexosForn: [],
+
+    anexosValidadosOptions: [
+        { label: "Aguardando...", value: 0 },
+        { label: "Invalidado", value: 1 },
+        { label: "Validado", value: 2 }
+    ]
 }
 
 class AddEvento extends Component {
@@ -205,6 +213,15 @@ class AddEvento extends Component {
         await this.getDescricaoPadrao();
         await this.getDocumentos();
         await this.getTiposDocumento();
+
+        if (this.state.chave != 0) {
+            const anexos = await loader.getBody("getAnexos.php", { evento: this.state.chave });
+            console.log(anexos);
+
+            await this.setState({
+                anexosForn: anexos.filter((an) => (anexos.validado == 0 || !anexos.validado))
+            });
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "SERVICOS_ITENS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "SERVICOS_ITENS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -570,6 +587,7 @@ class AddEvento extends Component {
             emails: this.state.emails,
             remarks: this.state.remarks,
             os: this.state.osOptions.find((e) => e.value == this.state.chave_os).label,
+            fornecedor: this.state.fornecedorCusteio != "" && this.state.fornecedorCusteio != "0" ? this.state.fornecedorCusteio : this.state.fornecedor,
             navio: this.state.osOptions.find((e) => e.value == this.state.chave_os).navioNome,
             porto: this.state.osOptions.find((e) => e.value == this.state.chave_os).portoNome,
             evento: this.state.chave,
@@ -753,6 +771,24 @@ class AddEvento extends Component {
         })
     }
 
+    salvarAnexos = async () => {
+        this.setState({ loading: true, anexosModal: false })
+
+        await apiEmployee.post(`updateAnexos.php`, {
+            token: true,
+            anexos: this.state.anexosForn,
+            validadoPor: this.state.usuarioLogado.codigo,
+            validadoData: moment().format("YYYY-MM-DD HH:mm:ss"),
+        }).then(
+            async res => {
+            },
+            async res => await console.log(`Erro: ${res}`)
+        )
+
+        this.setState({ loading: false });
+
+    }
+
     salvarServicoItem = async (validForm) => {
         this.setState({ bloqueado: true });
 
@@ -772,6 +808,12 @@ class AddEvento extends Component {
             ],
             loading: true
         })
+
+        const os = this.state.osOptions.find(option => option.value == this.state.chave_os).label;
+        const navio = this.state.osOptions.find((e) => e.value == this.state.chave_os).navioNome;
+        const porto = this.state.osOptions.find((e) => e.value == this.state.chave_os).portoNome;
+
+        this.setState({ assunto: `PO: ${os} - Nome do Navio: ${navio} - Porto: ${porto}\n` });
 
         if (parseInt(this.state.chave) === 0 && validForm) {
             await apiEmployee.post(`insertServicoItemBasico.php`, {
@@ -849,7 +891,6 @@ class AddEvento extends Component {
                 },
                 async res => await console.log(`Erro: ${res}`)
             )
-
         }
 
     }
@@ -1107,6 +1148,55 @@ class AddEvento extends Component {
 
                             </div >
                         </Modal >
+
+                        <Modal
+                            aria-labelledby="transition-modal-title"
+                            aria-describedby="transition-modal-description"
+                            style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
+                            open={this.state.anexosModal}
+                            onClose={async () => await this.setState({ anexosModal: false })}
+                        >
+                            <div className='modalContainer'>
+                                <div className='modalCriar'>
+                                    <div className='containersairlistprodmodal'>
+                                        <div className='botaoSairModal' onClick={async () => await this.setState({ anexosModal: false })}>
+                                            <span>X</span>
+                                        </div>
+                                    </div>
+                                    <div className='modalContent'>
+                                        <div className='tituloModal'>
+                                            <span>Anexos de Fornecedores:</span>
+                                        </div>
+
+
+                                        <div className='modalForm'>
+                                            <table style={{ width: "100%" }}>
+                                                <tr className='anexoListTitle'>
+                                                    <th>Anexo</th>
+                                                    <th style={{ width: 250, textAlign: "center" }}>Validado</th>
+                                                </tr>
+                                                {this.state.anexosForn.map((anexo) => (
+                                                    <tr className='anexoList'>
+                                                        <td><a className="nonLink" href={`${util.completarDocuments(`fornDocs/${anexo.anexo}`)}`} target="_blank">{anexo.anexo}</a></td>
+                                                        <td style={{ width: 250, display: "flex", justifyContent: "center" }}><Select style={{ width: 250 }} options={this.state.anexosValidadosOptions} value={this.state.anexosValidadosOptions.find((e) => e.value == anexo.validado)} onChange={(e) => this.setState({ anexosForn: this.state.anexosForn.map((an) => this.state.eventos.filter(e => e.chave == an.chave) ? ({ ...an, validado: e.value }) : ({ ...an })) })} /></td>
+                                                    </tr>
+                                                ))}
+                                            </table>
+
+                                            <div className='centerDiv'>
+                                                <button
+                                                    onClick={() => this.salvarAnexos()}
+                                                    style={{ width: 250, border: "1px solid black", borderRadius: 50, padding: 10 }}
+                                                >Salvar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div >
+
+                            </div >
+                        </Modal >
+
                         <Modal
                             aria-labelledby="transition-modal-title"
                             aria-describedby="transition-modal-description"
@@ -1179,21 +1269,15 @@ class AddEvento extends Component {
                                                                     <label>Assunto</label>
                                                                 </div>
                                                                 <div className="col-1 errorMessage">
-                                                                    {!this.state.assunto &&
-                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                                    }
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Field className="form-control" type="text" value={this.state.assunto} onChange={async e => { this.setState({ assunto: e.currentTarget.value }) }} />
+                                                                    <Field className="form-control" type="text" rows="2" component="textarea" value={this.state.assunto} onChange={async e => { this.setState({ assunto: e.currentTarget.value }) }} />
                                                                 </div>
                                                                 <div className="col-1"></div>
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstlabel">
                                                                     <label>Corpo</label>
                                                                 </div>
                                                                 <div className="col-1 errorMessage">
-                                                                    {!this.state.corpo &&
-                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                                    }
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                     <Field className="form-control" type="text" rows="4" component="textarea" value={this.state.corpo} onChange={async e => { this.setState({ corpo: e.currentTarget.value }) }} />
@@ -1294,21 +1378,30 @@ class AddEvento extends Component {
 
                                                     <div className="row addservicos">
                                                         {this.state.chave != 0 &&
-                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstlabel">
-                                                                <label>Chave</label>
-                                                            </div>
-                                                        }
-                                                        {this.state.chave != 0 &&
-                                                            <div className='col-1'></div>
-                                                        }
-                                                        {this.state.chave != 0 &&
-                                                            <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10 ">
-                                                                <Field className="form-control" style={{ backgroundColor: '#dddddd' }} type="text" disabled value={this.state.chave} />
-                                                            </div>
-                                                        }
-                                                        {this.state.chave != 0 &&
-                                                            <div className="col-xl-4 col-lg-4 col-md-3 col-sm-1 col-1 ">
-                                                            </div>
+                                                            <>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstlabel">
+                                                                    <label>Chave</label>
+                                                                </div>
+                                                                <div className='col-1'></div>
+                                                                <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10 ">
+                                                                    <Field className="form-control" style={{ backgroundColor: '#dddddd' }} type="text" disabled value={this.state.chave} />
+                                                                </div>
+                                                                <div className="col-xl-4 col-lg-4 col-md-3 col-sm-1 col-1 ">
+                                                                </div>
+                                                                {this.state.anexosForn[0] &&
+                                                                    <div className='col-xl-2 col-lg-2 col-md-12 col-sm-12 col-12 labelForm'>
+                                                                        <div className="centerDiv">
+                                                                            <button
+                                                                                disabled={!validForm}
+                                                                                type="button"
+                                                                                style={validForm ? { width: 150, height: 50, padding: 5, color: "white", border: "1px solid #efefef", marginBottom: 25 } : { backgroundColor: '#999', opacity: 0.3, width: 150, height: 50, padding: 5, color: "#ccc", border: "1px solid #ccc", marginBottom: 25 }}
+                                                                                onClick={() => { this.setState({ anexosModal: true }) }}
+                                                                            >Anexos
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                            </>
                                                         }
                                                         <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
                                                             <label>Ordem de Serviço</label>

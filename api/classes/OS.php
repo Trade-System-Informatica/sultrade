@@ -242,6 +242,24 @@ class OS {
 
     }
 
+    public static function testEventoFornecedor($chave, $fornecedor)
+    {
+        $database = new Database();
+
+        $evento = $database->doSelect(
+            'os_servicos_itens', 'os_servicos_itens.fornecedor',
+            "os_servicos_itens.chave = '$chave'"
+        );
+
+        if ($evento[0]["fornecedor"] == $fornecedor) {
+            $result = true;
+        } else {
+            $result = false;
+        }
+        $database->closeConection();
+        return $result;
+    }
+
     public static function getCentrosCustos(){
         $database = new Database();
 

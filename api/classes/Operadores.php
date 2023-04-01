@@ -58,7 +58,26 @@ class Operadores {
         }
         $database->closeConection();
         return $result;
+    }
 
+    public static function getOperadoresBase($empresa)
+    {
+        $database = new Database();
+
+        if ($empresa != 0) {
+            $result = $database->doSelect(
+                'operadores',
+                'operadores.Codigo, operadores.Nome',
+                "empresa = '" . $empresa . "' OR empresa = 0"
+            );
+        } else {
+            $result = $database->doSelect(
+                'operadores',
+                'operadores.Codigo, operadores.Nome'
+            );
+        }
+        $database->closeConection();
+        return $result;
     }
 
     public static function getControle(){

@@ -168,7 +168,9 @@ const estadoInicial = {
     cabecalhoModal: false,
     cabecalho: "",
     company: "",
-    address: ""
+    address: "",
+
+    faturada: true,
 }
 
 class AddOS extends Component {
@@ -235,6 +237,8 @@ class AddOS extends Component {
                 if (!permissao) {
                     this.setState({ bloqueado: true });
                 }
+            } else {
+                this.setState({ faturada: false });
             }
 
             if (this.state.cabecalho) {
@@ -433,6 +437,17 @@ class AddOS extends Component {
             response => { this.erroApi(response) }
 
         )
+    }
+
+    faturarData = async (valor) => {
+        if (!this.state.anexosForn[0]) {
+            await this.setState({
+                faturamento: valor,
+                faturadoPor: this.state.faturamento == '' ? '' : this.state.usuarioLogado.codigo
+            })
+        } else {
+            await this.setState({ error: { type: "error", msg: "Há Faturas Pendentes!" } });
+        }
     }
 
     deleteServicoItem = async (chave, nome) => {
@@ -1996,6 +2011,7 @@ class AddOS extends Component {
 
                             </div >
                         </Modal >
+
                         <Modal
                             aria-labelledby="transition-modal-title"
                             aria-describedby="transition-modal-description"
@@ -2361,18 +2377,20 @@ class AddOS extends Component {
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
                                                                 <label>Codigo</label>
                                                             </div>
-                                                            <div className='col-1'></div>
+                                                            <div className="col-1"></div>
                                                             <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10">
                                                                 <Field className="form-control" type="text" disabled value={this.state.codigo.Proximo ? `TS${this.state.codigo.Proximo}` : this.state.codigo ? this.state.codigo : ''} />
                                                             </div>
-                                                            <div className='col-xl-5 col-lg-5 col-md-5 col-sm-12 col-12 labelForm'>
-                                                                <button
-                                                                    disabled={!validForm}
-                                                                    type="button"
-                                                                    style={validForm ? { width: 150, height: 50, padding: 5, color: "white", border: "1px solid #efefef", marginBottom: 25 } : { backgroundColor: '#999', opacity: 0.3, width: 150, height: 50, padding: 5, color: "#ccc", border: "1px solid #ccc", marginBottom: 25 }}
-                                                                    onClick={() => { this.setState({ cabecalhoModal: true }) }}
-                                                                >Editar Cabeçalho
-                                                                </button>
+                                                            <div className='col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12 labelForm'>
+                                                                <div className="centerDiv">
+                                                                    <button
+                                                                        disabled={!validForm}
+                                                                        type="button"
+                                                                        style={validForm ? { width: 150, height: 50, padding: 5, color: "white", border: "1px solid #efefef", marginBottom: 25 } : { backgroundColor: '#999', opacity: 0.3, width: 150, height: 50, padding: 5, color: "#ccc", border: "1px solid #ccc", marginBottom: 25 }}
+                                                                        onClick={() => { this.setState({ cabecalhoModal: true }) }}
+                                                                    >Editar Cabeçalho
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 <label>Data Abertura</label>
@@ -2578,7 +2596,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="date" value={this.state.faturamento} onChange={async e => { await this.setState({ faturamento: e.currentTarget.value }); await this.setState({ faturadoPor: this.state.faturamento == '' ? '' : this.state.usuarioLogado.codigo }) }} />
+                                                                <Field className="form-control" type="date" value={this.state.faturamento} onChange={async e => { this.faturarData(e.currentTarget.value) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">

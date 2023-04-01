@@ -178,14 +178,14 @@ class PagamentosLote extends Component {
                 this.setState({ contasBase: contasFiltradas });
                 const contasUsadas = [];
                 const contasCombinadas = [];
-
+                
                 for (let i = 0; i < contasFiltradas.length; i++) {
                     const element = contasFiltradas[i];
-                    contasUsadas.push(element.Chave);
-
+                    
                     if (!contasUsadas.includes(element.Chave)) {
                         contasCombinadas[i] = { ...element, combinacoes: [element.Chave] };
                     }
+                    contasUsadas.push(element.Chave);
 
                     for (let j = 0; j < contasFiltradas.filter((con) => !contasUsadas.includes(con.Chave)).length; j++) {
                         const elem = contasFiltradas.filter((con) => !contasUsadas.includes(con.Chave))[j];
@@ -200,7 +200,7 @@ class PagamentosLote extends Component {
                 }
 
                 const contas = [];
-
+                
                 for (let i = 0; i < contasCombinadas.length; i++) {
                     let e = contasCombinadas[i]
 
@@ -302,7 +302,7 @@ class PagamentosLote extends Component {
                     chave: e.Chave
                 }).then(
                     async res => {
-                        console.log(res.data[0])
+                        //console.log(res.data[0])
                         return res.data[0];
                     },
                     async err => console.log(`erro: ` + err)
@@ -320,8 +320,8 @@ class PagamentosLote extends Component {
                     dadosComplementares
                 }).then(
                     async res => {
-                        console.log(res);
-                        console.log(res.data);
+                        //console.log(res);
+                        //console.log(res.data);
                         const requisicoes = this.state.requisicoesCarregando;
                         if (res.data.erros) {
                             requisicoes.push(`Conta ${e.Historico} (chave ${e.Chave}) - "Rejeitada"`);
@@ -350,8 +350,8 @@ class PagamentosLote extends Component {
                     lote: this.state.lote
                 }).then(
                     async res => {
-                        console.log(res);
-                        console.log(res.data);
+                        //console.log(res);
+                        //console.log(res.data);
 
                         const requisicoes = this.state.requisicoesCarregando;
                         const id = this.state.bbGet.find((e) => e.codigo == res.data.estadoRequisicao).status;
@@ -374,8 +374,8 @@ class PagamentosLote extends Component {
                     lote: this.state.lote
                 }).then(
                     async res => {
-                        console.log(res);
-                        console.log(res.data);
+                        //console.log(res);
+                        //console.log(res.data);
 
                         const requisicoes = this.state.requisicoesCarregando;
                         const id = this.state.bbGet.find((e) => e.codigo == res.data.codigoEstado).status;
@@ -759,7 +759,7 @@ class PagamentosLote extends Component {
 
             if (!e.dadosBase.error) {
                 if (e.dadosBase.meio == 'TRC') {
-                    console.log(e);
+                   //console.log(e);
                     await apiEmployee.post(`consultaTRC.php`, {
                         token: true,
                         url: `${API_BANCO}${API_BANCO_TRANS_GET}${e.dadosBase.cpf}/transferencias`,
@@ -768,8 +768,8 @@ class PagamentosLote extends Component {
                         id: e.id
                     }).then(
                         async res => {
-                            console.log(res)
-                            console.log(res.data)
+                           //console.log(res)
+                           //console.log(res.data)
 
                             try {
                                 if (res.data && !res.data.erros) {
@@ -909,18 +909,18 @@ class PagamentosLote extends Component {
                     }).then(
                         async res => {
                             try {
-                                console.log(res);
+                               //console.log(res);
                                 if (res.data) {
-                                    console.log(res.data);
+                                   //console.log(res.data);
                                     const response = await Util.constroiJsonBB(res.data);
-                                    console.log(response);
+                                   //console.log(response);
 
                                     if (response) {
                                         if (response.estadoRequisicao) {
 
                                             const newStatusId = this.state.bbGet.find((e) => e.codigo == response.estadoRequisicao).status;
-                                            console.log(newStatusId)
-                                            console.log(e.dadosBase.statusId)
+                                           //console.log(newStatusId)
+                                           //console.log(e.dadosBase.statusId)
 
                                             status.push({
                                                 conta: e.dadosBase.chave,
@@ -941,8 +941,8 @@ class PagamentosLote extends Component {
                                             await this.setState({ requisicoesCarregando: requisicoes })
                                         } else {
                                             const newStatusId = this.state.bbTrc.find((e) => e.codigo == response.estadoPagamento).status;
-                                            console.log(newStatusId)
-                                            console.log(e.dadosBase.statusId)
+                                           //console.log(newStatusId)
+                                           //console.log(e.dadosBase.statusId)
 
                                             status.push({
                                                 conta: e.dadosBase.chave,
@@ -1001,7 +1001,7 @@ class PagamentosLote extends Component {
                                     await this.setState({ requisicoesCarregando: requisicoes })
                                 }
                             } catch (err) {
-                                console.log(err);
+                               //console.log(err);
                                 status.push({
                                     conta: e.dadosBase.chave,
                                     contasChaves: e.dadosBase.chaves,
@@ -1052,8 +1052,8 @@ class PagamentosLote extends Component {
 
                                 if (response) {
                                     const newStatusId = this.state.bbTrc.find((e) => e.codigo == response.estadoPagamento).status;
-                                    console.log(newStatusId)
-                                    console.log(e.dadosBase.statusId)
+                                   //console.log(newStatusId)
+                                   //console.log(e.dadosBase.statusId)
 
                                     status.push({
                                         conta: e.dadosBase.chave,
@@ -1139,9 +1139,9 @@ class PagamentosLote extends Component {
                         async res => {
 
                             try {
-                                console.log(res.data);
+                               //console.log(res.data);
                                 const response = await Util.constroiJsonBB(res.data);
-                                console.log(response);
+                               //console.log(response);
 
                                 if (response) {
                                     const newStatusId = this.state.bbTrc.find((e) => e.codigo == response.estadoPagamento).status;
@@ -1179,7 +1179,7 @@ class PagamentosLote extends Component {
                                             errors: ''
                                         })
                                     } catch (err) {
-                                        console.log(err);
+                                       //console.log(err);
                                         status.push({
                                             conta: e.dadosBase.chave,
                                             contasChaves: e.dadosBase.chaves,
@@ -1199,7 +1199,7 @@ class PagamentosLote extends Component {
                                     await this.setState({ requisicoesCarregando: requisicoes })
                                 }
                             } catch (err) {
-                                console.log(err);
+                               //console.log(err);
                                 status.push({
                                     conta: e.dadosBase.chave,
                                     contasChaves: e.dadosBase.chaves,
@@ -1244,8 +1244,8 @@ class PagamentosLote extends Component {
                         empresa: this.state.usuarioLogado.empresa
                     }).then(
                         async res => {
-                            console.log(res)
-                            console.log(res.data)
+                           //console.log(res)
+                           //console.log(res.data)
 
                             try {
                                 const response = await Util.constroiJsonBB(res.data);
@@ -1334,8 +1334,8 @@ class PagamentosLote extends Component {
                         empresa: this.state.usuarioLogado.empresa
                     }).then(
                         async res => {
-                            console.log(res)
-                            console.log(res.data)
+                           //console.log(res)
+                           //console.log(res.data)
 
                             try {
                                 const response = await Util.constroiJsonBB(res.data);
@@ -1423,8 +1423,8 @@ class PagamentosLote extends Component {
                         empresa: this.state.usuarioLogado.empresa
                     }).then(
                         async res => {
-                            console.log(res)
-                            console.log(res.data)
+                           //console.log(res)
+                           //console.log(res.data)
 
                             try {
                                 const response = await Util.constroiJsonBB(res.data);
@@ -1527,7 +1527,7 @@ class PagamentosLote extends Component {
             if (!e.status) {
                 errors.push({ conta: e.conta, mensagem: e.error ? e.error : "Erro desconhecido, tente novamente" });
             }
-            console.log(e);
+           //console.log(e);
             for (let i = 0; i < e.contasChaves.length; i++) {
 
                 const contaAtual = this.state.contasBase.find((j) => j.Chave == e.contasChaves[i]);
@@ -1562,7 +1562,7 @@ class PagamentosLote extends Component {
                             );
 
                         } else {
-                            console.log(JSON.stringify(res))
+                           //console.log(JSON.stringify(res))
                         }
                     },
                     async err => {
@@ -1604,7 +1604,7 @@ class PagamentosLote extends Component {
     }
 
     gerarComprovante = async (dados) => {
-        console.log(dados);
+       //console.log(dados);
 
         if (dados.meioPagamento == 'TRC') {
             await apiEmployee.post(`consultaTRC.php`, {
@@ -1615,8 +1615,8 @@ class PagamentosLote extends Component {
                 id: dados.transacao
             }).then(
                 async res => {
-                    console.log("TRC");
-                    console.log(res.data);
+                   //console.log("TRC");
+                   //console.log(res.data);
                     if (!res.data.error) {
                         const response = await Util.constroiJsonBB(res.data.transferencias.at(-1));
 
@@ -1626,15 +1626,15 @@ class PagamentosLote extends Component {
                         }
 
                         if (parseInt(response.numeroCOMPE) == 1) {
-                            console.log("Transferencia entre contas");
+                           //console.log("Transferencia entre contas");
 
 
-                            console.log(response);
+                           //console.log(response);
 
                             this.comprovanteTransferencia(response, dados.transacao);
                         } else {
-                            console.log("TED/DOC");
-                            console.log(response);
+                           //console.log("TED/DOC");
+                           //console.log(response);
 
                             this.comprovanteTED(response, dados.transacao);
                         }
@@ -1643,8 +1643,8 @@ class PagamentosLote extends Component {
                     }
                 },
                 async err => {
-                    console.log("ERRO:");
-                    console.log(err);
+                   //console.log("ERRO:");
+                   //console.log(err);
                 }
             )
         } else if (dados.meioPagamento == 'BOL') {
@@ -1655,7 +1655,7 @@ class PagamentosLote extends Component {
             }).then(
                 async res => {
                     if (!res.data.error) {
-                        console.log("BOL");
+                       //console.log("BOL");
                         const response = await Util.constroiJsonBB(res.data)
 
                         const nomeBanco = this.state.bancos.find((banco) => parseInt(banco.compe) == parseInt(response.numeroCOMPE));
@@ -1665,7 +1665,7 @@ class PagamentosLote extends Component {
 
                         this.comprovanteBOL(response, dados.transacao);
 
-                        console.log(response)
+                       //console.log(response)
                     } else {
                         await this.setState({ error: { type: "error", msg: "Muitas requisições!\nAguarde alguns minutos, por favor..." } });
                     }

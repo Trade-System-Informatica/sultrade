@@ -30,7 +30,7 @@ class Header extends Component {
         permissoes: [],
         acessosPermissoes: [],
 
-        anexosVencidos: [],
+        tarifasVencidas: [],
         alert: {msg: "", type: ""}
     }
 
@@ -88,8 +88,9 @@ class Header extends Component {
 
     sendEmails = async () => {
         this.setState({alert: {msg: "", type: ""}})
+        console.log(this.state.tarifasVencidas);
         
-        await loader.anexosVencidosEmails(this.state.anexosVencidos);
+        await loader.tarifasVencidasEmails(this.state.tarifasVencidas);
     }
 
     componentDidMount = async () => {
@@ -97,9 +98,9 @@ class Header extends Component {
         await this.carregaPermissoes()
         await this.testaAcesso()
 
-        if (!this.props.user.codigo) {
+        if (!this.props.user.codigo && !this.props.login) {
             await this.setState({ redirect: true })
-        } else {
+        } else if (this.props.user.codigo) {
             if (this.props.user.justLogged) {
                 let permission = false;
                 this.state.acessosPermissoes.map((e) => {
@@ -109,12 +110,12 @@ class Header extends Component {
                 })
 
                 if (permission) {
-                    const anexos = await loader.testaAnexosVencimentos();
+                    const tarifas = await loader.testaTarifasVencimentos();
                     
-                    if (anexos[0]) {
-                        this.setState({anexosVencidos: anexos});
+                    if (tarifas[0]) {
+                        this.setState({tarifasVencidas: tarifas});
                         this.setState({alert: {type: "confirm", msg: `Há tarifas vencidas. Deseja enviar emails automáticamente?
-                        Vencimentos: (${anexos.map((anexo) => anexo.fornecedorNome).join(", ")})`}});
+                        Vencimentos: (${tarifas.length > 3 ? tarifas.filter((tarifa,tarifaIndex) => tarifaIndex <= 3).map((tarifa) => tarifa.fornecedorNome).join(", ") + ", ..." : tarifas.map((tarifa) => tarifa.fornecedorNome).join(", ")})`}});
                     }
                 }
             }
@@ -269,7 +270,7 @@ class Header extends Component {
                                 </Link>
                             }
                             {this.props.voltarAddPessoa &&
-                                <Link to={{ pathname: `/tabelas/addpessoa/${this.props.pessoa.Chave}`, state: { pessoa: this.props.pessoa } }}>
+                                <Link to={{ pathname: `/tabelas/addpessoa/${this.props.pessoa}`}}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
@@ -295,6 +296,11 @@ class Header extends Component {
                             }
                             {this.props.voltarTiposDocumentos &&
                                 <Link to={{ pathname: `/tabelas/tiposdocumentos`, state: { chave: this.props.chave } }}>
+                                    <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
+                                </Link>
+                            }
+                            {this.props.voltarTarifas &&
+                                <Link to={{ pathname: `/ordensservico/tarifas`, state: { chave: this.props.chave } }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
@@ -512,8 +518,8 @@ class Header extends Component {
                                                             Solitações de Serviço
                                                         </Link>
                                                     }
-                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'ANEXOS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
-                                                        <Link className="dropdown-item" to={{ pathname: `/ordensservico/anexos` }}>
+                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'TARIFAS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                        <Link className="dropdown-item" to={{ pathname: `/ordensservico/tarifas` }}>
                                                             Tarifas de fornecedores
                                                         </Link>
                                                     }
@@ -676,11 +682,11 @@ class Header extends Component {
                     </div>
 
                     <div className="headerImages">
-                        {this.props.sair &&
+                        {(this.props.sair || this.props.login) &&
                             <img alt='logo' className=" img-fluid logologado" src={Logo} style={{ alignItems: 'center', justifyContent: 'center' }} />
                         }
 
-                        {!this.props.sair &&
+                        {!this.props.sair && !this.props.login &&
                             <Link to={{ pathname: `/inicio` }}>
                                 <img alt='logo' className=" img-fluid logologado" src={Logo} style={{ alignItems: 'center', justifyContent: 'center' }} />
                             </Link>

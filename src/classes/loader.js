@@ -527,8 +527,8 @@ export default class loader {
     }
 
     //
-    static async testaAnexosVencimentos() {
-        return await apiEmployee.post("anexosVencimentos.php",{
+    static async testaTarifasVencimentos() {
+        return await apiEmployee.post("tarifasVencimentos.php",{
             token: true
         }).then(
             async res => {
@@ -540,10 +540,10 @@ export default class loader {
         )
     }
 
-    static async anexosVencidosEmails(anexos) {
-        const chaves = anexos.map((e) => e.chave);
+    static async tarifasVencidasEmails(tarifas) {
+        const chaves = tarifas.map((e) => e.chave);
 
-        return await apiEmployee.post("emailAnexosVencidos.php",{
+        return await apiEmployee.post("emailTarifasVencidas.php",{
             token: true,
             chaves
         }).then(

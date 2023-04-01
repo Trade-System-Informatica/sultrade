@@ -54,9 +54,34 @@ function savePicture($picture ,$name, $format, $ext){
     $img = str_replace(' ', '+', $img);
     $data = base64_decode($img);
 
+    if (file_exists("../$link")) {
+        unlink("../$link");
+    }
+    
     file_put_contents('../'.$link, $data);
 
-    return $name;
+    return "../$link";
+}
+
+function saveFornAnexo($doc, $name, $format, $ext, $key) {
+    if($name == null){
+        $name = date('m-d-Y-H-i-s', time());
+        $name = str_replace("-","",$name);
+        $name = $name . "-$key";
+    } 
+
+    $link = $name.'.'.$ext;
+    $fullName = $link;
+    $link = "documents/fornDocs/" . $link;
+
+    $img = $doc;
+    $img = str_replace('data:'.$format.';base64,', '', $img);
+    $img = str_replace(' ', '+', $img);
+    $data = base64_decode($img);
+
+    file_put_contents('../'.$link, $data);
+
+    return $fullName;
 }
 
 function savePDF($picture, $name = null){

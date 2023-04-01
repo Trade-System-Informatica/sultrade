@@ -3,8 +3,9 @@ header("Access-Control-Allow-Origin:*");
 header("Content-Type: application/x-www-form-urlencoded");
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
-//include_once '../classes/Employees.php';
+//application/x-httpd-php updateSeaport.php ( PHP script, ASCII text, with CRLF line terminators )
 include_once '../classes/Pessoas.php';
+include_once '../classes/Employees.php';
 include_once '../libraries/utils.php';
 
 $data = file_get_contents("php://input");
@@ -12,23 +13,17 @@ $objData = json_decode($data);
 
 if($objData != NULL){
     $token = prepareInput($objData->token);
-    $chave = prepareInput($objData->chave);
-    $anexo = prepareInput($objData->anexo);
+    $anexos = $objData->anexos;
+    $validadoPor = prepareInput($objData->validadoPor);
+    $validadoData = prepareInput($objData->validadoData);
 
-//    $employees = new Employees();
     $pessoas = new Pessoas();
 
-   // $result = $employees->checkToken($token);
-
+    //$result = $employees->checkToken($token);
     //if($result == 'true'){
-
-    unlink("../documents/fornDocs/$anexo");
-    
-    $result = $pessoas->deleteAnexo($chave);
-    //} else {
-       //return 'false';
+        //$result = "'" . $id_seaport . "'";
+        $result = $pessoas->updateAnexos($anexos, $validadoPor, $validadoData);
     //}
-    
 } else {
     $result = "false";
 }

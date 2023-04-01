@@ -400,10 +400,10 @@ class AddPessoaEndereco extends Component {
 
                 <section>
                     {this.props.location.state.backTo == 'addpessoa' &&
-                        <Header voltarAddPessoa pessoa={this.props.location.state.pessoa} titulo="Endereços"/>
+                        <Header voltarAddPessoa pessoa={this.state.chave_pessoa} titulo="Endereços"/>
                     }
                     {this.props.location.state.backTo == 'enderecos' &&
-                        <Header voltarPessoaEnderecos pessoa={this.props.location.state.pessoa} titulo="Endereços" chave={this.state.chave != 0 ? this.state.chave : ''}/>
+                        <Header voltarPessoaEnderecos pessoa={this.state.chave_pessoa} titulo="Endereços" chave={this.state.chave != 0 ? this.state.chave : ''}/>
                     }
                     <br />
                     <br />

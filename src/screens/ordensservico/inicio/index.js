@@ -127,11 +127,12 @@ class OrdensServico extends Component {
                                             </li>
                                         }
 
-                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+
+                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'TARIFAS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                             <li className=" text-left itemMenu list-group-item ">
-                                                <Link className="semTextDecoration" to={{ pathname: `/ordensservico/eventos` }}>
+                                                <Link className="semTextDecoration" to={{ pathname: `/ordensservico/tarifas` }}>
                                                     <FontAwesomeIcon icon={faFileContract} size="2x" color="tomato" />
-                                                    <h4 className="textoMenu">Eventos</h4>
+                                                    <h4 className="textoMenu">Tarifas de Fornecedores</h4>
                                                 </Link>
                                             </li>
                                         }
@@ -141,7 +142,7 @@ class OrdensServico extends Component {
                                             <li className=" text-left itemMenu list-group-item ">
                                                 <Link className="semTextDecoration" to={{ pathname: `/ordensservico/anexos` }}>
                                                     <FontAwesomeIcon icon={faPaperclip} size="2x" color="tomato" />
-                                                    <h4 className="textoMenu">Tarifas de Fornecedores</h4>
+                                                    <h4 className="textoMenu">Validações</h4>
                                                 </Link>
                                             </li>
                                         }

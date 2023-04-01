@@ -3,7 +3,6 @@ header("Access-Control-Allow-Origin:*");
 header("Content-Type: application/x-www-form-urlencoded");
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
-//include_once '../classes/Employees.php';
 include_once '../classes/Pessoas.php';
 include_once '../libraries/utils.php';
 
@@ -13,23 +12,11 @@ $objData = json_decode($data);
 if($objData != NULL){
     $token = prepareInput($objData->token);
     $chave = prepareInput($objData->chave);
-    $anexo = prepareInput($objData->anexo);
 
-//    $employees = new Employees();
     $pessoas = new Pessoas();
-
-   // $result = $employees->checkToken($token);
-
-    //if($result == 'true'){
-
-    unlink("../documents/fornDocs/$anexo");
     
-    $result = $pessoas->deleteAnexo($chave);
-    //} else {
-       //return 'false';
-    //}
-    
-} else {
+ $result = $pessoas->deleteTarifa($chave);
+    } else {
     $result = "false";
 }
 

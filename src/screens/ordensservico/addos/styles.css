@@ -137,6 +137,32 @@
     align-items: center;
 }
 
+.anexoList >td {
+}
+
+.anexoList:nth-child(even), .anexoList:nth-child(even) > td {
+    background-color: white;
+    padding: 15px;
+    color: black;
+}
+
+.anexoList:nth-child(odd), .anexoList:nth-child(odd) > td {
+    background-color: black;
+    padding: 15px;
+    color: white;
+}
+
+.anexoListTitle {
+    padding: 15px;
+}
+
+.anexoListTitle > th{
+    font-weight: bold;
+    padding: 15px;
+    color: white;
+    background-color: black;
+}
+
 @media (min-width: 768px) {
     .insideFormButton {
         font-size: 1.4em;

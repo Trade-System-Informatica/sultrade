@@ -2,6 +2,7 @@ import React from 'react'
 import {BrowserRouter, Route, Switch} from 'react-router-dom'
 import ScreenSaver from './components/screensaver'
 
+import FornecedoresAnexos from './screens/anexos'
 import Login from './screens/login'
 import Inicio from './screens/inicio'
 import Tabelas from './screens/tabelas/inicio'
@@ -55,11 +56,13 @@ import AddOperador from './screens/utilitarios/addoperador'
 import OS from './screens/ordensservico/os'
 import Eventos from './screens/ordensservico/eventos'
 import RelatorioOS from './screens/ordensservico/relatorio'
+import Tarifas from './screens/ordensservico/tarifas'
 import Anexos from './screens/ordensservico/anexos'
 
 import AddOS from './screens/ordensservico/addos'
 import AddEvento from './screens/ordensservico/addevento'
 import AddEventoFinanceiro from './screens/ordensservico/addeventofinanceiro'
+import AddTarifa from './screens/ordensservico/addtarifa'
 import AddAnexo from './screens/ordensservico/addanexo'
 
 
@@ -87,6 +90,7 @@ export default function Routes(){
         <BrowserRouter>
             <Switch>
                 <Route path="/" exact component={Login}  />
+                <Route path="/anexos/:evento/:fornecedor" exact component={FornecedoresAnexos}  />
                 <Route path="/inicio" exact component={Inicio} />
                 <Route path="/tabelas" exact component={Tabelas} />
                 <Route path="/ordensservico" exact component={OrdensServico} />
@@ -139,11 +143,13 @@ export default function Routes(){
                 <Route path="/ordensservico/os" component={OS} />
                 <Route path="/ordensservico/eventos" component={Eventos} />
                 <Route path="/ordensservico/relatorio" component={RelatorioOS} />
+                <Route path="/ordensservico/tarifas" component={Tarifas} />
                 <Route path="/ordensservico/anexos" component={Anexos} />
                 
                 <Route path="/ordensservico/addos/:id/" component={AddOS} />
                 <Route path="/ordensservico/addevento/:id/" component={AddEvento} />
                 <Route path="/ordensservico/addeventoFinanceiro/:id/" component={AddEventoFinanceiro} />
+                <Route path="/ordensservico/addtarifa/:id/" component={AddTarifa} />          
                 <Route path="/ordensservico/addanexo/:id/" component={AddAnexo} />          
 
 

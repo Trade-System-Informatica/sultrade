@@ -35,11 +35,19 @@ class Alert extends Component {
                                 {this.props.alert.type === "error" &&
                                     <FontAwesomeIcon style={{ color: "red" }} icon={faExclamationTriangle} />
                                 }
-                                {this.props.alert.msg}
+                                <div style={{ overflow: "scroll", maxHeight: 125 }}>
+                                    {this.props.alert.msg}
+                                    {this.props.alert.checkboxes && this.props.alert.checkboxes.map((check) => (
+                                        <>
+                                            <div><input type="checkbox" value={check.value} onChange={() => this.props.changeCheckbox(check.key)} /></div>
+                                            <div>{check.label}</div>
+                                        </>
+                                    ))}
+                                </div>
                                 {this.props.alert.type === "confirm" &&
                                     <div className="confirmButtons">
-                                        <button className="btn btn-success" style={{paddingLeft: 15, paddingRight: 15}} onClick={() => this.props.alertFunction()}>Sim</button>
-                                        <button className="btn btn-danger" style={{paddingLeft: 15, paddingRight: 15}} onClick={() => this.props.setAlert({type: "", msg: ""})}>Não</button>
+                                        <button className="btn btn-success" style={{ paddingLeft: 15, paddingRight: 15 }} onClick={() => this.props.alertFunction()}>Sim</button>
+                                        <button className="btn btn-danger" style={{ paddingLeft: 15, paddingRight: 15 }} onClick={() => this.props.setAlert({ type: "", msg: "" })}>Não</button>
                                     </div>
                                 }
                             </div>

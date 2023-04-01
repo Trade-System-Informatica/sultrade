@@ -299,6 +299,10 @@ class AddEventoFinanceiro extends Component {
     salvarServicoItem = async (validForm) => {
         this.setState({ bloqueado: true });
 
+        this.setState({
+            historico: `Valor referente Doc ${this.state.documento ? this.state.documento : ""} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}`
+        })
+        
         await this.setState({
             dadosFinais: [
                 { titulo: 'Moeda', valor: this.state.moeda },
@@ -695,8 +699,6 @@ class AddEventoFinanceiro extends Component {
         validations.push(this.state.valor && this.state.valor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')))
         validations.push((!this.state.repasse && !this.state.vlrc) || this.state.vlrc.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.vlrc.replaceAll('.', '').replaceAll(',', '.')) && (!this.state.repasse || this.state.vlrc == this.state.valor))
         validations.push(!this.state.desconto || this.state.desconto.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.desconto.replaceAll('.', '').replaceAll(',', '.')))
-        validations.push(!this.state.retencao1 || this.state.retencao1.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.retencao1.replaceAll('.', '').replaceAll(',', '.')))
-        validations.push(!this.state.retencao2 || this.state.retencao2.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.retencao2.replaceAll('.', '').replaceAll(',', '.')))
         validations.push(this.state.moeda)
         validations.push(!this.state.bloqueado)
 
@@ -706,8 +708,6 @@ class AddEventoFinanceiro extends Component {
         validationsContabiliza.push(this.state.valor && this.state.valor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')))
         validationsContabiliza.push((!this.state.repasse && !this.state.vlrc) || this.state.vlrc.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.vlrc.replaceAll('.', '').replaceAll(',', '.')) && (!this.state.repasse || this.state.vlrc == this.state.valor))
         validationsContabiliza.push(!this.state.desconto || this.state.desconto.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.desconto.replaceAll('.', '').replaceAll(',', '.')))
-        validationsContabiliza.push(!this.state.retencao1 || this.state.retencao1.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.retencao1.replaceAll('.', '').replaceAll(',', '.')))
-        validationsContabiliza.push(!this.state.retencao2 || this.state.retencao2.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.retencao2.replaceAll('.', '').replaceAll(',', '.')))
         validationsContabiliza.push(this.state.vencimento)
         validationsContabiliza.push(this.state.meioPagamento)
         validationsContabiliza.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.codigoReceita)

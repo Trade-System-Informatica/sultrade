@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import './styles.css'
 import { apiEmployee } from '../../../services/apiamrg'
 import loader from '../../../classes/loader'
-import moment from 'moment'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import ModalItem from '../../../components/modalItem'
@@ -27,7 +26,7 @@ const estadoInicial = {
     redirect: false,
     chaveFocus: '',
 
-    deleteAnexo: false,
+    deleteTarifa: false,
 
     modalItemAberto: false,
     itemPermissao: '',
@@ -39,21 +38,16 @@ const estadoInicial = {
     itemFinanceiro: {},
     itemDelete: '',
 
-    pesquisaStatus: -1,
-    statusOptions: [
-        { value: -1, label: "Todos" },
-        { value: 0, label: "Aguardando validação..." },
-        { value: 1, label: "Invalidado" },
-        { value: 2, label: "Validado" },
-    ],
+    pesquisaPorto: "",
+    pesquisaServico: "",
 
     acessos: [],
     permissoes: [],
     direcaoTabela: faChevronDown,
-    acessosPermissoes: [],
+    acessosPermissoes: []
 }
 
-class Anexos extends Component {
+class Tarifas extends Component {
 
     state = {
         ...estadoInicial,
@@ -73,24 +67,24 @@ class Anexos extends Component {
 
 
         this.state.acessosPermissoes.map((e) => {
-            if (e.acessoAcao == "ANEXOS" && e.permissaoConsulta == 0) {
+            if (e.acessoAcao == "TARIFAS" && e.permissaoConsulta == 0) {
                 this.setState({ redirect: true })
             }
         })
     }
 
     componentDidUpdate = async (prevProps, prevState) => {
-        if (this.state.deleteAnexo && this.state.modalItemAberto != prevState.modalItemAberto) {
+        if (this.state.deleteTarifa && this.state.modalItemAberto != prevState.modalItemAberto) {
             await this.setState({
                 modalItemAberto: false,
-                deleteAnexo: false
+                deleteTarifa: false
             })
         }
     }
 
     loadAll = async () => {
         await this.setState({
-            anexos: await loader.getBase('getAnexos.php'),
+            tarifas: await loader.getBase('getTarifas.php'),
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php')
         })
@@ -110,14 +104,14 @@ class Anexos extends Component {
         await this.setState({ redirect: true })
     }
 
-    deleteAnexo = async (id, nome, anexo) => {
-        this.setState({ deleteAnexo: true })
+    deleteTarifa = async (id, nome) => {
+        this.setState({ deleteTarifa: true })
         confirmAlert({
             customUI: ({ onClose }) => {
                 return (
                     <div className='custom-ui text-center'>
                         <h1>{NOME_EMPRESA}</h1>
-                        <p>Deseja remover a anexo de ({nome}) </p>
+                        <p>Deseja remover a tarifa de ({nome}) </p>
                         <button
                             style={{ marginRight: 5 }}
                             className="btn btn-danger w-25"
@@ -134,14 +128,13 @@ class Anexos extends Component {
                             className="btn btn-success w-25"
                             onClick={
                                 async () => {
-                                    await apiEmployee.post(`deleteAnexo.php`, {
+                                    await apiEmployee.post(`deleteTarifa.php`, {
                                         token: true,
-                                        chave: id,
-                                        anexo
+                                        chave: id
                                     }).then(
                                         async response => {
                                             if (response.data == true) {
-                                                await loader.salvaLogs('anexos', this.state.usuarioLogado.codigo, null, "Exclusão", id);
+                                                await loader.salvaLogs('tarifas', this.state.usuarioLogado.codigo, null, "Exclusão", id);
 
                                                 document.location.reload()
                                             }
@@ -165,7 +158,7 @@ class Anexos extends Component {
 
     reverterItens = async () => {
         await this.setState({ loading: true })
-        const anexos = this.state.anexos.reverse();
+        const tarifas = this.state.tarifas.reverse();
 
         if (this.state.direcaoTabela == faChevronDown) {
             await this.setState({ direcaoTabela: faChevronUp });
@@ -173,20 +166,16 @@ class Anexos extends Component {
             await this.setState({ direcaoTabela: faChevronDown });
         }
 
-        await this.setState({ anexos, loading: false });
+        await this.setState({ tarifas, loading: false });
     }
 
     filtrarPesquisa = (item) => {
-        if (this.state.pesquisa == "" && this.state.pesquisaStatus == -1) {
+        if (this.state.pesquisa == "" && this.state.pesquisaPorto == "" && this.state.pesquisaServico == "") {
             return true;
         }
 
         if (this.state.tipoPesquisa == 1) {
-            if (!item.osCodigo || !item.osCodigo.toLowerCase().includes(this.state.pesquisa.toLowerCase())) {
-                return false;
-            }
-        } else if (this.state.tipoPesquisa == 2) {
-            if (!item.fornecedorNome.toLowerCase().includes(this.state.pesquisa.toLowerCase())) {
+            if (!item.fornecedorNome || !item.fornecedorNome.toLowerCase().includes(this.state.pesquisa.toLowerCase())) {
                 return false;
             }
         } else {
@@ -195,8 +184,13 @@ class Anexos extends Component {
             }
         }
 
-        if (this.state.pesquisaStatus != -1) {
-            if (!item.validado || !item.validado != this.state.pesquisaStatus) {
+        if (this.state.pesquisaPorto) {
+            if (!item.portoNome || !item.portoNome.toLowerCase().includes(this.state.pesquisaPorto.toLowerCase())) {
+                return false;
+            }
+        }
+        if (this.state.pesquisaServico) {
+            if (!item.servico.toLowerCase().includes(this.state.pesquisaServico.toLowerCase())) {
                 return false;
             }
         }
@@ -222,7 +216,7 @@ class Anexos extends Component {
                     {!this.state.loading &&
                         <div>
                             <section>
-                                <Header voltarMovimentacao titulo="Validações" />
+                                <Header voltarMovimentacao titulo="Tarifas de Fornecedores" />
                                 <br />
 
 
@@ -242,7 +236,7 @@ class Anexos extends Component {
                                 acessosPermissoes={this.state.acessosPermissoes}
                             />
 
-                            <AddButton addLink={{ pathname: `/ordensservico/addanexo/0` }} />
+                            <AddButton addLink={{ pathname: `/ordensservico/addtarifa/0` }} />
 
                             <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-left">
                                 <div className="row mobileajuster3">
@@ -250,24 +244,22 @@ class Anexos extends Component {
                                     </div>
 
                                     <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
-
+                                        <div className='col-2'></div>
                                         <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
-                                            <option value={1}>OS</option>
-                                            <option value={2}>Fornecedor</option>
-                                            <option value={3}>Chave</option>
+                                            <option value={1}>Fornecedor</option>
+                                            <option value={4}>Chave</option>
                                         </select>
                                         <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
-                                        {/* <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
-                                            <Link to={{ pathname: `/ordensservico/addanexo/0` }}><button className="btn btn-success">+</button></Link>
-                                        </div> */}
+                                        <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
+                                            <Link to={{ pathname: `/ordensservico/addtarifa/0` }}><button className="btn btn-success">+</button></Link>
+                                        </div>
                                     </div>
-                                    <div className='col-4'></div>
+                                    <div className='col-2'></div>
                                     <div className='col-4'>
-                                        <select className="form-control" placeholder="Pesquise por status..." value={this.state.pesquisaStatus} onChange={e => { this.setState({ pesquisaStatus: e.currentTarget.value }) }} >
-                                            {this.state.statusOptions.map((status) => (
-                                                <options value={status.value}>{status.label}</options>
-                                            ))}
-                                        </select>
+                                        <input className="form-control " placeholder="Pesquise por porto..." value={this.state.pesquisaPorto} onChange={e => { this.setState({ pesquisaPorto: e.currentTarget.value }) }} />
+                                    </div>
+                                    <div className='col-4'>
+                                        <input className="form-control" placeholder="Pesquise por servico..." value={this.state.pesquisaServico} onChange={e => { this.setState({ pesquisaServico: e.currentTarget.value }) }} />
                                     </div>
 
                                 </div>
@@ -277,30 +269,48 @@ class Anexos extends Component {
                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
                                 <div className="col-lg-8 col-md-8 col-sm-12 col-12 mix all dresses bags">
                                     <div className="single-product-item">
-                                        <div className="row subtitulosTabela">
-                                            <div className="col-3 text-left">
-                                                <span className="subtituloships">OS</span>
+                                        {window.innerWidth >= 500 &&
+                                            <div className="row subtitulosTabela">
+                                                <div className="col-3 text-left">
+                                                    <span className="subtituloships">Fornecedor</span>
+                                                </div>
+                                                <div className="col-3 text-left">
+                                                    <span className="subtituloships">Porto</span>
+                                                </div>
+                                                <div className="col-2 text-left">
+                                                    <span className="subtituloships">Servico</span>
+                                                </div>
+                                                <div className="col-3 text-left">
+                                                    <span className="subtituloships" style={{ overflowWrap: "anywhere" }}>Preferencial</span>
+                                                </div>
+                                                <div className="col-1 text-right revertItem" onClick={() => this.reverterItens()}>
+                                                    <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela} /></span>
+                                                </div>
                                             </div>
-                                            <div className="col-3 text-left">
-                                                <span className="subtituloships">Fornecedor</span>
+                                        }
+                                        {window.innerWidth < 500 &&
+                                            <div className="row subtitulosTabela">
+                                                <div className="col-4 text-left">
+                                                    <span className="subtituloships">Fornecedor</span>
+                                                </div>
+                                                <div className="col-4 text-left">
+                                                    <span className="subtituloships">Porto</span>
+                                                </div>
+                                                <div className="col-3 text-left">
+                                                    <span className="subtituloships" style={{ overflowWrap: "anywhere" }}>Preferencial</span>
+                                                </div>
+                                                <div className="col-1 text-right revertItem" onClick={() => this.reverterItens()}>
+                                                    <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela} /></span>
+                                                </div>
                                             </div>
-                                            <div className="col-2 text-left">
-                                                <span className="subtituloships">Vencimento</span>
-                                            </div>
-                                            <div className="col-2 text-left">
-                                                <span className="subtituloships">Status</span>
-                                            </div>
-                                            <div className="col-2 text-right revertItem" onClick={() => this.reverterItens()}>
-                                                <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela} /></span>
-                                            </div>
-                                        </div>
+                                        }
                                     </div>
                                 </div>
                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
                             </div>
 
                             <div id="product-list">
-                                {this.state.anexos[0] != undefined && this.state.anexos.filter(this.filtrarPesquisa).map((feed, index) => (
+                                {this.state.tarifas[0] != undefined && this.state.tarifas.filter(this.filtrarPesquisa).map((feed, index) => (
                                     <div key={feed.chave} className="row row-list">
                                         <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
                                         <div ref={feed.chave == this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-8 col-md-8 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.chave == this.state.chaveFocus ? "par focusLight" : "par " : feed.chave == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
@@ -308,42 +318,42 @@ class Anexos extends Component {
                                             {window.innerWidth >= 500 &&
                                                 <div className="row deleteMargin alignCenter">
                                                     <div className="col-3 text-left">
-                                                        <p className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`fornDocs/${feed.anexo}`)}`} className="nonLink">{feed.osCodigo}</a></p>
+                                                        <p className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.fornecedorNome}</a></p>
                                                     </div>
                                                     <div className="col-3 text-left">
-                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`fornDocs/${feed.anexo}`)}`} className="nonLink">{feed.fornecedorNome}</a></h6>
+                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.portoNome.split("@").join(", ")}</a></h6>
                                                     </div>
                                                     <div className="col-2 text-left">
-                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`fornDocs/${feed.anexo}`)}`} className="nonLink">{moment(feed.vencimento).format("DD/MM/YYYY")}</a></h6>
+                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.servico}</a></h6>
                                                     </div>
-                                                    <div className="col-2 text-left">
-                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`fornDocs/${feed.anexo}`)}`} className="nonLink">{this.state.statusOptions.find((status) => status.value == (!feed.validado ? 0 : feed.validado))?.label}</a></h6>
+                                                    <div className="col-3 text-center" style={{ justifyContent: "center" }}>
+                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.preferencial != "0" ? `Sim` : "Não"}</a></h6>
                                                     </div>
-                                                    <div className="col-2 text-left icones mobileajuster4 ">
-                                                        {/* <div className='iconelixo giveMargin' type='button' >
+                                                    <div className="col-1 text-left icones mobileajuster4 ">
+                                                        <div className='iconelixo giveMargin' type='button' >
                                                             <Link to=
                                                                 {{
-                                                                    pathname: `/ordensservico/addanexo/0`,
-                                                                    state: { anexo: { ...feed } }
+                                                                    pathname: `/ordensservico/addtarifa/0`,
+                                                                    state: { tarifa: { ...feed } }
                                                                 }}
                                                             >
                                                                 <FontAwesomeIcon icon={faPlus} />
                                                             </Link>
-                                                        </div> */}
+                                                        </div>
 
                                                         <div className='iconelixo giveMargin' type='button' >
                                                             <Link to=
                                                                 {{
-                                                                    pathname: `/ordensservico/addanexo/${feed.chave}`,
-                                                                    state: { anexo: { ...feed } }
+                                                                    pathname: `/ordensservico/addtarifa/${feed.chave}`,
+                                                                    state: { tarifa: { ...feed } }
                                                                 }}
                                                             >
                                                                 <FontAwesomeIcon icon={faPen} />
                                                             </Link>
                                                         </div>
-                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'ANEXOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
+                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'TARIFAS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
 
-                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteAnexo(feed.chave, feed.fornecedor, feed.anexo)} >
+                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteTarifa(feed.chave, feed.fornecedor)} >
                                                                 <FontAwesomeIcon icon={faTrashAlt} />
                                                             </div>
                                                         }
@@ -359,59 +369,57 @@ class Anexos extends Component {
                                                             modalItemAberto: true,
                                                             itemInfo: [
                                                                 { titulo: 'Chave', valor: feed.chave },
-                                                                { titulo: 'OS', valor: feed.osCodigo },
-                                                                { titulo: 'Fornecedor', valor: feed.fornecedorNome },
+                                                                { titulo: 'Fornecedor', valor: feed.fornecedor }
                                                             ],
                                                             itemPermissao: 'ANEXO',
-                                                            itemNome: feed.osCodigo,
+                                                            itemNome: feed.fornecedorNome,
                                                             itemChave: feed.chave,
-                                                            itemAdd: false,
-                                                            // itemAdd: {
-                                                            //     pathname: `/ordensservico/addanexo/0`,
-                                                            //     state: { anexo: { ...feed } }
-                                                            // },
-                                                            itemEdit: {
-                                                                pathname: `/ordensservico/addanexo/${feed.chave}`,
-                                                                state: { anexo: { ...feed } }
+                                                            itemAdd: {
+                                                                pathname: `/ordensservico/addtarifa/0`,
+                                                                state: { tarifa: { ...feed } }
                                                             },
-                                                            itemDelete: this.deleteAnexo
+                                                            itemEdit: {
+                                                                pathname: `/ordensservico/addtarifa/${feed.chave}`,
+                                                                state: { tarifa: { ...feed } }
+                                                            },
+                                                            itemDelete: this.deleteTarifa
                                                         })
                                                     }}
                                                     className="row deleteMargin alignCenter">
-                                                    <div className="col-3 text-left">
-                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`fornDocs/${feed.anexo}`)}`} className="nonLink">{feed.osCodigo}</a></h6>
+                                                    <div className="col-4 text-left">
+                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.fornecedorNome}</a></h6>
                                                     </div>
                                                     <div className="col-4 text-left">
-                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`fornDocs/${feed.anexo}`)}`} className="nonLink">{feed.fornecedorNome}</a></h6>
+                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.portoNome.split("@").join(", ")}</a></h6>
                                                     </div>
                                                     <div className="col-3 text-center" style={{ justifyContent: "center" }}>
-                                                        <h6 className="mobileajuster5 text-center"><a target="_blank" href={`${util.completarDocuments(`fornDocs/${feed.anexo}`)}`} className="nonLink">{this.state.statusOptions.find((status) => status.value == (!feed.validado ? 0 : feed.validado))?.label}</a></h6>
+                                                        <h6 className="mobileajuster5 text-center"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.preferencial != "0" ? "Sim" : "Não"}</a></h6>
                                                     </div>
-                                                    <div className="col-2 text-left icones mobileajuster4 ">
-                                                        {/* <div className='iconelixo giveMargin' type='button' >
+                                                    <div className="col-1 text-left icones mobileajuster4 ">
+                                                        <div className='iconelixo giveMargin' type='button' >
                                                             <Link to=
                                                                 {{
-                                                                    pathname: `/ordensservico/addanexo/0`,
-                                                                    state: { anexo: { ...feed } }
+                                                                    pathname: `/ordensservico/addtarifa/0`,
+                                                                    state: { tarifa: { ...feed } }
                                                                 }}
                                                             >
                                                                 <FontAwesomeIcon icon={faPlus} />
                                                             </Link>
-                                                        </div> */}
+                                                        </div>
 
                                                         <div className='iconelixo giveMargin' type='button' >
                                                             <Link to=
                                                                 {{
-                                                                    pathname: `/ordensservico/addanexo/${feed.chave}`,
-                                                                    state: { anexo: { ...feed } }
+                                                                    pathname: `/ordensservico/addtarifa/${feed.chave}`,
+                                                                    state: { tarifa: { ...feed } }
                                                                 }}
                                                             >
                                                                 <FontAwesomeIcon icon={faPen} />
                                                             </Link>
                                                         </div>
-                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'ANEXOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
+                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'HISTORICOS_PADRAO') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
 
-                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteAnexo(feed.chave, feed.fornecedor, feed.anexo)} >
+                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteTarifa(feed.chave, feed.fornecedor)} >
                                                                 <FontAwesomeIcon icon={faTrashAlt} />
                                                             </div>
                                                         }
@@ -439,4 +447,4 @@ const mapStateToProps = ({ user }) => {
     }
 }
 
-export default connect(mapStateToProps, null)(Anexos)
+export default connect(mapStateToProps, null)(Tarifas)
