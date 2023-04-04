@@ -39,7 +39,7 @@ class Alert extends Component {
                                     {this.props.alert.msg}
                                     {this.props.alert.checkboxes && this.props.alert.checkboxes.map((check) => (
                                         <>
-                                            <div><input type="checkbox" value={check.value} onChange={() => this.props.changeCheckbox(check.key)} /></div>
+                                            <div><input type="checkbox" value={check.value} onChange={() => this.props.changeCheckbox ? this.props.changeCheckbox(check.key) : {}} /></div>
                                             <div>{check.label}</div>
                                         </>
                                     ))}
