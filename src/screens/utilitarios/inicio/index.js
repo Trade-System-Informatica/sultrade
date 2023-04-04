@@ -7,7 +7,7 @@ import './styles.css'
 import { apiEmployee } from '../../../services/apiamrg'
 import { connect } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBookOpen, faCheckCircle, faAddressCard, faCogs} from '@fortawesome/free-solid-svg-icons'
+import { faBookOpen, faCheckCircle, faAddressCard, faCogs } from '@fortawesome/free-solid-svg-icons'
 
 class Utilitarios extends Component {
 
@@ -91,7 +91,7 @@ class Utilitarios extends Component {
         )
         await this.setState({ loading: false })
     }
-    
+
     erroApi = async (res) => {
         await this.setState({ isLogado: false })
         this.setState({ redirect: true })
@@ -117,14 +117,25 @@ class Utilitarios extends Component {
                             <div className="col-12 text-center">
                                 <div className="rounded">
                                     <ul className='itens_centro'>
-                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OPERADORES') { return e } }).map((e) => e.permissoes)[0] == 1 &&
-                                            <li className=" text-left itemMenu list-group-item  ">
-                                                <Link to={{ pathname: `/utilitarios/operadores` }} className="semTextDecoration">
-                                                    <FontAwesomeIcon icon={faAddressCard} size="2x" color="tomato" />
-                                                    <h4 className="textoMenu">Operadores</h4>
-                                                </Link>
-                                            </li>
-                                        }
+                                        <li className=" text-left itemMenu list-group-item  ">
+                                            <Link to={{
+                                                pathname:
+                                                    this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OPERADORES') { return e } }).map((e) => e.permissoes)[0] == 1 ?
+                                                        `/utilitarios/operadores`
+                                                        :
+                                                        `utilitarios/addoperador/${this.state.usuarioLogado.codigo}`
+                                            }} className="semTextDecoration">
+                                                <FontAwesomeIcon icon={faAddressCard} size="2x" color="tomato" />
+                                                <h4 className="textoMenu">
+                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OPERADORES') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                        "Operadores"
+                                                    }
+                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OPERADORES') { return e } }).map((e) => e.permissoes)[0] != 1 &&
+                                                        "Perfil"
+                                                    }
+                                                </h4>
+                                            </Link>
+                                        </li>
 
                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PERMISSOES') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                             <li className=" text-left itemMenu list-group-item ">

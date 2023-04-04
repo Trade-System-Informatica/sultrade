@@ -400,7 +400,7 @@ class Relatorio extends Component {
                                             <th>BALANCE</th>
                                         </tr>
                                         <tr style={{ backgroundColor: "#999999", border: "1px solid black" }}>
-                                            <th colSpan={9}>
+                                            <th colSpan={6}>
                                                 <span style={{ fontSize: "1.2em" }}>{this.state.por == "porCliente" && e.pessoa ? e.pessoa.split('@.@')[0]
                                                     : this.state.por == "porVencimento" && e.vencimento ? moment(e.vencimento.split('@.@')[0]).format('DD/MM/YYYY')
                                                         : e.dataPagamento ? moment(e.dataPagamento.split('@.@')[0]).format('DD/MM/YYYY') : ''}</span>
@@ -416,18 +416,18 @@ class Relatorio extends Component {
                                                 discount = e.discount ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.discount.split("@.@")[index]) : "0,00";
                                                 received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.received.split("@.@")[index]) : "0,00";
                                             } else if (this.state.moeda == 5) {
-                                                FDA = e.FDA ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE.split("@.@")[index]) * parseFloat(e.FDA.split("@.@")[index])) : "0,00";
-                                                discount = e.discount ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE.split("@.@")[index]) * parseFloat(e.discount.split("@.@")[index])) : "0,00";
-                                                received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE.split("@.@")[index]) * parseFloat(e.received.split("@.@")[index])) : "0,00";
+                                                FDA = e.FDA ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.FDA.split("@.@")[index])) : "0,00";
+                                                discount = e.discount ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.discount.split("@.@")[index])) : "0,00";
+                                                received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.received.split("@.@")[index])) : "0,00";
                                             } else {
-                                                FDA = e.FDA ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.FDA.split("@.@")[index]) / parseFloat(e.ROE.split("@.@")[index])) : "0,00";
-                                                discount = e.discount ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.discount.split("@.@")[index]) / parseFloat(e.ROE.split("@.@")[index])) : "0,00";
-                                                received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.received.split("@.@")[index]) / parseFloat(e.ROE.split("@.@")[index])) : "0,00";
+                                                FDA = e.FDA ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.FDA.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
+                                                discount = e.discount ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.discount.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
+                                                received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.received.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
                                             }
 
                                             let balance = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(FDA.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(discount.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(received.replaceAll('.', '').replaceAll(",", ".")));
 
-                                            if (!e.os_moeda || (!(e.ROE.split("@.@")[index]) || e.ROE.split("@.@")[index] == 0) && this.state.moeda != e.os_moeda.split("@.@")[index]) {
+                                            if (!e.os_moeda || (!(e.ROE?.split("@.@")[index]) || e.ROE?.split("@.@")[index] == 0) && this.state.moeda != e.os_moeda.split("@.@")[index]) {
                                                 return;
                                             }
 
@@ -459,8 +459,8 @@ class Relatorio extends Component {
                                             }
                                         })}
                                         <tr>
-                                            <th colSpan='4'>{"Total ->"}</th>
-                                            <td colSpan="2" style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDAPorGrupo)}</td>
+                                            <th colSpan='2'>{"Total ->"}</th>
+                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDAPorGrupo)}</td>
                                             <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalDiscountPorGrupo)}</td>
                                             <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalReceivedPorGrupo)}</td>
                                             <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalBalancePorGrupo)}</td>
@@ -488,12 +488,13 @@ class Relatorio extends Component {
                         </table>
                     </div>
                 }
-                {this.props.location.state.backTo == 'contasPagas' && this.props.location.state.backTo == 'contasPagar' &&
+                {this.props.location.state.backTo == 'contasPagas' || this.props.location.state.backTo == 'contasPagar' &&
                     <div className='pdfContent'>
                         {relatorio.map((e) => {
+                            console.log(e);
                             totalValorPorGrupo = 0;
                             totalSaldoPorGrupo = 0;
-                            
+
                             if (this.state.por == 'porCliente' && !e.pessoa) {
                                 e.pessoa = '';
                             }
@@ -517,7 +518,7 @@ class Relatorio extends Component {
                                             <th>VALOR</th>
                                         </tr>
                                         <tr style={{ backgroundColor: "#999999", border: "1px solid black" }}>
-                                            <th colSpan={9}>
+                                            <th colSpan={8}>
                                                 <span style={{ fontSize: "1.2em" }}>{this.state.por == "porCliente" && e.pessoa ? e.pessoa.split('@.@')[0]
                                                     : this.state.por == "porVencimento" && e.vencimento ? moment(e.vencimento.split('@.@')[0]).format('DD/MM/YYYY')
                                                         : e.dataPagamento ? moment(e.dataPagamento.split('@.@')[0]).format('DD/MM/YYYY') : ''}</span>
@@ -531,20 +532,22 @@ class Relatorio extends Component {
                                                 valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.valor.split("@.@")[index]) : '0,00';
                                                 saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.saldo.split("@.@")[index]) : "0,00";
                                             } else if (this.state.moeda == 5) {
-                                                valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE.split("@.@")[index]) * parseFloat(e.valor.split("@.@")[index])) : "0,00";
-                                                saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE.split("@.@")[index]) * parseFloat(e.saldo.split("@.@")[index])) : "0,00";
+                                                valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.valor.split("@.@")[index])) : "0,00";
+                                                saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.saldo.split("@.@")[index])) : "0,00";
                                             } else {
-                                                valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.valor.split("@.@")[index]) / parseFloat(e.ROE.split("@.@")[index])) : "0,00";
-                                                saldo = e.discount ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.saldo.split("@.@")[index]) / parseFloat(e.ROE.split("@.@")[index])) : "0,00";
+                                                valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.valor.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
+                                                saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.saldo.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
+
                                             }
 
 
                                             totalValor += parseFloat(valor.replaceAll('.', '').replaceAll(',', '.'));
-                                            totalSaldo += parseFloat(saldo.replaceAll('.', '').replaceAll(',', '.'));
-                                            
                                             totalValorPorGrupo += parseFloat(valor.replaceAll('.', '').replaceAll(',', '.'));
+
+                                            totalSaldo += parseFloat(saldo.replaceAll('.', '').replaceAll(',', '.'));
                                             totalSaldoPorGrupo += parseFloat(saldo.replaceAll('.', '').replaceAll(',', '.'));
-                                           
+
+
                                             if (parseFloat(valor.replaceAll('.', '').replaceAll(",", ".")) > 0) {
                                                 return (
                                                     <tr style={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#999999" }}>
@@ -552,16 +555,16 @@ class Relatorio extends Component {
                                                         <td style={{ backgroundColor: "inherit" }}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.pessoa ? util.removeAcentos(e.pessoa.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.historico ? util.removeAcentos(e.historico.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ backgroundColor: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {valor}</td>
-                                                        <td style={{ backgroundColor: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {saldo}</td>
+                                                        <td style={{ backgroundColor: "inherit", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {valor}</td>
+                                                        <td style={{ backgroundColor: "inherit", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {saldo}</td>
                                                     </tr>
                                                 )
                                             }
                                         })}
                                         <tr>
                                             <th colSpan='4'>{"Total ->"}</th>
-                                            <td colSpan="2" style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalValorPorGrupo)}</td>
-                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalSaldoPorGrupo)}</td>
+                                            <td style={{ borderTop: "1px solid black", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalValorPorGrupo)}</td>
+                                            <td style={{ borderTop: "1px solid black", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalSaldoPorGrupo)}</td>
                                         </tr>
                                     </table>
                                     <hr />

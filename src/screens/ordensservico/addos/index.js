@@ -358,9 +358,7 @@ class AddOS extends Component {
             clientesOptions: await loader.getBaseOptions('getClientes.php', 'Nome', 'Chave'),
             tiposServicosOptions: await loader.getBaseOptions('getTiposServicos.php', 'descricao', 'chave'),
             portosOptions: await loader.getBaseOptions('getPortos.php', 'Descricao', 'Chave'),
-            tiposDocumento: await loader.getBase('getTiposDocumento.php'),
             tiposDocumentoOptions: await loader.getBaseOptions('getTiposDocumento.php', 'descricao', 'chave'),
-            moedas: await loader.getBase('getMoedas.php'),
             moedasOptions: await loader.getBaseOptions('getMoedas.php', 'Sigla', 'Chave'),
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php'),
@@ -899,9 +897,7 @@ class AddOS extends Component {
             await this.salvarOS(validForm)
 
             this.setState({ pdfNome: "Capa" })
-            if (!this.state.moedas) {
-                await this.getMoedas();
-            }
+
 
             await this.setState({ loading: true })
             await apiEmployee.post(`getCapaVoucher.php`, {
@@ -1234,9 +1230,7 @@ class AddOS extends Component {
             await this.salvarOS(validForm)
 
             this.setState({ pdfNome: "Relatorio_liquidos" })
-            if (!this.state.moedas) {
-                await this.getMoedas();
-            }
+
 
             await this.setState({
                 loading: true,
@@ -1365,9 +1359,7 @@ class AddOS extends Component {
             await this.salvarOS(validForm)
 
             this.setState({ pdfNome: "Vouchers" })
-            if (!this.state.moedas) {
-                await this.getMoedas();
-            }
+
 
             await this.setState({
                 loading: true,
@@ -1562,9 +1554,7 @@ class AddOS extends Component {
             await this.salvarOS(validForm)
 
             this.setState({ pdfNome: "Close_to_Real" })
-            if (!this.state.moedas) {
-                await this.getMoedas();
-            }
+
             await this.setState({ loading: true })
             await apiEmployee.post(`getCloseToReal.php`, {
                 token: true,
@@ -2388,7 +2378,7 @@ class AddOS extends Component {
                                                                         type="button"
                                                                         style={validForm ? { width: 150, height: 50, padding: 5, color: "white", border: "1px solid #efefef", marginBottom: 25 } : { backgroundColor: '#999', opacity: 0.3, width: 150, height: 50, padding: 5, color: "#ccc", border: "1px solid #ccc", marginBottom: 25 }}
                                                                         onClick={() => { this.setState({ cabecalhoModal: true }) }}
-                                                                    >Editar Cabeçalho
+                                                                    >Instrução de Cobrança
                                                                     </button>
                                                                 </div>
                                                             </div>

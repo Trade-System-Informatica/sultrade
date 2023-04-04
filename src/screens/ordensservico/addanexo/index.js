@@ -61,7 +61,8 @@ const estadoInicial = {
     statusOptions: [
         { value: 0, label: "Aguardando validação..." },
         { value: 1, label: "Invalidado" },
-        { value: 2, label: "Validado" }
+        { value: 2, label: "Aprovado" },
+        { value: 3, label: "Validado", nonSelectable: true },
     ]
 }
 
@@ -91,7 +92,9 @@ class AddAnexo extends Component {
                 dadosIniciais: [
                     { titulo: 'fornecedor', valor: this.state.fornecedor },
                     { titulo: 'os', valor: this.state.os },
-                    { titulo: 'validado', valor: this.state.validado }
+                    { titulo: 'validado', valor: this.state.validado },
+                    { titulo: 'validadoPor', valor: this.state.usuarioLogado },
+                    { titulo: 'validadoData', valor: this.state.validadoData },
                 ]
             })
         } else {
@@ -133,7 +136,9 @@ class AddAnexo extends Component {
             dadosFinais: [
                 { titulo: 'fornecedor', valor: this.state.fornecedor },
                 { titulo: 'os', valor: this.state.os },
-                { titulo: 'validado', valor: this.state.validado }
+                { titulo: 'validado', valor: this.state.validado },
+                { titulo: 'validadoPor', valor: this.state.usuarioLogado },
+                { titulo: 'validadoData', valor: this.state.validadoData },
             ],
             loading: true
         })
@@ -171,9 +176,10 @@ class AddAnexo extends Component {
             await apiEmployee.post(`updateAnexo.php`, {
                 token: true,
                 chave: this.state.chave,
-                fornecedor: this.state.fornecedor,
-                os: this.state.os,
-                validado: this.state.validado
+                operador: this.state.usuarioLogado.codigo,
+                evento: this.state.evento,
+                validado: this.state.validado,
+                validadoData: moment().format("YYYY-MM-DD")
             }).then(
                 async res => {
                     console.log(res.data);
@@ -301,7 +307,7 @@ class AddAnexo extends Component {
                                                 <div className='col-1 errorMessage'>
                                                 </div>
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                    <Select className='SearchSelect' options={this.state.statusOptions} value={this.state.statusOptions.find(option => option.value == this.state.validado)} onChange={(e) => (!this.state.validadoData) ? this.setState({ validado: e.value }) : {}} />
+                                                    <Select className='SearchSelect' isDisabled={!!this.state.validadoPor} options={this.state.validado != 3 ? this.state.statusOptions.filter((status) => !status.nonSelectable) : this.state.statusOptions.filter((status) => status.nonSelectable)} value={this.state.statusOptions.find(option => option.value == this.state.validado)} onChange={(e) => (!this.state.validadoPor) ? this.setState({ validado: e.value }) : {}} />
                                                 </div>
                                                 <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
                                                 </div>
@@ -332,9 +338,9 @@ class AddAnexo extends Component {
                                                     <Field disabled className='SearchSelect' value={this.state.osCodigo} />
                                                 </div>
                                             </div>
-                                            {this.state.validadoData &&
+                                            {this.state.validadoPor &&
                                                 <div className="centerDiv">
-                                                    {this.state.statusOptions.find((opt) => opt.value == this.state.validado)?.label} em {moment(this.state.validadoData).format("DD/MM/YYYY")} por {this.state.operadores.find((op) => op.Codigo == this.state.validadoPor)?.Nome}
+                                                    {this.state.statusOptions.find((opt) => opt.value == this.state.validado)?.label} em {moment(this.state.validadoData).format("DD/MM/YYYY")} {this.state.validadoPor == -1 ? "pelo sistema (tempo expirado)" : `por ${this.state.operadores.find((op) => op.Codigo == this.state.validadoPor)?.Nome}`}
                                                 </div>
                                             }
 
@@ -343,7 +349,7 @@ class AddAnexo extends Component {
                                         <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
                                     </div>
 
-                                    {!this.state.validadoData &&
+                                    {!this.state.validadoPor &&
                                         <div className="row">
                                             <div className="col-4"></div>
                                             <div className="col-4" style={{ display: 'flex', justifyContent: 'center' }}>

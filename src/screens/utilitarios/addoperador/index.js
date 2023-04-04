@@ -46,6 +46,7 @@ const estadoInicial = {
     senhaRepetida: '',
 
     bloqueado: false,
+    notAllowed: false,
 }
 
 class AddPessoa extends Component {
@@ -59,12 +60,17 @@ class AddPessoa extends Component {
         window.scrollTo(0, 0)
         var id = await this.props.match.params.id
         await this.setState({ codigo: id })
-
+        
         if (this.state.usuarioLogado.empresa != 0) {
             await this.setState({ empresa: this.state.usuarioLogado.empresa });
         }
         if (parseInt(id) != 0) {
-            await this.setState({ operador: this.props.location.state.operador })
+            if (this.props?.location?.state?.operador) {
+                await this.setState({ operador: this.props.location.state.operador })
+            } else {
+                const operador = await loader.getBody(`getOperador.php`, { codigo: this.state.codigo });
+                await this.setState({ operador: operador[0]});
+            }
             //console.log('Servicos: ' + JSON.stringify(this.state.tiposervico))
             //await this.loadData(this.state.tiposervico)
             await this.setState({
@@ -85,8 +91,13 @@ class AddPessoa extends Component {
         await this.testaAcesso()
 
         this.state.acessosPermissoes.map((e) => {
-            if ((e.acessoAcao == "OPERADORES" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "OPERADORES" && e.permissaoEdita == 0 && this.state.chave != 0)) {
-                this.setState({ bloqueado: true })
+            if (((e.acessoAcao == "OPERADORES" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "OPERADORES" && e.permissaoEdita == 0 && this.state.codigo != 0))) {
+                if (this.state.codigo != this.state.usuarioLogado.codigo) {
+                    this.setState({ bloqueado: true })
+                } else {
+                    this.setState({ notAllowed: true});
+                }
+                
             }
         })
     }
@@ -253,7 +264,7 @@ class AddPessoa extends Component {
                 }
 
                 <section>
-                    <Header voltarOperadores titulo="Operadores" chave={this.state.codigo != 0 ? this.state.codigo : ''} />
+                    <Header voltarOperadores={!this.state.notAllowed} voltarUtilitarios={this.state.notAllowed} titulo="Operadores" chave={this.state.codigo != 0 ? this.state.codigo : ''} />
                 </section>
 
                 <br />

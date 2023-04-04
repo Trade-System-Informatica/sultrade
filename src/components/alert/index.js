@@ -35,13 +35,13 @@ class Alert extends Component {
                                 {this.props.alert.type === "error" &&
                                     <FontAwesomeIcon style={{ color: "red" }} icon={faExclamationTriangle} />
                                 }
-                                <div style={{ overflow: "scroll", maxHeight: 125 }}>
+                                <div style={{ overflow: "scroll", maxHeight: 200, padding: 15 }}>
                                     {this.props.alert.msg}
                                     {this.props.alert.checkboxes && this.props.alert.checkboxes.map((check) => (
-                                        <>
-                                            <div><input type="checkbox" value={check.value} onChange={() => this.props.changeCheckbox ? this.props.changeCheckbox(check.key) : {}} /></div>
+                                        <div style={{display: "flex", flexDirection: "row", alignItems: "flex-start"}}>
+                                            <input type="checkbox" value={check.value} style={{margin: 10}} onChange={() => this.props.alert.changeCheckbox ? this.props.alert.changeCheckbox(check.chave) : {}} />
                                             <div>{check.label}</div>
-                                        </>
+                                        </div>
                                     ))}
                                 </div>
                                 {this.props.alert.type === "confirm" &&

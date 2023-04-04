@@ -9,7 +9,7 @@ import { NOME_EMPRESA, CAMINHO_DOCUMENTOS } from '../../../config'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faExclamationTriangle, faTrashAlt, faPen, faPlus, faDollarSign, faEnvelope } from '@fortawesome/free-solid-svg-icons'
+import { faExclamationTriangle, faTrashAlt, faPaperclip, faPen, faPlus, faDollarSign, faEnvelope } from '@fortawesome/free-solid-svg-icons'
 import { apiEmployee } from '../../../services/apiamrg'
 import Skeleton from '../../../components/skeleton'
 import 'moment-timezone';
@@ -129,7 +129,8 @@ const estadoInicial = {
     anexosValidadosOptions: [
         { label: "Aguardando...", value: 0 },
         { label: "Invalidado", value: 1 },
-        { label: "Validado", value: 2 }
+        { label: "Aprovado", value: 2 },
+        { label: "Validado", value: 3, nonSelectable: true }
     ]
 }
 
@@ -144,7 +145,7 @@ class AddEvento extends Component {
         window.scrollTo(0, 0)
         var id = await this.props.match.params.id
         await this.setState({ chave: id })
-        if (this.props.location.state.os) {
+        if (this.props.location?.state?.os) {
             const os = {
                 value: this.props.location.state.os.Chave,
                 navio: this.props.location.state.os.chave_navio,
@@ -157,9 +158,16 @@ class AddEvento extends Component {
             }
         }
         if (parseInt(id) != 0) {
+            if (!this.props.location || !this.props.location.state || !this.props.location.state.evento) {
+                const evento = await loader.getBody(`getSolicitacao.php`, { chave: this.state.chave });
+                await this.setState({ evento: evento[0]});
+            } else {
+                await this.setState({evento: this.props.location.state.evento});
+            }
+            console.log(this.state.evento);
+            
             await this.getOSUma();
             await this.getOrdem();
-            await this.setState({ evento: this.props.location.state.evento })
             await this.setState({
                 data: this.state.evento.data,
                 fornecedor: this.state.evento.fornecedor,
@@ -282,7 +290,7 @@ class AddEvento extends Component {
     getOSUma = async () => {
         await apiEmployee.post(`getOSUma.php`, {
             token: true,
-            chave_os: this.props.location.state.evento.chave_os
+            chave_os: this.state.evento.chave_os
         }).then(
             async res => {
                 await this.setState({ os: res.data[0] })
@@ -773,14 +781,20 @@ class AddEvento extends Component {
 
     salvarAnexos = async () => {
         this.setState({ loading: true, anexosModal: false })
+        const validadoData = moment().format("YYYY-MM-DD HH:mm:ss");
 
         await apiEmployee.post(`updateAnexos.php`, {
             token: true,
-            anexos: this.state.anexosForn,
+            anexos: this.state.anexosForn.filter((anexo) => !anexo.validadoPor),
             validadoPor: this.state.usuarioLogado.codigo,
-            validadoData: moment().format("YYYY-MM-DD HH:mm:ss"),
+            validadoData,
         }).then(
             async res => {
+                this.setState({
+                    anexosForn: this.state.anexosForn.map((anexo) => !anexo.validadoPor ? ({ ...anexo, validadoData, validadoPor: this.state.usuarioLogado.codigo }) : ({ ...anexo })),
+                    bloqueado: false,
+                    loading: false
+                });
             },
             async res => await console.log(`Erro: ${res}`)
         )
@@ -892,6 +906,30 @@ class AddEvento extends Component {
                 async res => await console.log(`Erro: ${res}`)
             )
         }
+
+    }
+
+    validarAnexo = async () => {
+        this.setState({ loading: true, anexosModal: false })
+        const anexo = this.state.anexosForn.find((anexo) => anexo.validado == 2);
+        const validadoData = moment().format("YYYY-MM-DD HH:mm:ss");
+
+        if (anexo) {
+            await apiEmployee.post(`updateAnexo.php`, {
+                token: true,
+                chave: anexo.chave,
+                operador: this.state.usuarioLogado.codigo,
+                evento: this.state.chave,
+                validadoData
+            }).then(
+                async res => {
+                    this.setState({ anexosForn: this.state.anexosForn.map((an) => an.chave == anexo.chave ? ({ ...an, validado: 3, validadoData, validadoPor: this.state.usuarioLogado.codigo }) : ({ ...an })) })
+                },
+                async res => await console.log(`Erro: ${res}`)
+            )
+        }
+
+        this.setState({ loading: false, bloqueado: false });
 
     }
 
@@ -1178,7 +1216,7 @@ class AddEvento extends Component {
                                                 {this.state.anexosForn.map((anexo) => (
                                                     <tr className='anexoList'>
                                                         <td><a className="nonLink" href={`${util.completarDocuments(`fornDocs/${anexo.anexo}`)}`} target="_blank">{anexo.anexo}</a></td>
-                                                        <td style={{ width: 250, display: "flex", justifyContent: "center" }}><Select style={{ width: 250 }} options={this.state.anexosValidadosOptions} value={this.state.anexosValidadosOptions.find((e) => e.value == anexo.validado)} onChange={(e) => this.setState({ anexosForn: this.state.anexosForn.map((an) => this.state.eventos.filter(e => e.chave == an.chave) ? ({ ...an, validado: e.value }) : ({ ...an })) })} /></td>
+                                                        <td style={{ width: 250, display: "flex", justifyContent: "center" }}><Select style={{ width: 250 }} isDisabled={!!anexo.validadoPor} options={!anexo.validadoPor && anexo.validado != 3 ? this.state.anexosValidadosOptions.filter((opt) => !opt.nonSelectable) : this.state.anexosValidadosOptions.filter((opt) => opt.nonSelectable)} value={this.state.anexosValidadosOptions.find((e) => e.value == anexo.validado)} onChange={(e) => !anexo.validadoPor ? this.setState({ anexosForn: this.state.anexosForn.map((an) => anexo.chave == an.chave ? ({ ...an, validado: e.value }) : ({ ...an })) }) : {}} /></td>
                                                     </tr>
                                                 ))}
                                             </table>
@@ -1411,17 +1449,9 @@ class AddEvento extends Component {
                                                                 <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
                                                             }
                                                         </div>
-                                                        {(!this.props.location.state || !this.props.location.state.os) &&
-                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                <Select className='SearchSelect' options={this.state.osOptions.filter(e => this.filterSearch(e, this.state.osOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ osOptionsTexto: e }) }} value={this.state.osOptions.filter(option => option.value == this.state.chave_os)[0]} search={true} onChange={async (e) => { await this.changeOS(e); await this.getOrdem(); }} />
-                                                            </div>
-                                                        }
-                                                        {this.props.location.state.os &&
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                 <Select className='SearchSelect' isDisabled options={this.state.osOptions.filter(e => this.filterSearch(e, this.state.osOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ osOptionsTexto: e }) }} value={this.state.osOptions.filter(option => option.value == this.state.chave_os)[0]} search={true} />
                                                             </div>
-                                                        }
-
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Navio</label>
                                                         </div>
@@ -1450,7 +1480,7 @@ class AddEvento extends Component {
                                                             }
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Field className="form-control" type="text" disabled={this.state.ordemBloqueado} value={this.state.ordem.replaceAll(',', '.')} onChange={async e => { this.setState({ ordem: e.currentTarget.value }) }} />
+                                                            <Field className="form-control" type="text" disabled={this.state.ordemBloqueado} value={this.state.ordem?.replaceAll(',', '.')} onChange={async e => { this.setState({ ordem: e.currentTarget.value }) }} />
                                                         </div>
                                                         <div className='col-1 errorMessage'>
                                                         </div>
@@ -1618,13 +1648,18 @@ class AddEvento extends Component {
 
                                                 <div className="col-8" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                                     {validForm && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'EVENTOS_FINANCEIRO') { return e } }).map((e) => e.permissaoInsere)[0] == 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'EVENTOS_FINANCEIRO') { return e } }).map((e) => e.permissaoEdita)[0] == 1 &&
-                                                        <button style={{ borderRadius: 15 }} onClick={async () => { await this.setState({ financeiro: true }); await this.salvarServicoItem(validForm) }}>
+                                                        <button title="Financeiro" style={{ borderRadius: 15, margin: 3 }} onClick={async () => { await this.setState({ financeiro: true }); await this.salvarServicoItem(validForm) }}>
                                                             <FontAwesomeIcon icon={faDollarSign} />
                                                         </button>
                                                     }
                                                     {(validForm || this.state.failures[0]) &&
-                                                        <button style={{ borderRadius: 15 }} onClick={() => { this.setState({ email: true }); this.salvarServicoItem(validForm) }}>
+                                                    <button title="Enviar Email" style={{ borderRadius: 15, margin: 3 }} onClick={() => { this.setState({ email: true }); this.salvarServicoItem(validForm) }}>
                                                             <FontAwesomeIcon icon={faEnvelope} />
+                                                        </button>
+                                                    }
+                                                    {validForm && this.state.anexosForn[0] && this.state.anexosForn.find((anexo) => anexo.validado == 2) &&
+                                                    <button title="Validar" style={{ borderRadius: 15, margin: 3 }} onClick={() => { this.salvarServicoItem(); this.validarAnexo() }}>
+                                                            <FontAwesomeIcon icon={faPaperclip} />
                                                         </button>
                                                     }
 

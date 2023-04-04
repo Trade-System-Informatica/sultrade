@@ -44,7 +44,8 @@ const estadoInicial = {
         { value: -1, label: "Todos" },
         { value: 0, label: "Aguardando validação..." },
         { value: 1, label: "Invalidado" },
-        { value: 2, label: "Validado" },
+        { value: 2, label: "Aprovado" },
+        { value:    3, label: "Validado" },
     ],
 
     acessos: [],
@@ -278,21 +279,44 @@ class Anexos extends Component {
                                 <div className="col-lg-8 col-md-8 col-sm-12 col-12 mix all dresses bags">
                                     <div className="single-product-item">
                                         <div className="row subtitulosTabela">
-                                            <div className="col-3 text-left">
-                                                <span className="subtituloships">OS</span>
-                                            </div>
-                                            <div className="col-3 text-left">
-                                                <span className="subtituloships">Fornecedor</span>
-                                            </div>
-                                            <div className="col-2 text-left">
-                                                <span className="subtituloships">Vencimento</span>
-                                            </div>
-                                            <div className="col-2 text-left">
-                                                <span className="subtituloships">Status</span>
-                                            </div>
-                                            <div className="col-2 text-right revertItem" onClick={() => this.reverterItens()}>
-                                                <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela} /></span>
-                                            </div>
+                                            {window.innerWidth >= 500 &&
+                                                <>
+                                                    <div className="col-2 text-left">
+                                                        <span className="subtituloships">OS</span>
+                                                    </div>
+                                                    <div className="col-2 text-left">
+                                                        <span className="subtituloships">Navio</span>
+                                                    </div>
+                                                    <div className="col-3 text-left">
+                                                        <span className="subtituloships">Fornecedor</span>
+                                                    </div>
+                                                    <div className="col-2 text-left">
+                                                        <span className="subtituloships">Vencimento</span>
+                                                    </div>
+                                                    <div className="col-2 text-left">
+                                                        <span className="subtituloships">Status</span>
+                                                    </div>
+                                                    <div className="col-1 text-right revertItem" onClick={() => this.reverterItens()}>
+                                                        <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela} /></span>
+                                                    </div>
+                                                </>
+                                                }
+                                            {window.innerWidth < 500 &&
+                                                <>
+                                                    <div className="col-3 text-left">
+                                                        <span className="subtituloships">OS</span>
+                                                    </div>
+                                                    <div className="col-4 text-left">
+                                                        <span className="subtituloships">Fornecedor</span>
+                                                    </div>
+                                                    <div className="col-3 text-left">
+                                                        <span className="subtituloships">Status</span>
+                                                    </div>
+                                                    <div className="col-2 text-right revertItem" onClick={() => this.reverterItens()}>
+                                                        <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela} /></span>
+                                                    </div>
+                                                </>
+                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -307,8 +331,11 @@ class Anexos extends Component {
 
                                             {window.innerWidth >= 500 &&
                                                 <div className="row deleteMargin alignCenter">
-                                                    <div className="col-3 text-left">
+                                                    <div className="col-2 text-left">
                                                         <p className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`fornDocs/${feed.anexo}`)}`} className="nonLink">{feed.osCodigo}</a></p>
+                                                    </div>
+                                                    <div className="col-2 text-left">
+                                                        <p className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`fornDocs/${feed.anexo}`)}`} className="nonLink">{feed.navioNome}</a></p>
                                                     </div>
                                                     <div className="col-3 text-left">
                                                         <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`fornDocs/${feed.anexo}`)}`} className="nonLink">{feed.fornecedorNome}</a></h6>
@@ -319,7 +346,7 @@ class Anexos extends Component {
                                                     <div className="col-2 text-left">
                                                         <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`fornDocs/${feed.anexo}`)}`} className="nonLink">{this.state.statusOptions.find((status) => status.value == (!feed.validado ? 0 : feed.validado))?.label}</a></h6>
                                                     </div>
-                                                    <div className="col-2 text-left icones mobileajuster4 ">
+                                                    <div className="col-1 text-left icones mobileajuster4 ">
                                                         {/* <div className='iconelixo giveMargin' type='button' >
                                                             <Link to=
                                                                 {{
@@ -361,6 +388,8 @@ class Anexos extends Component {
                                                                 { titulo: 'Chave', valor: feed.chave },
                                                                 { titulo: 'OS', valor: feed.osCodigo },
                                                                 { titulo: 'Fornecedor', valor: feed.fornecedorNome },
+                                                                { titulo: 'Navio', valor: feed.navioNome },
+                                                                { titulo: 'Validado Por', valor: feed.operadorNome },
                                                             ],
                                                             itemPermissao: 'ANEXO',
                                                             itemNome: feed.osCodigo,
