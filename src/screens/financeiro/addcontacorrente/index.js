@@ -112,12 +112,12 @@ class AddContaCorrente extends Component {
         if (this.state.tipo == '0') {
             this.setState({
                 pessoas: await loader.getBase('getClientes.php'),
-                pessoasOptions: await loader.getBaseOptions('getClientes.php', "Nome", "Chave")
+                pessoasOptions: await loader.getBaseOptionsCustomLabel('getClientes.php', "Nome", "Cnpj_Cpf", "Chave")
             })
         } else if (this.state.tipo == '1') {
             this.setState({
                 pessoas: await loader.getBase('getFornecedores.php'),
-                pessoasOptions: await loader.getBaseOptions('getFornecedores.php', "Nome", "Chave")
+                pessoasOptions: await loader.getBaseOptionsCustomLabel('getFornecedores.php', "Nome", "Cnpj_Cpf", "Chave")
             });
         }
     }

@@ -35,7 +35,7 @@ class Alert extends Component {
                                 {this.props.alert.type === "error" &&
                                     <FontAwesomeIcon style={{ color: "red" }} icon={faExclamationTriangle} />
                                 }
-                                <div style={{ overflow: "scroll", maxHeight: 200, padding: 15 }}>
+                                <div style={{ overflow: this.props.alert.checkboxes ? "scroll" : undefined, maxHeight: 200, padding: 15 }}>
                                     {this.props.alert.msg}
                                     {this.props.alert.checkboxes && this.props.alert.checkboxes.map((check) => (
                                         <div style={{display: "flex", flexDirection: "row", alignItems: "flex-start"}}>

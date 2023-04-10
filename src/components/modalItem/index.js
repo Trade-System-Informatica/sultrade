@@ -121,7 +121,7 @@ class ModalItem extends Component {
                                 }
                             </div>
 
-                            {this.props.itemEditMini && this.props.acessosPermissoes.filter((e) => { if (e.acessoAcao == this.props.itemPermissao) { return e } }).map((e) => e.permissaoEdita)[0] == 1 &&
+                            {!!this.props.itemEditMini && this.props.acessosPermissoes.filter((e) => { if (e.acessoAcao == this.props.itemPermissao) { return e } }).map((e) => e.permissaoEdita)[0] == 1 &&
                                 <Formik
                                     initialValues={{
                                         name: '',

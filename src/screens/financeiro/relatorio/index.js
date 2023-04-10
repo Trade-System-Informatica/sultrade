@@ -163,9 +163,10 @@ class Relatorio extends Component {
             async res => {
                 await this.setState({ pessoas: res.data })
 
-                const options = this.state.pessoas.map((e) =>
-                    ({ label: e.Nome, value: e.Chave })
-                );
+                const options = this.state.pessoas.map((e) => {
+                    return { label: `${e.Nome_Fantasia ? e.Nome_Fantasia : e.Nome}${e.Cnpj_Cpf ? ` - ${util.formataCPF(e.Cnpj_Cpf)}` : ""}`, value: e.Chave }
+                })
+
 
                 await this.setState({ pessoasOptions: options })
             },
@@ -316,6 +317,7 @@ class Relatorio extends Component {
     relatorio = async () => {
         this.setState({ loading: true });
         const relatorio = this.state.relatorio;
+        console.log(relatorio);
         let map = [];
         let titulo = 'contas ';
 
@@ -411,7 +413,7 @@ class Relatorio extends Component {
                                             let discount = 0;
                                             let received = 0;
 
-                                            if (e.os_moeda && this.state.moeda == e.os_moeda.split("@.@")[index]) {
+                                            if (e.os_moeda && this.state.moeda == e.os_moeda.split("@.@")[index] || !e.os_moeda) {
                                                 FDA = e.FDA ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.FDA.split("@.@")[index]) : '0,00';
                                                 discount = e.discount ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.discount.split("@.@")[index]) : "0,00";
                                                 received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.received.split("@.@")[index]) : "0,00";
@@ -510,15 +512,15 @@ class Relatorio extends Component {
 
                                     <table className='pdfTable'>
                                         <tr>
-                                            <th>Nº DOCTO</th>
-                                            <th>PO</th>
-                                            <th>PESSOA</th>
-                                            <th>HISTORICO</th>
-                                            <th>SALDO</th>
-                                            <th>VALOR</th>
+                                            <th style={{minWidth: 100}}>Nº DOCTO</th>
+                                            <th style={{ minWidth:75 }}>PO</th>
+                                            <th style={{ minWidth: 100 }}>PESSOA</th>
+                                            <th style={{ minWidth: 150 }}>HISTORICO</th>
+                                            <th style={{ minWidth: 100 }}>SALDO</th>
+                                            <th style={{ minWidth: 100 }}>VALOR</th>
                                         </tr>
                                         <tr style={{ backgroundColor: "#999999", border: "1px solid black" }}>
-                                            <th colSpan={8}>
+                                            <th colSpan={6}>
                                                 <span style={{ fontSize: "1.2em" }}>{this.state.por == "porCliente" && e.pessoa ? e.pessoa.split('@.@')[0]
                                                     : this.state.por == "porVencimento" && e.vencimento ? moment(e.vencimento.split('@.@')[0]).format('DD/MM/YYYY')
                                                         : e.dataPagamento ? moment(e.dataPagamento.split('@.@')[0]).format('DD/MM/YYYY') : ''}</span>
@@ -528,16 +530,15 @@ class Relatorio extends Component {
                                             let valor = 0;
                                             let saldo = 0;
 
-                                            if (e.os_moeda && this.state.moeda == e.os_moeda.split("@.@")[index]) {
-                                                valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.valor.split("@.@")[index]) : '0,00';
-                                                saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.saldo.split("@.@")[index]) : "0,00";
+                                            if (e.os_moeda && this.state.moeda == e.os_moeda.split("@.@")[index] || !e.os_moeda) {
+                                                valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.valor.split("@.@")[index] /* - e.valorDescontos*/) : '0,00';
+                                                saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.saldo.split("@.@")[index] /* - e.valorDescontos*/) : "0,00";
                                             } else if (this.state.moeda == 5) {
-                                                valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.valor.split("@.@")[index])) : "0,00";
-                                                saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.saldo.split("@.@")[index])) : "0,00";
+                                                valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.valor.split("@.@")[index] /* - e.valorDescontos*/)) : "0,00";
+                                                saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.saldo.split("@.@")[index] /* - e.valorDescontos*/)) : "0,00";
                                             } else {
-                                                valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.valor.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
-                                                saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.saldo.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
-
+                                                valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.valor.split("@.@")[index] /* - e.valorDescontos*/) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
+                                                saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.saldo.split("@.@")[index] /* - e.valorDescontos*/) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
                                             }
 
 
@@ -551,12 +552,12 @@ class Relatorio extends Component {
                                             if (parseFloat(valor.replaceAll('.', '').replaceAll(",", ".")) > 0) {
                                                 return (
                                                     <tr style={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#999999" }}>
-                                                        <td style={{ backgroundColor: "inherit" }}>{e.documento ? util.removeAcentos(e.documento.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ backgroundColor: "inherit" }}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ backgroundColor: "inherit" }}>{e.pessoa ? util.removeAcentos(e.pessoa.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ backgroundColor: "inherit" }}>{e.historico ? util.removeAcentos(e.historico.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ backgroundColor: "inherit", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {valor}</td>
-                                                        <td style={{ backgroundColor: "inherit", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {saldo}</td>
+                                                        <td style={{ minWidth: 100, backgroundColor: "inherit" }}>{e.documento ? util.removeAcentos(e.documento.split('@.@')[index]) : ''}</td>
+                                                        <td style={{ minWidth: 75, backgroundColor: "inherit" }}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
+                                                        <td style={{ minWidth: 100, backgroundColor: "inherit" }}>{e.pessoa ? util.removeAcentos(e.pessoa.split('@.@')[index]) : ''}</td>
+                                                        <td style={{ minWidth: 150, backgroundColor: "inherit" }}>{e.historico ? util.removeAcentos(e.historico.split('@.@')[index]) : ''}</td>
+                                                        <td style={{ minWidth: 100, backgroundColor: "inherit", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {valor}</td>
+                                                        <td style={{ minWidth: 100, backgroundColor: "inherit", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {saldo}</td>
                                                     </tr>
                                                 )
                                             }
@@ -654,7 +655,7 @@ class Relatorio extends Component {
                         >
                             <PDFExport
                                 scale={0.6}
-                                landscape={true}
+                                portrait={true}
 
                                 paperSize="A4"
                                 margin="0.5cm"

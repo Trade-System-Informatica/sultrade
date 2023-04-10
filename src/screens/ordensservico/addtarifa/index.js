@@ -285,6 +285,7 @@ class AddTarifa extends Component {
             assunto: this.state.email.assunto,
             corpo: this.state.email.corpo,
             anexos: this.state.email.anexos,
+            operador: this.state.usuarioLogado.nome,
             anexosNomes: this.state.email.anexosNomes,
         });
 

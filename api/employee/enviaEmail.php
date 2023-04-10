@@ -25,7 +25,8 @@ $navio = $objData->navio;
 $porto = $objData->porto;
 $anexos = $objData->anexos;
 $anexosNomes = $objData->anexosNomes;
-$fornecedor = prepareInput($objData->fornecedor);
+$fornecedor = prepareInput( $objData->fornecedor);
+$operador = prepareInput($objData->operador);
 $corpo = prepareInput($objData->corpo);
 $assunto = prepareInput($objData->assunto);
 $mensagemPadrao = "Para melhor identificacao dos processos internos de pagamento, solicitamos que toda prestacao de servico e/ou venda tenha destacada na nota fiscal numero da ordem de servico, nome do navio e porto (Neste caso: ".$os." - ".$navio." - PORTO: ".$porto.")";
@@ -100,9 +101,9 @@ try {
         //Content
         $mail->isHTML(true);                                  //Set email format to HTML
         $mail->Subject = $subject;
-        $mail->Body    = $body;
+        $mail->Body    = $body."<br><br>Ass.: $operador";
         $mail->AltBody = $remarks."\n\n".$mensagemPadrao.",
-        \n\nPermanecemos a disposição.\n\nSaudações,";
+        \n\nPermanecemos a disposição.\n\nSaudações,\nAss.: $operador";
         
         if (!PHPMailer::validateAddress($emails[$i])){ 
             array_push($return['failures'], $emails[$i]);

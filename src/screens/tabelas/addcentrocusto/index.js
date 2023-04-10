@@ -97,7 +97,7 @@ class AddCentroCusto extends Component {
     loadAll = async () => {
         await this.setState({
             pessoas: await loader.getBase('getPessoas.php'),
-            pessoasOptions: await loader.getPessoasOptions(),
+            pessoasOptions: await loader.getBaseOptionsCustomLabel('getPessoas.php', 'Nome', 'Cnpj_Cpf', 'Chave'),
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php')
         })

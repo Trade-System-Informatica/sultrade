@@ -80,6 +80,20 @@ class Operadores {
         return $result;
     }
 
+    public static function getOperador($codigo)
+    {
+        $database = new Database();
+
+            $result = $database->doSelect(
+                'operadores',
+                'operadores.Nome, operadores.empresa, operadores.Codigo',
+                "Codigo = '" . $codigo . "'"
+            );
+
+            $database->closeConection();
+        return $result;
+    }
+
     public static function getControle(){
         $database = new Database();
 

@@ -186,7 +186,6 @@ class AddLancamento extends Component {
             historicosOptions: await loader.getBaseOptions('getHistoricos.php', "Descricao", "chave"),
             tipoDocumentosOptions: await loader.getBaseOptions('getTiposDocumento.php', "descricao", "chave"),
             centrosCustosOptions: await loader.getBaseOptions('getCentrosCustos.php', "Descricao", "Chave"),
-            pessoasOptions: await loader.getBaseOptions('getPessoas.php', "Nome", "Chave"),
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php'),
         });

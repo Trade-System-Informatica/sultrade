@@ -373,12 +373,12 @@ class AddConta extends Component {
         if (this.state.tipo == '0') {
             this.setState({
                 pessoas: await loader.getBase('getClientes.php'),
-                pessoasOptions: await loader.getBaseOptions('getClientes.php', "Nome", "Chave")
+                pessoasOptions: await loader.getBaseOptionsCustomLabel('getClientes.php', "Nome", "Cnpj_Cpf", "Chave")
             })
         } else if (this.state.tipo == '1') {
             this.setState({
                 pessoas: await loader.getBase('getFornecedores.php'),
-                pessoasOptions: await loader.getBaseOptions('getFornecedores.php', "Nome", "Chave")
+                pessoasOptions: await loader.getBaseOptionsCustomLabel('getFornecedores.php', "Nome", "Cnpj_Cpf", "Chave")
             });
         }
     }
@@ -457,7 +457,6 @@ class AddConta extends Component {
             console.log(contatos)
             if (!this.state.tipoPix) {
                 this.setState({ loading: false });
-                console.log("aa");
                 return;
             }
         }
@@ -726,8 +725,8 @@ class AddConta extends Component {
                 valor: this.state.desconto,
                 complemento: this.state.descontoComplemento,
                 conta: this.state.descontoConta,
-                check: true
-            }, , {
+                check: !!this.state.desconto
+            }, {
                 valor: this.state.retencaoInss,
                 complemento: this.state.retencaoInssComplemento,
                 conta: this.state.retencaoInssConta,
@@ -764,8 +763,8 @@ class AddConta extends Component {
             await apiEmployee.post(`contabilizaContasAberto.php`, {
                 token: true,
                 data: this.state.lancamento,
-                conta_credito: this.state.tipo == 1 ? this.state.contaContabil : this.state.contaProvisao,
-                conta_debito: this.state.tipo == 1 ? this.state.contaProvisao : this.state.contaContabil,
+                conta_credito: this.state.tipo == 1 ? this.state.contaProvisao : this.state.contaContabil,
+                conta_debito: this.state.tipo == 1 ? this.state.contaContabil : this.state.contaProvisao,
                 tipo_documento: this.state.tipoDocumento,
                 centro_custo: this.state.centroCusto,
                 historico_padrao: this.state.historicoPadrao,
@@ -1061,7 +1060,7 @@ class AddConta extends Component {
                                                                     <label className='smallCheckbox'>INSS</label>
                                                                     <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoInssCheck} onChange={async (e) => { await this.mudaRetencao("INSS") }} />
                                                                 </div>
-                                                                <div>
+                                                                <div> 
                                                                     <label className='smallCheckbox'>IR</label>
                                                                     <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoIrCheck} onChange={async (e) => { await this.mudaRetencao("IR") }} />
                                                                 </div>

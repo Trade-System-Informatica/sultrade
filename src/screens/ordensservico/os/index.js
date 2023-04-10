@@ -202,6 +202,7 @@ class OS extends Component {
             osFiltrada = ((!os.Data_Faturamento || moment(os.Data_Faturamento).format() == "Invalid date") && os.cancelada == '0') ? os : '';
         }
 
+        console.log(osFiltrada)
         if (osFiltrada) {
             return osFiltrada;
         }

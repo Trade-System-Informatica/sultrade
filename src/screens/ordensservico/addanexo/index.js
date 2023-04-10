@@ -115,7 +115,7 @@ class AddAnexo extends Component {
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php'),
             fornecedores: await loader.getBase('getFornecedores.php'),
-            fornecedoresOptions: await loader.getBaseOptions(`getFornecedores.php`, "Nome", "Chave"),
+            fornecedoresOptions: await loader.getBaseOptionsCustomLabel(`getFornecedores.php`, "Nome", "Cnpj_Cpf", "Chave"),
             operadores: await loader.getBody('getOperadoresBase.php',
                 {
                     empresa: this.state.usuarioLogado.empresa

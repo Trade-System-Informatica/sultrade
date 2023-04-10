@@ -152,9 +152,24 @@ class Pessoas
         if ($evento) {
             $result = $database->doSelect("anexos", "anexos.*", "evento = '$evento'");
         } else {
-            $result = $database->doSelect("anexos LEFT JOIN pessoas ON pessoas.chave = anexos.fornecedor", "anexos.*, pessoas.nome AS fornecedorNome");
+            $result = $database->doSelect("anexos LEFT JOIN pessoas ON pessoas.chave = anexos.fornecedor LEFT JOIN os_servicos_itens ON os_servicos_itens.chave = anexos.evento LEFT JOIN os ON os.chave = os_servicos_itens.chave_os LEFT JOIN os_navios ON os_navios.chave = os.chave_navio LEFT JOIN operadores ON operadores.chave = anexos.validadoPor", "anexos.*, pessoas.nome AS fornecedorNome, os.codigo AS osCodigo, os_navios.nome AS navioNome, operadores.nome AS operadorNome");
         }
 
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function getAnexosNaoValidados()
+    {
+        $database = new Database();
+
+        $expiration = date("Y-m-d H:i:s", strtotime('-48 hours'));
+        
+        $database->doUpdate('anexos LEFT JOIN os_servicos_itens AS eventos ON eventos.chave = anexos.evento LEFT JOIN os ON os.chave = eventos.chave_os', "validado = 1, validadoPor = -1, validadoData = '" . date("Y-m-d H:i:s") . "'", "validado = 0 AND os.Data_Abertura <= '$expiration'");
+        $database->doUpdate('anexos', "validado = 1, validadoPor = -1, validadoData = '" . date("Y-m-d H:i:s") . "'", "validado = 2 AND validadoData <= '$expiration'");
+
+        $result = $database->doSelect("anexos", "anexos.*", "validado IN(0,2) ORDER BY envio DESC");
+        
         $database->closeConection();
         return $result;
     }
@@ -394,18 +409,26 @@ class Pessoas
         $database = new Database();
 
         foreach($anexos as $anexo) {
-            $database->doUpdate('anexos', "validado = ".$anexo->{"validado"}.", validadoPor = '$validadoPor', validadoData = '$validadoData'", "chave = ".$anexo->{"chave"});
+            if ($anexo->{"validado"} != "0") {
+                $database->doUpdate('anexos', "validado = ".$anexo->{"validado"}.", validadoPor = '$validadoPor', validadoData = '$validadoData'", "chave = ".$anexo->{"chave"});
+            } else {
+                $database->doUpdate('anexos', "validado = " . $anexo->{"validado"}, "chave = " . $anexo->{"chave"});
+            }
         }
 
         $database->closeConection();
         return true;
     }
 
-    public static function updateAnexo($chave, $fornecedor, $os, $validado)
+    public static function updateAnexo($chave, $operador, $evento, $validado, $validadoData)
     {
         $database = new Database();
 
-        $query = "fornecedor = '$fornecedor', os = '$os', validado = '$validado'";
+        if ($validado != "0") {
+            $query = "evento = '$evento', validado = '$validado', validadoData = '$validadoData', validadoPor = '$operador'";
+        } else{
+            $query = "evento = '$evento', validado = '$validado'";
+        }
 
         $database->doUpdate('anexos', $query, "chave = ".$chave);
 

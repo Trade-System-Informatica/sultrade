@@ -130,15 +130,17 @@ class Contas
 
         if ($empresa == 0) {
             $result = $database->doSelect(
-                'contas_aberto',
-                'contas_aberto.*',
-                "contas_aberto.Saldo > 0 AND contas_aberto.Tipo = 1"
+                'contas_aberto LEFT JOIN contas_aberto_cc ON contas_aberto_cc.chave_conta_aberto = contas_aberto.chave',
+                'contas_aberto.*,
+                SUM(contas_aberto_cc.valor) as valorDescontos',
+                "contas_aberto.Saldo > 0 AND contas_aberto.Tipo = 1 GROUP BY contas_aberto.chave"
             );
         } else {
             $result = $database->doSelect(
-                'contas_aberto',
-                'contas_aberto.*',
-                "contas_aberto.Saldo > 0 AND contas_aberto.Tipo = 1 AND empresa = '" . $empresa . "'"
+                'contas_aberto LEFT JOIN contas_aberto_cc ON contas_aberto_cc.chave_conta_aberto = contas_aberto.chave',
+                'contas_aberto.*,
+                SUM(contas_aberto_cc.valor) as valorDescontos',
+                "contas_aberto.Saldo > 0 AND contas_aberto.Tipo = 1 AND empresa = '" . $empresa . "' GROUP BY contas_aberto.chave"
             );
         }
         $database->closeConection();
@@ -901,7 +903,7 @@ class Contas
             if ($item->{"check"}) {
                 $values = $baseValues . ", '" . $item->{"complemento"} . "', '$lote', 0, '" . $item->{"conta"} . "', '" . $item->{"valor"} . "', 0, 0, 0";
                 $result[count($result)] = $database->doInsert('lancamentos', $cols, $values);
-                $valor -= $item->{"valor"};
+                $valorTotal -= $item->{"valor"};
             }
         }
 
@@ -909,11 +911,11 @@ class Contas
             $values = $baseValues . ", '$historico', '$lote', '$conta_debito', '$conta_credito', '$valorTotal', 0, 0, 0";
             $result[count($result)] = $database->doInsert('lancamentos', $cols, $values);
         } else {
-            $values = $baseValues . ", '$historico', '$lote', '0', '$conta_credito', '$valor', 0, 0, 0";
+            $values = $baseValues . ", '$historico', '$lote', '0', '$conta_credito', '$valorTotal', 0, 0, 0";
             $result[count($result)] = $database->doInsert('lancamentos', $cols, $values);
 
             if ($conta_debito) {
-                $values = $baseValues . ", '$historico', '$lote', '$conta_debito', '0', '$valorTotal', 0, 0, 0";
+                $values = $baseValues . ", '$historico', '$lote', '$conta_debito', '0', '$valor', 0, 0, 0";
                 $result[count($result)] = $database->doInsert('lancamentos', $cols, $values);
             }
         }
@@ -1247,16 +1249,16 @@ class Contas
                                           GROUP_CONCAT(contas_aberto.lancto SEPARATOR '@.@') AS lancamento,
                                           GROUP_CONCAT(contas_aberto.saldo SEPARATOR '@.@') AS saldo,
                                           GROUP_CONCAT(contas_aberto.valor SEPARATOR '@.@') AS valor,
-                                          GROUP_CONCAT((SELECT codigo FROM os WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS os,
-                                          GROUP_CONCAT((SELECT data_saida FROM os WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS sailed,
-                                          GROUP_CONCAT((SELECT ROE FROM os WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS ROE,
-                                          GROUP_CONCAT((SELECT SUM(os_servicos_itens.valor1) FROM os LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os WHERE os.centro_custo = contas_aberto.centro_custo AND os_servicos_itens.cancelada != 1 AND os_servicos_itens.tipo_sub = '$tipo_sub' ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS FDA,
-                                          GROUP_CONCAT((SELECT SUM(os_servicos_itens.valor1) FROM os LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os WHERE os.centro_custo = contas_aberto.centro_custo AND os_servicos_itens.cancelada != 1 AND os_servicos_itens.tipo_sub = '3'  ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS discount,
-                                          GROUP_CONCAT((SELECT SUM(os_servicos_itens.valor1) FROM os LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os WHERE os.centro_custo = contas_aberto.centro_custo AND os_servicos_itens.cancelada != 1 AND os_servicos_itens.tipo_sub = '2'  ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS recieved,
-                                          GROUP_CONCAT((SELECT os_servicos_itens.Moeda FROM os LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS os_moeda,
-                                          GROUP_CONCAT((SELECT os_navios.nome FROM os LEFT JOIN os_navios ON os.chave_navio = os_navios.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio,
-                                          GROUP_CONCAT((SELECT os_portos.Descricao FROM os LEFT JOIN os_portos ON os.porto = os_portos.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto,                                          GROUP_CONCAT((SELECT os_navios.nome FROM os LEFT JOIN os_navios ON os.chave_navio = os_navios.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio,
-                                          GROUP_CONCAT((SELECT os_navios.nome FROM contas_aberto AS Cont LEFT JOIN os_navios ON Cont.navio_manual = os_navios.chave WHERE Cont.chave = contas_aberto.chave ORDER BY Cont.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio_manual,                                          GROUP_CONCAT((SELECT os_navios.nome FROM os LEFT JOIN os_navios ON os.chave_navio = os_navios.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio_manual,
+                                          GROUP_CONCAT((SELECT codigo FROM os WHERE os.centro_custo = contas_aberto.centro_custo AND os.centro_custo != '' ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS os,
+                                          GROUP_CONCAT((SELECT data_saida FROM os WHERE os.centro_custo = contas_aberto.centro_custo AND os.centro_custo != '' ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS sailed,
+                                          GROUP_CONCAT((SELECT ROE FROM os WHERE os.centro_custo = contas_aberto.centro_custo AND os.centro_custo != '' ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS ROE,
+                                          GROUP_CONCAT((SELECT SUM(os_servicos_itens.valor1) FROM os LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os WHERE os.centro_custo = contas_aberto.centro_custo AND os.centro_custo != '' AND os_servicos_itens.cancelada != 1 AND os_servicos_itens.tipo_sub = '$tipo_sub' ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS FDA,
+                                          GROUP_CONCAT((SELECT SUM(os_servicos_itens.valor1) FROM os LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os WHERE os.centro_custo = contas_aberto.centro_custo AND os.centro_custo != '' AND os_servicos_itens.cancelada != 1 AND os_servicos_itens.tipo_sub = '3'  ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS discount,
+                                          GROUP_CONCAT((SELECT SUM(os_servicos_itens.valor1) FROM os LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os WHERE os.centro_custo = contas_aberto.centro_custo AND os.centro_custo != '' AND os_servicos_itens.cancelada != 1 AND os_servicos_itens.tipo_sub = '2'  ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS recieved,
+                                          GROUP_CONCAT((SELECT os_servicos_itens.Moeda FROM os LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os WHERE os.centro_custo = contas_aberto.centro_custo AND os.centro_custo != '' ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS os_moeda,
+                                          GROUP_CONCAT((SELECT os_navios.nome FROM os LEFT JOIN os_navios ON os.chave_navio = os_navios.chave WHERE os.centro_custo = contas_aberto.centro_custo AND os.centro_custo != '' ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio,
+                                          GROUP_CONCAT((SELECT os_portos.Descricao FROM os LEFT JOIN os_portos ON os.porto = os_portos.chave WHERE os.centro_custo = contas_aberto.centro_custo AND os.centro_custo != '' ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto,                                         
+                                          GROUP_CONCAT((SELECT os_navios.nome FROM contas_aberto AS Cont LEFT JOIN os_navios ON Cont.navio_manual = os_navios.chave WHERE Cont.chave = contas_aberto.chave ORDER BY Cont.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio_manual,                                        
                                           GROUP_CONCAT((SELECT os_portos.Descricao FROM contas_aberto AS Cont LEFT JOIN os_portos ON Cont.porto_manual = os_portos.chave WHERE Cont.chave = contas_aberto.chave ORDER BY Cont.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto_manual",
                 $where . " " . $groupBy
             );
@@ -1284,8 +1286,8 @@ class Contas
                         GROUP_CONCAT((SELECT SUM(os_servicos_itens.valor1) FROM os LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os WHERE os.centro_custo = contas_aberto.centro_custo AND os_servicos_itens.cancelada != 1 AND os_servicos_itens.tipo_sub = '2'  ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS recieved,
                         GROUP_CONCAT((SELECT os_servicos_itens.Moeda FROM os LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS os_moeda,
                         GROUP_CONCAT((SELECT os_navios.nome FROM os LEFT JOIN os_navios ON os.chave_navio = os_navios.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio,
-                        GROUP_CONCAT((SELECT os_portos.Descricao FROM os LEFT JOIN os_portos ON os.porto = os_portos.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto,                                          GROUP_CONCAT((SELECT os_navios.nome FROM os LEFT JOIN os_navios ON os.chave_navio = os_navios.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio,
-                        GROUP_CONCAT((SELECT os_navios.nome FROM contas_aberto AS Cont LEFT JOIN os_navios ON Cont.navio_manual = os_navios.chave WHERE Cont.chave = contas_aberto.chave ORDER BY Cont.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio_manual,                                          GROUP_CONCAT((SELECT os_navios.nome FROM os LEFT JOIN os_navios ON os.chave_navio = os_navios.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio_manual,
+                        GROUP_CONCAT((SELECT os_portos.Descricao FROM os LEFT JOIN os_portos ON os.porto = os_portos.chave WHERE os.centro_custo = contas_aberto.centro_custo ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto,                                  
+                        GROUP_CONCAT((SELECT os_navios.nome FROM contas_aberto AS Cont LEFT JOIN os_navios ON Cont.navio_manual = os_navios.chave WHERE Cont.chave = contas_aberto.chave ORDER BY Cont.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio_manual,                                   
                         GROUP_CONCAT((SELECT os_portos.Descricao FROM contas_aberto AS Cont LEFT JOIN os_portos ON Cont.porto_manual = os_portos.chave WHERE Cont.chave = contas_aberto.chave ORDER BY Cont.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto_manual",
                 "1=1 " . $groupBy
             );

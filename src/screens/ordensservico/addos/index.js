@@ -156,6 +156,7 @@ const estadoInicial = {
     pdfNome: "",
     pdfgerado: [],
     pdfContent: [],
+    anexosForn: [],
     moedas: '',
 
     error: { msg: "", type: "" },
@@ -169,6 +170,11 @@ const estadoInicial = {
     cabecalho: "",
     company: "",
     address: "",
+
+    agrupadorModal: false,
+    agrupadorEventos: [],
+
+    custeios_subagentes: [],
 
     faturada: true,
 }
@@ -355,7 +361,7 @@ class AddOS extends Component {
     loadAll = async () => {
         await this.setState({
             naviosOptions: await loader.getBaseOptions('getNavios.php', 'nome', 'chave'),
-            clientesOptions: await loader.getBaseOptions('getClientes.php', 'Nome', 'Chave'),
+            clientesOptions: await loader.getBaseOptionsCustomLabel('getClientes.php', 'Nome', 'Cnpj_Cpf', 'Chave'),
             tiposServicosOptions: await loader.getBaseOptions('getTiposServicos.php', 'descricao', 'chave'),
             portosOptions: await loader.getBaseOptions('getPortos.php', 'Descricao', 'Chave'),
             tiposDocumentoOptions: await loader.getBaseOptions('getTiposDocumento.php', 'descricao', 'chave'),
@@ -366,6 +372,7 @@ class AddOS extends Component {
 
         await this.getOperadores();
         if (this.state.chave) {
+            await this.getCusteiosSubagentes();
             await this.getCentrosCustos();
             await this.getServicosItens();
             await this.getDocumentos();
@@ -374,6 +381,57 @@ class AddOS extends Component {
         await this.setState({
             acessosPermissoes: await loader.testaAcesso(this.state.acessos, this.state.permissoes, this.state.usuarioLogado),
         });
+    }
+
+    getCusteiosSubagentes = async () => {
+        await apiEmployee.post(`getCusteioSubagente.php`, {
+            token: true,
+            chave_os: this.state.chave
+        }).then(
+            async res => {
+                if (res.data[0]) {
+                    this.setState({ custeios_subagentes: res.data });
+                }
+            },
+            async res => await console.log(`Erro: ${res}`)
+        )
+    }
+
+    filterAgrupador = (item) => {
+        const eventosUsados = [];
+
+        this.state.custeios_subagentes.map((e) => e.evento.split(",").map((el) => {
+            eventosUsados.push(el);
+        }));
+
+        if (eventosUsados.includes(item.chave)) {
+            return false;
+        }
+
+        if (!this.state.agrupadorEventos[0]) {
+            return true;
+        }
+        const firstItem = this.state.eventos.find((evento) => evento.chave == this.state.agrupadorEventos[0]);
+
+        if (item.tipo_sub != firstItem.tipo_sub || item.fornecedor != firstItem.fornecedor) {
+            return false;
+        }
+
+        return true;
+    }
+
+    agruparEventos = async () => {
+        await apiEmployee.post(`insertCusteioSubagente.php`, {
+            token: true,
+            os: this.state.chave,
+            eventos: this.state.agrupadorEventos
+        }).then(
+            async res => {
+                this.setState({ agrupadorEventos: [] });
+                await this.getCusteiosSubagentes();
+            },
+            async res => await console.log(`Erro: ${res}`)
+        )
     }
 
     reloadItemEditMini = async () => {
@@ -438,6 +496,7 @@ class AddOS extends Component {
     }
 
     faturarData = async (valor) => {
+        console.log(valor)
         if (!this.state.anexosForn[0]) {
             await this.setState({
                 faturamento: valor,
@@ -643,7 +702,6 @@ class AddOS extends Component {
             }
         })
     }
-
 
     salvarOS = async (validForm) => {
         await this.setState({
@@ -2006,6 +2064,243 @@ class AddOS extends Component {
                             aria-labelledby="transition-modal-title"
                             aria-describedby="transition-modal-description"
                             style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
+                            open={this.state.agrupadorModal}
+                            onClose={async () => await this.setState({ agrupadorModal: false })}
+                        >
+                            <div className='modalContainer'>
+                                <div className='modalCriar'>
+                                    <div className='containersairlistprodmodal'>
+                                        <div className='botaoSairModal' onClick={async () => await this.setState({ agrupadorModal: false })}>
+                                            <span>X</span>
+                                        </div>
+                                    </div>
+                                    <div className='modalContent'>
+
+                                        <div className='modalForm' style={{ width: "95%" }}>
+                                            <Formik
+                                                initialValues={{
+                                                    name: '',
+                                                }}
+                                                onSubmit={async values => {
+                                                    await new Promise(r => setTimeout(r, 1000))
+                                                    await this.setState({ agrupadorModal: false })
+                                                    await this.agruparEventos();
+                                                }}
+                                            >
+                                                <Form className="contact-form" >
+
+
+                                                    <div className="row">
+
+                                                        <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
+
+                                                            <div className="row addservicos">
+                                                                <div className="col-12">
+                                                                    <h4 className='text-center white'>Eventos:</h4>
+                                                                </div>
+                                                                <h3 className='text-center white'>Selecionados</h3>
+                                                                {this.state.agrupadorEventos[0] &&
+                                                                    <div className="agrupador_eventos_selecionados">
+                                                                        <table className='agrupador_lista'>
+                                                                            <tr>
+                                                                                <th className='text-center'>
+                                                                                    <span>Chave</span>
+                                                                                </th>
+                                                                                {window.innerWidth >= 500 &&
+                                                                                    <th className='text-center'>
+                                                                                        <span>Tipo</span>
+                                                                                    </th>
+                                                                                }
+                                                                                <th className='text-center'>
+                                                                                    <span>Ordem</span>
+                                                                                </th>
+                                                                                {window.innerWidth >= 500 &&
+                                                                                    <th className='text-center'>
+                                                                                        <span>Descrição</span>
+                                                                                    </th>
+                                                                                }
+                                                                                <th className='text-center'>
+                                                                                    <span>Valor (USD)</span>
+                                                                                </th>
+                                                                                <th className='text-center'>
+                                                                                    <span>Valor (R$)</span>
+                                                                                </th>
+                                                                                <th className='text-center' style={{ width: 20, height: 20, padding: 5 }}>
+                                                                                </th>
+                                                                            </tr>
+                                                                            {this.state.eventos[0] != undefined && this.state.eventos.filter((feed) => this.state.agrupadorEventos.includes(feed.chave)).map((feed, index) => (
+                                                                                <>
+                                                                                    {window.innerWidth < 500 &&
+                                                                                        <tr onClick={() => this.setState({ agrupadorEventos: this.state.agrupadorEventos.filter((e) => e != feed.chave) })}>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.chave}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.ordem.replaceAll(',', '.')}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                            </td>
+                                                                                            <td>
+                                                                                                <input type="checkbox" checked={true} />
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    }
+                                                                                    {window.innerWidth >= 500 &&
+                                                                                        <tr onClick={() => this.setState({ agrupadorEventos: this.state.agrupadorEventos.filter((e) => e != feed.chave) })}>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.chave}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{this.state.tiposServicosItens[feed.tipo_sub]}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.ordem.replaceAll(',', '.')}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.descricao}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                            </td>
+                                                                                            <td>
+                                                                                                <input type="checkbox" checked={true} />
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    }
+                                                                                </>
+                                                                            )
+                                                                            )}
+                                                                        </table>
+                                                                    </div>
+                                                                }
+                                                                {!this.state.agrupadorEventos[0] &&
+                                                                    <h4 className='text-center'>Nenhum</h4>
+                                                                }
+                                                                <br /><br /><br />
+                                                                <h3 className='text-center white'>Eventos</h3>
+                                                                {this.state.eventos.filter((feed) => !this.state.agrupadorEventos.includes(feed.chave)).find(this.filterAgrupador) &&
+                                                                    <div className="agrupador_eventos">
+                                                                        <table className='agrupador_lista'>
+                                                                            <tr>
+                                                                                <th className='text-center'>
+                                                                                    <span>Chave</span>
+                                                                                </th>
+                                                                                {window.innerWidth >= 500 &&
+                                                                                    <th className='text-center'>
+                                                                                        <span>Tipo</span>
+                                                                                    </th>
+                                                                                }
+                                                                                <th className='text-center'>
+                                                                                    <span>Ordem</span>
+                                                                                </th>
+                                                                                {window.innerWidth >= 500 &&
+                                                                                    <th className='text-center'>
+                                                                                        <span>Descrição</span>
+                                                                                    </th>
+                                                                                }
+                                                                                <th className='text-center'>
+                                                                                    <span>Valor (USD)</span>
+                                                                                </th>
+                                                                                <th className='text-center'>
+                                                                                    <span>Valor (R$)</span>
+                                                                                </th>
+                                                                                <th className='text-center' style={{ width: 20, height: 20, padding: 5 }}>
+                                                                                </th>
+                                                                            </tr>
+                                                                            {this.state.eventos[0] != undefined && this.state.eventos.filter((feed) => !this.state.agrupadorEventos.includes(feed.chave)).filter(this.filterAgrupador).map((feed, index) => (
+                                                                                <>
+                                                                                    {window.innerWidth < 500 &&
+                                                                                        <tr onClick={() => this.setState({ agrupadorEventos: [...this.state.agrupadorEventos, feed.chave] })}>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.chave}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.ordem.replaceAll(',', '.')}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                            </td>
+                                                                                            <td>
+                                                                                                <input type="checkbox" checked={false} />
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    }
+                                                                                    {window.innerWidth >= 500 &&
+                                                                                        <tr onClick={() => this.setState({ agrupadorEventos: [...this.state.agrupadorEventos, feed.chave] })}>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.chave}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{this.state.tiposServicosItens[feed.tipo_sub]}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.ordem.replaceAll(',', '.')}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.descricao}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                            </td>
+                                                                                            <td>
+                                                                                                <input type="checkbox" checked={false} />
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    }
+                                                                                </>
+                                                                            )
+                                                                            )}
+                                                                        </table>
+                                                                    </div>
+                                                                }
+                                                                {!this.state.eventos.filter((feed) => !this.state.agrupadorEventos.includes(feed.chave)).find(this.filterAgrupador) &&
+                                                                    <h4 className="text-center">Nenhum disponível</h4>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                                                    </div>
+
+                                                    <div className="row">
+                                                        <div className="col-2"></div>
+                                                        <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                            <button type="submit" style={{ width: 300 }} >Agrupar</button>
+                                                        </div>
+                                                        <div className="col-2"></div>
+                                                    </div>
+
+                                                </Form>
+                                            </Formik>
+
+                                        </div>
+                                    </div>
+
+
+
+
+
+                                </div >
+
+                            </div >
+                        </Modal >
+
+                        <Modal
+                            aria-labelledby="transition-modal-title"
+                            aria-describedby="transition-modal-description"
+                            style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
                             open={this.state.cabecalhoModal}
                             onClose={async () => { await this.setState({ cabecalhoModal: false }); await this.salvarCabecalho() }}
                         >
@@ -2671,9 +2966,25 @@ class AddOS extends Component {
                                             <div className="relatorioButton">
                                                 <button className="btn btn-danger" onClick={() => this.FaturamentoCusteio(this.state.os.codigo, validForm)}>Relatório Líquidos</button>
                                             </div>
+                                        </div>
+
+                                    </>
+                                }
+
+                                {this.props.match.params.id != 0 &&
+                                    <>
+                                        <br /><br /><br /><br />
+                                        <div>
+                                            <div className="page-breadcrumb2"><h3>Funções</h3></div>
+                                        </div>
+                                        <br />
+                                        <div className="relatoriosSection">
                                             <div className="relatorioButton">
                                                 <button className="btn btn-danger" onClick={() => this.GerarEtiqueta(this.state.os.codigo)}>Enviar Etiqueta</button>
                                             </div>
+                                            {/* <div className="relatorioButton">
+                                                <button className="btn btn-danger" onClick={() => this.setState({ agrupadorModal: true })}>Custeio Subagente</button>
+                                            </div> */}
                                             <div className="relatorioButton">
                                                 <button className="btn btn-danger"><Link style={{ color: "inherit", textDecoration: "none" }} to={{ pathname: "/financeiro/addFatura/0", state: { backTo: `/ordensservicos/os/${this.state.chave}`, os: this.state.os } }}>Emitir NF</Link></button>
                                             </div>
@@ -2953,6 +3264,197 @@ class AddOS extends Component {
                                                                                                     <FontAwesomeIcon icon={faTimes} />
                                                                                                 </span>
                                                                                             }
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                }
+                                                                            </>
+                                                                        )
+                                                                        )}
+                                                                        {this.state.eventos[0] &&
+                                                                            <>
+                                                                                {
+                                                                                    window.innerWidth < 500 &&
+                                                                                    <tr className={this.state.eventos.length % 2 == 0 ? "parTr" : "imparTr"}>
+                                                                                        <td className="text-center"></td>
+                                                                                        <td className="text-center">Total</td>
+                                                                                        <td className="text-center">
+                                                                                            <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal)}</p>
+                                                                                        </td>
+                                                                                        <td></td>
+                                                                                    </tr>
+                                                                                }
+                                                                                {window.innerWidth >= 500 &&
+                                                                                    <tr className={this.state.eventos.length % 2 == 0 ? "parTr" : "imparTr"}>
+                                                                                        <td className="text-center"></td>
+                                                                                        <td className="text-center">Total</td>
+                                                                                        <td className="text-center"></td>
+                                                                                        <td className="text-center"></td>
+                                                                                        <td className="text-center">
+                                                                                            <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal)}</p>
+                                                                                        </td>
+                                                                                        <td></td>
+                                                                                    </tr>
+                                                                                }
+                                                                            </>
+                                                                        }
+                                                                    </table>
+
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                {this.props.match.params.id != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+
+                                    <div>
+                                        <br />
+                                        <br />
+                                        <div>
+                                            <div>
+                                                <div className="page-breadcrumb2"><h3>Eventos</h3></div>
+                                            </div>
+                                            <br />
+                                            <div>
+                                                <div>
+                                                    <div className="row" id="product-list">
+                                                        <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags">
+                                                            <div className="single-product-item">
+                                                                <div className="row subtitulosTabela">
+                                                                    <table className='addOsTable'>
+                                                                        <tr>
+                                                                            <th className='text-center'>
+                                                                                <span>Chave</span>
+                                                                            </th>
+                                                                            {window.innerWidth >= 500 &&
+                                                                                <th className='text-center'>
+                                                                                    <span>Tipo</span>
+                                                                                </th>
+                                                                            }
+                                                                            <th className='text-center'>
+                                                                                <span>Ordem</span>
+                                                                            </th>
+                                                                            {window.innerWidth >= 500 &&
+                                                                                <th className='text-center'>
+                                                                                    <span>Descrição</span>
+                                                                                </th>
+                                                                            }
+                                                                            <th className='text-center'>
+                                                                                <span>Valor (USD)</span>
+                                                                            </th>
+                                                                            <th className='text-center'>
+                                                                                <span>Valor (R$)</span>
+                                                                            </th>
+                                                                            <th className='text-center'>
+                                                                                <span>
+                                                                                    {!this.state.eventos[1] &&
+
+                                                                                        <Link to=
+                                                                                            {{
+                                                                                                pathname: `/ordensservico/addevento/0`,
+                                                                                                state: { evento: {}, os: { ...this.state.os, addOS: true } }
+                                                                                            }}
+                                                                                        >
+                                                                                            <FontAwesomeIcon icon={faPlus} />
+                                                                                        </Link>
+                                                                                    }
+                                                                                </span>
+                                                                            </th>
+                                                                        </tr>
+                                                                        {this.state.custeios_subagentes[0] != undefined && this.state.custeios_subagentes.map((feed, index) => (
+                                                                            <>
+                                                                                {window.innerWidth < 500 &&
+                                                                                    <tr
+                                                                                        className={index % 2 == 0 ? "parTr" : "imparTr"}>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.grupo}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.ordem.replaceAll(',', '.')}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <span className='iconelixo giveMargin' type='button' >
+                                                                                                <Link to=
+                                                                                                    {{
+                                                                                                        pathname: `/ordensservico/addevento/0`,
+                                                                                                        state: { evento: { ...feed }, os: { ...this.state.os } }
+                                                                                                    }}
+                                                                                                >
+                                                                                                    <FontAwesomeIcon icon={faPlus} />
+                                                                                                </Link>
+                                                                                            </span>
+
+
+                                                                                            <span className='iconelixo giveMargin' type='button' >
+                                                                                                <Link to=
+                                                                                                    {{
+                                                                                                        pathname: `/ordensservico/addevento/${feed.chave}`,
+                                                                                                        state: { evento: { ...feed }, os: { ... this.state.os } }
+                                                                                                    }}
+                                                                                                >
+                                                                                                    <FontAwesomeIcon icon={faPen} />
+                                                                                                </Link>
+                                                                                            </span>
+
+                                                                                            <span className='iconelixo giveMargin' type='button' >
+                                                                                                <Link to=
+                                                                                                    {{
+                                                                                                        pathname: `/ordensservico/addeventofinanceiro/${feed.chave}`,
+                                                                                                        state: { evento: { ...feed }, os: { ...this.state.os } }
+                                                                                                    }}
+                                                                                                >
+                                                                                                    <FontAwesomeIcon icon={faDollarSign} />
+                                                                                                </Link>
+                                                                                            </span>
+
+                                                                                            {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
+
+                                                                                                <span type='button' className='iconelixo' onClick={(a) => this.deleteServicoItem(feed.chave, feed.descricao)} >
+                                                                                                    <FontAwesomeIcon icon={faTimes} />
+                                                                                                </span>
+                                                                                            }
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                }
+                                                                                {window.innerWidth >= 500 &&
+                                                                                    <tr
+                                                                                        className={index % 2 == 0 ? "parTr" : "imparTr"}>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.chave}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>{this.state.tiposServicosItens[feed.tipo_sub]}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.ordem.replaceAll(',', '.')}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.descricao}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                        </td>
+                                                                                        <td>
                                                                                         </td>
                                                                                     </tr>
                                                                                 }

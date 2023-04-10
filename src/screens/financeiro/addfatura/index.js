@@ -104,7 +104,7 @@ class AddFatura extends Component {
             formularios: await loader.getBase('getFormularios.php'),
 
             pessoas: await loader.getBase('getPessoas.php'),
-            pessoasOptions: await loader.getBaseOptions('getPessoas.php', "Nome", "Chave"),
+            pessoasOptions: await loader.getBaseOptionsCustomLabel('getPessoas.php', "Nome", "Cnpj_Cpf", "Chave"),
 
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php')

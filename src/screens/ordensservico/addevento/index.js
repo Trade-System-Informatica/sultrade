@@ -19,6 +19,7 @@ import ModalListas from '../../../components/modalListas'
 import Select from 'react-select';
 import Modal from '@material-ui/core/Modal';
 import ModalLogs from '../../../components/modalLogs'
+import Alert from '../../../components/alert'
 
 const estadoInicial = {
     evento: '',
@@ -98,6 +99,7 @@ const estadoInicial = {
     irParaFinanceiro: false,
     email: false,
     emails: [],
+    hasEmail: false,
     failures: [],
     successes: [],
 
@@ -123,6 +125,7 @@ const estadoInicial = {
     emailsIniciais: [],
     emailsFinais: [],
 
+    alert: {type: "", msg: ""},
 
     anexosForn: [],
 
@@ -160,12 +163,12 @@ class AddEvento extends Component {
         if (parseInt(id) != 0) {
             if (!this.props.location || !this.props.location.state || !this.props.location.state.evento) {
                 const evento = await loader.getBody(`getSolicitacao.php`, { chave: this.state.chave });
-                await this.setState({ evento: evento[0]});
+                await this.setState({ evento: evento[0] });
             } else {
-                await this.setState({evento: this.props.location.state.evento});
+                await this.setState({ evento: this.props.location.state.evento });
             }
             console.log(this.state.evento);
-            
+
             await this.getOSUma();
             await this.getOrdem();
             await this.setState({
@@ -184,7 +187,7 @@ class AddEvento extends Component {
                 repasse: this.state.evento.repasse == 1 ? true : false,
                 fornecedorCusteio: this.state.evento.Fornecedor_Custeio,
                 ordemBloqueado: false,
-                emailEnviado: this.state.evento.email_enviado ? this.state.evento.email_enviado.split('; ') : [],
+                emailEnviado: this.state.evento.email_enviado ? this.state.evento.email_enviado.split(';') : [],
                 dataEmail: this.state.evento.data_email
             })
 
@@ -372,7 +375,7 @@ class AddEvento extends Component {
                 await this.setState({ pessoas: res.data })
 
                 const options = this.state.pessoas.map((e) => {
-                    return { label: e.Nome_Fantasia ? e.Nome_Fantasia : e.Nome, value: e.Chave }
+                    return { label: `${e.Nome_Fantasia ? e.Nome_Fantasia : e.Nome}${e.Cnpj_Cpf ? ` - ${util.formataCPF(e.Cnpj_Cpf)}` : ""}`, value: e.Chave }
                 })
 
                 options.unshift({ label: 'Nenhum', value: '' })
@@ -599,6 +602,7 @@ class AddEvento extends Component {
             navio: this.state.osOptions.find((e) => e.value == this.state.chave_os).navioNome,
             porto: this.state.osOptions.find((e) => e.value == this.state.chave_os).portoNome,
             evento: this.state.chave,
+            operador: this.state.usuarioLogado.nome,
             corpo: this.state.corpo,
             assunto: this.state.assunto,
             anexos: this.state.anexos,
@@ -619,7 +623,7 @@ class AddEvento extends Component {
                     remarks: this.state.evento.remarks,
                     fornecedorCusteio: this.state.evento.Fornecedor_Custeio,
                     ordemBloqueado: false,
-                    emailEnviado: this.state.evento.email_enviado ? this.state.evento.email_enviado.split('; ') : [],
+                    emailEnviado: this.state.evento.email_enviado ? this.state.evento.email_enviado.split(';') : [],
                     dataEmail: this.state.evento.data_email
                 })
                 if (res.data.successes[0]) {
@@ -649,11 +653,10 @@ class AddEvento extends Component {
                 const emails = this.state.emails[0] ? this.state.emails : [];
                 const emailsFornecedores = this.state.fornecedorEmail ? this.state.fornecedorEmail.split("; ") : [];
                 console.log({ emails, emailsFornecedores });
-                await this.setState({ emails: [...emails, ...emailsFornecedores] })
+                await this.setState({ emails: [...emails, ...emailsFornecedores], hasEmail: !![...emails, ...emailsFornecedores][0] })
                 await this.setState({ loading: false })
             },
             response => { this.erroApi(response) }
-
         )
     }
 
@@ -700,7 +703,7 @@ class AddEvento extends Component {
                 { titulo: "data_email", valor: this.state.dataEmail }
             ]
         })
-        const email_enviado = emails.join('; ');
+        const email_enviado = emails.join(';');
 
         await this.setState({
             emailsFinais: [
@@ -933,6 +936,26 @@ class AddEvento extends Component {
 
     }
 
+    saveEmail = async () => {
+        this.setState({alert: {type: "", msg: ""}});
+        
+        await apiEmployee.post(`insertContato.php`, {
+            token: true,
+            values: `'EM', '${this.state.emails.join(';')}', '', ${this.state.fornecedor}`
+        }).then(
+            async res => {
+                if (res.data[0]) {
+                    await loader.salvaLogs('pessoas_contatos', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
+
+                    await this.setState({ hasEmail: true, loading: false, bloqueado: false, savedRedirect: true })
+                } else {
+                    //alert(`Erro: ${res.data}`)
+                }
+            },
+            async res => await console.log(`Erro: ${res.data}`)
+        )
+    } 
+
     erroApi = async (res) => {
         alert(res)
         await this.setState({ redirect: true })
@@ -1000,8 +1023,8 @@ class AddEvento extends Component {
         const validations = []
         validations.push(this.state.chave_os)
         validations.push(this.state.data)
-        validations.push(this.state.taxa)
-        validations.push(this.state.fornecedor || this.state.tipo == 1)
+        validations.push(this.state.taxa || this.state.tipo == 2)
+        validations.push(this.state.fornecedor || this.state.tipo == 1 || this.state.tipo == 2)
         validations.push(this.state.fornecedorCusteio || this.state.tipo != 1)
         validations.push(this.state.valor && this.state.valor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')))
         validations.push((!this.state.repasse && !this.state.vlrc) || this.state.vlrc.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.vlrc.replaceAll('.', '').replaceAll(',', '.')) && (!this.state.repasse || this.state.vlrc == this.state.valor))
@@ -1235,6 +1258,12 @@ class AddEvento extends Component {
                             </div >
                         </Modal >
 
+                        <Alert
+                            alert={this.state.alert}
+                            setAlert={(e) => this.setState({ alert: e })}
+                            alertFunction={() => this.saveEmail()}
+                        />
+
                         <Modal
                             aria-labelledby="transition-modal-title"
                             aria-describedby="transition-modal-description"
@@ -1300,7 +1329,7 @@ class AddEvento extends Component {
 
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Field className="form-control" type="text" value={this.state.emails.join('; ')} onChange={async e => { this.setState({ emails: e.currentTarget.value.split('; ') }) }} />
+                                                                    <Field className="form-control" type="text" value={this.state.emails.join(';')} onChange={async e => { this.setState({ emails: e.currentTarget.value.split(';') }) }} onBlur={(e) => e.currentTarget.value != "" && !this.state.hasEmail ? this.setState({ alert: { type: "confirm", msg: "Deseja salvar esse email como padrão?" } }) : {}} />
                                                                 </div>
                                                                 <div className="col-1"></div>
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstlabel">
@@ -1340,7 +1369,7 @@ class AddEvento extends Component {
                                                                     </div>
                                                                 }
                                                                 {this.state.failures[0] &&
-                                                                    <div className="co    l-1 errorMessage">
+                                                                    <div className="col-1 errorMessage">
                                                                     </div>
                                                                 }
                                                                 {this.state.failures[0] &&
@@ -1449,9 +1478,9 @@ class AddEvento extends Component {
                                                                 <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
                                                             }
                                                         </div>
-                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                <Select className='SearchSelect' isDisabled options={this.state.osOptions.filter(e => this.filterSearch(e, this.state.osOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ osOptionsTexto: e }) }} value={this.state.osOptions.filter(option => option.value == this.state.chave_os)[0]} search={true} />
-                                                            </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Select className='SearchSelect' isDisabled options={this.state.osOptions.filter(e => this.filterSearch(e, this.state.osOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ osOptionsTexto: e }) }} value={this.state.osOptions.filter(option => option.value == this.state.chave_os)[0]} search={true} />
+                                                        </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Navio</label>
                                                         </div>
@@ -1514,7 +1543,7 @@ class AddEvento extends Component {
                                                             <label>Taxa</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
-                                                            {!this.state.taxa &&
+                                                            {!this.state.taxa && this.state.tipo != 2 &&
                                                                 <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
                                                             }
                                                         </div>
@@ -1531,7 +1560,7 @@ class AddEvento extends Component {
                                                             <label>Fornecedor</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
-                                                            {!this.state.fornecedor && this.state.tipo != 1 &&
+                                                            {!this.state.fornecedor && this.state.tipo != 1 && this.state.tipo != 2 &&
                                                                 <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
                                                             }
                                                         </div>
@@ -1653,12 +1682,12 @@ class AddEvento extends Component {
                                                         </button>
                                                     }
                                                     {(validForm || this.state.failures[0]) &&
-                                                    <button title="Enviar Email" style={{ borderRadius: 15, margin: 3 }} onClick={() => { this.setState({ email: true }); this.salvarServicoItem(validForm) }}>
+                                                        <button title="Enviar Email" style={{ borderRadius: 15, margin: 3 }} onClick={() => { this.setState({ email: true }); this.salvarServicoItem(validForm) }}>
                                                             <FontAwesomeIcon icon={faEnvelope} />
                                                         </button>
                                                     }
                                                     {validForm && this.state.anexosForn[0] && this.state.anexosForn.find((anexo) => anexo.validado == 2) &&
-                                                    <button title="Validar" style={{ borderRadius: 15, margin: 3 }} onClick={() => { this.salvarServicoItem(); this.validarAnexo() }}>
+                                                        <button title="Validar" style={{ borderRadius: 15, margin: 3 }} onClick={() => { this.salvarServicoItem(); this.validarAnexo() }}>
                                                             <FontAwesomeIcon icon={faPaperclip} />
                                                         </button>
                                                     }

@@ -184,22 +184,35 @@ class PagamentosLote extends Component {
 
                     if (!contasUsadas.includes(element.Chave)) {
                         contasCombinadas[i] = { ...element, combinacoes: [element.Chave] };
+                        if (!contasCombinadas[i].Valor) {
+                            contasCombinadas[i].Valor = 0;
+                        }
                     }
                     contasUsadas.push(element.Chave);
 
-                    const contasTestadas = [];
-                    for (let j = 0; j < contasFiltradas.filter((con) => !contasUsadas.includes(con.Chave)).length; j++) {
-                        const elem = contasFiltradas.filter((con) => !contasUsadas.includes(con.Chave))[j];
-                        
-                        if (elem.Chave != element.Chave && elem.Pessoa == element.Pessoa && elem.Vencimento == element.Vencimento && elem.contaCorrente == element.contaCorrente) {
-                            contasCombinadas[i].Valor = parseFloat(element.Valor) + parseFloat(elem.Valor);
-                            contasCombinadas[i].combinacoes.push(elem.Chave);
-
-                            contasTestadas.push(elem.Chave);
+                    if (["TRC", "PIX"].includes(element.meioPagamento)) {
+                        if (element.Pessoa == 442) {
+                            console.log(element.Valor);
                         }
-                    }
+                        
+                        const contasTestadas = [];
 
-                    contasTestadas.forEach((conta) => contasUsadas.push(conta));
+                        for (let j = 0; j < contasFiltradas.filter((con) => !contasUsadas.includes(con.Chave)).length; j++) {
+                            const elem = contasFiltradas.filter((con) => !contasUsadas.includes(con.Chave))[j];
+                            if (element.Pessoa == 442 && elem.Pessoa == 442) {
+                                console.log(elem.Valor);
+                            }
+
+                            if (elem.Chave != element.Chave && elem.Pessoa == element.Pessoa && elem.Vencimento == element.Vencimento && elem.contaCorrente == element.contaCorrente) {
+                                contasCombinadas[i].Valor = parseFloat(contasCombinadas[i].Valor) + parseFloat(elem.Valor);
+                                contasCombinadas[i].combinacoes.push(elem.Chave);
+
+                                contasTestadas.push(elem.Chave);
+                            }
+                        }
+                        
+                        contasTestadas.forEach((conta) => contasUsadas.push(conta));
+                    }
                 }
 
                 const contas = [];

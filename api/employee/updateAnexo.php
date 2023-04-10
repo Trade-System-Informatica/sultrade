@@ -14,16 +14,17 @@ $objData = json_decode($data);
 if($objData != NULL){
     $token = prepareInput($objData->token);
     $chave = prepareInput($objData->chave);
-    $fornecedor = prepareInput($objData->fornecedor);
-    $os = prepareInput($objData->os);
+    $operador = prepareInput($objData->operador);
+    $evento = prepareInput($objData->evento);
     $validado = prepareInput($objData->validado);
+    $validadoData = prepareInput($objData->validadoData);
 
     $pessoas = new Pessoas();
 
     //$result = $employees->checkToken($token);
     //if($result == 'true'){
         //$result = "'" . $id_seaport . "'";
-        $result = $pessoas->updateAnexo($chave, $fornecedor, $os, $validado);
+        $result = $pessoas->updateAnexo($chave, $operador, $evento, $validado, $validadoData);
     //}
 } else {
     $result = "false";

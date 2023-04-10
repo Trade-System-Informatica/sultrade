@@ -73,6 +73,8 @@ class ContasPagar extends Component {
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php'),
         })
+        
+        this.setState({contas: this.state.contas.map((conta) => ({...conta, Valor: conta.Valor - conta.valorDescontos}))});
 
         await this.getPessoas();
 

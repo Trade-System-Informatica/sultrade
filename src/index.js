@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import {storeConfig, persistor} from './store/storeConfig'
 import {PersistGate} from 'redux-persist/integration/react'
 import App from './App'
-import * as serviceWorkerRegistration from './serviceWorkerRegistration'
+import * as serviceWorker from './serviceWorkerRegistration'
 
 import './index.css'
 import './css/magnific-popup.css'
@@ -34,4 +34,4 @@ ReactDOM.render(
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorkerRegistration.register();
+serviceWorker.register();

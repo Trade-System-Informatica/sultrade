@@ -137,9 +137,6 @@
     align-items: center;
 }
 
-.anexoList >td {
-}
-
 .anexoList:nth-child(even), .anexoList:nth-child(even) > td {
     background-color: white;
     padding: 15px;
@@ -161,6 +158,21 @@
     padding: 15px;
     color: white;
     background-color: black;
+}
+
+.agrupador_lista {
+    width: 100%;
+    margin: 0px;
+}
+
+.agrupador_lista > tr > th, .agrupador_lista > tr > td{
+    border-bottom: 1px solid black;
+    cursor: pointer;
+    user-select: none;
+}
+
+.white {
+    color: white;
 }
 
 @media (min-width: 768px) {

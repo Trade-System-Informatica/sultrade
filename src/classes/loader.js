@@ -1,6 +1,7 @@
 
 import { apiEmployee } from '../services/apiamrg'
 import axios from 'axios'
+import util from './util.js'
 import moment from 'moment'
 
 export default class loader {
@@ -191,6 +192,23 @@ export default class loader {
             async res => {
                 const options = res.data.map((e) => {
                     return { label: e[label], value: e[chave] }
+                })
+                return options;
+            },
+            async err => { alert(err) }
+        )
+    }
+
+    static async getBaseOptionsCustomLabel(url, label, secondLabel, chave) {
+        return await apiEmployee.post(url, {
+            token: true
+        }).then(
+            async res => {
+                const options = res.data.map((e) => {
+                    if ([secondLabel.toLowerCase().contains("cpf")]) {
+                        return { label: `${e[label]}${e[secondLabel] ? ` - ${util.formataCPF(e[secondLabel])}` : ""}`, value: e[chave] }
+                    } 
+                    return { label: `${e[label]}${e[secondLabel] ? ` - ${e[secondLabel]}` : ""}`, value: e[chave] }
                 })
                 return options;
             },

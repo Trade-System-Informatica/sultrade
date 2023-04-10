@@ -211,7 +211,7 @@ export default class Util {
         return array.map((key) => ({label: key[label], value: key[value]}));
     }
 
-    static async formataCPF(input) {
+    static formataCPF(input) {
         input = `${input}`;
         
         if (input.length <= 11) {

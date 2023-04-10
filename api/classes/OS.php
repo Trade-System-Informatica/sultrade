@@ -339,7 +339,23 @@ class OS {
                                     );
         $database->closeConection();
         return $result;
+    }
 
+    public static function getCusteiosSubagentes($chave_os) 
+    {
+        $database = new Database();
+
+        $result = $database->doSelect(
+            'custeios_subagentes LEFT JOIN os_servicos_itens ON os_servicos_itens.chave = custeios_subagentes.evento',
+            'custeios_subagentes.grupo,
+            GROUP_CONCAT(custeios_subagentes.chave) as chave,
+            GROUP_CONCAT(custeios_subagentes.os) as os,
+            GROUP_CONCAT(custeios_subagentes.evento) as evento,
+            GROUP_CONCAT(os_servicos_itens.descricao) as eventoDescricao',
+            "custeios_subagentes.os = '" . $chave_os . "' GROUP BY custeios_subagentes.grupo"
+        );
+        $database->closeConection();
+        return $result;
     }
 
     public static function getValoresOS($chave){
@@ -541,6 +557,23 @@ class OS {
 
         $database->closeConection();
         return $result;
+    }
+
+    public static function insertCusteioSubagente($os, $eventos)
+    {
+        $database = new Database();
+
+        $cols = 'grupo, os, evento';
+
+        $grupos = $database->doSelect('custeios_subagentes', 'custeios_subagentes.grupo', "custeios_subagentes.os = '$os' GROUP BY grupo");
+
+        foreach ($eventos as $evento) {
+            $values = count($grupos).", $os, $evento";
+            $database->doInsert('custeios_subagentes', $cols, $values);
+        }
+            
+            $database->closeConection();
+        return true;
     }
 
     

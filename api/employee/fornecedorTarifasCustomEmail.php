@@ -22,6 +22,7 @@ $pessoas = new Pessoas();
 $email = prepareInput($objData->email);
 $assunto = prepareInput($objData->assunto);
 $corpo = prepareInput($objData->corpo);
+$operador = prepareInput($objData->operador);
 $anexos = $objData->anexos;
 $anexosNomes = $objData->anexosNomes;
 $mail = new PHPMailer;
@@ -61,6 +62,8 @@ try {
     $mail->Subject = $assunto;
     $mail->Body    = "<div style='width: 100%; display: flex; justify-content: center; align-items: center;'><img src='https://i.ibb.co/G5Z8qmT/logo.png' alt='logo' border='0'></div><div>
             <pre>$corpo</pre>
+            <br><br>
+            Ass.: $operador
             </div>";
 
 
