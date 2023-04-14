@@ -7,7 +7,7 @@ export const NAVIOS = 'Navios'
 export const PRECISA_LOGAR = 'Você precisa estar logado para acessar este conteúdo!'
 export const CAMINHO_FOTOS = ''
 export const NOME_EMPRESA = 'SulTrade'
-export const CAMINHO_DOCUMENTOS = 'http://ftptrade.ddns.net/sultrade/api/documents/docs/'
+export const CAMINHO_DOCUMENTOS = 'http://132.255.147.28/sultrade/api/documents/docs/'
 export const API_BANCO = 'https://api-ip.bb.com.br/pagamentos-lote/v1';
 
 export const API_BANCO_GPS = '/lotes-gps';
