@@ -101,57 +101,6 @@ class CentrosCustos extends Component {
         })
     }
 
-    deleteCentroCusto = async (chave, nome) => {
-        this.setState({ deleteCentroCusto: true })
-        confirmAlert({
-            customUI: ({ onClose }) => {
-                return (
-                    <div className='custom-ui text-center'>
-                        <h1>{NOME_EMPRESA}</h1>
-                        <p>Deseja remover este Centro de Custos? ({nome}) </p>
-                        <button
-                            style={{ marginRight: 5 }}
-                            className="btn btn-danger w-25"
-                            onClick={
-                                async () => {
-                                    onClose()
-                                }
-                            }
-                        >
-                            Não
-                        </button>
-                        <button
-                            style={{ marginRight: 5 }}
-                            className="btn btn-success w-25"
-                            onClick={
-                                async () => {
-                                    await apiEmployee.post(`deleteCentroCusto.php`, {
-                                        token: true,
-                                        chave: chave
-                                    }).then(
-                                        async response => {
-                                            if (response.data == true) {
-                                                await loader.salvaLogs('centros_custos', this.state.usuarioLogado.codigo, null, "Exclusão", chave);
-                                                document.location.reload()
-                                            }
-                                        },
-                                        async response => {
-                                            this.erroApi(response)
-                                        }
-                                    )
-                                    onClose()
-                                }
-                            }
-
-                        >
-                            Sim
-                        </button>
-                    </div>
-                )
-            }
-        })
-    }
-
     reverterItens = async () => {
         await this.setState({ loading: true })
         const centrosCustos = this.state.centrosCustos.reverse();
@@ -171,7 +120,7 @@ class CentrosCustos extends Component {
         } else if (centroCusto.pessoaNome && this.state.tipoPesquisa == 2) {
             return centroCusto.pessoaNome.toLowerCase().includes(this.state.pesquisa.toLowerCase())
         } else {
-            return centroCusto.Chave.toLowerCase().includes(this.state.pesquisa.toLowerCase())
+            return centroCusto.Codigo.toLowerCase().includes(this.state.pesquisa.toLowerCase())
         }
 
     }
@@ -228,7 +177,7 @@ class CentrosCustos extends Component {
                                             <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
                                                 <option value={1}>Descrição</option>
                                                 <option value={2}>Cliente</option>
-                                                <option value={3}>Chave</option>
+                                                <option value={3}>Codigo</option>
                                             </select>
                                             <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
                                             <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
@@ -253,7 +202,7 @@ class CentrosCustos extends Component {
                                         {window.innerWidth >= 500 &&
                                             <div className="row subtitulosTabela">
                                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
-                                                    <span className="subtituloships">Chave</span>
+                                                    <span className="subtituloships">Codigo</span>
                                                 </div>
                                                 <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-left">
                                                     <span className="subtituloships">Descrição</span>
@@ -286,13 +235,13 @@ class CentrosCustos extends Component {
 
                             <div id="product-list">
                                 {this.state.centrosCustos[0] != undefined && this.state.centrosCustos.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (
-                                    <div key={feed.Chave} className="row row-list">
+                                    <div key={feed.Codigo} className="row row-list">
                                         <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
-                                        <div ref={feed.Chave == this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-8 col-md-8 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.Chave == this.state.chaveFocus ? "par focusLight" : "par " : feed.Chave == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
+                                        <div ref={feed.Codigo == this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-8 col-md-8 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.Codigo == this.state.chaveFocus ? "par focusLight" : "par " : feed.Codigo == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
                                             {window.innerWidth >= 500 &&
                                                 <div className="row deleteMargin alignCenter">
                                                     <div className="col-2 text-left">
-                                                        <p>{feed.Chave}</p>
+                                                        <p>{feed.Codigo}</p>
                                                     </div>
                                                     <div className="col-4 text-left">
                                                         <p>{feed.Descricao}</p>
@@ -323,12 +272,6 @@ class CentrosCustos extends Component {
                                                                 <FontAwesomeIcon icon={faPen} />
                                                             </Link>
                                                         </div>
-
-                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CENTROS_CUSTOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteCentroCusto(feed.Chave, feed.Descricao)} >
-                                                                <FontAwesomeIcon icon={faTrashAlt} />
-                                                            </div>
-                                                        }
                                                     </div>
 
                                                 </div>
@@ -340,7 +283,7 @@ class CentrosCustos extends Component {
 
                                                             modalItemAberto: true,
                                                             itemInfo: [
-                                                                { titulo: 'Chave', valor: feed.Chave },
+                                                                { titulo: 'Codigo', valor: feed.Codigo },
                                                                 { titulo: 'Descrição', valor: feed.Descricao },
                                                                 { titulo: 'Cliente', valor: feed.pessoaNome },
                                                                 { titulo: 'Data', valor: moment(feed.Data).format('DD/MM/YYYY') },
@@ -357,7 +300,6 @@ class CentrosCustos extends Component {
                                                                 pathname: `/tabelas/addcentrocusto/${feed.Chave}`,
                                                                 state: { centroCusto: { ...feed } }
                                                             },
-                                                            itemDelete: this.deleteCentroCusto
                                                         })
                                                     }}
                                                     className="row deleteMargin alignCenter">
@@ -390,12 +332,6 @@ class CentrosCustos extends Component {
                                                                 <FontAwesomeIcon icon={faPen} />
                                                             </Link>
                                                         </div>
-
-                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CENTROS_CUSTOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteCentroCusto(feed.Chave, feed.Descricao)} >
-                                                                <FontAwesomeIcon icon={faTrashAlt} />
-                                                            </div>
-                                                        }
                                                     </div>
                                                 </div>
                                             }

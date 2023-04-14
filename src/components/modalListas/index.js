@@ -1511,58 +1511,6 @@ class ModalListas extends Component {
         })
     }
 
-    deleteCentroCusto = async (chave, nome) => {
-        this.fecharModal()
-        confirmAlert({
-            customUI: ({ onClose }) => {
-                return (
-                    <div className='custom-ui text-center'>
-                        <h1>{NOME_EMPRESA}</h1>
-                        <p>Deseja remover este Centro de Custo? ({nome}) </p>
-                        <button
-                            style={{ marginRight: 5 }}
-                            className="btn btn-success w-25"
-                            onClick={
-                                async () => {
-                                    onClose()
-                                }
-                            }
-                        >
-                            Não
-                        </button>
-                        <button
-                            style={{ marginRight: 5 }}
-                            className="btn btn-danger w-25"
-                            onClick={
-                                async () => {
-                                    await apiEmployee.post(`deleteCentroCusto.php`, {
-                                        token: true,
-                                        chave: chave
-                                    }).then(
-                                        async response => {
-                                            if (response.data == true) {
-                                                await loader.salvaLogs('centros_custos', this.state.usuarioLogado.codigo, null, "Exclusão", chave);
-
-                                                document.location.reload()
-                                            }
-                                        },
-                                        async response => {
-                                            this.erroApi(response)
-                                        }
-                                    )
-                                    onClose()
-                                }
-                            }
-
-                        >
-                            Sim
-                        </button>
-                    </div>
-                )
-            }
-        })
-    }
-
     deleteSubgrupo = async (chave, nome) => {
         this.fecharModal()
         confirmAlert({
@@ -3993,13 +3941,6 @@ class ModalListas extends Component {
                                                                     <FontAwesomeIcon icon={faPen} />
                                                                 </div>
                                                             </div>
-
-                                                            {this.props.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CENTROS_CUSTOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-
-                                                                <div type='button' className='iconelixo' onClick={(a) => this.deleteCentroCusto(feed.Chave, feed.Descricao)} >
-                                                                    <FontAwesomeIcon icon={faTrashAlt} />
-                                                                </div>
-                                                            }
                                                         </div>
 
                                                     </div>

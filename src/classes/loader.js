@@ -479,7 +479,8 @@ export default class loader {
                 permissaoInsere: permissao ? permissao.Liberacao.split(``)[0] : 0,
                 permissaoEdita: permissao ? permissao.Liberacao.split(``)[1] : 0,
                 permissaoConsulta: permissao ? permissao.Liberacao.split(``)[2] : 0,
-                permissaoDeleta: permissao ? permissao.Liberacao.split(``)[3] : 0
+                permissaoDeleta: permissao ? permissao.Liberacao.split(``)[3] : 0,
+                permissaoImprime: permissao ? permissao.Liberacao.split(``)[4] : 0
             }
         })
 

@@ -255,4 +255,8 @@ export default class Util {
         return returnObj;
     }
 
+    static toFixed(num, precision) {
+        return parseFloat((+(Math.round(+(num + 'e' + precision)) + 'e' + -precision)).toFixed(precision));
+    }
+
 }

@@ -14,13 +14,14 @@ import { Link, Redirect } from 'react-router-dom'
 import ModalLogs from '../../../components/modalLogs'
 import { apiEmployee } from '../../../services/apiamrg'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faExclamationTriangle, faTrashAlt, faPen, faPlus, faDollarSign, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faExclamationTriangle, faTrashAlt, faPen, faPlus, faDollarSign, faTimes, faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons'
 import moment from 'moment'
 import Select from 'react-select';
 import { confirmAlert } from 'react-confirm-alert'
 import { PDFExport } from "@progress/kendo-react-pdf";
 import Modal from '@material-ui/core/Modal';
 import Alert from '../../../components/alert'
+import Util from '../../../classes/util'
 
 
 const estadoInicial = {
@@ -176,7 +177,34 @@ const estadoInicial = {
 
     custeios_subagentes: [],
 
-    faturada: true,
+    historicosOptions: [],
+    planosContasOptions: [],
+    meiosPagamentosOptions: [],
+    optionsTexto: "",
+
+    historico: [],
+    historicoPadrao: [],
+    codBarras: [],
+    contaDebito: [],
+    contaCredito: [],
+    meioPagamento: [],
+    meioPagamentoNome: [],
+    codigoReceita: [],
+    contribuinte: [],
+    codigoIdentificadorTributo: [],
+    mesCompetNumRef: [],
+    dataApuracao: [],
+    darfValor: [],
+    darfPagamento: [],
+    darfMulta: [],
+    darfJuros: [],
+    darfOutros: [],
+
+    contabiliza: false,
+    eventosContabilizando: [],
+    paginaContabiliza: 0,
+
+    faturado: false,
 }
 
 class AddOS extends Component {
@@ -232,21 +260,6 @@ class AddOS extends Component {
                 operador: this.state.os.operador
             })
 
-            if (this.state.faturamento != "T.B.I.") {
-                let permissao = false;
-                this.state.acessosPermissoes.map((e) => {
-                    if ((e.acessoAcao == "EVENTOS_FINANCEIRO" && e.permissaoEdita == 0)) {
-                        permissao = true;
-                    }
-                })
-
-                if (!permissao) {
-                    this.setState({ bloqueado: true });
-                }
-            } else {
-                this.setState({ faturada: false });
-            }
-
             if (this.state.cabecalho) {
                 const cabecalho = JSON.parse(this.state.cabecalho);
 
@@ -289,6 +302,21 @@ class AddOS extends Component {
         await this.calculaTotal();
         await this.getDadosCliente();
 
+        if (this.state.faturamento != "T.B.I." && this.state.chave != 0) {
+            let permissao = false;
+            this.state.acessosPermissoes.map((e) => {
+                if ((e.acessoAcao == "EVENTOS_FINANCEIRO" && e.permissaoEdita == 1)) {
+                    permissao = true;
+                }
+            })
+
+            if (!permissao) {
+                this.setState({ faturado: true });
+            }
+        } else {
+            this.setState({ faturado: false });
+        }
+
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "OS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "OS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
                 this.setState({ bloqueado: true })
@@ -307,7 +335,7 @@ class AddOS extends Component {
         }
     }
 
-    calculaTotal = async () => {
+    calculaTotal = () => {
         let eventosTotal = 0;
 
         this.state.eventos.map((evento) => {
@@ -319,6 +347,7 @@ class AddOS extends Component {
         })
 
         this.setState({ eventosTotal });
+        return eventosTotal;
     }
 
     getDadosCliente = async () => {
@@ -370,6 +399,12 @@ class AddOS extends Component {
             permissoes: await loader.getBase('getPermissoes.php'),
         });
 
+        const planosContasOptions = await loader.getPlanosContasAnaliticasOptions();
+        planosContasOptions.unshift({ value: "", label: "Select..." });
+
+        const meiosPagamentosOptions = await loader.getMeiosPagamentosOptions();
+        meiosPagamentosOptions.unshift({ value: "", label: "Select..." });
+
         await this.getOperadores();
         if (this.state.chave) {
             await this.getCusteiosSubagentes();
@@ -379,6 +414,8 @@ class AddOS extends Component {
         }
 
         await this.setState({
+            planosContasOptions,
+            meiosPagamentosOptions,
             acessosPermissoes: await loader.testaAcesso(this.state.acessos, this.state.permissoes, this.state.usuarioLogado),
         });
     }
@@ -389,8 +426,8 @@ class AddOS extends Component {
             chave_os: this.state.chave
         }).then(
             async res => {
-                if (res.data[0]) {
-                    this.setState({ custeios_subagentes: res.data });
+                if (res.data) {
+                    this.setState({ custeios_subagentes: [...res.data] });
                 }
             },
             async res => await console.log(`Erro: ${res}`)
@@ -400,7 +437,7 @@ class AddOS extends Component {
     filterAgrupador = (item) => {
         const eventosUsados = [];
 
-        this.state.custeios_subagentes.map((e) => e.evento.split(",").map((el) => {
+        this.state.custeios_subagentes.filter((e) => e.grupo != this.state.grupoSelecionado).map((e) => e.evento.split(",").map((el) => {
             eventosUsados.push(el);
         }));
 
@@ -421,17 +458,141 @@ class AddOS extends Component {
     }
 
     agruparEventos = async () => {
-        await apiEmployee.post(`insertCusteioSubagente.php`, {
-            token: true,
-            os: this.state.chave,
-            eventos: this.state.agrupadorEventos
-        }).then(
-            async res => {
-                this.setState({ agrupadorEventos: [] });
-                await this.getCusteiosSubagentes();
-            },
-            async res => await console.log(`Erro: ${res}`)
-        )
+        if (this.state.grupoSelecionado == 0) {
+            await apiEmployee.post(`insertCusteioSubagente.php`, {
+                token: true,
+                os: this.state.chave,
+                eventos: this.state.agrupadorEventos
+            }).then(
+                async res => {
+                    this.setState({ agrupadorEventos: [] });
+                    await this.getCusteiosSubagentes();
+                },
+                async res => await console.log(`Erro: ${res}`)
+            )
+        } else {
+            await apiEmployee.post(`updateCusteioSubagente.php`, {
+                token: true,
+                os: this.state.chave,
+                grupo: this.state.grupoSelecionado,
+                eventos: this.state.agrupadorEventos
+            }).then(
+                async res => {
+                    this.setState({ agrupadorEventos: [] });
+                    await this.getCusteiosSubagentes();
+                },
+                async res => await console.log(`Erro: ${res}`)
+            )
+        }
+    }
+
+    abrirContabilizacao = async (grupo) => {
+        const eventos = this.state.eventos.filter((evento) => this.state.custeios_subagentes.find((e) => e.grupo == grupo)?.evento.split(',').includes(evento.chave));
+        const newArray = [...Array(eventos.length)].map(() => (""));
+        const contaDebito = [];
+        const contaCredito = [];
+
+        for (const evento of eventos) {
+            if (evento.tipo_sub == 2) {
+                contaCredito.push(await loader.getContaTaxa(evento.taxa));
+                contaDebito.push(await loader.getContaPessoa(this.state.cliente));
+            } else {
+                if (evento.repasse == 1) {
+                    contaCredito.push(await loader.getContaPessoa(!evento.fornecedor || evento.fornecedor === "0" ? evento.Fornecedor_Custeio : evento.fornecedor, "provisao"));
+                    contaDebito.push(await loader.getContaPessoa(this.state.cliente));
+                } else {
+                    contaCredito.push(await loader.getContaPessoa(!evento.fornecedor || evento.fornecedor === "0" ? evento.Fornecedor_Custeio : evento.fornecedor, "provisao"));
+                    contaDebito.push("");
+                }
+            }
+        }
+
+        this.setState({
+            historico: newArray,
+            codBarras: newArray,
+            meioPagamento: newArray,
+            meioPagamentoNome: newArray,
+            darfPagamento: newArray,
+            codigoReceita: newArray,
+            contribuinte: newArray,
+            codigoIdentificadorTributo: newArray,
+            mesCompetNumRef: newArray,
+            dataApuracao: newArray,
+            darfValor: newArray,
+            darfMulta: newArray,
+            darfJuros: newArray,
+            darfOutros: newArray,
+            contaDebito,
+            contaCredito,
+            eventosContabilizando: eventos,
+            contabiliza: true,
+            paginaContabiliza: 0
+        })
+        // if (pagar) {
+        //     if (repasse) {
+        //         D: cliente,
+        //         C: forn,
+        //         C: retencoes e descontos,
+        //     } else {
+        //         D: aberto
+        //         C: forn
+        //         C: retencoes e descontos
+        //     }
+        // } else {
+        //         D: cliente,
+        //         C: taxa,
+        // }
+    }
+
+    deleteGrupo = async (grupo) => {
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return (
+                    <div className='custom-ui text-center'>
+                        {this.setState({ modalItemAberto: false })}
+                        <h1>{NOME_EMPRESA}</h1>
+                        <p>Deseja remover este grupo?</p>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-danger w-25"
+                            onClick={
+                                async () => {
+                                    onClose()
+                                }
+                            }
+                        >
+                            Não
+                        </button>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-success w-25"
+                            onClick={
+                                async () => {
+                                    await apiEmployee.post(`deleteCusteioSubagente.php`, {
+                                        token: true,
+                                        grupo,
+                                        os: this.state.chave
+                                    }).then(
+                                        async response => {
+                                            await loader.salvaLogs('grupo', this.state.usuarioLogado.codigo, null, "Exclusão", grupo);
+
+                                            this.getCusteiosSubagentes();
+                                        },
+                                        async response => {
+                                            this.erroApi(response)
+                                        }
+                                    )
+                                    onClose()
+                                }
+                            }
+
+                        >
+                            Sim
+                        </button>
+                    </div>
+                )
+            }
+        })
     }
 
     reloadItemEditMini = async () => {
@@ -496,7 +657,7 @@ class AddOS extends Component {
     }
 
     faturarData = async (valor) => {
-        console.log(valor)
+        //console.log(valor)
         if (!this.state.anexosForn[0]) {
             await this.setState({
                 faturamento: valor,
@@ -760,8 +921,8 @@ class AddOS extends Component {
             )
 
         } else if (validForm) {
-            if (this.state.os.Data_Faturamento && this.state.faturamento) {
-                //await this.faturaOS();
+            if (!this.state.os.Data_Faturamento && this.state.faturamento) {
+                await this.faturaOS();
             }
 
 
@@ -812,10 +973,11 @@ class AddOS extends Component {
 
     faturaOS = async () => {
         const valor = this.calculaTotal();
+        console.log(valor)
 
         await apiEmployee.post(`insertContaFornecedor.php`, {
             token: true,
-            values: `'${this.state.faturamento}', '0', '${this.state.cliente}', '0', '0', '${this.state.centroCusto}', '',  0,0, 0, '${parseFloat(valor.replaceAll('.', '').replaceAll(',', '.'))}', '0', '0', '0', '${0}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', 0, 0, 0, ''`,
+            values: `'${this.state.faturamento}', '0', '${this.state.cliente}', '0', '0', '${this.state.centroCusto}', '',  0,0, 0, '${parseFloat(`${valor}`.replaceAll('.', '').replaceAll(',', '.'))}', '0', '0', '0', '${0}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', 0, 0, 0, ''`,
         }).then(
             async res => {
                 console.log(res.data);
@@ -841,12 +1003,58 @@ class AddOS extends Component {
                 if (e.moeda == 5) {
                     valorTotal += parseFloat(e.valor);
                 } else {
-                    valorTotal += parseFloat(parseFloat(e.valor * this.state.roe).toFixed(2));
+                    valorTotal += Util.toFixed(parseFloat(e.valor * this.state.roe), 2);
                 }
             })
         }
 
         return valorTotal;
+    }
+
+    salvarConta = async () => {
+        this.setState({loading: true, contabiliza: false});
+
+        const events = this.state.eventosContabilizando.map((e, index) => 
+        ({
+            ...e, 
+            historico: this.state.historico[index],
+            historicoPadrao: this.state.historicoPadrao[index],
+            codBarras: this.state.codBarras[index],
+            contaDebito: this.state.contaDebito[index],
+            contaCredito: this.state.contaCredito[index],
+            meioPagamento: this.state.meioPagamento[index],
+            meioPagamentoNome: this.state.meioPagamentoNome[index],
+            codigoReceita: this.state.codigoReceita[index],
+            contribuinte: this.state.contribuinte[index],
+            codigoIdentificadorTributo: this.state.codigoIdentificadorTributo[index],
+            mesCompetNumRef: this.state.mesCompetNumRef[index],
+            dataApuracao: this.state.dataApuracao[index],
+            darfValor: this.state.darfValor[index],
+            darfPagamento: this.state.darfPagamento[index],
+            darfMulta: this.state.darfMulta[index],
+            darfJuros: this.state.darfJuros[index],
+            darfOutros: this.state.darfOutros[index]
+        })
+        );
+
+        console.log(events);
+        /*await apiEmployee.post(`.php`, {
+            token: true,
+            chave_os: this.state.chave,
+            events,
+            centros_custos: this.state.centros_custos
+        }).then(
+            async res => {
+                if (res.data === true) {
+                    console.log(res.data);
+                    await this.setState({ loading: false })
+                } else {
+                    await alert(`Erro ${JSON.stringify(res)}`)
+                }
+            },
+            async res => await console.log(`Erro: ${res}`)
+        )*/
+
     }
 
     salvarCabecalho = async () => {
@@ -861,7 +1069,7 @@ class AddOS extends Component {
         }).then(
             async res => {
                 if (res.data === true) {
-                    console.log(res.data);
+                    //console.log(res.data);
                     await this.setState({ loading: false })
                 } else {
                     await alert(`Erro ${JSON.stringify(res)}`)
@@ -1011,12 +1219,12 @@ class AddOS extends Component {
 
             if (this.state.pdfContent[0].GT && ["SIM", "S"].includes(this.state.pdfContent[0].GT.toUpperCase())) {
                 totalFinal += parseFloat(this.state.pdfContent[0].governmentTaxes);
-                totalFinalDolar += parseFloat(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe).toFixed(2));
+                totalFinalDolar += Util.toFixed(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe), 2);
             }
 
             if (this.state.pdfContent[0].BK && ["SIM", "S"].includes(this.state.pdfContent[0].BK.toUpperCase())) {
                 totalFinal += parseFloat(this.state.pdfContent[0].bankCharges);
-                totalFinalDolar += parseFloat(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe).toFixed(2));
+                totalFinalDolar += Util.toFixed(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe), 2);
             }
 
             if (this.state.pdfContent[0]) {
@@ -1123,20 +1331,20 @@ class AddOS extends Component {
                                                         if (e.moeda == 5) {
                                                             valorTotal += parseFloat(e.valor);
                                                             totalFinal += parseFloat(e.valor);
-                                                            totalFinalDolar += parseFloat(parseFloat(e.valor / this.state.pdfContent[0].roe).toFixed(2));
+                                                            totalFinalDolar += Util.toFixed(parseFloat(e.valor / this.state.pdfContent[0].roe), 2);
                                                         } else {
-                                                            valorTotal += parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
-                                                            totalFinal += parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
+                                                            valorTotal += Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
+                                                            totalFinal += Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
                                                             totalFinalDolar += parseFloat(e.valor);
                                                         }
                                                     } else {
                                                         if (e.moeda == 5) {
                                                             valorTotal -= parseFloat(e.valor);
                                                             descontoFinal += parseFloat(e.valor);
-                                                            descontoFinalDolar += parseFloat(parseFloat(e.valor / this.state.pdfContent[0].roe).toFixed(2));
+                                                            descontoFinalDolar += Util.toFixed(parseFloat(e.valor / this.state.pdfContent[0].roe), 2);
                                                         } else {
-                                                            valorTotal -= parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
-                                                            descontoFinal += parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
+                                                            valorTotal -= Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
+                                                            descontoFinal += Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
                                                             descontoFinalDolar += parseFloat(e.valor);
                                                         }
                                                     }
@@ -1145,10 +1353,10 @@ class AddOS extends Component {
                                                     if (e.moeda == 5) {
                                                         valorTotal -= parseFloat(e.valor);
                                                         descontoFinal += parseFloat(e.valor);
-                                                        descontoFinalDolar += parseFloat(parseFloat(e.valor / this.state.pdfContent[0].roe).toFixed(2));
+                                                        descontoFinalDolar += Util.toFixed(parseFloat(e.valor / this.state.pdfContent[0].roe), 2);
                                                     } else {
-                                                        valorTotal -= parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
-                                                        descontoFinal += parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
+                                                        valorTotal -= Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
+                                                        descontoFinal += Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
                                                         descontoFinalDolar += parseFloat(e.valor);
                                                     }
                                                 })}
@@ -1295,7 +1503,7 @@ class AddOS extends Component {
                 pdfContent: await loader.getBody(`faturamentoCusteio.php`, { token: true, codigo: codigo })
             })
 
-            console.log(this.state.pdfContent);
+            //console.log(this.state.pdfContent);
 
             if (!this.state.pdfContent || !this.state.pdfContent[0]) {
                 return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
@@ -1305,11 +1513,14 @@ class AddOS extends Component {
             let valorTotal = 0;
             let valorTotalCobrar = 0;
             let valorTotalPago = 0;
+            let contasCodigos = [];
+            let contasValores = [];
             let pdf = '';
 
             const { pdfContent } = this.state;
 
             const pdfCusteio = [];
+            const pdfCusteioCodigo = [];
 
             if (!pdfContent[0]) {
                 await this.setState({ erro: 'Sem as informações necessárias para gerar o pdf!', loading: false })
@@ -1317,8 +1528,10 @@ class AddOS extends Component {
             }
 
             pdfContent.map((content) => {
+                console.log(content);
                 if (!pdfCusteio.includes(content.fornecedor_custeio)) {
                     pdfCusteio.push(content.fornecedor_custeio);
+                    pdfCusteioCodigo.push(content.fornecedor_custeioCodigo);
                 }
             })
 
@@ -1334,7 +1547,7 @@ class AddOS extends Component {
 
                         <div className={`faturamentoCabecalho`}>NAVIO: {pdfContent[0].nome_navio ? pdfContent[0].nome_navio.toUpperCase() : ""}</div>
                         <br />
-                        {pdfCusteio.map((custeio) => {
+                        {pdfCusteio.map((custeio, custeioIndex) => {
                             valorTotalCobrar = 0;
                             valorTotalPago = 0;
                             valorTotal = 0;
@@ -1351,12 +1564,12 @@ class AddOS extends Component {
                                                 <th style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }}>VALOR PAGO</th>
                                                 <th style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }}>VALOR LIQUIDO</th>
                                             </tr>
-                                            {pdfContent.filter((content) => content.fornecedor_custeio == custeio).map((content, index) => {
+                                            {!["17", "16"].includes(pdfCusteioCodigo[custeioIndex]) && pdfContent.filter((content) => content.fornecedor_custeio == custeio).map((content, index) => {
                                                 let valor_cobrar = content.valor_cobrar;
                                                 let valor_pago = content.valor_pago;
 
                                                 if (content.moeda == 6) {
-                                                    valor_cobrar = parseFloat((parseFloat(valor_cobrar) * parseFloat(roe)).toFixed(2));
+                                                    valor_cobrar = Util.toFixed(parseFloat(valor_cobrar) * parseFloat(roe), 2);
                                                 }
 
                                                 valorTotalCobrar += parseFloat(valor_cobrar);
@@ -1365,26 +1578,61 @@ class AddOS extends Component {
                                                 let valor_liquido = parseFloat(valor_cobrar) - parseFloat(valor_pago);
 
                                                 valorTotal += valor_liquido;
-                                                totalConsolidado += valor_liquido;
+                                                totalConsolidado += parseFloat(valor_cobrar);
 
                                                 return (
                                                     <>
                                                         <tr>
                                                             <td colSpan={2} style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px", paddingRight: 75 }}>{content.evento}</td>
-                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>{content.uf == 81 ? content.contaEstrangeiraNome : content.contaNome}</td>
+                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>{content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod}</td>
                                                             <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor_cobrar)}</td>
-                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor_pago)}</td>
-                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor_liquido)}</td>
+                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(0)}</td>
+                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor_cobrar)}</td>
                                                         </tr>
                                                     </>
                                                 )
                                             })}
-                                            <tr style={{ backgroundColor: "#9a9a9a" }}>
+                                            {["17", "16"].includes(pdfCusteioCodigo[custeioIndex]) && pdfContent.filter((content) => !!content.fornecedor_custeio).map((content, index) => {
+                                                let valor_cobrar = content.valor_cobrar;
+                                                let valor_pago = content.valor_pago;
+
+                                                if (content.moeda == 6) {
+                                                    valor_cobrar = Util.toFixed(parseFloat(valor_cobrar) * parseFloat(roe), 2);
+                                                }
+
+                                                valorTotalPago += parseFloat(content.fornecedor_custeio == custeio ? 0 : valor_pago);
+                                                valorTotalCobrar += parseFloat(content.fornecedor_custeio == custeio ? valor_cobrar : 0);
+
+                                                totalConsolidado += content.fornecedor_custeio == custeio ? valor_cobrar : 0;
+
+                                                if (contasCodigos[0] && contasCodigos.find((cnt) => cnt.conta == content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod && cnt.custeio == content.fornecedor_custeioCodigo)) {
+                                                    contasCodigos = contasCodigos.map((cnt) => cnt.conta == content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod && cnt.custeio == content.fornecedor_custeioCodigo ? ({ ...cnt, valor: parseFloat(cnt.valor) + parseFloat(content.fornecedor_custeio == custeio ? 0 : valor_pago) }) : ({ ...cnt })) 
+                                                } else {
+                                                    contasCodigos.push({
+                                                    conta: content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod,
+                                                    valor: content.fornecedor_custeio == custeio ? 0 : valor_pago,
+                                                    custeio: content.fornecedor_custeioCodigo
+                                                });
+                                            }
+
+                                                return (
+                                                    <>
+                                                        <tr>
+                                                            <td colSpan={2} style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px", paddingRight: 75 }}>{content.evento}</td>
+                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>{content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod}</td>
+                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(content.fornecedor_custeio == custeio ? valor_cobrar : 0)}</td>
+                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(content.fornecedor_custeio == custeio ? valor_pago : valor_pago)}</td>
+                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(content.fornecedor_custeio == custeio ? valor_cobrar : 0)}</td>
+                                                        </tr>
+                                                    </>
+                                                )
+                                            })}
+                                            <tr style={{ backgroundColor: "#9A9A9A" }}>
                                                 <td colSpan={2} style={{ fontSize: '0.95em', border: "1px solid black" }}><b>VALOR DA NF A SER EMITIDA</b></td>
                                                 <td style={{ fontSize: '0.95em', border: "1px solid black" }}></td>
                                                 <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'><b>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalCobrar)}</b></td>
-                                                <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'><b>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalPago)}</b></td>
-                                                <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'><b>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotal)}</b></td>
+                                                <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'><b>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(["16", "17"].includes(pdfCusteioCodigo[custeioIndex]) ? valorTotalPago : 0)}</b></td>
+                                                <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'><b>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalCobrar)}</b></td>
                                             </tr>
                                         </table>
                                     </>
@@ -1394,6 +1642,45 @@ class AddOS extends Component {
                         <div className="faturamentoFooter">
                             VALOR CONSOLIDADO: R$<span style={{ marginLeft: "40px" }}>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalConsolidado)}</span>
                         </div>
+                        {pdfCusteioCodigo.map((custeio, custeioIndex) => {
+                            let contaValor = 0;
+                            if (!custeio) return (<></>);
+
+                            return (
+                                <table className="relatorio_liquidos_contas">
+                                    <tr className="relatorio_liquidos_contas_titulos">
+                                        <th colSpan={3}>
+                                            {pdfCusteio[custeioIndex]}
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th></th>
+                                        <th>
+                                            Conta
+                                        </th>
+                                        <th>
+                                            Valor
+                                        </th>
+                                    </tr>
+                                    {contasCodigos.filter((conta) => conta.custeio == custeio && !!conta.conta).map((conta) => {
+                                        contaValor += parseFloat(conta.valor);
+
+                                        return (
+                                            <tr className="relatorio_liquidos_contas_row">
+                                                <td className="relatorio_liquidos_contas_item"></td>
+                                                <td className="relatorio_liquidos_contas_item">{conta.conta}</td>
+                                                <td className="relatorio_liquidos_contas_item">R${Util.formataDinheiroBrasileiro(conta.valor)}</td>
+                                            </tr>
+                                        )
+                                    })}
+                                    <tr className="relatorio_liquidos_contas_row">
+                                        <th className="relatorio_liquidos_contas_item" colSpan={2}>TOTAL:</th>
+                                        <th className="relatorio_liquidos_contas_item">R${Util.formataDinheiroBrasileiro(contaValor)}</th>
+                                    </tr>
+                                </table>
+                            )
+                        })
+                        }
                     </div>
             } else {
                 await this.setState({ erro: 'Sem as informações necessárias para gerar o pdf!', loading: false })
@@ -1403,6 +1690,7 @@ class AddOS extends Component {
             await this.setState({ pdfgerado: pdf })
             this.handleExportWithComponent()
         } catch (err) {
+            console.log(err);
             await this.setState({ erro: "Erro ao criar o pdf", loading: false });
         }
     }
@@ -1563,8 +1851,8 @@ class AddOS extends Component {
                                                 <th style={{ padding: "0px 3px 0px 3px" }}>Debit USD</th>
                                             </tr>
                                             {pdfContent.filter((e) => e.codsubgrupo_taxas == chave.codsubgrupo_taxas).map((e, i) => {
-                                                valorTotalReais += parseFloat(parseFloat(getValorItemReal(e)).toFixed(2));
-                                                valorTotalDolares += parseFloat(parseFloat(getValorItemDolar(e)).toFixed(2));
+                                                valorTotalReais += Util.toFixed(parseFloat(getValorItemReal(e)), 2);
+                                                valorTotalDolares += Util.toFixed(parseFloat(getValorItemDolar(e)), 2);
                                                 return (
                                                     <tr>
                                                         <td style={{ padding: "0px 3px 0px 3px", paddingRight: 50 }} colSpan={2}>{getDescricaoItem(e)}</td>
@@ -1636,7 +1924,7 @@ class AddOS extends Component {
             if (this.state.pdfContent[0]) {
                 if (this.state.pdfContent[0].governmentTaxes > 0) {
                     valorTotal += parseFloat(this.state.pdfContent[0].governmentTaxes);
-                    valorTotalDolar += parseFloat(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe).toFixed(2));
+                    valorTotalDolar += Util.toFixed(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe), 2);
                 }
                 if (this.state.pdfContent[0].bankCharges > 0) {
                     valorTotal += parseFloat(this.state.pdfContent[0].bankCharges);
@@ -1702,18 +1990,20 @@ class AddOS extends Component {
                                 <tr>
                                 </tr>
                                 <tr>
-                                    <td colSpan='2' style={{ padding: "0px 3px 0px 3px", paddingRight: 25, backgroundColor: "#ff5555" }}>DESCRICAO:</td>
-                                    <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25, backgroundColor: "#ff5555" }}>VALOR (USD)</td>
-                                    <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25, backgroundColor: "#ff5555" }}>VALOR (R$)</td>
+                                    <td colSpan='2' style={{ padding: "0px 3px 0px 3px", paddingRight: 25, backgroundColor: "#CDCDCD" }}>DESCRIPTION:</td>
+                                    <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25, backgroundColor: "#CDCDCD" }}>VALUE (USD)</td>
+                                    <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 25, backgroundColor: "#CDCDCD" }}>VALUE (R$)</td>
                                 </tr>
                                 {this.state.pdfContent.map((e, index) => {
                                     if (e.moeda == 5) {
                                         valorTotal += parseFloat(e.valor);
-                                        valorTotalDolar += parseFloat(parseFloat(e.valor / this.state.pdfContent[0].roe).toFixed(2))
+                                        valorTotalDolar += Util.toFixed(parseFloat(e.valor / this.state.pdfContent[0].roe), 2)
                                     } else {
-                                        valorTotal += parseFloat(parseFloat(e.valor * this.state.pdfContent[0].roe).toFixed(2));
+                                        console.log(e.valor * this.state.pdfContent[0].roe);
+                                        valorTotal += Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
                                         valorTotalDolar += parseFloat(e.valor)
                                     }
+                                    console.log(valorTotal);
                                     return (
                                         <tr style={{ background: index % 2 == 0 ? "white" : "#dddddd" }}>
                                             <td colSpan='2' className='' style={{ padding: "0px 3px 0px 3px", background: index % 2 == 0 ? "white" : "#ccc", paddingRight: 50 }}>{e.descos}</td>
@@ -1743,6 +2033,44 @@ class AddOS extends Component {
                                 </tr>
                             </table>
                         </div>
+                        <br />
+                        <br />
+                        <br />
+
+                        <h5 style={{ width: "100%", textAlign: "center" }}>BANKING DETAILS</h5>
+                        <table style={{ width: "80%", marginLeft: "5%" }}>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Bank's name:</b> Banco do Brasil</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Branch's name:</b> Rio Grande</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Address:</b> Benjamin Constant St, 72</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Swift Code:</b> BRASBRRJCTA</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>IBAN:</b> BR640000000002694000161440C1</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Branch's number:</b> 2694-8</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Account number:</b> 161441-X</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Account name:</b> SUL TRADE AGENCIAMENTOS MARITIMOS LTDA-ME</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Phone:</b> +55 53 3235 3500</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>CNPJ:</b> 10.432.546/0001-75</td>
+                            </tr>
+
+                        </table>
                     </div>
             } else {
                 await this.setState({ erro: 'Sem as informações necessárias para gerar o pdf!', loading: false })
@@ -1902,6 +2230,19 @@ class AddOS extends Component {
 
         const validForm = validations.reduce((t, a) => t && a)
 
+        const validationsContabiliza = []
+        validationsContabiliza.push(this.state.meioPagamento)
+        validationsContabiliza.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.codigoReceita)
+        validationsContabiliza.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.contribuinte)
+        validationsContabiliza.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.codigoIdentificadorTributo)
+        validationsContabiliza.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.mesCompetNumRef)
+        validationsContabiliza.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.dataApuracao)
+        validationsContabiliza.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfValor && this.state.darfValor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.')))
+        validationsContabiliza.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfPagamento && this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.')))
+        validationsContabiliza.push(!this.state.bloqueadoContabiliza)
+
+        //const validFormContabiliza = validationsContabiliza.reduce((t, a) => t && a)
+        const validFormContabiliza = true;
 
         return (
             <div className='allContent'>
@@ -2120,9 +2461,6 @@ class AddOS extends Component {
                                                                                     </th>
                                                                                 }
                                                                                 <th className='text-center'>
-                                                                                    <span>Valor (USD)</span>
-                                                                                </th>
-                                                                                <th className='text-center'>
                                                                                     <span>Valor (R$)</span>
                                                                                 </th>
                                                                                 <th className='text-center' style={{ width: 20, height: 20, padding: 5 }}>
@@ -2139,10 +2477,7 @@ class AddOS extends Component {
                                                                                                 <p>{feed.ordem.replaceAll(',', '.')}</p>
                                                                                             </td>
                                                                                             <td className="text-center">
-                                                                                                <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
-                                                                                            </td>
-                                                                                            <td className="text-center">
-                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor1)}</p>
                                                                                             </td>
                                                                                             <td>
                                                                                                 <input type="checkbox" checked={true} />
@@ -2164,10 +2499,7 @@ class AddOS extends Component {
                                                                                                 <p>{feed.descricao}</p>
                                                                                             </td>
                                                                                             <td className="text-center">
-                                                                                                <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
-                                                                                            </td>
-                                                                                            <td className="text-center">
-                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor1)}</p>
                                                                                             </td>
                                                                                             <td>
                                                                                                 <input type="checkbox" checked={true} />
@@ -2274,13 +2606,27 @@ class AddOS extends Component {
                                                         <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
                                                     </div>
 
-                                                    <div className="row">
-                                                        <div className="col-2"></div>
-                                                        <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                            <button type="submit" style={{ width: 300 }} >Agrupar</button>
+                                                    {this.state.agrupadorEventos[0] &&
+                                                        <div className="row">
+                                                            <div className="col-2"></div>
+                                                            {this.state.grupoSelecionado == 0 &&
+                                                                <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                                    <button type="submit" style={{ width: 300 }} >Salvar</button>
+                                                                </div>
+                                                            }
+                                                            {this.state.grupoSelecionado != 0 &&
+                                                                <>
+                                                                    <div className="col-4" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                                        <button type="submit" style={{ width: 300 }} >Salvar</button>
+                                                                    </div>
+                                                                    <div className="col-4" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                                        <button type="submit" onClick={() => this.abrirContabilizacao(this.state.grupoSelecionado)} style={{ width: 300 }} >Contabilizar</button>
+                                                                    </div>
+                                                                </>
+                                                            }
+                                                            <div className="col-2"></div>
                                                         </div>
-                                                        <div className="col-2"></div>
-                                                    </div>
+                                                    }
 
                                                 </Form>
                                             </Formik>
@@ -2381,6 +2727,260 @@ class AddOS extends Component {
 
                             </div >
                         </Modal >
+
+                        <Modal
+                            aria-labelledby="transition-modal-title"
+                            aria-describedby="transition-modal-description"
+                            style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
+                            open={this.state.contabiliza}
+                            onClose={async () => await this.setState({ contabiliza: false, bloqueado: false, bloqueadoContabiliza: false })}
+                        >
+                            <div className='modalContainer'>
+                                <div className='modalCriar'>
+                                    <div className='containersairlistprodmodal'>
+                                        <div className='botaoSairModal' onClick={async () => await this.setState({ contabiliza: false, bloqueado: false, bloqueadoContabiliza: false })}>
+                                            <span>X</span>
+                                        </div>
+                                    </div>
+                                    <div className='modalContent'>
+                                        <div className='tituloPagesModal'>
+                                            <span style={{ cursor: "pointer" }} onClick={() => this.state.paginaContabiliza != 0 ? this.setState({ paginaContabiliza: this.state.paginaContabiliza - 1 }) : {}}><FontAwesomeIcon icon={faChevronLeft} color={this.state.paginaContabiliza == 0 ? "#CFCFCF" : "#8a8a8a"} /></span>
+                                            <span>{this.state.eventosContabilizando[this.state.paginaContabiliza]?.descricao}</span>
+                                            <span style={{ cursor: "pointer" }} onClick={() => this.state.paginaContabiliza != (this.state.eventosContabilizando.length - 1) ? this.setState({ paginaContabiliza: this.state.paginaContabiliza + 1 }) : {}} ><FontAwesomeIcon icon={faChevronRight} color={this.state.paginaContabiliza >= (this.state.eventosContabilizando.length - 1) ? "#CFCFCF" : "#8a8a8a"} /></span>
+                                        </div>
+
+
+                                        <div className='modalForm'>
+                                            <Formik
+                                                initialValues={{
+                                                    name: '',
+                                                }}
+                                                onSubmit={async values => {
+                                                    await new Promise(r => setTimeout(r, 1000))
+                                                    this.salvarConta(validFormContabiliza)
+                                                }}
+                                            >
+                                                <Form className="contact-form" >
+
+                                                    <div className="row">
+
+                                                        <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
+
+                                                            <div className="row addservicos">
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Histórico Padrão</label>
+                                                                </div>
+                                                                <div className='col-1'></div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Select className='SearchSelect' options={this.state.historicosOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ historicosOptionsTexto: e }) }} value={this.state.historicosOptions.filter(option => option.chave == this.state.historicoPadrao)[0]} search={true} onChange={(e) => { this.setState({ historico: this.state.historico.map((h, index) => index == this.state.paginaContabiliza || !h ? e.label : h), historicoPadrao: this.state.historicoPadrao.map((h, index) => index == this.state.paginaContabiliza || !h ? e.chave : h) }) }} />
+                                                                </div>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Histórico</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                <Field className="form-control" type="text" value={this.state.historico[this.state.paginaContabiliza]} onChange={async e => { this.setState({ historico: this.state.historico.map((h, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : h) }) }} onBlur={async e => { this.setState({ historico: this.state.historico.map((h) => !h ? e.currentTarget.value : h) }) }}/>
+                                                                </div>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Cód. Barras</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                <Field className="form-control" type="text" value={this.state.codBarras[this.state.paginaContabiliza]} onChange={async e => { this.setState({ codBarras: this.state.codBarras.map((c, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : c) }) }} onBlur={async e => { this.setState({ codBarras: this.state.codBarras.map((c) => !c ? e.currentTarget.value : c) }) }} />
+                                                                </div>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Conta Débito</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                    {!this.state.contaDebito[this.state.paginaContabiliza] &&
+                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                    }
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Select className='SearchSelect'
+                                                                        isDisabled={!(this.state.eventosContabilizando[this.state.paginaContabiliza]?.tipo_sub == 0 && this.state.eventosContabilizando[this.state.paginaContabiliza]?.repasse)}
+                                                                        options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)}
+                                                                        onInputChange={e => { this.setState({ optionsTexto: e }) }}
+                                                                        value={this.state.planosContasOptions.filter(option => option.value == this.state.contaDebito[this.state.paginaContabiliza])[0]}
+                                                                        search={true}
+                                                                        onChange={(e) => { if (this.state.eventosContabilizando[this.state.paginaContabiliza]?.tipo_sub == 0 && this.state.eventosContabilizando[this.state.paginaContabiliza]?.repasse) { this.setState({ contaDebito: this.state.contaDebito.map((c, index) => index == this.state.paginaContabiliza || !c ? (e.value) : (c)) }) } }}
+                                                                    />
+                                                                </div> <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Conta Crédito</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                    {!this.state.contaCredito[this.state.paginaContabiliza] &&
+                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                    }
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Select className='SearchSelect'
+                                                                        isDisabled={!(this.state.eventosContabilizando[this.state.paginaContabiliza]?.tipo_sub == "0" && !this.state.eventosContabilizando[this.state.paginaContabiliza]?.repasse)}
+                                                                        options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)}
+                                                                        value={this.state.planosContasOptions.filter(option => option.value == this.state.contaCredito[this.state.paginaContabiliza])[0]}
+                                                                        onChange={(e) => { if (this.state.eventosContabilizando[this.state.paginaContabiliza]?.tipo_sub != 1 || !this.state.eventosContabilizando[this.state.paginaContabiliza]?.repasse) { this.setState({ contaCredito: this.state.contaCredito.map((c, index) => index == this.state.paginaContabiliza || !c ? (e.value) : (c)) }) } }}
+                                                                    />
+                                                                </div>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Meio de Pagamento</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                    {!this.state.meioPagamento[this.state.paginaContabiliza] &&
+                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                    }
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Select className='SearchSelect' options={this.state.meiosPagamentosOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ optionsTexto: e }) }} value={this.state.meiosPagamentosOptions.filter(option => option.value == this.state.meioPagamento[this.state.paginaContabiliza])[0]} search={true} onChange={(e) => { this.setState({ meioPagamento: this.state.meioPagamento.map((m, index) => index == this.state.paginaContabiliza || !m ? e.value : m), meioPagamentoNome: this.state.meioPagamentoNome.map((m, index) => index == this.state.paginaContabiliza || !m ? e.label : m) }) }} />
+                                                                </div>
+
+                                                                {(this.state.meioPagamentoNome[this.state.paginaContabiliza] == 'DARF' || this.state.meioPagamentoNome[this.state.paginaContabiliza] == "GPS") &&
+                                                                    <>
+                                                                        <div>
+                                                                            <hr />
+                                                                        </div>
+                                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                            <label>Código da receita</label>
+                                                                        </div>
+                                                                        <div className='col-1 errorMessage'>
+                                                                            {!this.state.codigoReceita[this.state.paginaContabiliza] &&
+                                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                            }
+                                                                        </div>
+                                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                            <Field className="form-control" type="text" value={this.state.codigoReceita[this.state.paginaContabiliza]} onChange={async e => { this.setState({ codigoReceita: this.state.codigoReceita.map((c, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : c) }) }} />
+                                                                        </div>
+                                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                            <label>Contribuinte</label>
+                                                                        </div>
+                                                                        <div className='col-1 errorMessage'>
+                                                                            {!this.state.contribuinte[this.state.paginaContabiliza] &&
+                                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                            }
+                                                                        </div>
+                                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                            <Field className="form-control" type="text" value={this.state.contribuinte[this.state.paginaContabiliza]} onChange={async e => { this.setState({ contribuinte: this.state.contribuinte.map((c, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : c) }) }} />
+                                                                        </div>
+                                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                            <label>Código identicador do tributo</label>
+                                                                        </div>
+                                                                        <div className='col-1 errorMessage'>
+                                                                            {!this.state.codigoIdentificadorTributo[this.state.paginaContabiliza] &&
+                                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                            }
+                                                                        </div>
+                                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                            <Field className="form-control" type="text" value={this.state.codigoIdentificadorTributo[this.state.paginaContabiliza]} onChange={async e => { this.setState({ codigoIdentificadorTributo: this.state.codigoIdentificadorTributo.map((c, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : c) }) }} />
+                                                                        </div>
+                                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                            <label>Número de referência</label>
+                                                                        </div>
+                                                                        <div className='col-1 errorMessage'>
+                                                                            {!this.state.mesCompetNumRef[this.state.paginaContabiliza] &&
+                                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                            }
+                                                                        </div>
+                                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                            <Field className="form-control" type="text" value={this.state.mesCompetNumRef[this.state.paginaContabiliza]} onChange={async e => { this.setState({ mesCompetNumRef: this.state.mesCompetNumRef.map((m, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : m) }) }} />
+                                                                        </div>
+                                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                            <label>Data de Apuração</label>
+                                                                        </div>
+                                                                        <div className='col-1 errorMessage'>
+                                                                            {!this.state.dataApuracao[this.state.paginaContabiliza] &&
+                                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                            }
+                                                                        </div>
+                                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                            <Field className="form-control" type="date" value={this.state.dataApuracao[this.state.paginaContabiliza]} onChange={async e => { this.setState({ dataApuracao: this.state.dataApuracao.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} />
+                                                                        </div>
+                                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                            <label>Valor</label>
+                                                                        </div>
+                                                                        <div className='col-1 errorMessage'>
+                                                                            {!this.state.darfValor[this.state.paginaContabiliza] &&
+                                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                            }
+                                                                        </div>
+                                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfValor[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfValor: this.state.darfValor.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfValor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                        </div>
+                                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                            <label>Multa</label>
+                                                                        </div>
+                                                                        <div className='col-1 errorMessage'>
+                                                                            {!this.state.darfMulta[this.state.paginaContabiliza] &&
+                                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                            }
+                                                                        </div>
+                                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfMulta[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfMulta: this.state.darfMulta.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfMulta: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                        </div>
+                                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                            <label>Juros</label>
+                                                                        </div>
+                                                                        <div className='col-1 errorMessage'>
+                                                                            {!this.state.darfJuros[this.state.paginaContabiliza] &&
+                                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                            }
+                                                                        </div>
+                                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfJuros[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfJuros: this.state.darfJuros.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfJuros: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                        </div>
+                                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                            <label>Valor de Pagamento</label>
+                                                                        </div>
+                                                                        <div className='col-1 errorMessage'>
+                                                                            {!this.state.darfPagamento[this.state.paginaContabiliza] &&
+                                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                            }
+                                                                        </div>
+                                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfPagamento[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfPagamento: this.state.darfPagamento.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfPagamento: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                        </div>
+                                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                            <label>Outros Valores</label>
+                                                                        </div>
+                                                                        <div className='col-1 errorMessage'>
+                                                                            {!this.state.darfOutros[this.state.paginaContabiliza] &&
+                                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                            }
+                                                                        </div>
+                                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfOutros[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfOutros: this.state.darfOutros.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfOutros: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                        </div>
+                                                                    </>
+                                                                }
+
+                                                            </div>
+                                                        </div>
+                                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                                                    </div>
+
+                                                    <div className="row">
+                                                        <div className="col-2"></div>
+                                                        <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                            <button disabled={!validFormContabiliza} type="submit" style={validFormContabiliza ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Enviar</button>
+                                                        </div>
+                                                        <div className="col-2"></div>
+                                                    </div>
+
+                                                </Form>
+                                            </Formik>
+
+                                        </div>
+                                    </div>
+
+
+
+
+
+                                </div >
+
+                            </div >
+                        </Modal >
+
                         <ModalListas
                             alteraModal={this.alteraModal}
                             alteraNavio={this.alteraNavio}
@@ -2395,6 +2995,7 @@ class AddOS extends Component {
                             pesquisa={this.state.modalPesquisa}
                             closeModal={() => { this.setState({ modalAberto: false }) }}
                         />
+
                         <ModalItem
                             closeModal={() => { this.setState({ modalItemAberto: false }) }}
                             itens={this.state.itemInfo}
@@ -2447,7 +3048,7 @@ class AddOS extends Component {
                                         }}
                                         onSubmit={async values => {
                                             await new Promise(r => setTimeout(r, 1000))
-                                            this.salvarOS(validForm)
+                                            this.salvarOS(validForm && !this.state.faturado)
                                         }}
                                     >
                                         <Form className="contact-form" >
@@ -2827,7 +3428,7 @@ class AddOS extends Component {
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                <label>E.T.S</label>
+                                                                <label>E.T.S.</label>
                                                             </div>
                                                             <div className="col-1 errorMessage">
                                                             </div>
@@ -2936,7 +3537,7 @@ class AddOS extends Component {
                                             <div className="row">
                                                 <div className="col-2"></div>
                                                 <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                    <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
+                                                    <button disabled={!(validForm && !this.state.faturado)} type="submit" style={validForm && !this.state.faturado ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
                                                 </div>
                                                 <div className="col-2"></div>
                                             </div>
@@ -2957,15 +3558,19 @@ class AddOS extends Component {
                                             <div className="relatorioButton">
                                                 <button className="btn btn-danger" onClick={() => this.CloseToReal(this.state.os.codigo, validForm)}>Close to Real</button>
                                             </div>
-                                            <div className="relatorioButton">
-                                                <button className="btn btn-danger" onClick={() => this.RelatorioVoucher(this.state.os.codigo, validForm)}>Vouchers</button>
-                                            </div>
-                                            <div className="relatorioButton">
-                                                <button className="btn btn-danger" onClick={() => this.CapaVoucher(this.state.os.codigo, validForm)}>Capa</button>
-                                            </div>
-                                            <div className="relatorioButton">
-                                                <button className="btn btn-danger" onClick={() => this.FaturamentoCusteio(this.state.os.codigo, validForm)}>Relatório Líquidos</button>
-                                            </div>
+                                            {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'RELATORIOS_OS') { return e } }).map((e) => e.permissaoImprime)[0] == 1 &&
+                                                <>
+                                                    <div className="relatorioButton">
+                                                        <button className="btn btn-danger" onClick={() => this.RelatorioVoucher(this.state.os.codigo, validForm)}>Vouchers</button>
+                                                    </div>
+                                                    <div className="relatorioButton">
+                                                        <button className="btn btn-danger" onClick={() => this.CapaVoucher(this.state.os.codigo, validForm)}>Capa</button>
+                                                    </div>
+                                                    <div className="relatorioButton">
+                                                        <button className="btn btn-danger" onClick={() => this.FaturamentoCusteio(this.state.os.codigo, validForm)}>Relatório Líquidos</button>
+                                                    </div>
+                                                </>
+                                            }
                                         </div>
 
                                     </>
@@ -2982,12 +3587,16 @@ class AddOS extends Component {
                                             <div className="relatorioButton">
                                                 <button className="btn btn-danger" onClick={() => this.GerarEtiqueta(this.state.os.codigo)}>Enviar Etiqueta</button>
                                             </div>
-                                            {/* <div className="relatorioButton">
-                                                <button className="btn btn-danger" onClick={() => this.setState({ agrupadorModal: true })}>Custeio Subagente</button>
-                                            </div> */}
-                                            <div className="relatorioButton">
-                                                <button className="btn btn-danger"><Link style={{ color: "inherit", textDecoration: "none" }} to={{ pathname: "/financeiro/addFatura/0", state: { backTo: `/ordensservicos/os/${this.state.chave}`, os: this.state.os } }}>Emitir NF</Link></button>
-                                            </div>
+                                            {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'RELATORIOS_OS') { return e } }).map((e) => e.permissaoImprime)[0] == 1 &&
+                                                <>
+                                                    {/* <div className="relatorioButton">
+                                                        <button className="btn btn-danger" onClick={() => this.setState({ agrupadorModal: true, grupoSelecionado: 0, agrupadorEventos: [] })}>Custeio Subagente</button>
+                                                    </div> */}
+                                                    <div className="relatorioButton">
+                                                        <button className="btn btn-danger"><Link style={{ color: "inherit", textDecoration: "none" }} to={{ pathname: "/financeiro/addFatura/0", state: { backTo: `/ordensservicos/os/${this.state.chave}`, os: this.state.os } }}>Emitir NF</Link></button>
+                                                    </div>
+                                                </>
+                                            }
                                         </div>
 
                                     </>
@@ -3316,14 +3925,14 @@ class AddOS extends Component {
                                         </div>
                                     </div>
                                 }
-                                {this.props.match.params.id != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                {false && this.props.match.params.id != 0 && this.state.custeios_subagentes[0] && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
 
                                     <div>
                                         <br />
                                         <br />
                                         <div>
                                             <div>
-                                                <div className="page-breadcrumb2"><h3>Eventos</h3></div>
+                                                <div className="page-breadcrumb2"><h3>Custeios Subagentes</h3></div>
                                             </div>
                                             <br />
                                             <div>
@@ -3335,7 +3944,7 @@ class AddOS extends Component {
                                                                     <table className='addOsTable'>
                                                                         <tr>
                                                                             <th className='text-center'>
-                                                                                <span>Chave</span>
+                                                                                <span>Grupo</span>
                                                                             </th>
                                                                             {window.innerWidth >= 500 &&
                                                                                 <th className='text-center'>
@@ -3343,34 +3952,12 @@ class AddOS extends Component {
                                                                                 </th>
                                                                             }
                                                                             <th className='text-center'>
-                                                                                <span>Ordem</span>
-                                                                            </th>
-                                                                            {window.innerWidth >= 500 &&
-                                                                                <th className='text-center'>
-                                                                                    <span>Descrição</span>
-                                                                                </th>
-                                                                            }
-                                                                            <th className='text-center'>
-                                                                                <span>Valor (USD)</span>
+                                                                                <span>Fornecedor</span>
                                                                             </th>
                                                                             <th className='text-center'>
-                                                                                <span>Valor (R$)</span>
+                                                                                <span>Valor</span>
                                                                             </th>
-                                                                            <th className='text-center'>
-                                                                                <span>
-                                                                                    {!this.state.eventos[1] &&
-
-                                                                                        <Link to=
-                                                                                            {{
-                                                                                                pathname: `/ordensservico/addevento/0`,
-                                                                                                state: { evento: {}, os: { ...this.state.os, addOS: true } }
-                                                                                            }}
-                                                                                        >
-                                                                                            <FontAwesomeIcon icon={faPlus} />
-                                                                                        </Link>
-                                                                                    }
-                                                                                </span>
-                                                                            </th>
+                                                                            <th className='text-center'></th>
                                                                         </tr>
                                                                         {this.state.custeios_subagentes[0] != undefined && this.state.custeios_subagentes.map((feed, index) => (
                                                                             <>
@@ -3381,55 +3968,18 @@ class AddOS extends Component {
                                                                                             <p>{feed.grupo}</p>
                                                                                         </td>
                                                                                         <td className="text-center">
-                                                                                            <p>{feed.ordem.replaceAll(',', '.')}</p>
+                                                                                            <p>{feed.fornecedorNome}</p>
                                                                                         </td>
                                                                                         <td className="text-center">
-                                                                                            <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
-                                                                                        </td>
-                                                                                        <td className="text-center">
-                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor)}</p>
                                                                                         </td>
                                                                                         <td>
                                                                                             <span className='iconelixo giveMargin' type='button' >
-                                                                                                <Link to=
-                                                                                                    {{
-                                                                                                        pathname: `/ordensservico/addevento/0`,
-                                                                                                        state: { evento: { ...feed }, os: { ...this.state.os } }
-                                                                                                    }}
-                                                                                                >
-                                                                                                    <FontAwesomeIcon icon={faPlus} />
-                                                                                                </Link>
+                                                                                                <FontAwesomeIcon icon={faPen} onClick={() => this.setState({ grupoSelecionado: feed.grupo, agrupadorModal: true, agrupadorEventos: feed.evento.split(',') })} />
                                                                                             </span>
-
-
-                                                                                            <span className='iconelixo giveMargin' type='button' >
-                                                                                                <Link to=
-                                                                                                    {{
-                                                                                                        pathname: `/ordensservico/addevento/${feed.chave}`,
-                                                                                                        state: { evento: { ...feed }, os: { ... this.state.os } }
-                                                                                                    }}
-                                                                                                >
-                                                                                                    <FontAwesomeIcon icon={faPen} />
-                                                                                                </Link>
+                                                                                            <span className='iconelixo giveMargin' type='button'>
+                                                                                                <FontAwesomeIcon icon={faTrashAlt} onClick={() => this.deleteGrupo(feed.grupo)} />
                                                                                             </span>
-
-                                                                                            <span className='iconelixo giveMargin' type='button' >
-                                                                                                <Link to=
-                                                                                                    {{
-                                                                                                        pathname: `/ordensservico/addeventofinanceiro/${feed.chave}`,
-                                                                                                        state: { evento: { ...feed }, os: { ...this.state.os } }
-                                                                                                    }}
-                                                                                                >
-                                                                                                    <FontAwesomeIcon icon={faDollarSign} />
-                                                                                                </Link>
-                                                                                            </span>
-
-                                                                                            {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-
-                                                                                                <span type='button' className='iconelixo' onClick={(a) => this.deleteServicoItem(feed.chave, feed.descricao)} >
-                                                                                                    <FontAwesomeIcon icon={faTimes} />
-                                                                                                </span>
-                                                                                            }
                                                                                         </td>
                                                                                     </tr>
                                                                                 }
@@ -3437,63 +3987,30 @@ class AddOS extends Component {
                                                                                     <tr
                                                                                         className={index % 2 == 0 ? "parTr" : "imparTr"}>
                                                                                         <td className="text-center">
-                                                                                            <p>{feed.chave}</p>
+                                                                                            <p>{feed.grupo}</p>
                                                                                         </td>
                                                                                         <td className="text-center">
-                                                                                            <p>{this.state.tiposServicosItens[feed.tipo_sub]}</p>
+                                                                                            <p>{this.state.tiposServicosItens[feed.tipo]}</p>
                                                                                         </td>
                                                                                         <td className="text-center">
-                                                                                            <p>{feed.ordem.replaceAll(',', '.')}</p>
+                                                                                            <p>{feed.fornecedorNome}</p>
                                                                                         </td>
                                                                                         <td className="text-center">
-                                                                                            <p>{feed.descricao}</p>
-                                                                                        </td>
-                                                                                        <td className="text-center">
-                                                                                            <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
-                                                                                        </td>
-                                                                                        <td className="text-center">
-                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor)}</p>
                                                                                         </td>
                                                                                         <td>
+                                                                                            <span className='iconelixo giveMargin' type='button' >
+                                                                                                <FontAwesomeIcon icon={faPen} onClick={() => this.setState({ grupoSelecionado: feed.grupo, agrupadorModal: true, agrupadorEventos: feed.evento.split(',') })} />
+                                                                                            </span>
+                                                                                            <span className='iconelixo giveMargin' type='button'>
+                                                                                                <FontAwesomeIcon icon={faTrashAlt} onClick={() => this.deleteGrupo(feed.grupo)} />
+                                                                                            </span>
                                                                                         </td>
                                                                                     </tr>
                                                                                 }
                                                                             </>
                                                                         )
                                                                         )}
-                                                                        {this.state.eventos[0] &&
-                                                                            <>
-                                                                                {
-                                                                                    window.innerWidth < 500 &&
-                                                                                    <tr className={this.state.eventos.length % 2 == 0 ? "parTr" : "imparTr"}>
-                                                                                        <td className="text-center"></td>
-                                                                                        <td className="text-center">Total</td>
-                                                                                        <td className="text-center">
-                                                                                            <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
-                                                                                        </td>
-                                                                                        <td className="text-center">
-                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal)}</p>
-                                                                                        </td>
-                                                                                        <td></td>
-                                                                                    </tr>
-                                                                                }
-                                                                                {window.innerWidth >= 500 &&
-                                                                                    <tr className={this.state.eventos.length % 2 == 0 ? "parTr" : "imparTr"}>
-                                                                                        <td className="text-center"></td>
-                                                                                        <td className="text-center">Total</td>
-                                                                                        <td className="text-center"></td>
-                                                                                        <td className="text-center"></td>
-                                                                                        <td className="text-center">
-                                                                                            <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
-                                                                                        </td>
-                                                                                        <td className="text-center">
-                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal)}</p>
-                                                                                        </td>
-                                                                                        <td></td>
-                                                                                    </tr>
-                                                                                }
-                                                                            </>
-                                                                        }
                                                                     </table>
 
 

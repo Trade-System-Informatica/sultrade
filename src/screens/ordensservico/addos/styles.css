@@ -137,13 +137,15 @@
     align-items: center;
 }
 
-.anexoList:nth-child(even), .anexoList:nth-child(even) > td {
+.anexoList:nth-child(even),
+.anexoList:nth-child(even)>td {
     background-color: white;
     padding: 15px;
     color: black;
 }
 
-.anexoList:nth-child(odd), .anexoList:nth-child(odd) > td {
+.anexoList:nth-child(odd),
+.anexoList:nth-child(odd)>td {
     background-color: black;
     padding: 15px;
     color: white;
@@ -153,7 +155,7 @@
     padding: 15px;
 }
 
-.anexoListTitle > th{
+.anexoListTitle>th {
     font-weight: bold;
     padding: 15px;
     color: white;
@@ -165,7 +167,8 @@
     margin: 0px;
 }
 
-.agrupador_lista > tr > th, .agrupador_lista > tr > td{
+.agrupador_lista>tr>th,
+.agrupador_lista>tr>td {
     border-bottom: 1px solid black;
     cursor: pointer;
     user-select: none;
@@ -173,6 +176,47 @@
 
 .white {
     color: white;
+}
+
+.tituloPagesModal {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 70%;
+    user-select: none;
+}
+
+.tituloPagesModal > * {
+    padding: 5px;
+}
+
+.relatorioButton:only-child {
+    margin: 0 auto;
+}
+
+.relatorio_liquidos_contas {
+    width: 50%;
+    margin-left: 50%;
+    margin-top: 25px;
+}
+
+.relatorio_liquidos_contas, .relatorio_liquidos_contas > tr, .relatorio_liquidos_contas > th, .relatorio_liquidos_contas > td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+.relatorio_liquidos_contas_titulos {
+    background-color: #acacac;
+    text-align: center;
+}
+
+.relatorio_liquidos_contas_item {
+    border-bottom: 1px solid black;
+    padding: 5px;
+}
+
+.relatorio_liquidos_contas_row:nth-child(even) {
+    background-color: #F8F8F8;
 }
 
 @media (min-width: 768px) {

@@ -247,25 +247,25 @@ class AddCentroCusto extends Component {
                                         <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12 ">
 
                                             <div className="row addservicos">
-                                                {this.state.chave != 0 &&
+                                                {this.state.codigo != 0 &&
                                                     <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
-                                                        <label>Chave</label>
+                                                        <label>Codigo</label>
                                                     </div>
                                                 }
-                                                {this.state.chave != 0 &&
+                                                {this.state.codigo != 0 &&
                                                     <div className='col-1'></div>
                                                 }
-                                                {this.state.chave != 0 &&
+                                                {this.state.codigo != 0 &&
                                                     <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10 ">
-                                                        <Field className="form-control" style={{ backgroundColor: '#dddddd' }} type="text" disabled value={this.state.chave} />
+                                                        <Field className="form-control" style={{ backgroundColor: '#dddddd' }} type="text" disabled value={this.state.codigo} />
                                                     </div>
                                                 }
-                                                {this.state.chave != 0 &&
+                                                {this.state.codigo != 0 &&
                                                     <div className="col-xl-4 col-lg-4 col-md-3 col-sm-1 col-1 ">
                                                     </div>
                                                 }
 
-                                                <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
+                                                <div className={this.state.codigo == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
                                                     <label>Descricao</label>
                                                 </div>
                                                 <div className="col-1 errorMessage">

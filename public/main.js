@@ -133,32 +133,8 @@ $( document ).ready(function() {
     )
 });
 
-window.setInterval(trocarfoto, 8000);
-
-function trocarfoto() {
-    var a =  $('#trocafundoimg').attr("class").split(/\s+/);
-    if(a[2] == undefined) {
-        $('#trocafundoimg').addClass('limg1')
-     }else if(a[2] == 'limg1') {
-        $('#trocafundoimg').removeClass('limg1')
-        $('#trocafundoimg').addClass('limg2')
-     } else if(a[2] == 'limg2') {
-        $('#trocafundoimg').removeClass('limg2')
-        $('#trocafundoimg').addClass('limg3')
-     }else if(a[2] == 'limg3') {
-        $('#trocafundoimg').removeClass('limg3')
-        $('#trocafundoimg').addClass('limg1')
-     }
-
-
-}
-
 window.onload = function() {
     window.setTimeout(function () {
         document.querySelector('.btn-danger').click()
     }, 3500);
 };
-
-
-function teste(params) {
-}
