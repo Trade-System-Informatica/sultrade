@@ -220,6 +220,9 @@ class AddOS extends Component {
     }
 
     componentDidMount = async () => {
+        if (!this.state.usuarioLogado?.codigo) {
+            return;
+        }
         window.scrollTo(0, 0)
         var id = await this.props.match.params.id
         await this.setState({ chave: id })
@@ -428,6 +431,7 @@ class AddOS extends Component {
             async res => {
                 if (res.data) {
                     this.setState({ custeios_subagentes: [...res.data] });
+                    console.log(res.data);
                 }
             },
             async res => await console.log(`Erro: ${res}`)
@@ -528,20 +532,6 @@ class AddOS extends Component {
             contabiliza: true,
             paginaContabiliza: 0
         })
-        // if (pagar) {
-        //     if (repasse) {
-        //         D: cliente,
-        //         C: forn,
-        //         C: retencoes e descontos,
-        //     } else {
-        //         D: aberto
-        //         C: forn
-        //         C: retencoes e descontos
-        //     }
-        // } else {
-        //         D: cliente,
-        //         C: taxa,
-        // }
     }
 
     deleteGrupo = async (grupo) => {
@@ -795,7 +785,7 @@ class AddOS extends Component {
                 await this.setState({ centrosCustos: res.data })
 
                 const options = this.state.centrosCustos.map((e) => {
-                    return { label: e.Descricao, value: e.Chave }
+                    return { label: `CC:${e.Codigo} - ${e.Descricao}`, value: e.Chave }
                 })
                 options.unshift({ label: '--', value: '' })
 
@@ -973,7 +963,6 @@ class AddOS extends Component {
 
     faturaOS = async () => {
         const valor = this.calculaTotal();
-        console.log(valor)
 
         await apiEmployee.post(`insertContaFornecedor.php`, {
             token: true,
@@ -1012,37 +1001,79 @@ class AddOS extends Component {
     }
 
     salvarConta = async () => {
-        this.setState({loading: true, contabiliza: false});
+        this.setState({ loading: true, contabiliza: false });
 
-        const events = this.state.eventosContabilizando.map((e, index) => 
-        ({
-            ...e, 
-            historico: this.state.historico[index],
-            historicoPadrao: this.state.historicoPadrao[index],
-            codBarras: this.state.codBarras[index],
-            contaDebito: this.state.contaDebito[index],
-            contaCredito: this.state.contaCredito[index],
-            meioPagamento: this.state.meioPagamento[index],
-            meioPagamentoNome: this.state.meioPagamentoNome[index],
-            codigoReceita: this.state.codigoReceita[index],
-            contribuinte: this.state.contribuinte[index],
-            codigoIdentificadorTributo: this.state.codigoIdentificadorTributo[index],
-            mesCompetNumRef: this.state.mesCompetNumRef[index],
-            dataApuracao: this.state.dataApuracao[index],
-            darfValor: this.state.darfValor[index],
-            darfPagamento: this.state.darfPagamento[index],
-            darfMulta: this.state.darfMulta[index],
-            darfJuros: this.state.darfJuros[index],
-            darfOutros: this.state.darfOutros[index]
+        let grupos = [];
+
+        this.state.eventosContabilizando.forEach((evento, index) => {
+            const grupoIndex = grupos.findIndex((ev) =>
+                evento.desconto_conta == ev.desconto_conta &&
+                evento.retencao_inss == ev.retencao_inss &&
+                evento.retencao_ir == ev.retencao_ir &&
+                evento.retencao_iss == ev.retencao_iss &&
+                evento.retencao_csll == ev.retencao_csll &&
+                this.state.historico[index] == ev.historico &&
+                this.state.historicoPadrao[index] == ev.historicoPadrao &&
+                this.state.codBarras[index] == ev.codBarras &&
+                this.state.contaDebito[index] == ev.contaDebito &&
+                this.state.contaCredito[index] == ev.contaCredito &&
+                this.state.meioPagamento[index] == ev.meioPagamento &&
+                this.state.codigoReceita[index] == ev.codigoReceita &&
+                this.state.contribuinte[index] == ev.contribuinte &&
+                this.state.codigoIdentificadorTributo[index] == ev.codigoIdentificadorTributo &&
+                this.state.mesCompetNumRef[index] == ev.mesCompetNumRef &&
+                this.state.dataApuracao[index] == ev.dataApuracao &&
+                this.state.darfValor[index] == ev.darfValor &&
+                this.state.darfPagamento[index] == ev.darfPagamento &&
+                this.state.darfMulta[index] == ev.darfMulta &&
+                this.state.darfJuros[index] == ev.darfJuros &&
+                this.state.darfOutros[index] == ev.darfOutros
+            );
+
+            if (grupoIndex != -1) {
+                grupos[grupoIndex].eventos.push({ ...evento });
+                grupos[grupoIndex].vcp += parseFloat(evento.valor1);
+            } else {
+                grupos.push({
+                    valuesLancto: `'${moment().format("YYYY-MM-DD")}', '${evento.tipo_documento}', '${this.state.centroCusto}', '${this.state.historicoPadrao[index]}', '${this.state.cliente}', '${this.state.usuarioLogado.codigo}', '${moment().format("YYYY-MM-DD")}', '${moment().format("YYYY-MM-DD")}', '0', '0'`,
+                    valuesConta: `'${moment(evento.emissao ? evento.emissao : "").format("YYYY-MM-DD")}', '${evento.tipo_sub == 0 ? 1 : 0}', '${evento.fornecedor}', '${this.state.tipo_sub == 0 ? this.state.contaCredito[index] : this.state.contaDebito[index]}', '${this.state.codBarras[index]}', '${this.state.centroCusto}', '${this.state.historico[index]}', '${this.state.tipo_sub == 0 ? this.state.contaDebito[index] : this.state.contaCredito[index]}', '1', '1', '${evento.vencimento}', '${evento.vencimento}', '', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${evento.documento}', '${evento.tipo_documento}', '${this.state.meioPagamento[index]}', '${evento.chave}'`,
+                    valuesDarf: ['DARF', 'GPS', 'GRU', 'PIX'].includes(this.state.meioPagamentoNome[index]) ? `'${this.state.codigoReceita[index]}', '${this.state.contribuinte[index]}', '${this.state.codigoIdentificadorTributo[index]}', '${this.state.mesCompetNumRef[index]}', '${moment(this.state.dataApuracao[index]).format("YYYY-MM-DD")}', '${parseFloat(this.state.darfValor[index].replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta[index].replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros[index].replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros[index].replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento[index].replaceAll('.', '').replaceAll(',', '.'))}'` : false,
+                    eventos: [{ ...evento }],
+                    vcp: parseFloat(evento.valor1),
+                    desconto_conta: evento.desconto_conta,
+                    retencao_inss: evento.retencao_inss,
+                    retencao_ir: evento.retencao_ir,
+                    retencao_iss: evento.retencao_iss,
+                    retencao_csll: evento.retencao_csll,
+                    contaDebito: this.state.contaDebito[index],
+                    contaCredito: this.state.contaCredito[index],
+                    chave: this.state.custeios_subagentes.find((gp) => gp.grupo == this.state.grupoSelecionado)?.chave_grupo,
+                    historico: this.state.historico[index],
+                    historicoPadrao: this.state.historicoPadrao[index],
+                    codBarras: this.state.codBarras[index],
+                    contaDebito: this.state.contaDebito[index],
+                    contaCredito: this.state.contaCredito[index],
+                    meioPagamento: this.state.meioPagamento[index],
+                    meioPagamentoNome: this.state.meioPagamentoNome[index],
+                    codigoReceita: this.state.codigoReceita[index],
+                    contribuinte: this.state.contribuinte[index],
+                    codigoIdentificadorTributo: this.state.codigoIdentificadorTributo[index],
+                    mesCompetNumRef: this.state.mesCompetNumRef[index],
+                    dataApuracao: this.state.dataApuracao[index],
+                    darfValor: this.state.darfValor[index],
+                    darfPagamento: this.state.darfPagamento[index],
+                    darfMulta: this.state.darfMulta[index],
+                    darfJuros: this.state.darfJuros[index],
+                    darfOutros: this.state.darfOutros[index]
+                })
+            }
         })
-        );
 
-        console.log(events);
-        /*await apiEmployee.post(`.php`, {
+        console.log(grupos);
+
+        await apiEmployee.post(`contabilizaCusteioSubagente.php`, {
             token: true,
-            chave_os: this.state.chave,
-            events,
-            centros_custos: this.state.centros_custos
+            grupos
         }).then(
             async res => {
                 if (res.data === true) {
@@ -1053,7 +1084,7 @@ class AddOS extends Component {
                 }
             },
             async res => await console.log(`Erro: ${res}`)
-        )*/
+        )
 
     }
 
@@ -1528,7 +1559,6 @@ class AddOS extends Component {
             }
 
             pdfContent.map((content) => {
-                console.log(content);
                 if (!pdfCusteio.includes(content.fornecedor_custeio)) {
                     pdfCusteio.push(content.fornecedor_custeio);
                     pdfCusteioCodigo.push(content.fornecedor_custeioCodigo);
@@ -1605,15 +1635,15 @@ class AddOS extends Component {
 
                                                 totalConsolidado += content.fornecedor_custeio == custeio ? valor_cobrar : 0;
 
-                                                if (contasCodigos[0] && contasCodigos.find((cnt) => cnt.conta == content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod && cnt.custeio == content.fornecedor_custeioCodigo)) {
-                                                    contasCodigos = contasCodigos.map((cnt) => cnt.conta == content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod && cnt.custeio == content.fornecedor_custeioCodigo ? ({ ...cnt, valor: parseFloat(cnt.valor) + parseFloat(content.fornecedor_custeio == custeio ? 0 : valor_pago) }) : ({ ...cnt })) 
+                                                if (contasCodigos[0] && contasCodigos.find((cnt) => cnt.conta == (content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod) && cnt.custeio == content.fornecedor_custeioCodigo)) {
+                                                    contasCodigos = contasCodigos.map((cnt) => cnt.conta == (content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod) && cnt.custeio == content.fornecedor_custeioCodigo ? ({ ...cnt, valor: parseFloat(cnt.valor) + parseFloat(content.fornecedor_custeio == custeio ? 0 : valor_pago) }) : ({ ...cnt }))
                                                 } else {
                                                     contasCodigos.push({
-                                                    conta: content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod,
-                                                    valor: content.fornecedor_custeio == custeio ? 0 : valor_pago,
-                                                    custeio: content.fornecedor_custeioCodigo
-                                                });
-                                            }
+                                                        conta: content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod,
+                                                        valor: valor_cobrar,
+                                                        custeio: content.fornecedor_custeioCodigo
+                                                    });
+                                                }
 
                                                 return (
                                                     <>
@@ -1999,11 +2029,9 @@ class AddOS extends Component {
                                         valorTotal += parseFloat(e.valor);
                                         valorTotalDolar += Util.toFixed(parseFloat(e.valor / this.state.pdfContent[0].roe), 2)
                                     } else {
-                                        console.log(e.valor * this.state.pdfContent[0].roe);
                                         valorTotal += Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
                                         valorTotalDolar += parseFloat(e.valor)
                                     }
-                                    console.log(valorTotal);
                                     return (
                                         <tr style={{ background: index % 2 == 0 ? "white" : "#dddddd" }}>
                                             <td colSpan='2' className='' style={{ padding: "0px 3px 0px 3px", background: index % 2 == 0 ? "white" : "#ccc", paddingRight: 50 }}>{e.descos}</td>
@@ -2780,7 +2808,7 @@ class AddOS extends Component {
                                                                 <div className='col-1 errorMessage'>
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                <Field className="form-control" type="text" value={this.state.historico[this.state.paginaContabiliza]} onChange={async e => { this.setState({ historico: this.state.historico.map((h, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : h) }) }} onBlur={async e => { this.setState({ historico: this.state.historico.map((h) => !h ? e.currentTarget.value : h) }) }}/>
+                                                                    <Field className="form-control" type="text" value={this.state.historico[this.state.paginaContabiliza]} onChange={async e => { this.setState({ historico: this.state.historico.map((h, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : h) }) }} onBlur={async e => { this.setState({ historico: this.state.historico.map((h) => !h ? e.currentTarget.value : h) }) }} />
                                                                 </div>
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                     <label>Cód. Barras</label>
@@ -2788,7 +2816,7 @@ class AddOS extends Component {
                                                                 <div className='col-1 errorMessage'>
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                <Field className="form-control" type="text" value={this.state.codBarras[this.state.paginaContabiliza]} onChange={async e => { this.setState({ codBarras: this.state.codBarras.map((c, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : c) }) }} onBlur={async e => { this.setState({ codBarras: this.state.codBarras.map((c) => !c ? e.currentTarget.value : c) }) }} />
+                                                                    <Field className="form-control" type="text" value={this.state.codBarras[this.state.paginaContabiliza]} onChange={async e => { this.setState({ codBarras: this.state.codBarras.map((c, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : c) }) }} onBlur={async e => { this.setState({ codBarras: this.state.codBarras.map((c) => !c ? e.currentTarget.value : c) }) }} />
                                                                 </div>
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                     <label>Conta Débito</label>
@@ -2849,7 +2877,7 @@ class AddOS extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control" type="text" value={this.state.codigoReceita[this.state.paginaContabiliza]} onChange={async e => { this.setState({ codigoReceita: this.state.codigoReceita.map((c, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : c) }) }} />
+                                                                            <Field className="form-control" type="text" value={this.state.codigoReceita[this.state.paginaContabiliza]} onChange={async e => { this.setState({ codigoReceita: this.state.codigoReceita.map((c, index) => index == this.state.paginaContabiliza || !c ? e.currentTarget.value : c) }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Contribuinte</label>
@@ -2860,7 +2888,7 @@ class AddOS extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control" type="text" value={this.state.contribuinte[this.state.paginaContabiliza]} onChange={async e => { this.setState({ contribuinte: this.state.contribuinte.map((c, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : c) }) }} />
+                                                                            <Field className="form-control" type="text" value={this.state.contribuinte[this.state.paginaContabiliza]} onChange={async e => { this.setState({ contribuinte: this.state.contribuinte.map((c, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : c) }) }} onBlur={async e => { this.setState({ contribuinte: this.state.contribuinte.map((c, index) => index == this.state.paginaContabiliza || !c ? e.currentTarget.value : c) }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Código identicador do tributo</label>
@@ -2871,7 +2899,7 @@ class AddOS extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control" type="text" value={this.state.codigoIdentificadorTributo[this.state.paginaContabiliza]} onChange={async e => { this.setState({ codigoIdentificadorTributo: this.state.codigoIdentificadorTributo.map((c, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : c) }) }} />
+                                                                            <Field className="form-control" type="text" value={this.state.codigoIdentificadorTributo[this.state.paginaContabiliza]} onChange={async e => { this.setState({ codigoIdentificadorTributo: this.state.codigoIdentificadorTributo.map((c, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : c) }) }} onBlur={async e => { this.setState({ codigoIdentificadorTributo: this.state.codigoIdentificadorTributo.map((c, index) => index == this.state.paginaContabiliza || !c ? e.currentTarget.value : c) }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Número de referência</label>
@@ -2882,7 +2910,7 @@ class AddOS extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control" type="text" value={this.state.mesCompetNumRef[this.state.paginaContabiliza]} onChange={async e => { this.setState({ mesCompetNumRef: this.state.mesCompetNumRef.map((m, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : m) }) }} />
+                                                                            <Field className="form-control" type="text" value={this.state.mesCompetNumRef[this.state.paginaContabiliza]} onChange={async e => { this.setState({ mesCompetNumRef: this.state.mesCompetNumRef.map((m, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : m) }) }} onBlur={async e => { this.setState({ mesCompetNumRef: this.state.mesCompetNumRef.map((m, index) => index == this.state.paginaContabiliza || !m ? e.currentTarget.value : m) }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Data de Apuração</label>
@@ -2893,7 +2921,7 @@ class AddOS extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control" type="date" value={this.state.dataApuracao[this.state.paginaContabiliza]} onChange={async e => { this.setState({ dataApuracao: this.state.dataApuracao.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} />
+                                                                            <Field className="form-control" type="date" value={this.state.dataApuracao[this.state.paginaContabiliza]} onChange={async e => { this.setState({ dataApuracao: this.state.dataApuracao.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ dataApuracao: this.state.dataApuracao.map((d, index) => index == this.state.paginaContabiliza || !d ? e.currentTarget.value : d) }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Valor</label>
@@ -2904,7 +2932,7 @@ class AddOS extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.darfValor[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfValor: this.state.darfValor.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfValor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfValor[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfValor: this.state.darfValor.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfValor: this.state.darfValor.map((d, index) => index == this.state.paginaContabiliza || !d ? Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' : d) }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Multa</label>
@@ -2915,7 +2943,7 @@ class AddOS extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.darfMulta[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfMulta: this.state.darfMulta.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfMulta: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfMulta[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfMulta: this.state.darfMulta.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfMulta: this.state.darfMulta.map((d, index) => index == this.state.paginaContabiliza || !d ? Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' : d) }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Juros</label>
@@ -2926,7 +2954,7 @@ class AddOS extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.darfJuros[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfJuros: this.state.darfJuros.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfJuros: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfJuros[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfJuros: this.state.darfJuros.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfJuros: this.state.darfJuros.map((d, index) => index == this.state.paginaContabiliza || !d ? Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' : d) }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Valor de Pagamento</label>
@@ -2937,7 +2965,7 @@ class AddOS extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.darfPagamento[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfPagamento: this.state.darfPagamento.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfPagamento: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfPagamento[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfPagamento: this.state.darfPagamento.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfPagamento: this.state.darfPagamento.map((d, index) => index == this.state.paginaContabiliza || !d ? Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' : d) }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Outros Valores</label>
@@ -2948,7 +2976,7 @@ class AddOS extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.darfOutros[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfOutros: this.state.darfOutros.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfOutros: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfOutros[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfOutros: this.state.darfOutros.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfOutros: this.state.darfOutros.map((d, index) => index == this.state.paginaContabiliza || !d ? Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' : d) }) }} />
                                                                         </div>
                                                                     </>
                                                                 }
@@ -3589,9 +3617,9 @@ class AddOS extends Component {
                                             </div>
                                             {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'RELATORIOS_OS') { return e } }).map((e) => e.permissaoImprime)[0] == 1 &&
                                                 <>
-                                                    {/* <div className="relatorioButton">
+                                                    <div className="relatorioButton">
                                                         <button className="btn btn-danger" onClick={() => this.setState({ agrupadorModal: true, grupoSelecionado: 0, agrupadorEventos: [] })}>Custeio Subagente</button>
-                                                    </div> */}
+                                                    </div>
                                                     <div className="relatorioButton">
                                                         <button className="btn btn-danger"><Link style={{ color: "inherit", textDecoration: "none" }} to={{ pathname: "/financeiro/addFatura/0", state: { backTo: `/ordensservicos/os/${this.state.chave}`, os: this.state.os } }}>Emitir NF</Link></button>
                                                     </div>
@@ -3925,7 +3953,7 @@ class AddOS extends Component {
                                         </div>
                                     </div>
                                 }
-                                {false && this.props.match.params.id != 0 && this.state.custeios_subagentes[0] && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                {this.props.match.params.id != 0 && this.state.custeios_subagentes[0] && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
 
                                     <div>
                                         <br />

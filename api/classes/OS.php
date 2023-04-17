@@ -376,7 +376,7 @@ class OS
             custeios_subagentes.os,
             GROUP_CONCAT(custeios_subagentes.evento) as evento,
             SUM(os_servicos_itens.valor1) as valor,
-            os_servicos_itens.moeda as moeda,
+            custeios_subagentes.chave as chave_grupo,
             pessoas.nome as fornecedorNome,
             os_servicos_itens.tipo_sub as tipo',
             "custeios_subagentes.os = '" . $chave_os . "' GROUP BY custeios_subagentes.grupo"
@@ -611,7 +611,7 @@ class OS
         return true;
     }
 
-    public static function contabilizaCusteioSubagente($grupos, $os, $centro_custo)
+    public static function contabilizaCusteioSubagente($grupos)
     {
         $database = new Database();
 
@@ -619,15 +619,28 @@ class OS
             $lote = $database->doSelect('codigos', 'codigos.Proximo', "Tipo = 'LT'");
             //$database->doUpdate('codigos', 'Proximo = ' . ($lote[0]["Proximo"] + 1), "Tipo = 'LT'");
             $lote = $lote[0]["Proximo"];
-            $colsLancto = "Data, TipoDocto, CentroControle, Historico_Padrao, Pessoa, ChavePr, Usuario_Inclusao, Usuario_Alteracao, Data_Inclusao, Data_Alteracao, Historico, Lote, ContaDebito, ContaCredito, Valor, Deletado, tipo, atualizado";
-            $colsConta = 'Lancto, Tipo, Pessoa, Conta_Contabil, RepCodBar, Centro_Custo, Historico, Conta_Desconto, Parc_Ini, Parc_Fim, Valor, Vencimento, Vencimento_Original, Conta_Provisao, Saldo, Operador, Empresa, Docto, tipodocto, meio_pagamento, docto_origem';
+            $colsLancto = "Data, TipoDocto, CentroControle, Historico_Padrao, Pessoa, Usuario_Inclusao, Usuario_Alteracao, Data_Inclusao, Data_Alteracao, Deletado, tipo, atualizado, Lote, Historico, ChavePr, Valor, ContaDebito, ContaCredito";
+            $colsConta = 'Lancto, Tipo, Pessoa, Conta_Contabil, RepCodBar, Centro_Custo, Historico, Conta_Desconto, Parc_Ini, Parc_Fim, Vencimento, Vencimento_Original, Conta_Provisao, Operador, Empresa, Docto, tipodocto, meio_pagamento, docto_origem, Valor, Saldo, grupo_origem';
             $colsDarf = "codigo_receita, contribuinte, codigo_identificador_tributo, mes_compet_num_ref, data_apuracao, valor, valor_multa, valor_juros, valor_outros, valor_pagamento, chave_contas_aberto";
+            $colsRet = "chave_conta, complemento, tipo, valor, chave_conta_aberto";
 
-            $valuesLancto = $grupo->{"valuesLancto"};
+            $valuesLancto = $grupo->{"valuesLancto"}.", '$lote'";
             $valuesConta = $grupo->{"valuesConta"};
             $valuesDarf = $grupo->{"valuesDarf"};
 
-            $valorTotal = $grupos->{"valor1"};
+            $contaDesconto = "";
+            $contaINSS = "";
+            $contaIR = "";
+            $contaISS = "";
+            $contaCRF = "";
+
+            $cplDesconto = "";
+            $cplINSS = "";
+            $cplIR = "";
+            $cplISS = "";
+            $cplCRF = "";
+
+            $valorTotal = $grupo->{"vcp"};
             $valorDesconto = 0;
             $valorINSS = 0;
             $valorIR = 0;
@@ -636,27 +649,79 @@ class OS
 
             $eventos = $grupo->{"eventos"};
             foreach ($eventos as $evento) {
+
                 if ($evento->{"desconto_valor"} && $evento->{"desconto_valor"} != "0.00") {
                     $valorDesconto += $evento->{"desconto_valor"};
+                    $contaDesconto = $evento->{"desconto_conta"};
+                    $cplDesconto = $evento->{"desconto_cpl"};
                 }
 
                 if ($evento->{"retencao_inss_valor"} && $evento->{"retencao_inss_valor"} != "0.00") {
                     $valorINSS += $evento->{"retencao_inss_valor"};
+                    $contaINSS = $evento->{"retencao_inss_conta"};
+                    $cplINSS = $evento->{"retencao_inss_cpl"};
                 }
 
                 if ($evento->{"retencao_ir_valor"} && $evento->{"retencao_ir_valor"} != "0.00") {
                     $valorIR += $evento->{"retencao_ir_valor"};
+                    $contaIR = $evento->{"retencao_ir_conta"};
+                    $cplIR = $evento->{"retencao_ir_cpl"};
                 }
 
                 if ($evento->{"retencao_iss_valor"} && $evento->{"retencao_iss_valor"} != "0.00") {
                     $valorISS += $evento->{"retencao_iss_valor"};
+                    $contaISS = $evento->{"retencao_iss_conta"};
+                    $cplISS = $evento->{"retencao_iss_cpl"};
                 }
 
                 if ($evento->{"retencao_csll_valor"} && $evento->{"retencao_csll_valor"} != "0.00") {
                     $valorCRF += $evento->{"retencao_csll_valor"};
+                    $contaCRF = $evento->{"retencao_csll_conta"};
+                    $cplCRF = $evento->{"retencao_csll_cpl"};
                 }
             }
             $valorTotal -= ($valorDesconto + $valorINSS + $valorIR + $valorISS + $valorCRF);
+
+            $contaNova = $database->doInsert("contas_aberto", $colsConta, $valuesConta.", '$valorTotal', '$valorTotal', '".$grupo->{"chave"}."'");
+            $contaNova = $contaNova[0]["Chave"];
+            if ($valuesDarf) {
+                $valuesDarf .= "'$contaNova'";
+                $database->doInsert("contas_aberto_complementar", $colsDarf, $valuesDarf);
+            }
+            
+            if ($contaDesconto) {
+                $database->doInsert("contas_aberto_cc", $colsRet, "'$contaDesconto', '$cplDesconto', 'DESC', '$valorDesconto', '$contaNova'");
+
+                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '$cplDesconto', '$contaNova','$valorDesconto', '0', $contaDesconto");
+            }
+            if ($contaINSS) {
+                $database->doInsert("contas_aberto_cc", $colsRet, "'$contaINSS', '$cplINSS', 'INSS', '$valorINSS', '$contaNova'");
+
+                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '$cplINSS', '$contaNova','$valorINSS', '0', $contaINSS");
+            }
+            if ($contaIR) {
+                $database->doInsert("contas_aberto_cc", $colsRet, "'$contaIR', '$cplIR', 'IR', '$valorIR', '$contaNova'");
+
+                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '$cplIR', '$contaNova','$valorIR', '0', $contaIR");
+            }
+            if ($contaISS) {
+                $database->doInsert("contas_aberto_cc", $colsRet, "'$contaISS', '$cplISS', 'ISS', '$valorISS', '$contaNova'");
+
+                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '$cplISS', '$contaNova','$valorISS', '0', $contaISS");
+            }
+            if ($contaCRF) {
+                $database->doInsert("contas_aberto_cc", $colsRet, "'$contaCRF', '$cplCRF', 'CRF', '$valorCRF', '$contaNova'");
+
+                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '$cplCRF', '$contaNova','$valorCRF', '0', $contaCRF");
+            }
+
+            if ($valorTotal == $grupo->{"vcp"}) {
+                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '".$grupo->{"historico"}."', '$valorTotal', '$contaNova', '".$grupo->{"contaDebito"}."', '".$grupo->{"contaCredito"}."'");
+            } else {
+                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '" . $grupo->{"historico"} . "', '".$grupo->{"vcp"}."', '$contaNova', '" . $grupo->{"contaDebito"} . "', '" . $grupo->{"contaCredito"} . "'");
+
+                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '" . $grupo->{"historico"} . "', '$valorTotal', '$contaNova', '" . $grupo->{"contaDebito"} . "', '0'");
+            }
         }
 
         $database->closeConection();

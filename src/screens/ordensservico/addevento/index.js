@@ -64,6 +64,7 @@ const estadoInicial = {
     emails: [],
 
     recarregaPagina: "",
+    redirectOS: false,
 
     pessoas: [],
     pessoasOptions: [],
@@ -125,7 +126,7 @@ const estadoInicial = {
     emailsIniciais: [],
     emailsFinais: [],
 
-    alert: {type: "", msg: ""},
+    alert: { type: "", msg: "" },
 
     anexosForn: [],
 
@@ -937,8 +938,8 @@ class AddEvento extends Component {
     }
 
     saveEmail = async () => {
-        this.setState({alert: {type: "", msg: ""}});
-        
+        this.setState({ alert: { type: "", msg: "" } });
+
         await apiEmployee.post(`insertContato.php`, {
             token: true,
             values: `'EM', '${this.state.emails.join(';')}', '', ${this.state.fornecedor}`
@@ -954,7 +955,7 @@ class AddEvento extends Component {
             },
             async res => await console.log(`Erro: ${res.data}`)
         )
-    } 
+    }
 
     erroApi = async (res) => {
         alert(res)
@@ -989,6 +990,7 @@ class AddEvento extends Component {
                             className="btn btn-danger w-50"
                             onClick={
                                 async () => {
+                                    this.setState({ redirectOS: true });
                                     onClose()
                                 }
                             }
@@ -1059,6 +1061,9 @@ class AddEvento extends Component {
                         <Redirect to={{ pathname: '/ordensservico/addevento/0', state: { ... this.props.location.state, evento: {} } }} />
                         {window.location.reload()}
                     </>
+                }
+                {this.state.redirectOS &&
+                    <Redirect to={{ pathname: `/ordensservico/addos/${this.props.location?.state?.os?.Chave}`, state: { os: this.props?.location?.state?.os } }} />
                 }
                 {this.state.irParaFinanceiro && this.props.location.state && this.props.location.state.os &&
                     <Redirect to={{ pathname: `/ordensservico/addeventofinanceiro/${this.state.evento.chave}`, state: { evento: { ...this.state.evento }, os: { ...this.state.os } } }} />
@@ -1644,7 +1649,7 @@ class AddEvento extends Component {
                                                         <div className='col-1 errorMessage'>
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                        <Field className="form-control text-right" type="text" step="0.1" value={this.state.vlrc} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ vlrc: e.currentTarget.value }); if (this.state.repasse) { this.setState({ valor: e.currentTarget.value }) } }} onBlur={async e => { this.setState({ vlrc: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }); if (this.state.repasse) { this.setState({ valor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' })} }} />
+                                                            <Field className="form-control text-right" type="text" step="0.1" value={this.state.vlrc} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ vlrc: e.currentTarget.value }); if (this.state.repasse) { this.setState({ valor: e.currentTarget.value }) } }} onBlur={async e => { this.setState({ vlrc: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }); if (this.state.repasse) { this.setState({ valor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }) } }} />
                                                         </div>
                                                         <div className='col-1 errorMessage'>
                                                         </div>
