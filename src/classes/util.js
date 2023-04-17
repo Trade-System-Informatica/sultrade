@@ -122,11 +122,11 @@ export default class Util {
     }
 
     static completarPictures(valor) {
-        return `http://ftptrade.ddns.net/sultrade/api/documents/pictures/${valor}.png`
+        return `http://132.255.147.28/sultrade/api/documents/pictures/${valor}.png`
     }
     
     static completarDocuments(valor) {
-        return `http://ftptrade.ddns.net/sultrade/api/documents/${valor}`
+        return `http://132.255.147.28/sultrade/api/documents/${valor}`
     }
 
     static testaCPF(strCPF) {
