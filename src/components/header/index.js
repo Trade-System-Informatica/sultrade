@@ -548,11 +548,11 @@ class Header extends Component {
                                                                 OS
                                                             </Link>
                                                         }
-                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                        {/* {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                                             <Link className="dropdown-item" to={{ pathname: `/ordensservico/eventos` }}>
                                                                 Solitações de Serviço
                                                             </Link>
-                                                        }
+                                                        } */}
                                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'TARIFAS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                                             <Link className="dropdown-item" to={{ pathname: `/ordensservico/tarifas` }}>
                                                                 Tarifas de fornecedores
