@@ -791,12 +791,12 @@ class AddPessoa extends Component {
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 <Field type="checkbox" name='fornecedor' checked={this.state.categoria.fornecedor} onChange={async e => { this.setState({ categoria: { ...this.state.categoria, fornecedor: e.target.checked } }); if (e.target.checked) { await this.setState({ contaProvisao: this.state.contaProvisaoInicial }) } else { await this.setState({ contaProvisao: "" }) } }} />
                                                             </div>
-                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            {/* <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 <label>Prestador de Serviços</label>
                                                             </div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 <Field type="checkbox" name='prestador_servicos' checked={this.state.categoria.prestador_servico} onChange={async e => { this.setState({ categoria: { ...this.state.categoria, prestador_servico: e.target.checked } }) }} />
-                                                            </div>
+                                                            </div> */}
                                                             {/*<div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                     <label>Transportador</label>
                                                 </div>

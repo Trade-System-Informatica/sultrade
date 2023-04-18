@@ -2647,12 +2647,12 @@ class ModalListas extends Component {
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <Field type="checkbox" name='fornecedor' checked={this.state.clienteCategoria.fornecedor} onChange={async e => { this.setState({ clienteCategoria: { ...this.state.clienteCategoria, fornecedor: e.target.checked } }); if (e.target.checked) { await this.setState({ clienteContaProvisao: this.state.clienteContaProvisaoInicial }) } else { await this.setState({ clienteContaProvisao: "" }) } }} />
                                                         </div>
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                        {/* <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Prestador de Serviços</label>
                                                         </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <Field type="checkbox" name='prestador_servicos' checked={this.state.clienteCategoria.prestador_servico} onChange={async e => { this.setState({ clienteCategoria: { ...this.state.clienteCategoria, prestador_servico: e.target.checked } }) }} />
-                                                        </div>
+                                                        </div> */}
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Banco</label>
                                                         </div>
