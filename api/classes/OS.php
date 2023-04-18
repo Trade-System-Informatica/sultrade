@@ -617,7 +617,7 @@ class OS
 
         foreach ($grupos as $grupo) {
             $lote = $database->doSelect('codigos', 'codigos.Proximo', "Tipo = 'LT'");
-            //$database->doUpdate('codigos', 'Proximo = ' . ($lote[0]["Proximo"] + 1), "Tipo = 'LT'");
+            $database->doUpdate('codigos', 'Proximo = ' . ($lote[0]["Proximo"] + 1), "Tipo = 'LT'");
             $lote = $lote[0]["Proximo"];
             $colsLancto = "Data, TipoDocto, CentroControle, Historico_Padrao, Pessoa, Usuario_Inclusao, Usuario_Alteracao, Data_Inclusao, Data_Alteracao, Deletado, tipo, atualizado, Lote, Historico, ChavePr, Valor, ContaDebito, ContaCredito";
             $colsConta = 'Lancto, Tipo, Pessoa, Conta_Contabil, RepCodBar, Centro_Custo, Historico, Conta_Desconto, Parc_Ini, Parc_Fim, Vencimento, Vencimento_Original, Conta_Provisao, Operador, Empresa, Docto, tipodocto, meio_pagamento, docto_origem, Valor, Saldo, grupo_origem';
@@ -716,11 +716,11 @@ class OS
             }
 
             if ($valorTotal == $grupo->{"vcp"}) {
-                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '".$grupo->{"historico"}."', '$valorTotal', '$contaNova', '".$grupo->{"contaDebito"}."', '".$grupo->{"contaCredito"}."'");
+                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '".$grupo->{"historico"}."', '$contaNova', '$valorTotal', '".$grupo->{"contaDebito"}."', '".$grupo->{"contaCredito"}."'");
             } else {
-                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '" . $grupo->{"historico"} . "', '".$grupo->{"vcp"}."', '$contaNova', '" . $grupo->{"contaDebito"} . "', '" . $grupo->{"contaCredito"} . "'");
+                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '" . $grupo->{"historico"} . "', '$contaNova', '" . $grupo->{"vcp"} . "', '" . $grupo->{"contaDebito"} . "', '" . $grupo->{"contaCredito"} . "'");
 
-                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '" . $grupo->{"historico"} . "', '$valorTotal', '$contaNova', '" . $grupo->{"contaDebito"} . "', '0'");
+                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '" . $grupo->{"historico"} . "', '$contaNova', '$valorTotal', '" . $grupo->{"contaDebito"} . "', '0'");
             }
         }
 

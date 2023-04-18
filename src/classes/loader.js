@@ -465,6 +465,10 @@ export default class loader {
 
     //
     static async testaAcesso(acessos, permissoes, usuarioLogado) {
+        if (!acessos || !acessos[0] || !permissoes || !permissoes[0] || !usuarioLogado || !usuarioLogado.codigo) {
+            return [];
+        }
+        
         let permissao = '';
 
         const acessosPermissoes = acessos.map((e, i) => {

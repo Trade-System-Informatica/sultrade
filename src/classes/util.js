@@ -1,4 +1,5 @@
 import moment from 'moment'
+import { CAMINHO_DOCS, CAMINHO_DOCUMENTOS } from '../config'
 
 export default class Util {
 
@@ -122,11 +123,11 @@ export default class Util {
     }
 
     static completarPictures(valor) {
-        return `http://132.255.147.28/sultrade/api/documents/pictures/${valor}.png`
+        return `${CAMINHO_DOCUMENTOS}/pictures/${valor}.png`
     }
     
     static completarDocuments(valor) {
-        return `http://132.255.147.28/sultrade/api/documents/${valor}`
+        return `${CAMINHO_DOCUMENTOS}/${valor}`
     }
 
     static testaCPF(strCPF) {

@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { CAMINHO_API } from '../config'
+
 var url = '187.86.143.231'
 if (document.URL.search('10.0.0.220') >= 0) {
     console.log('interno' + document.URL)
@@ -12,7 +14,7 @@ var apiClient = axios.create({
 
 var apiEmployee = axios.create({
     //baseURL: 'http://10.0.0.220:8080/html/site/api/employee/',
-    baseURL: `http://ftptrade.ddns.net/sultrade/api/employee/`,
+    baseURL: `${CAMINHO_API}`,
     timeout: 30000
 })
 

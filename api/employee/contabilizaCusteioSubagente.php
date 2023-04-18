@@ -15,8 +15,9 @@ if($objData != NULL){
     $grupos = $objData->grupos;
     
     $os = new OS();
+
     
-    $result = $contas->contabilizaCusteioSubagente($grupos);
+    $result = $os->contabilizaCusteioSubagente($grupos);
 
     } else {
     $result = "false";

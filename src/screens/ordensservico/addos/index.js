@@ -1035,7 +1035,7 @@ class AddOS extends Component {
                 grupos[grupoIndex].vcp += parseFloat(evento.valor1);
             } else {
                 grupos.push({
-                    valuesLancto: `'${moment().format("YYYY-MM-DD")}', '${evento.tipo_documento}', '${this.state.centroCusto}', '${this.state.historicoPadrao[index]}', '${this.state.cliente}', '${this.state.usuarioLogado.codigo}', '${moment().format("YYYY-MM-DD")}', '${moment().format("YYYY-MM-DD")}', '0', '0'`,
+                    valuesLancto: `'${moment().format("YYYY-MM-DD")}', '${evento.tipo_documento ? evento.tipo_documento : ""}', '${this.state.centroCusto}', '${this.state.historicoPadrao[index]}', '${this.state.cliente}', '${this.state.usuarioLogado.codigo}', '${this.state.usuarioLogado.codigo}', '${moment().format("YYYY-MM-DD")}', '${moment().format("YYYY-MM-DD")}', '0', '0', '0'`,
                     valuesConta: `'${moment(evento.emissao ? evento.emissao : "").format("YYYY-MM-DD")}', '${evento.tipo_sub == 0 ? 1 : 0}', '${evento.fornecedor}', '${this.state.tipo_sub == 0 ? this.state.contaCredito[index] : this.state.contaDebito[index]}', '${this.state.codBarras[index]}', '${this.state.centroCusto}', '${this.state.historico[index]}', '${this.state.tipo_sub == 0 ? this.state.contaDebito[index] : this.state.contaCredito[index]}', '1', '1', '${evento.vencimento}', '${evento.vencimento}', '', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${evento.documento}', '${evento.tipo_documento}', '${this.state.meioPagamento[index]}', '${evento.chave}'`,
                     valuesDarf: ['DARF', 'GPS', 'GRU', 'PIX'].includes(this.state.meioPagamentoNome[index]) ? `'${this.state.codigoReceita[index]}', '${this.state.contribuinte[index]}', '${this.state.codigoIdentificadorTributo[index]}', '${this.state.mesCompetNumRef[index]}', '${moment(this.state.dataApuracao[index]).format("YYYY-MM-DD")}', '${parseFloat(this.state.darfValor[index].replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta[index].replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros[index].replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros[index].replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento[index].replaceAll('.', '').replaceAll(',', '.'))}'` : false,
                     eventos: [{ ...evento }],
@@ -1071,7 +1071,7 @@ class AddOS extends Component {
 
         console.log(grupos);
 
-        await apiEmployee.post(`contabilizaCusteioSubagente.php`, {
+        /*await apiEmployee.post(`contabilizaCusteioSubagente.php`, {
             token: true,
             grupos
         }).then(
@@ -1084,7 +1084,7 @@ class AddOS extends Component {
                 }
             },
             async res => await console.log(`Erro: ${res}`)
-        )
+        )*/
 
     }
 

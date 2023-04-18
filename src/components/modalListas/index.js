@@ -739,13 +739,13 @@ class ModalListas extends Component {
             return;
         }
 
+        this.setState({ clienteBloqueado: true })
         if (this.state.clienteCpfLimpo) {
             await this.testaCpf();
             if (!this.state.cpfAprovado) {
                 return;
             }
         }
-        this.setState({ clienteBloqueado: true })
 
         let categoria = [this.state.clienteCategoria.cliente ? 1 : 0, this.state.clienteCategoria.fornecedor ? 1 : 0, this.state.clienteCategoria.prestador_servico ? 1 : 0, this.state.clienteCategoria.transportador ? 1 : 0, this.state.clienteCategoria.banco ? 1 : 0, this.state.clienteCategoria.adm_cartao ? 1 : 0, this.state.clienteCategoria.adm_convenio ? 1 : 0]
         categoria = categoria.join('');
@@ -815,17 +815,18 @@ class ModalListas extends Component {
                     await this.setState({ cpfAprovado: true })
                 } else {
                     this.setState({
-                        clienteNome: this.state.pessoa.Nome,
-                        clienteNomeFantasia: this.state.pessoa.Nome_Fantasia,
-                        clienteCpf: this.state.pessoa.Cnpj_Cpf,
-                        clienteRG: this.state.pessoa.Rg_Ie,
-                        clienteInscricaoMunicipal: this.state.pessoa.Inscricao_Municipal,
-                        clienteNascimento: this.state.pessoa.Nascimento_Abertura,
-                        clienteInclusao: this.state.pessoa.Inclusao,
-                        clienteChave: this.state.pessoa.Chave,
-                        clienteContaContabil: this.state.pessoa.Conta_Contabil,
-                        clienteContaFatura: this.state.pessoa.Conta_Fatura,
-                        clienteContaProvisao: this.state.pessoa.Conta_Provisao
+                        clienteNome: res.data[0].Nome,
+                        clienteNomeFantasia: res.data[0].Nome_Fantasia,
+                        clienteCpf: res.data[0].Cnpj_Cpf,
+                        clienteRG: res.data[0].Rg_Ie,
+                        clienteInscricaoMunicipal: res.data[0].Inscricao_Municipal,
+                        clienteNascimento: res.data[0].Nascimento_Abertura,
+                        clienteInclusao: res.data[0].Inclusao,
+                        clienteChave: res.data[0].Chave,
+                        clienteContaContabil: res.data[0].Conta_Contabil,
+                        clienteContaFatura: res.data[0].Conta_Fatura,
+                        clienteContaProvisao: res.data[0].Conta_Provisao,
+                        cpfAprovado: false
                     })
                 }
             },
