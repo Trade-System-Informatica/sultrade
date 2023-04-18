@@ -1544,6 +1544,7 @@ class AddOS extends Component {
             let valorTotal = 0;
             let valorTotalCobrar = 0;
             let valorTotalPago = 0;
+            let valorTotalLiquido = 0;
             let contasCodigos = [];
             let contasValores = [];
             let pdf = '';
@@ -1579,6 +1580,7 @@ class AddOS extends Component {
                         <br />
                         {pdfCusteio.map((custeio, custeioIndex) => {
                             valorTotalCobrar = 0;
+                            valorTotalLiquido = 0;
                             valorTotalPago = 0;
                             valorTotal = 0;
 
@@ -1604,11 +1606,11 @@ class AddOS extends Component {
 
                                                 valorTotalCobrar += parseFloat(valor_cobrar);
                                                 valorTotalPago += parseFloat(valor_pago);
-
                                                 let valor_liquido = parseFloat(valor_cobrar) - parseFloat(valor_pago);
-
+                                                
                                                 valorTotal += valor_liquido;
                                                 totalConsolidado += parseFloat(valor_cobrar);
+                                                valorTotalLiquido += parseFloat(valor_cobrar);
 
                                                 return (
                                                     <>
@@ -1632,6 +1634,7 @@ class AddOS extends Component {
 
                                                 valorTotalPago += parseFloat(content.fornecedor_custeio == custeio ? 0 : valor_pago);
                                                 valorTotalCobrar += parseFloat(content.fornecedor_custeio == custeio ? valor_cobrar : 0);
+                                                valorTotalLiquido += parseFloat(content.fornecedor_custeio == custeio ? valor_cobrar : -valor_pago);
 
                                                 totalConsolidado += content.fornecedor_custeio == custeio ? valor_cobrar : 0;
 
@@ -1652,7 +1655,7 @@ class AddOS extends Component {
                                                             <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>{content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod}</td>
                                                             <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(content.fornecedor_custeio == custeio ? valor_cobrar : 0)}</td>
                                                             <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(content.fornecedor_custeio == custeio ? valor_pago : valor_pago)}</td>
-                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(content.fornecedor_custeio == custeio ? valor_cobrar : 0)}</td>
+                                                            <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(content.fornecedor_custeio == custeio ? valor_cobrar : -valor_pago)}</td>
                                                         </tr>
                                                     </>
                                                 )
@@ -1662,7 +1665,7 @@ class AddOS extends Component {
                                                 <td style={{ fontSize: '0.95em', border: "1px solid black" }}></td>
                                                 <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'><b>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalCobrar)}</b></td>
                                                 <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'><b>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(["16", "17"].includes(pdfCusteioCodigo[custeioIndex]) ? valorTotalPago : 0)}</b></td>
-                                                <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'><b>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalCobrar)}</b></td>
+                                                <td style={{ fontSize: '0.95em', border: "1px solid black", padding: "0px 3px 0px 3px" }} className='text-right'><b>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalLiquido)}</b></td>
                                             </tr>
                                         </table>
                                     </>
