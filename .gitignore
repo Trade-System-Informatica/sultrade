@@ -2,7 +2,11 @@ node_modules
 package.json
 src/config.js
 api/classes/Database.php
+<<<<<<< HEAD
 sultrade_cert.crt
 sultrade_cert.key
 sultrade_cert.pem
 sultrade_key.pem
+=======
+api/documents
+>>>>>>> 0eb065001bff1f8c5b59d682aa9f877f60b7e99b

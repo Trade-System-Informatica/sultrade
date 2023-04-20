@@ -54,8 +54,8 @@ function savePicture($picture ,$name, $format, $ext){
     $img = str_replace(' ', '+', $img);
     $data = base64_decode($img);
 
-    if (file_exists("../$link")) {
-        unlink("../$link");
+    if (file_exists("../../../$link")) {
+        unlink("../../../$link");
     }
     
     file_put_contents('../'.$link, $data);
@@ -79,7 +79,7 @@ function saveFornAnexo($doc, $name, $format, $ext, $key) {
     $img = str_replace(' ', '+', $img);
     $data = base64_decode($img);
 
-    file_put_contents('../'.$link, $data);
+    file_put_contents('../../../'.$link, $data);
 
     return $fullName;
 }
@@ -98,7 +98,7 @@ function savePDF($picture, $name = null){
     $img = str_replace(' ', '+', $img);
     $data = base64_decode($img);
 
-    file_put_contents('../'.$link, $data);
+    file_put_contents('../../../'.$link, $data);
 
     return $name;
 }

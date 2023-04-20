@@ -9,8 +9,8 @@ include_once '../classes/Contas.php';
 
 $data = file_get_contents("php://input");
 $objData = json_decode($data);
-$pathToCertificate = '/var/www/html/sultrade/sultrade_cert.crt';
-$pathToKey = '/var/www/html/sultrade/sultrade_cert.key';
+$pathToCertificate = '/var/www/html/sultradeDocs/certificates/sultrade_cert.crt';
+$pathToKey = '/var/www/html/sultradeDocs/certificates/sultrade_cert.key';
 $statusId = 1;
 
 if ($objData != NULL) {

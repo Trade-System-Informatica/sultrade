@@ -1856,7 +1856,7 @@ class AddOS extends Component {
                                                 }
                                             </tr>
                                             <tr>
-                                                {chave.vessel_name && moment(chave.vessel_name).format("DD/MM/YYYY") != "Invalid date" &&
+                                                {chave.vessel_name &&
                                                     <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Vessel Name:</b> {chave.vessel_name}</td>
                                                 }
                                                 {chave.data_saida && moment(chave.data_saida).format("DD/MM/YYYY") != "Invalid date" &&
@@ -1864,10 +1864,10 @@ class AddOS extends Component {
                                                 }
                                             </tr>
                                             <tr>
-                                                {chave.name_of_port && moment(chave.name_of_port).format("DD/MM/YYYY") != "Invalid date" &&
+                                                {chave.name_of_port &&
                                                     <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Name of Port:</b> {chave.name_of_port}</td>
                                                 }
-                                                <td colSpan={2} style={{ padding: "0px 3px 0px 3px", textAlign: chave.name_of_port && moment(chave.name_of_port).format("DD/MM/YYYY") != "Invalid date" ? "right" : "left", paddingRight: 8 }}>{mconversao()}</td>
+                                                <td colSpan={2} style={{ padding: "0px 3px 0px 3px", textAlign: chave.name_of_port ? "right" : "left", paddingRight: 8 }}>{mconversao()}</td>
                                             </tr>
                                         </table>
                                     </div>
