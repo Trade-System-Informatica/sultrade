@@ -1,1 +1,8 @@
 node_modules
+package.json
+src/config.js
+api/classes/Database.php
+sultrade_cert.crt
+sultrade_cert.key
+sultrade_cert.pem
+sultrade_key.pem
