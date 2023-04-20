@@ -787,9 +787,12 @@ class AddOS extends Component {
                 const options = this.state.centrosCustos.map((e) => {
                     return { label: `CC:${e.Codigo} - ${e.Descricao}`, value: e.Chave }
                 })
+
+                console.log(this.state.centrosCustos.find((e) => !this.state.centroCusto && e.Codigo == this.state.codigo.slice(2) && e.Codigo >= 5850));
                 options.unshift({ label: '--', value: '' })
 
                 await this.setState({ centrosCustosOptions: options })
+                
             },
             async err => console.log(`erro: ` + err)
         )

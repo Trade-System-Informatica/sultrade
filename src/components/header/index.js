@@ -128,11 +128,11 @@ class Header extends Component {
                 }
             }
 
-            if (this.props.user.expiry && moment().isSameOrBefore(this.props.user.expiry)) {
+            /*if (this.props.user.expiry && moment().isSameOrBefore(this.props.user.expiry)) {
                 await this.props.extendExpiration({ ...this.props.user });
             } else if (this.props.user.expiry) {
                 //await this.expirarSessao();
-            }
+            }*/
 
 
             await this.setState({ anexosNaoValidados: await loader.getBody(`getAnexosNaoValidados.php`) })
