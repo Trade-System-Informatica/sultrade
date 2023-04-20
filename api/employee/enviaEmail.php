@@ -41,7 +41,7 @@ if ($corpo) {
     <br><br>Permanecemos a disposicao.<br><br>Saudacoes,</div>";
 }
 
-$body .= "<br/><br/><br/><span><a href='http://ftptrade.ddns.net:2243/anexos/$os/$fornecedor'>Enviar documentos</a></span>";
+$body .= "<br/><br/><br/><span><a href='http://132.255.147.28:3000/anexos/$os/$fornecedor'>Enviar documentos</a></span>";
 
 if (!is_array($emails) || !is_array($anexos) && $anexos != null) {
     echo $return;
