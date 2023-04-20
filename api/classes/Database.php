@@ -5,7 +5,7 @@ class Database {
 	private static $_connection;
     
 	public function __construct(){
-        $this->connection = new mysqli('192.168.15.150', 
+        $this->connection = new mysqli('127.0.0.1', 
                                        'webtrade', 
                                        'T3760S', 
                                        'dbstrade'
