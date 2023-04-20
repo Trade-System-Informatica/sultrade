@@ -788,7 +788,12 @@ class AddOS extends Component {
                     return { label: `CC:${e.Codigo} - ${e.Descricao}`, value: e.Chave }
                 })
 
-                console.log(this.state.centrosCustos.find((e) => !this.state.centroCusto && e.Codigo == this.state.codigo.slice(2) && e.Codigo >= 5850));
+                const centroCusto = this.state.centrosCustos.find((e) => !this.state.centroCusto && e.Codigo == this.state.codigo.slice(2) && e.Codigo >= 5850);
+
+                if (centroCusto) {
+                    this.setState({centroCusto: centroCusto.Chave});
+                    console.log({centroCusto})
+                }
                 options.unshift({ label: '--', value: '' })
 
                 await this.setState({ centrosCustosOptions: options })
