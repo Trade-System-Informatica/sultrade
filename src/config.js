@@ -10,8 +10,8 @@ export const NOME_EMPRESA = 'SulTrade'
 // export const CAMINHO_DOCUMENTOS = 'http://ftptrade.ddns.net/sultrade/api/documents'
 // export const CAMINHO_DOCS = 'http://ftptrade.ddns.net/sultrade/api/documents/docs'
 // export const CAMINHO_API = 'http://ftptrade.ddns.net/sultrade/api/employee/'
-export const CAMINHO_DOCUMENTOS = 'http://132.255.147.28/sultrade/api/documents'
-export const CAMINHO_DOCS = 'http://132.255.147.28/sultrade/api/documents/docs'
+export const CAMINHO_DOCUMENTOS = 'http://132.255.147.28/documents'
+export const CAMINHO_DOCS = 'http://132.255.147.28/documents/docs'
 export const CAMINHO_API = 'http://132.255.147.28/sultrade/api/employee/'
 export const API_BANCO = 'https://api-ip.bb.com.br/pagamentos-lote/v1';
 
