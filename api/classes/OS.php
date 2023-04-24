@@ -468,7 +468,7 @@ class OS
                 $valuesCentroCusto = "'$codigo', '$codigo', 'ST$codigo $navio - $tipoServico - $cliente - $porto'";
                 $centroCusto = $database->doInsert('centros_custos', 'Chave, Codigo, Descricao', $valuesCentroCusto);
 
-                $database->doUpdate('codigos',"Proximo = '$codigo'", "Tipo = 'CC'");
+                //$database->doUpdate('codigos',"Proximo = '".($codigo+1)."'", "Tipo = 'CC'");
             }    
             $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, centro_custo';
             $result = $database->doInsert('os', $cols, $values.", '".$centroCusto[0]["Chave"]."'");
