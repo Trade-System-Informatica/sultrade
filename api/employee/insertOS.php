@@ -14,13 +14,17 @@ if($objData != NULL){
     $values = prepareInput($objData->values);
     $codigo = prepareInput($objData->codigo);
     $tipo = prepareInput($objData->tipo);
+    $navio = prepareInput($objData->navio);
+    $tipoServico = prepareInput($objData->tipoServico);
+    $cliente = prepareInput($objData->cliente);
+    $porto = prepareInput($objData->porto);
 
     //$employees = new Employees();
     $os = new OS();
 
     //$result = $employees->checkToken($token);
     //if($result == 'true'){
-    $result = $os->insertOS($values, $codigo, $tipo);
+    $result = $os->insertOS($values, $codigo, $tipo, $navio, $tipoServico, $cliente, $porto);
     //}
 } else {
     $result = "false";

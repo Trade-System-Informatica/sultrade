@@ -897,11 +897,18 @@ class AddOS extends Component {
 
         if (parseInt(this.state.chave) === 0 && validForm) {
             await this.getCodigo();
+            let clienteEncurtado = this.state.clientesOptions.find((cliente) => cliente.value == this.state.cliente)?.label;
+            clienteEncurtado = clienteEncurtado.split(" ")[0];
+            
             await apiEmployee.post(`insertOS.php`, {
                 token: true,
                 values: `'${this.state.usuarioLogado.codigo}', '${this.state.descricao}', 'ST${this.state.codigo.Proximo}', '${this.state.cliente}', '${this.state.navio}', '${moment(this.state.abertura).format('YYYY-MM-DD')}', '${moment(this.state.chegada).format('YYYY-MM-DD')}', '${moment(this.state.data_saida).format('YYYY-MM-DD')}', '${this.state.tipoServico}', '${this.state.viagem}', '${this.state.porto}', '${this.state.encerradoPor}', '${this.state.faturadoPor}', '${this.state.empresa}', '${this.state.eta}', '${this.state.atb}', '${this.state.etb}', '${this.state.governmentTaxes ? parseFloat(this.state.governmentTaxes.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.bankCharges ? parseFloat(this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.operador}'`,
                 codigo: this.state.codigo.Proximo,
-                tipo: this.state.codigo.Tipo
+                tipo: this.state.codigo.Tipo,
+                navio: this.state.naviosOptions.find((navio) => navio.value == this.state.navio)?.label,
+                tipoServico: this.state.tiposServicosOptions.find((tipo) => tipo.value == this.state.tipoServico)?.label,
+                cliente: clienteEncurtado,
+                porto: this.state.portosOptions.find((porto) => porto.value == this.state.porto)?.label,
             }).then(
                 async res => {
                     if (res.data[0].Chave) {

@@ -456,17 +456,31 @@ class OS
         return $result;
     }
 
-    public static function insertOS($values, $codigo, $tipo)
+    public static function insertOS($values, $codigo, $tipo, $navio = null, $tipoServico = null, $cliente = null, $porto = null)
     {
         $database = new Database();
+        
+        
+        if ($codigo >= 5850 && $navio && $tipoServico && $cliente && $porto) {
+            $centroCusto = $database->doSelect('centros_custos', 'Chave', "Codigo = '$codigo'");
+            
+            if (!$centroCusto[0]) {
+                $valuesCentroCusto = "'$codigo', '$codigo', 'ST$codigo $navio - $tipoServico - $cliente - $porto'";
+                $centroCusto = $database->doInsert('centros_custos', 'Chave, Codigo, Descricao', $valuesCentroCusto);
 
-        $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador';
-
-        $result = $database->doInsert('os', $cols, $values);
+                $database->doUpdate('codigos',"Proximo = '$codigo'", "Tipo = 'CC'");
+            }    
+            $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, centro_custo';
+            $result = $database->doInsert('os', $cols, $values.", '".$centroCusto[0]["Chave"]."'");
+        } else {
+            $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador';
+            $result = $database->doInsert('os', $cols, $values);
+        }
+            
 
         if ($result) {
             $query = "Proximo = '" . ($codigo + 1) . "'";
-            $result2 = $database->doUpdate('codigos', $query, "Tipo = '" . $tipo . "'");
+            $database->doUpdate('codigos', $query, "Tipo = '" . $tipo . "'");
         }
         $database->closeConection();
         return $result;
@@ -516,9 +530,9 @@ class OS
     {
         $database = new Database();
 
-        $cols = 'Descricao, Data, Cliente, Codigo';
+        $cols = 'Descricao, Data, Cliente, Codigo, Chave';
 
-        $result = $database->doInsert('centros_custos', $cols, $values);
+        $result = $database->doInsert('centros_custos', $cols, $values.", '$codigo'");
 
         if ($result) {
             $query = "Proximo = '" . ($codigo + 1) . "'";
@@ -535,7 +549,7 @@ class OS
 
         $cols = 'Descricao, Data, Cliente, Codigo';
 
-        $result = $database->doInsert('centros_custos', $cols, $values);
+        $result = $database->doInsert('centros_custos', $cols, $values.", '$codigo'");
 
         if ($result) {
             $query = "Proximo = '" . ($codigo + 1) . "'";
