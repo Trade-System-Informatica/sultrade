@@ -82,10 +82,10 @@ if ($os) {
         //Recipients
         $mail->setFrom('no-reply@tradesystem.com.br', 'Sultrade');
 
-        $mail->addAddress('dev2@tradesystem.com.br');     //Add a recipient
+        //$mail->addAddress('dev2@tradesystem.com.br');     //Add a recipient
         
-        //$mail->addAddress('operations@sultradeagency.com');     //Add a recipient
-        //$mail->addAddress('accounts@sultradeagency.com');     //Add a recipient
+        $mail->addAddress('operations@sultradeagency.com');     //Add a recipient
+        $mail->addAddress('accounts@sultradeagency.com');     //Add a recipient
         $mail->addCC('no-reply@tradesystem.com.br');
         $mail->addBCC('no-reply@tradesystem.com.br');
 
