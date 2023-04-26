@@ -602,7 +602,7 @@ class AddOS extends Component {
                         onChange2: async (valor) => { await this.setState({ eventoValor: valor }); await this.reloadItemEditMini() },
                         onBlur2: async (valor) => { await this.setState({ eventoValor: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); await this.reloadItemEditMini() },
                     },
-                    
+
                 ]
             }
         })
@@ -792,13 +792,13 @@ class AddOS extends Component {
                 const centroCusto = this.state.centrosCustos.find((e) => !this.state.centroCusto && e.Codigo == this.state.codigo.slice(2) && e.Codigo >= 5850);
 
                 if (centroCusto) {
-                    this.setState({centroCusto: centroCusto.Chave});
-                    console.log({centroCusto})
+                    this.setState({ centroCusto: centroCusto.Chave });
+                    console.log({ centroCusto })
                 }
                 options.unshift({ label: '--', value: '' })
 
                 await this.setState({ centrosCustosOptions: options })
-                
+
             },
             async err => console.log(`erro: ` + err)
         )
@@ -900,7 +900,7 @@ class AddOS extends Component {
             await this.getCodigo();
             let clienteEncurtado = this.state.clientesOptions.find((cliente) => cliente.value == this.state.cliente)?.label;
             clienteEncurtado = clienteEncurtado.split(" ")[0];
-            
+
             await apiEmployee.post(`insertOS.php`, {
                 token: true,
                 values: `'${this.state.usuarioLogado.codigo}', '${this.state.descricao}', 'ST${this.state.codigo.Proximo}', '${this.state.cliente}', '${this.state.navio}', '${moment(this.state.abertura).format('YYYY-MM-DD')}', '${moment(this.state.chegada).format('YYYY-MM-DD')}', '${moment(this.state.data_saida).format('YYYY-MM-DD')}', '${this.state.tipoServico}', '${this.state.viagem}', '${this.state.porto}', '${this.state.encerradoPor}', '${this.state.faturadoPor}', '${this.state.empresa}', '${this.state.eta}', '${this.state.atb}', '${this.state.etb}', '${this.state.governmentTaxes ? parseFloat(this.state.governmentTaxes.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.bankCharges ? parseFloat(this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.operador}'`,
@@ -1623,7 +1623,7 @@ class AddOS extends Component {
                                                 valorTotalCobrar += parseFloat(valor_cobrar);
                                                 valorTotalPago += parseFloat(valor_pago);
                                                 let valor_liquido = parseFloat(valor_cobrar) - parseFloat(valor_pago);
-                                                
+
                                                 valorTotal += valor_liquido;
                                                 totalConsolidado += parseFloat(valor_cobrar);
                                                 valorTotalLiquido += parseFloat(valor_cobrar);

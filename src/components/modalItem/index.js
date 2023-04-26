@@ -137,30 +137,54 @@ class ModalItem extends Component {
 
                                         <div className="row">
 
-                                                    {this.props.itemEditMini.valores.map((valor) => (
+                                            {this.props.itemEditMini.valores.filter((valor) => !valor.hidden).map((valor) => (
+                                                <>
+                                                    {valor.half &&
                                                         <>
-                                                            {valor.half &&
-                                                                <>
-                                                                    <>
-                                                                        <div className="col-12 labelForm">
-                                                                            <label>{valor.titulo}</label>
-                                                                        </div>
-                                                                        <div className='col-1 errorMessage'>
-                                                                        </div>
-                                                                        <div className="fieldDividido col-10">
-                                                                            <select className='form-control nextToInput fieldDividido_1' value={valor.valor1} onChange={async (e) => {console.log(e.currentTarget.value); await valor.onChange1(e.currentTarget.value)}}>
-                                                                                {valor.options1.map((e) => (
-                                                                                    <option value={e.value}>{e.label}</option>
-                                                                                ))}
-                                                                            </select>
-                                                                            <Field className="form-control fieldDividido_2 text-right " type="text" onClick={(e) => e.target.select()} value={valor.valor2} onChange={async (e) => await valor.onChange2(e.currentTarget.value)} onBlur={async e => await valor.onBlur2(e.currentTarget.value)} />
-                                                                        </div>
+                                                            <>
+                                                                <div className="col-12 labelForm">
+                                                                    <label>{valor.titulo}</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="fieldDividido col-10">
+                                                                    <select className='form-control nextToInput fieldDividido_1' value={valor.valor1} onChange={async (e) => { await valor.onChange1(e.currentTarget.value) }}>
+                                                                        {valor.options1.map((e) => (
+                                                                            <option value={e.value}>{e.label}</option>
+                                                                        ))}
+                                                                    </select>
+                                                                    <Field className="form-control fieldDividido_2 text-right " type="text" onClick={(e) => e.target.select()} value={valor.valor2} onChange={async (e) => await valor.onChange2(e.currentTarget.value)} onBlur={async e => await valor.onBlur2(e.currentTarget.value)} />
+                                                                </div>
 
-                                                                    </>
-                                                                </>
-                                                            }
+                                                            </>
                                                         </>
-                                                    ))}
+                                                    }
+                                                    {!valor.half &&
+                                                        <>
+                                                            <div className="col-12 labelForm">
+                                                                <label>{valor.titulo}</label>
+                                                            </div>
+                                                            <div className='col-1 errorMessage'>
+                                                            </div>
+                                                            <div className="col-10">
+                                                                {valor.tipo == "select" &&
+                                                                    <select className='form-control nextToInput fieldDividido_1' value={valor.valor} onChange={async (e) => { await valor.onChange(e.currentTarget.value) }}>
+                                                                        {valor.options.map((e) => (
+                                                                            <option value={e.value}>{e.label}</option>
+                                                                        ))}
+                                                                    </select>
+                                                                }
+                                                                {valor.tipo == "money" &&
+                                                                    <Field className="form-control text-right " type="text" onClick={(e) => e.target.select()} value={valor.valor} onChange={async (e) => await valor.onChange(e.currentTarget.value)} onBlur={async e => await valor.onBlur(e.currentTarget.value)} />
+                                                                }
+                                                                {valor.tipo != "select" && valor.tipo != "money" &&
+                                                                    <Field className="form-control" type={valor.tipo} value={valor.valor} onChange={async (e) => await valor.onChange(e.currentTarget.value)} />
+                                                                }
+                                                            </div>
+                                                        </>
+                                                    }
+                                                </>
+                                            ))}
 
                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
                                         </div>
