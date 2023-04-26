@@ -601,7 +601,8 @@ class AddOS extends Component {
                         tipo2: "text",
                         onChange2: async (valor) => { await this.setState({ eventoValor: valor }); await this.reloadItemEditMini() },
                         onBlur2: async (valor) => { await this.setState({ eventoValor: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); await this.reloadItemEditMini() },
-                    }
+                    },
+                    
                 ]
             }
         })
