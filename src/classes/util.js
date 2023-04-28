@@ -1,5 +1,6 @@
 import moment from 'moment'
 import { CAMINHO_DOCS, CAMINHO_DOCUMENTOS } from '../config'
+import XLSX from "xlsx-js-style";
 
 export default class Util {
 
@@ -258,6 +259,128 @@ export default class Util {
 
     static toFixed(num, precision) {
         return parseFloat((+(Math.round(+(num + 'e' + precision)) + 'e' + -precision)).toFixed(precision));
+    }
+
+    static async testExcell() {
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet([]);
+        console.log("QWE");
+
+        XLSX.utils.book_append_sheet(workbook, worksheet, "FATURAMENTOS");
+        const firstHeader = [
+            "NAVIO: MINDORO STAR",
+            "",
+            "",
+            "",
+            "ROE: 5"
+        ]
+
+        const smallHeaders = [
+            "Evento",
+            "Conta",
+            "Valor à Cobrar",
+            "Valor Pago",
+            "Valor Líquido"
+        ];
+
+        let bigHeader = [
+            "",
+            "",
+            "FATURAMENTO SUL TRADE AGENCIAMENTOS MARITIMOS LTDA",
+            "",
+            ""
+        ];
+
+        XLSX.utils.sheet_add_aoa(worksheet, [firstHeader, bigHeader, smallHeaders]);
+        console.log("ASD3");
+
+        let content = [{
+            "evento": "IMMIGRATION CLEARANCE AT FIRST AIRPORT - 03SUPTD",
+            "conta": "",
+            "valor_a_cobrar": 756.24,
+            "valor_pago": 0,
+            "valor_liquido": 756.24
+        }, {
+            "evento": "CUSTOMS/IMMIGRATIONCLEARANCE IN PORT - 03SUPTD",
+            "conta": "",
+            "valor_a_cobrar": 1436.86,
+            "valor_pago": 0,
+            "valor_liquido": 1436.86,
+        }, {
+            "evento": "SPECIAL SANITARY AUTHORITY CLEARANCE (COVID-19) - 03SUPTD",
+            "conta": "",
+            "valor_a_cobrar": 378.12,
+            "valor_pago": 0,
+            "valor_liquido": 378.12,
+        }, {
+            "evento": "CAR HIRE TO ANTICIPATE CLEARANCE WITH AUTHORITIES",
+            "conta": "",
+            "valor_a_cobrar": 0,
+            "valor_pago": 0,
+            "valor_liquido": 0,
+        }, {
+            "evento": "03SUPTD - CAR TRANSPORTATION SSA AIRPORT X HOTEL",
+            "conta": "",
+            "valor_a_cobrar": 0,
+            "valor_pago": 0,
+            "valor_liquido": 0,
+        }, {
+            "evento": "03SUPTD - CAR TRANSPORTATION HOTEL X VESSEL ON ARP/ 03",
+            "conta": "",
+            "valor_a_cobrar": 756.24,
+            "valor_pago": 0,
+            "valor_liquido": 756.24,
+        }, {
+            "evento": "IMMIGRATION/SANITARY CLEARANCE FOR DISEMBARK CREW AT ANCHORAGE AREA",
+            "conta": "",
+            "valor_a_cobrar": 0,
+            "valor_pago": 0,
+            "valor_liquido": 0,
+        }, {
+            "evento": "CAR HIRE TO TRANSFER MR. CLENTON BELONGS - BOAT STATION X OFFICE",
+            "conta": "",
+            "valor_a_cobrar": 0,
+            "valor_pago": 0,
+            "valor_liquido": 0,
+        }, {
+            "evento": "COORDINATION FEE ON HUSBANDRY SERVICES",
+            "conta": "",
+            "valor_a_cobrar": 1512.48,
+            "valor_pago": 0,
+            "valor_liquido": 1512.48,
+        }, {
+            "evento": "01 OFF/S - HOTEL AND MEALS",
+            "conta": "",
+            "valor_a_cobrar": 4285.36,
+            "valor_pago": 0,
+            "valor_liquido": 4285.36,
+        }];
+
+        XLSX.utils.sheet_add_json(worksheet, content, {
+            skipHeader: true,
+            origin: -1
+        })
+        console.log("ASD2");
+
+        // let footer = {
+        //     titulo: "VALOR DA NF A SER EMITIDA",
+        //     blank: "",
+        //     valor_a_cobrar: 9125.3,
+        //     valor_pago: 0,
+        //     valor_liquido: 9125.3
+        // };
+
+        // XLSX.utils.sheet_add_json(worksheet, footer, {
+        //     skipHeader: true,
+        //     origin: -1
+        // });
+        console.log("ASD");
+
+        const url = await XLSX.write(workbook, {
+            type: "buffer",
+            cellStyles: true
+        });
+        console.log(url);
     }
 
 }
