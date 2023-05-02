@@ -1444,17 +1444,17 @@ class AddOS extends Component {
                                 <br />
                                 <table className='voucherTableFinal'>
                                     <tr>
-                                        <td colSpan='4' className='pdfTitle pdf_small_col'>Total Final Costs</td>
+                                        <td colSpan='5' className='pdfTitle pdf_small_col'>Total Final Costs</td>
                                         <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinalDolar))}</td>
                                         <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinal))}</td>
                                     </tr>
                                     <tr>
-                                        <td colSpan='4' className='pdfTitle pdf_small_col'>Total Final Discounts</td>
+                                        <td colSpan='5' className='pdfTitle pdf_small_col'>Total Final Discounts</td>
                                         <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinal))}</td>
                                         <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinalDolar))}</td>
                                     </tr>
                                     <tr>
-                                        <td colSpan='4' className='pdfTitle pdf_small_col'>Final Blce/Debit Customer</td>
+                                        <td colSpan='5' className='pdfTitle pdf_small_col'>Final Blce/Debit Customer</td>
                                         <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinalDolar) - parseFloat(descontoFinalDolar))}</td>
                                         <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinal) - parseFloat(descontoFinal))}</td>
                                     </tr>
