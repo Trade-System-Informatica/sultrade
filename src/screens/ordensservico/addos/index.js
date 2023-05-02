@@ -1294,26 +1294,26 @@ class AddOS extends Component {
                         <div style={{ width: "80%", marginLeft: "5%" }}>
                             <table>
                                 <tr>
-                                    <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Company:</b> {company}</td>
+                                    <td colSpan={4} className="pdf_large_col"><b>Company:</b> {company}</td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Address:</b> {address}</td>
+                                    <td colSpan={4} className="pdf_large_col"><b>Address:</b> {address}</td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Vessel Name:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomeNavio)}</td>
+                                    <td colSpan={4} className="pdf_large_col"><b>Vessel Name:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomeNavio)}</td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Name of Port:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomePorto)}</td>
+                                    <td colSpan={4} className="pdf_large_col"><b>Name of Port:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomePorto)}</td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Arrived:</b> {moment(this.state.pdfContent[0].data_chegada).format('MMMM DD, YYYY') != "Invalid date" ? moment(this.state.pdfContent[0].data_chegada).format('MMMM DD, YYYY') : 'T.B.I.'}</td>
+                                    <td colSpan={4} className="pdf_large_col"><b>Arrived:</b> {moment(this.state.pdfContent[0].data_chegada).format('MMMM DD, YYYY') != "Invalid date" ? moment(this.state.pdfContent[0].data_chegada).format('MMMM DD, YYYY') : 'T.B.I.'}</td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Sailed:</b> {moment(this.state.pdfContent[0].data_saida).format('MMMM DD, YYYY') != "Invalid date" ? moment(this.state.pdfContent[0].data_saida).format('MMMM DD, YYYY') : 'T.B.I.'}</td>
+                                    <td colSpan={4} className="pdf_large_col"><b>Sailed:</b> {moment(this.state.pdfContent[0].data_saida).format('MMMM DD, YYYY') != "Invalid date" ? moment(this.state.pdfContent[0].data_saida).format('MMMM DD, YYYY') : 'T.B.I.'}</td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Date of Billing:</b> {moment(this.state.pdfContent[0].data_faturamento).format('MMMM DD, YYYY') != "Invalid date" ? moment(this.state.pdfContent[0].data_faturamento).format('MMMM DD, YYYY') : 'T.B.I.'}</td>
-                                    <td colSpan={2} style={{ padding: "0px 3px 0px 3px", textAlign: "right" }}><b>PO:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].codigo)}</td>
+                                    <td colSpan={2} className="pdf_large_col"><b>Date of Billing:</b> {moment(this.state.pdfContent[0].data_faturamento).format('MMMM DD, YYYY') != "Invalid date" ? moment(this.state.pdfContent[0].data_faturamento).format('MMMM DD, YYYY') : 'T.B.I.'}</td>
+                                    <td colSpan={2} className="pdf_money_col"><b>PO:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].codigo)}</td>
                                 </tr>
                             </table>
                         </div>
@@ -1353,8 +1353,8 @@ class AddOS extends Component {
                                 <table className={`voucherTable`}>
                                     <tr>
                                         <td className='pdfTitle' style={{ width: 75 }}>Voucher</td>
-                                        <td colSpan='2' className='pdfTitle'>Description</td>
-                                        <td className='pdfTitle'>Expense Type</td>
+                                        <td colSpan='3' className='pdfTitle'>Description</td>
+                                        <td colSpan='2' className='pdfTitle'>Expense Type</td>
                                         <td className='pdfTitle'>Final USD</td>
                                         <td className='pdfTitle'>Final BRL</td>
                                     </tr>
@@ -1409,11 +1409,11 @@ class AddOS extends Component {
                                                 })}
 
                                                 <tr>
-                                                    <td style={{ backgroundColor: backgroundColor, padding: "0px 3px 0px 3px", fontSize: 13 }}>{voucherInfo.chavTaxa}</td>
-                                                    <td colSpan='2' style={{ backgroundColor: backgroundColor, padding: "0px 3px 0px 3px", paddingRight: 25, fontSize: 13 }}>{voucherInfo.descSubgrupo}</td>
-                                                    <td style={{ backgroundColor: backgroundColor, padding: "0px 3px 0px 3px", paddingRight: 25, fontSize: 13 }}>{voucherInfo.descGrupo}</td>
-                                                    <td style={{ backgroundColor: backgroundColor, padding: "0px 3px 0px 3px", fontSize: 13 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(valorTotal / this.state.pdfContent[0].roe))}</td>
-                                                    <td style={{ backgroundColor: backgroundColor, padding: "0px 3px 0px 3px", fontSize: 13 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(valorTotal))}</td>
+                                                    <td className="pdf_small_col reduce_font" style={{ backgroundColor: backgroundColor }}>{voucherInfo.chavTaxa}</td>
+                                                    <td colSpan='3' className="pdf_large_col reduce_font" style={{ backgroundColor: backgroundColor }}>{voucherInfo.descSubgrupo}</td>
+                                                    <td colSpan='2' className="pdf_small_col reduce_font" style={{ backgroundColor: backgroundColor }}>{voucherInfo.descGrupo}</td>
+                                                    <td className="pdf_money_col reduce_font" style={{ backgroundColor: backgroundColor }}>{util.formataDinheiroBrasileiro(parseFloat(valorTotal / this.state.pdfContent[0].roe))}</td>
+                                                    <td className="pdf_money_col reduce_font" style={{ backgroundColor: backgroundColor }}>{util.formataDinheiroBrasileiro(parseFloat(valorTotal))}</td>
                                                 </tr>
 
 
@@ -1424,19 +1424,19 @@ class AddOS extends Component {
                                     {this.state.pdfContent[0].GT && ["SIM", "S"].includes(this.state.pdfContent[0].GT.toUpperCase()) &&
                                         <tr>
                                             <td></td>
-                                            <td colSpan='2' style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 13 }}>GOVERNMENT TAXES</td>
-                                            <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 13 }}></td>
-                                            <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 13 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe))}</td>
-                                            <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 13 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes))}</td>
+                                            <td colSpan='3' className="pdf_large_col" style={{ fontWeight: "bold" }}>GOVERNMENT TAXES</td>
+                                            <td colSpan='2' className="pdf_small_col" style={{ fontWeight: "bold" }}></td>
+                                            <td className="pdf_money_col" style={{ fontWeight: "bold" }}>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe))}</td>
+                                            <td className="pdf_money_col" style={{ fontWeight: "bold" }}>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes))}</td>
                                         </tr>
                                     }
                                     {this.state.pdfContent[0].BK && ["SIM", "S"].includes(this.state.pdfContent[0].BK.toUpperCase()) &&
                                         <tr>
                                             <td></td>
-                                            <td colSpan='2' style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 13 }}>BANK CHARGES</td>
-                                            <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 13 }}></td>
-                                            <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 13 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe))}</td>
-                                            <td style={{ fontWeight: "bold", padding: "0px 3px 0px 3px", fontSize: 13 }} className="text-right">{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges))}</td>
+                                            <td colSpan='3' className="pdf_large_col" style={{ fontWeight: "bold" }}>BANK CHARGES</td>
+                                            <td colSpan='2' className="pdf_small_col" style={{ fontWeight: "bold" }}></td>
+                                            <td className="pdf_money_col" style={{ fontWeight: "bold" }}>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe))}</td>
+                                            <td className="pdf_money_col" style={{ fontWeight: "bold" }}>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges))}</td>
                                         </tr>
                                     }
 
@@ -1444,19 +1444,19 @@ class AddOS extends Component {
                                 <br />
                                 <table className='voucherTableFinal'>
                                     <tr>
-                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} colSpan='4' className='pdfTitle'>Total Final Costs</td>
-                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(totalFinalDolar))}</td>
-                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(totalFinal))}</td>
+                                        <td colSpan='4' className='pdfTitle pdf_small_col'>Total Final Costs</td>
+                                        <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinalDolar))}</td>
+                                        <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinal))}</td>
                                     </tr>
                                     <tr>
-                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} colSpan='4' className='pdfTitle'>Total Final Discounts</td>
-                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinal))}</td>
-                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinalDolar))}</td>
+                                        <td colSpan='4' className='pdfTitle pdf_small_col'>Total Final Discounts</td>
+                                        <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinal))}</td>
+                                        <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinalDolar))}</td>
                                     </tr>
                                     <tr>
-                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} colSpan='4' className='pdfTitle'>Final Blce/Debit Customer</td>
-                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(totalFinalDolar) - parseFloat(descontoFinalDolar))}</td>
-                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 14 }} className='pdfTitle text-right'>{util.formataDinheiroBrasileiro(parseFloat(totalFinal) - parseFloat(descontoFinal))}</td>
+                                        <td colSpan='4' className='pdfTitle pdf_small_col'>Final Blce/Debit Customer</td>
+                                        <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinalDolar) - parseFloat(descontoFinalDolar))}</td>
+                                        <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinal) - parseFloat(descontoFinal))}</td>
                                     </tr>
                                 </table>
                                 <table className='pdfTable' style={{ width: "80%", marginLeft: "5%" }}>
@@ -1852,38 +1852,38 @@ class AddOS extends Component {
                                         <table style={{ width: "100%" }}>
                                             <tr>
                                                 {company &&
-                                                    <td colSpan={4} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Company:</b> {company}</td>
+                                                    <td colSpan={4} className="pdf_large_column"><b>Company:</b> {company}</td>
                                                 }
                                             </tr>
                                             <tr>
                                                 {address &&
-                                                    <td colSpan={3} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Address:</b> {address}</td>
+                                                    <td colSpan={3} className="pdf_large_column"><b>Address:</b> {address}</td>
                                                 }
                                                 {chave.codigo &&
-                                                    <td colSpan={1} style={{ padding: "0px 3px 0px 3px", textAlign: address ? "right" : "left", paddingRight: 5 }}><b>PO:</b> {chave.codigo}</td>
+                                                    <td colSpan={1} className={address ? "pdf_money_col" : "pdf_small_col"}><b>PO:</b> {chave.codigo}</td>
                                                 }
                                             </tr>
                                             <tr>
-                                                {chave.data_faturamento && moment(chave.data_faturamento).format("DD/MM/YYYY") != "Invalid date" &&
-                                                    <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Date of Billing:</b> {moment(chave.data_faturamento).format('DD/MM/YYYY')}</td>
+                                                {chave.data_faturamento && moment(chave.data_faturamento).isValid() &&
+                                                    <td colSpan={2} className="pdf_large_column"><b>Date of Billing:</b> {moment(chave.data_faturamento).format('DD/MM/YYYY')}</td>
                                                 }
                                                 {chave.eta && moment(chave.eta).format("DD/MM/YYYY") != "Invalid date" &&
-                                                    <td colSpan={2} style={{ padding: "0px 3px 0px 3px", textAlign: chave.data_faturamento && moment(chave.data_faturamento).format("DD/MM/YYYY") != "Invalid date" ? "right" : "left" }}><b>Arrived:</b> {moment(chave.eta).format('DD/MM/YYYY')}</td>
+                                                    <td colSpan={2} className={chave.data_faturamento && moment(chave.data_faturamento).isValid() ? "pdf_money_col" : "pdf_small_col"}><b>Arrived:</b> {moment(chave.eta).format('DD/MM/YYYY')}</td>
                                                 }
                                             </tr>
                                             <tr>
                                                 {chave.vessel_name &&
-                                                    <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Vessel Name:</b> {chave.vessel_name}</td>
+                                                    <td colSpan={2} className="pdf_large_column"><b>Vessel Name:</b> {chave.vessel_name}</td>
                                                 }
-                                                {chave.data_saida && moment(chave.data_saida).format("DD/MM/YYYY") != "Invalid date" &&
-                                                    <td colSpan={2} style={{ padding: "0px 3px 0px 3px", textAlign: chave.vessel_name && moment(chave.vessel_name).format("DD/MM/YYYY") != "Invalid date" ? "right" : "left" }}><b>Sailed:</b> {moment(chave.Data_Saida).format('DD/MM/YYYY')}</td>
+                                                {chave.data_saida && moment(chave.data_saida).isValid() &&
+                                                    <td colSpan={2} className={chave.vessel_name ? "pdf_money_col" : "pdf_small_col"}><b>Sailed:</b> {moment(chave.Data_Saida).format('DD/MM/YYYY')}</td>
                                                 }
                                             </tr>
                                             <tr>
                                                 {chave.name_of_port &&
-                                                    <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }}><b>Name of Port:</b> {chave.name_of_port}</td>
+                                                    <td colSpan={2} className="pdf_large_column"><b>Name of Port:</b> {chave.name_of_port}</td>
                                                 }
-                                                <td colSpan={2} style={{ padding: "0px 3px 0px 3px", textAlign: chave.name_of_port ? "right" : "left", paddingRight: 8 }}>{mconversao()}</td>
+                                                <td colSpan={2} className={chave.name_of_port ? "pdf_money_col" : "pdf_small_col"}>{mconversao()}</td>
                                             </tr>
                                         </table>
                                     </div>
@@ -1895,27 +1895,27 @@ class AddOS extends Component {
                                         <div className='center'>{chave.subgrupos}</div>
                                         <table>
                                             <tr>
-                                                <th style={{ padding: "0px 3px 0px 3px", paddingRight: 10 }} colSpan={2}>Services</th>
-                                                <th style={{ padding: "0px 3px 0px 3px" }}>Debit BRL</th>
-                                                <th style={{ padding: "0px 3px 0px 3px" }}>Debit USD</th>
+                                                <th className="pdf_large_col" colSpan={7}>Services</th>
+                                                <th>Debit BRL</th>
+                                                <th>Debit USD</th>
                                             </tr>
                                             {pdfContent.filter((e) => e.codsubgrupo_taxas == chave.codsubgrupo_taxas).map((e, i) => {
                                                 valorTotalReais += Util.toFixed(parseFloat(getValorItemReal(e)), 2);
                                                 valorTotalDolares += Util.toFixed(parseFloat(getValorItemDolar(e)), 2);
                                                 return (
                                                     <tr>
-                                                        <td style={{ padding: "0px 3px 0px 3px", paddingRight: 15, fontSize: 13 }} colSpan={2}>{getDescricaoItem(e)}</td>
-                                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 13 }}>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(getValorItemReal(e))}</td>
-                                                        <td style={{ padding: "0px 3px 0px 3px", fontSize: 13 }}>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(getValorItemDolar(e))}</td>
+                                                        <td className="pdf_large_col reduce-font" colSpan={7}>{getDescricaoItem(e)}</td>
+                                                        <td className="pdf_money_col reduce-font">{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(getValorItemReal(e))}</td>
+                                                        <td className="pdf_money_col reduce-font">{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(getValorItemDolar(e))}</td>
                                                     </tr>
 
                                                 )
                                             })
                                             }
                                             <tr>
-                                                <td colSpan={2} style={{ padding: "0px 3px 0px 3px", paddingRight: 15, fontSize: 13 }}><b>TOTAL</b></td>
-                                                <td style={{ padding: "0px 3px 0px 3px", fontSize: 13 }}><b>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalReais)}</b></td>
-                                                <td style={{ padding: "0px 3px 0px 3px", fontSize: 13 }}><b>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalDolares)}</b></td>
+                                                <td colSpan={7} className="pdf_large_col"><b>TOTAL</b></td>
+                                                <td className="pdf_money_col"><b>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalReais)}</b></td>
+                                                <td className="pdf_money_col"><b>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotalDolares)}</b></td>
                                             </tr>
 
                                         </table>
@@ -1997,33 +1997,33 @@ class AddOS extends Component {
                             <div>
                                 <table className='pdfTableCabecalho'>
                                     <tr>
-                                        <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>COMPANY:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].cliente)}</td>
-                                        <td style={{ padding: "0px 3px 0px 3px" }}></td>
-                                        <td style={{ padding: "0px 3px 0px 3px" }}></td>
+                                        <td className="pdf_small_col"><b style={{ paddingRight: 5 }}>COMPANY:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].cliente)}</td>
+                                        <td className="pdf_small_col"></td>
+                                        <td className="pdf_small_col"></td>
                                     </tr>
                                     <tr>
-                                        <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>ADDRESS:</b> {`${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].complemento)} ${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].rua)} ${this.state.pdfContent[0].numero && this.state.pdfContent[0].numero != "0" ? this.state.pdfContent[0].numero : ""} ${this.state.pdfContent[0].cep && this.state.pdfContent[0].cep != "0" ? this.state.pdfContent[0].cep : ""}`}</td>
-                                        <td style={{ padding: "0px 3px 0px 3px" }}></td>
-                                        <td style={{ padding: "0px 3px 0px 3px" }}></td>
+                                        <td className="pdf_small_col" colSpan='2'><b style={{ paddingRight: 5 }}>ADDRESS:</b> {`${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].complemento)} ${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].rua)} ${this.state.pdfContent[0].numero && this.state.pdfContent[0].numero != "0" ? this.state.pdfContent[0].numero : ""} ${this.state.pdfContent[0].cep && this.state.pdfContent[0].cep != "0" ? this.state.pdfContent[0].cep : ""}`}</td>
+                                        <td className="pdf_small_col"></td>
+                                        <td className="pdf_small_col"></td>
                                     </tr>
                                     <tr>
-                                        <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>Vessel Name:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomeNavio)}</td>
-                                        <td style={{ padding: "0px 3px 0px 3px", textAlign: "right" }} colSpan='2'><b style={{ paddingRight: 5 }}>Name of Port:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomePorto)}</td>
+                                        <td className="pdf_small_col" colSpan='2'><b style={{ paddingRight: 5 }}>Vessel Name:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomeNavio)}</td>
+                                        <td className="pdf_small_col" colSpan='2'><b style={{ paddingRight: 5 }}>Name of Port:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomePorto)}</td>
                                     </tr>
                                     <tr>
-                                        <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>Arrived:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].data_chegada)).format('MMMM DD, YYYY')}</td>
+                                        <td className="pdf_small_col" colSpan='2'><b style={{ paddingRight: 5 }}>Arrived:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].data_chegada)).format('MMMM DD, YYYY')}</td>
                                         {this.state.pdfContent[0].data_saida && moment(this.state.pdfContent[0].data_saida).format("DD/MM/YYYY") != "Invalid date" &&
-                                            <td style={{ padding: "0px 3px 0px 3px", textAlign: "right" }} colSpan='2'><b style={{ paddingRight: 5 }}>Sailed:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].data_saida)).format('MMMM DD, YYYY')}</td>
+                                            <td className="pdf_money_col" colSpan='2'><b style={{ paddingRight: 5 }}>Sailed:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].data_saida)).format('MMMM DD, YYYY')}</td>
                                         }
                                     </tr>
                                     <tr>
-                                        <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>PO:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].codigo)}</td>
-                                        <td style={{ padding: "0px 3px 0px 3px", textAlign: "right" }} colSpan='2'><b style={{ paddingRight: 5 }}>O.C.C:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].centro_custo)}</td>
+                                        <td className="pdf_small_col" colSpan='2'><b style={{ paddingRight: 5 }}>PO:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].codigo)}</td>
+                                        <td className="pdf_money_col" colSpan='2'><b style={{ paddingRight: 5 }}>O.C.C:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].centro_custo)}</td>
                                     </tr>
                                     <tr>
-                                        <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2'><b style={{ paddingRight: 5 }}>ROE:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].roe.replaceAll('.', ','))}</td>
-                                        <td style={{ padding: "0px 3px 0px 3px" }}></td>
-                                        <td style={{ padding: "0px 3px 0px 3px" }}></td>
+                                        <td className="pdf_small_col" colSpan='2'><b style={{ paddingRight: 5 }}>ROE:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].roe.replaceAll('.', ','))}</td>
+                                        <td className="pdf_small_col"></td>
+                                        <td className="pdf_small_col"></td>
                                     </tr>
                                 </table>
                                 <br />
@@ -2032,16 +2032,16 @@ class AddOS extends Component {
                         <div>
                             <table style={{ width: "90%", marginLeft: "5%" }}>
                                 <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px" }} colSpan='2' className=' pdfTitle'></td>
-                                    <td style={{ padding: "0px 3px 0px 3px" }}></td>
-                                    <td style={{ padding: "0px 3px 0px 3px" }}></td>
+                                    <td colSpan='2' className='pdf_small_col pdfTitle'></td>
+                                    <td className="pdf_small_col"></td>
+                                    <td className="pdf_small_col"></td>
                                 </tr>
                                 <tr>
                                 </tr>
                                 <tr>
-                                    <td colSpan='2' style={{ padding: "0px 3px 0px 3px", paddingRight: 15, backgroundColor: "#CDCDCD", fontSize: 14 }}>DESCRIPTION:</td>
-                                    <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 15, backgroundColor: "#CDCDCD", fontSize: 14 }}>VALUE (USD)</td>
-                                    <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 15, backgroundColor: "#CDCDCD", fontSize: 14 }}>VALUE (R$)</td>
+                                    <td colSpan='7' className="pdf_large_col" style={{ backgroundColor: "#CDCDCD" }}>DESCRIPTION:</td>
+                                    <td className='pdf_money_col' style={{ backgroundColor: "#CDCDCD" }}>VALUE (USD)</td>
+                                    <td className='pdf_money_col' style={{ backgroundColor: "#CDCDCD" }}>VALUE (R$)</td>
                                 </tr>
                                 {this.state.pdfContent.map((e, index) => {
                                     if (e.moeda == 5) {
@@ -2053,30 +2053,30 @@ class AddOS extends Component {
                                     }
                                     return (
                                         <tr style={{ background: index % 2 == 0 ? "white" : "#dddddd" }}>
-                                            <td colSpan='2' className='' style={{ padding: "0px 3px 0px 3px", background: index % 2 == 0 ? "white" : "#ccc", paddingRight: 15, fontSize: 13 }}>{e.descos}</td>
-                                            <td className='text-right' style={{ padding: "0px 3px 0px 3px", background: index % 2 == 0 ? "white" : "#ccc", paddingRight: 15, fontSize: 13 }}>{e.moeda == 5 ? util.formataDinheiroBrasileiro(parseFloat(e.valor / this.state.pdfContent[0].roe)) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
-                                            <td className='text-right' style={{ padding: "0px 3px 0px 3px", background: index % 2 == 0 ? "white" : "#ccc", paddingRight: 15, fontSize: 13 }}>{e.moeda == 6 ? util.formataDinheiroBrasileiro(parseFloat(e.valor * this.state.pdfContent[0].roe)) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
+                                            <td colSpan='7' className='pdf_large_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.descos}</td>
+                                            <td className='pdf_money_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.moeda == 5 ? util.formataDinheiroBrasileiro(parseFloat(e.valor / this.state.pdfContent[0].roe)) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
+                                            <td className='pdf_money_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.moeda == 6 ? util.formataDinheiroBrasileiro(parseFloat(e.valor * this.state.pdfContent[0].roe)) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
                                         </tr>
                                     )
                                 })}
                                 {this.state.pdfContent[0].governmentTaxes > 0 &&
                                     <tr>
-                                        <td colSpan='2' className='' style={{ padding: "0px 3px 0px 3px", fontSize: 13 }}><b>GOVERNMENT TAXES</b></td>
-                                        <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 15, fontSize: 13 }}><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe))}</b></td>
-                                        <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 15, fontSize: 13 }}><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes))}</b></td>
+                                        <td colSpan='7' className='pdf_large_col reduce_font'><b>GOVERNMENT TAXES</b></td>
+                                        <td className='pdf_money_col reduce_font'><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe))}</b></td>
+                                        <td className='pdf_money_col reduce_font'><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes))}</b></td>
                                     </tr>
                                 }
                                 {this.state.pdfContent[0].bankCharges > 0 &&
                                     <tr styles={{ padding: "37px 0px 37px 0px" }}>
-                                        <td colSpan='2' className='' style={{ padding: "0px 3px 0px 3px", fontSize: 13 }}><b>BANK CHARGES</b></td>
-                                        <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 15, fontSize: 13 }}><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe))}</b></td>
-                                        <td className='text-right' style={{ padding: "0px 3px 0px 3px", paddingRight: 15, fontSize: 13 }}><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges))}</b></td>
+                                        <td colSpan='7' className='pdf_large_col reduce_font'><b>BANK CHARGES</b></td>
+                                        <td className='pdf_money_col reduce_font'><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe))}</b></td>
+                                        <td className='pdf_money_col reduce_font'><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges))}</b></td>
                                     </tr>
                                 }
                                 <tr>
-                                    <td style={{ padding: "0px 3px 0px 3px", fontSize: 13 }} colSpan='2' className=' pdfTitle'>Total</td>
-                                    <td style={{ padding: "0px 3px 0px 3px", paddingRight: 15, fontSize: 13 }} className='text-right'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotalDolar))}</b></td>
-                                    <td style={{ padding: "0px 3px 0px 3px", paddingRight: 15, fontSize: 13 }} className='text-right'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotal))}</b></td>
+                                    <td colSpan='7' className='pdf_large_col pdfTitle'>Total</td>
+                                    <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotalDolar))}</b></td>
+                                    <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotal))}</b></td>
                                 </tr>
                             </table>
                         </div>

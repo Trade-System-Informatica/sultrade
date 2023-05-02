@@ -219,6 +219,23 @@
     background-color: #F8F8F8;
 }
 
+.pdf_small_col {
+    padding-right: 3px;
+}
+
+.pdf_money_col {
+    padding-right: 3px;
+    text-align: right;
+}
+
+.pdf_large_col {
+    padding: 0px 10px 0px 3px;
+}
+
+.reduce-font {
+    font-size: 13px;
+}
+
 @media (min-width: 768px) {
     .insideFormButton {
         font-size: 1.4em;
