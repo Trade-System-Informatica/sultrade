@@ -214,10 +214,10 @@ class Relatorio extends Component {
         const conta = this.state.conta ? `contas_aberto.Conta_Contabil = '${this.state.conta}'` : '';
         const centroCusto = this.state.centroCusto ? `contas_aberto.Centro_Custo = '${this.state.centroCusto}'` : '';
         const pessoa = this.state.pessoa ? `contas_aberto.pessoa = '${this.state.pessoa}'` : '';
-        const periodoInicial = this.state.periodoInicial ? this.state.tipo == 'aberto' ? `contas_aberto.vencimento >= '${moment(this.state.periodoInicial).format('YYYYMMDD')}'` : `contas_aberto.data_pagto >= '${moment(this.state.periodoInicial).format('YYYYMMDD')}'` : '';
-        const periodoFinal = this.state.periodoFinal ? this.state.tipo == 'aberto' ? `contas_aberto.vencimento <= '${moment(this.state.periodoFinal).format('YYYYMMDD')}'` : `contas_aberto.data_pagto <= '${moment(this.state.periodoFinal).format('YYYYMMDD')}'` : '';
-        const lancamentoInicial = this.state.lancamentoInicial ? `contas_aberto.lancto >= '${moment(this.state.lancamentoInicial).format('YYYYMMDD')}'` : '';
-        const lancamentoFinal = this.state.lancamentoFinal ? `contas_aberto.lancto <= '${moment(this.state.lancamentoFinal).format('YYYYMMDD')}'` : '';
+        let periodoInicial = this.state.periodoInicial ? this.state.tipo == 'aberto' ? `contas_aberto.vencimento >= '${moment(this.state.periodoInicial).format('YYYY-MM-DD')}'` : `contas_aberto.data_pagto >= '${moment(this.state.periodoInicial).format('YYYY-MM-DD')}'` : '';
+        let periodoFinal = this.state.periodoFinal ? this.state.tipo == 'aberto' ? `contas_aberto.vencimento <= '${moment(this.state.periodoFinal).format('YYYY-MM-DD')}'` : `contas_aberto.data_pagto <= '${moment(this.state.periodoFinal).format('YYYY-MM-DD')}'` : '';
+        const lancamentoInicial = this.state.lancamentoInicial ? `contas_aberto.lancto >= '${moment(this.state.lancamentoInicial).format('YYYY-MM-DD')}'` : '';
+        const lancamentoFinal = this.state.lancamentoFinal ? `contas_aberto.lancto <= '${moment(this.state.lancamentoFinal).format('YYYY-MM-DD')}'` : '';
         const exclusao = (this.state.excluirTipos || this.state.tiposDocumentos[0]) ? 'NOT' : '';
         const tiposDocumento = this.state.tiposDocumentos[0] ? `contas_aberto.tipodocto ${exclusao} IN (${this.state.tiposDocumentos.join(',')})` : ``;
 
@@ -227,6 +227,8 @@ class Relatorio extends Component {
                 tipo_sub = 0;
             } else {
                 tipo_sub = 1;
+                periodoInicial = "1 = 1";
+                periodoFinal = "1 = 1";
             }
         }
 
@@ -357,7 +359,7 @@ class Relatorio extends Component {
             <div style={{ zoom: 1 }} key={546546554654}>
 
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                    <img className="img-fluid" src="https://i.ibb.co/vmKJkx4/logo.png" alt="logo-Strade" border="0" style={{ width: '30%', height: '260px', maxWidth: "100%" }} />
+                    <img className="img-fluid" src="https://i.ibb.co/vmKJkx4/logo.png" alt="logo-Strade" border="0" style={{ width: '40%', height: '190px', maxWidth: "100%" }} />
                     {this.props.location.state.backTo == 'contasPagas' || this.props.location.state.backTo == 'contasPagar' &&
                         <h4>{titulo}</h4>
                     }
@@ -395,14 +397,14 @@ class Relatorio extends Component {
                                             <th>PO</th>
                                             <th>PORT OF CALL</th>
                                             <th>SAILED</th>
-                                            <th>FDA</th>
                                             <th>ROE</th>
+                                            <th>FDA</th>
                                             <th>DISCOUNT</th>
                                             <th>RECEIVED</th>
                                             <th>BALANCE</th>
                                         </tr>
                                         <tr style={{ backgroundColor: "#999999", border: "1px solid black" }}>
-                                            <th colSpan={6}>
+                                            <th colSpan={9}>
                                                 <span style={{ fontSize: "1.2em" }}>{this.state.por == "porCliente" && e.pessoa ? e.pessoa.split('@.@')[0]
                                                     : this.state.por == "porVencimento" && e.vencimento ? moment(e.vencimento.split('@.@')[0]).format('DD/MM/YYYY')
                                                         : e.dataPagamento ? moment(e.dataPagamento.split('@.@')[0]).format('DD/MM/YYYY') : ''}</span>
@@ -414,16 +416,16 @@ class Relatorio extends Component {
                                             let received = 0;
 
                                             if (e.os_moeda && this.state.moeda == e.os_moeda.split("@.@")[index] || !e.os_moeda) {
-                                                FDA = e.FDA ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.FDA.split("@.@")[index]) : '0,00';
-                                                discount = e.discount ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.discount.split("@.@")[index]) : "0,00";
+                                                FDA = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.valor.split("@.@")[index]) : '0,00';
+                                                discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.desconto.split("@.@")[index]) : "0,00";
                                                 received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.received.split("@.@")[index]) : "0,00";
                                             } else if (this.state.moeda == 5) {
-                                                FDA = e.FDA ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.FDA.split("@.@")[index])) : "0,00";
-                                                discount = e.discount ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.discount.split("@.@")[index])) : "0,00";
+                                                FDA = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.valor.split("@.@")[index])) : "0,00";
+                                                discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.desconto.split("@.@")[index])) : "0,00";
                                                 received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.received.split("@.@")[index])) : "0,00";
                                             } else {
-                                                FDA = e.FDA ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.FDA.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
-                                                discount = e.discount ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.discount.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
+                                                FDA = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.valor.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
+                                                discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.desconto.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
                                                 received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.received.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
                                             }
 
@@ -451,8 +453,8 @@ class Relatorio extends Component {
                                                         <td style={{ backgroundColor: "inherit" }}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.porto ? util.removeAcentos(e.porto.split('@.@')[index]) : e.porto_manual ? util.removeAcentos(e.porto_manual.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.sailed ? moment(e.sailed.split('@.@')[index]).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.sailed.split('@.@')[index]).format("DD/MM/YYYY") : ''}</td>
-                                                        <td style={{ backgroundColor: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {FDA}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.ROE ? e.ROE.split("@.@")[index] : ""}</td>
+                                                        <td style={{ backgroundColor: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {FDA}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {discount}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {received}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {balance}</td>
@@ -461,7 +463,7 @@ class Relatorio extends Component {
                                             }
                                         })}
                                         <tr>
-                                            <th colSpan='2'>{"Total ->"}</th>
+                                            <th colSpan='5'>{"Total ->"}</th>
                                             <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDAPorGrupo)}</td>
                                             <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalDiscountPorGrupo)}</td>
                                             <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalReceivedPorGrupo)}</td>

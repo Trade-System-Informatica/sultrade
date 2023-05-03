@@ -927,7 +927,7 @@ class AddOS extends Component {
             )
 
         } else if (validForm) {
-            if (!this.state.os.Data_Faturamento && this.state.faturamento) {
+            if ((!moment(this.state.os.Data_Faturamento) || !moment(this.state.os.Data_Faturamento).isValid()) && this.state.faturamento && moment(this.state.faturamento).isValid()) {
                 await this.faturaOS();
             }
 
@@ -978,11 +978,37 @@ class AddOS extends Component {
     }
 
     faturaOS = async () => {
-        const valor = this.calculaTotal();
+        let valor = 0;
+        let valorDesconto = 0;
 
-        await apiEmployee.post(`insertContaFornecedor.php`, {
+        this.state.eventos.map((evento) => {
+            if (evento.tipo_sub == 3 && evento.cancelada == 0) {
+                if (evento.Moeda == 5) {
+                    valorDesconto += parseFloat(evento.valor);
+                } else if (evento.Moeda == 6) {
+                    valorDesconto += (parseFloat(evento.valor) * (parseFloat(this.state.roe) == 0 ? 5 : parseFloat(this.state.roe)));
+                }
+            } else if (evento.cancelada == 0) {
+                if (evento.repasse != 0 || evento.Fornecedor_Custeio != 0) {
+                    if (evento.Moeda == 5) {
+                        valor += parseFloat(evento.valor);
+                    } else if (evento.Moeda == 6) {
+                        valor += (parseFloat(evento.valor) * (parseFloat(this.state.roe) == 0 ? 5 : parseFloat(this.state.roe)));
+                    }
+                }
+            }
+        });
+
+        let valuesRet = "";
+
+        if (valorDesconto != 0) {
+            valuesRet = `'0', '${parseFloat(valorDesconto)}', 'Desconto de ${this.state.codigo}', 'DESCONTO'`;
+        }
+
+        await apiEmployee.post(`insertContaOS.php`, {
             token: true,
-            values: `'${this.state.faturamento}', '0', '${this.state.cliente}', '0', '0', '${this.state.centroCusto}', '',  0,0, 0, '${parseFloat(`${valor}`.replaceAll('.', '').replaceAll(',', '.'))}', '0', '0', '0', '${0}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', 0, 0, 0, ''`,
+            values: `'${moment(this.state.faturamento).format("YYYY-MM-DD")}', '0', '${this.state.cliente}', '0', '0', '${this.state.centroCusto}', '',  0,0, 0, '${parseFloat(`${valor}`)}', '${parseFloat(`${valor}`)}', '0', '0', '${0}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', 0, 0, 0, ''`,
+            valuesRet
         }).then(
             async res => {
                 console.log(res.data);
@@ -1852,12 +1878,12 @@ class AddOS extends Component {
                                         <table style={{ width: "100%" }}>
                                             <tr>
                                                 {company &&
-                                                    <td colSpan={4} className="pdf_large_column"><b>Company:</b> {company}</td>
+                                                    <td colSpan={6} className="pdf_large_column"><b>Company:</b> {company}</td>
                                                 }
                                             </tr>
                                             <tr>
                                                 {address &&
-                                                    <td colSpan={3} className="pdf_large_column"><b>Address:</b> {address}</td>
+                                                    <td colSpan={5} className="pdf_large_column"><b>Address:</b> {address}</td>
                                                 }
                                                 {chave.codigo &&
                                                     <td colSpan={1} className={address ? "pdf_money_col" : "pdf_small_col"}><b>PO:</b> {chave.codigo}</td>
@@ -1865,25 +1891,25 @@ class AddOS extends Component {
                                             </tr>
                                             <tr>
                                                 {chave.data_faturamento && moment(chave.data_faturamento).isValid() &&
-                                                    <td colSpan={2} className="pdf_large_column"><b>Date of Billing:</b> {moment(chave.data_faturamento).format('DD/MM/YYYY')}</td>
+                                                    <td colSpan={3} className="pdf_large_column"><b>Date of Billing:</b> {moment(chave.data_faturamento).format('DD/MM/YYYY')}</td>
                                                 }
-                                                {chave.eta && moment(chave.eta).format("DD/MM/YYYY") != "Invalid date" &&
-                                                    <td colSpan={2} className={chave.data_faturamento && moment(chave.data_faturamento).isValid() ? "pdf_money_col" : "pdf_small_col"}><b>Arrived:</b> {moment(chave.eta).format('DD/MM/YYYY')}</td>
+                                                {chave.eta && moment(chave.eta).isValid() &&
+                                                    <td colSpan={3} className={chave.data_faturamento && moment(chave.data_faturamento).isValid() ? "pdf_money_col" : "pdf_small_col"}><b>Arrived:</b> {moment(chave.eta).format('DD/MM/YYYY')}</td>
                                                 }
                                             </tr>
                                             <tr>
                                                 {chave.vessel_name &&
-                                                    <td colSpan={2} className="pdf_large_column"><b>Vessel Name:</b> {chave.vessel_name}</td>
+                                                    <td colSpan={3} className="pdf_large_column"><b>Vessel Name:</b> {chave.vessel_name}</td>
                                                 }
                                                 {chave.data_saida && moment(chave.data_saida).isValid() &&
-                                                    <td colSpan={2} className={chave.vessel_name ? "pdf_money_col" : "pdf_small_col"}><b>Sailed:</b> {moment(chave.Data_Saida).format('DD/MM/YYYY')}</td>
+                                                    <td colSpan={3} className={chave.vessel_name ? "pdf_money_col" : "pdf_small_col"}><b>Sailed:</b> {moment(chave.Data_Saida).format('DD/MM/YYYY')}</td>
                                                 }
                                             </tr>
                                             <tr>
                                                 {chave.name_of_port &&
-                                                    <td colSpan={2} className="pdf_large_column"><b>Name of Port:</b> {chave.name_of_port}</td>
+                                                    <td colSpan={3} className="pdf_large_column"><b>Name of Port:</b> {chave.name_of_port}</td>
                                                 }
-                                                <td colSpan={2} className={chave.name_of_port ? "pdf_money_col" : "pdf_small_col"}>{mconversao()}</td>
+                                                <td colSpan={3} className={chave.name_of_port ? "pdf_money_col" : "pdf_small_col"}>{mconversao()}</td>
                                             </tr>
                                         </table>
                                     </div>
