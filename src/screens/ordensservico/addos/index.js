@@ -927,7 +927,7 @@ class AddOS extends Component {
             )
 
         } else if (validForm) {
-            if ((!moment(this.state.os.Data_Faturamento) || !moment(this.state.os.Data_Faturamento).isValid()) && this.state.faturamento && moment(this.state.faturamento).isValid()) {
+            if (((!moment(this.state.os.Data_Faturamento) || !moment(this.state.os.Data_Faturamento).isValid()) || !this.state.os.centro_custo == 0) && this.state.faturamento && moment(this.state.faturamento).isValid() && this.state.centroCusto != 0) {
                 await this.faturaOS();
             }
 
@@ -998,6 +998,8 @@ class AddOS extends Component {
                 }
             }
         });
+        valor += parseFloat(this.state.bankCharges);
+        valor += parseFloat(this.state.governmentTaxes);
 
         let valuesRet = "";
 
@@ -1113,7 +1115,7 @@ class AddOS extends Component {
 
         console.log(grupos);
 
-        /*await apiEmployee.post(`contabilizaCusteioSubagente.php`, {
+        await apiEmployee.post(`contabilizaCusteioSubagente.php`, {
             token: true,
             grupos
         }).then(
@@ -1126,7 +1128,7 @@ class AddOS extends Component {
                 }
             },
             async res => await console.log(`Erro: ${res}`)
-        )*/
+        )
 
     }
 
@@ -2023,18 +2025,14 @@ class AddOS extends Component {
                             <div>
                                 <table className='pdfTableCabecalho'>
                                     <tr>
-                                        <td className="pdf_small_col"><b style={{ paddingRight: 5 }}>COMPANY:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].cliente)}</td>
-                                        <td className="pdf_small_col"></td>
-                                        <td className="pdf_small_col"></td>
+                                        <td colSpan={4} className="pdf_large_col"><b style={{ paddingRight: 5 }}>COMPANY:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].cliente)}</td>
                                     </tr>
                                     <tr>
-                                        <td className="pdf_small_col" colSpan='2'><b style={{ paddingRight: 5 }}>ADDRESS:</b> {`${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].complemento)} ${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].rua)} ${this.state.pdfContent[0].numero && this.state.pdfContent[0].numero != "0" ? this.state.pdfContent[0].numero : ""} ${this.state.pdfContent[0].cep && this.state.pdfContent[0].cep != "0" ? this.state.pdfContent[0].cep : ""}`}</td>
-                                        <td className="pdf_small_col"></td>
-                                        <td className="pdf_small_col"></td>
+                                        <td className="pdf_large_col" colSpan='4'><b style={{ paddingRight: 5 }}>ADDRESS:</b> {`${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].complemento)} ${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].rua)} ${this.state.pdfContent[0].numero && this.state.pdfContent[0].numero != "0" ? this.state.pdfContent[0].numero : ""} ${this.state.pdfContent[0].cep && this.state.pdfContent[0].cep != "0" ? this.state.pdfContent[0].cep : ""}`}</td>
                                     </tr>
                                     <tr>
                                         <td className="pdf_small_col" colSpan='2'><b style={{ paddingRight: 5 }}>Vessel Name:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomeNavio)}</td>
-                                        <td className="pdf_small_col" colSpan='2'><b style={{ paddingRight: 5 }}>Name of Port:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomePorto)}</td>
+                                        <td className="pdf_money_col" colSpan='2'><b style={{ paddingRight: 5 }}>Name of Port:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomePorto)}</td>
                                     </tr>
                                     <tr>
                                         <td className="pdf_small_col" colSpan='2'><b style={{ paddingRight: 5 }}>Arrived:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].data_chegada)).format('MMMM DD, YYYY')}</td>
@@ -2047,9 +2045,7 @@ class AddOS extends Component {
                                         <td className="pdf_money_col" colSpan='2'><b style={{ paddingRight: 5 }}>O.C.C:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].centro_custo)}</td>
                                     </tr>
                                     <tr>
-                                        <td className="pdf_small_col" colSpan='2'><b style={{ paddingRight: 5 }}>ROE:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].roe.replaceAll('.', ','))}</td>
-                                        <td className="pdf_small_col"></td>
-                                        <td className="pdf_small_col"></td>
+                                        <td className="pdf_small_col" colSpan='4'><b style={{ paddingRight: 5 }}>ROE:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].roe.replaceAll('.', ','))}</td>
                                     </tr>
                                 </table>
                                 <br />

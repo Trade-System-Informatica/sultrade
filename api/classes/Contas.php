@@ -1363,6 +1363,8 @@ class Contas
                     }
                 }
             }
+            $valor += $ordem["bankCharges"];
+            $valor += $ordem["governmentTaxes"]; 
             
             $conta = $database->doSelect('contas_aberto', '*', "tipo = 0 AND Centro_Custo = ".$ordem["centro_custo"]." AND Centro_Custo != ''");
             if ($conta[0]) {
