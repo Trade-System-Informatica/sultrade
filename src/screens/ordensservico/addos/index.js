@@ -234,6 +234,7 @@ class AddOS extends Component {
 
         if (parseInt(id) !== 0) {
             await this.setState({ os: await loader.getOne('getOSUma.php', null, null, { chave_os: this.state.chave }) })
+            console.log(this.state.os);
             //console.log('Servicos: ' + JSON.stringify(this.state.tiposervico))
             //await this.loadData(this.state.tiposervico)
             await this.setState({
