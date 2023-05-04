@@ -303,6 +303,21 @@ class OS
         return $result;
     }
 
+    public static function getCentrosCustosLivres($os_chave)
+    {
+        $database = new Database();
+
+        $result = $database->doSelect(
+            'centros_custos
+        LEFT JOIN pessoas ON centros_custos.cliente = pessoas.chave LEFT JOIN os ON centros_custos.chave ON os.centro_custo',
+            'centros_custos.*, pessoas.Nome as pessoaNome',
+            "(Encerrado IS NULL OR Encerrado = '0000-00-00') AND (os.chave IS NULL OR os.chave = '$os_chave') ORDER BY centros_custos.codigo DESC"
+        );
+
+        $database->closeConection();
+        return $result;
+    }
+
     public static function getOrdem($chave_os)
     {
         $database = new Database();
@@ -468,7 +483,7 @@ class OS
                 $valuesCentroCusto = "'$codigo', '$codigo', 'ST$codigo $navio - $tipoServico - $cliente - $porto'";
                 $centroCusto = $database->doInsert('centros_custos', 'Chave, Codigo, Descricao', $valuesCentroCusto);
 
-                //$database->doUpdate('codigos',"Proximo = '".($codigo+1)."'", "Tipo = 'CC'");
+                $database->doUpdate('codigos',"Proximo = '".($codigo+1)."'", "Tipo = 'CC'");
             }    
             $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, centro_custo';
             $result = $database->doInsert('os', $cols, $values.", '".$centroCusto[0]["Chave"]."'");
@@ -532,11 +547,17 @@ class OS
 
         $cols = 'Descricao, Data, Cliente, Codigo, Chave';
 
+        $centrosCustosTeste = $database->doSelect('centros_custos', '*', "codigo = '$codigo'");
+
+        if ($centrosCustosTeste[0]) {
+            return ["error" => "Repetição de códigos"];
+        }
+
         $result = $database->doInsert('centros_custos', $cols, $values.", '$codigo'");
 
         if ($result) {
             $query = "Proximo = '" . ($codigo + 1) . "'";
-            $result2 = $database->doUpdate('codigos', $query, "Tipo = 'CC'");
+            $database->doUpdate('codigos', $query, "Tipo = 'CC'");
         }
 
         $database->closeConection();
@@ -547,16 +568,20 @@ class OS
     {
         $database = new Database();
 
-        $cols = 'Descricao, Data, Cliente, Codigo';
+        $cols = 'Descricao, Data, Cliente, Codigo, Chave';
 
-        $result = $database->doInsert('centros_custos', $cols, $values.", '$codigo'");
+        $centrosCustosTeste = $database->doSelect('centros_custos', '*', "codigo = '$codigo'");
+
+        if ($centrosCustosTeste[0]) {
+            return ["error" => "Repetição de códigos"];
+        }
+
+        $result = $database->doInsert('centros_custos', $cols, $values . ", '$codigo'");
 
         if ($result) {
             $query = "Proximo = '" . ($codigo + 1) . "'";
-            $result = $database->doUpdate('codigos', $query, "Tipo = 'CC'");
+            $database->doUpdate('codigos', $query, "Tipo = 'CC'");
         }
-
-        $result = $database->doSelect('centros_custos', 'centros_custos.*', '1=1 ORDER BY Chave DESC');
 
         $database->closeConection();
         return $result;

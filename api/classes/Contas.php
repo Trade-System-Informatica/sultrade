@@ -724,7 +724,7 @@ class Contas
     {
         $database = new Database();
 
-        $cols = 'Lancto, Tipo, Pessoa, Conta_Contabil, RepCodBar, Centro_Custo, Historico, Conta_Desconto, Parc_Ini, Parc_Fim, Valor, Vencimento, Vencimento_Original, Conta_Provisao, Saldo, Operador, Empresa, Docto, tipodocto, meio_pagamento, docto_origem';
+        $cols = 'Lancto, Tipo, Pessoa, Conta_Contabil, RepCodBar, Centro_Custo, Historico, Conta_Desconto, Parc_Ini, Parc_Fim, Valor, Saldo, Vencimento, Vencimento_Original, Conta_Provisao, Operador, Empresa, Docto, tipodocto, meio_pagamento, docto_origem';
 
         $result = $database->doInsert('contas_aberto', $cols, $values);
 
@@ -1087,6 +1087,25 @@ class Contas
         }
     }
 
+    public static function updateContaOS($old_centro_custo, $Lancto, $Pessoa, $Centro_Custo, $Valor, $Saldo, $Empresa, $valuesRet)
+    {
+        $database = new Database();
+
+        $query = "Lancto = '" . $Lancto . "', Pessoa = '" . $Pessoa . "', Centro_Custo = '" . $Centro_Custo . "', Valor = '" . $Valor . "', Saldo = '" . $Saldo . "', Empresa = '" . $Empresa . "'";
+        
+        $conta = $database->doSelect('contas_aberto LEFT JOIN contas_aberto_cc ON contas_aberto_cc.chave_conta_aberto = contas_aberto.chave', 'contas_aberto.chave AS chave, contas_aberto.codigo AS codigo, contas_aberto_cc.chave as chave_cc', 'contas_aberto.Centro_Custo = ' . $old_centro_custo. ' AND contas_aberto_cc.tipo == "DESCONTO"');
+        $database->doUpdate('contas_aberto', $query, 'Centro_Custo = ' . $old_centro_custo);
+
+        if ($conta[0] && $conta[0]["chave"]) {
+            $database->doUpdate("contas_aberto_cc", "valor = '$valuesRet'", "contas_aberto_cc.chave = ".$conta[0]["chave"]);
+        } else {
+            $database->doInsert("contas_aberto_cc", "valor, complemento, tipo", "'$valuesRet', 'Desconto de ".$conta[0]["codigo"]."', 'DESCONTO'");
+        }
+
+        $database->closeConection();
+        return $conta[0];
+    }
+
     public static function pagarConta($chave, $status, $transacao, $valor, $saldo, $data_pagto, $id_status)
     {
         $database = new Database();
@@ -1321,72 +1340,5 @@ class Contas
             );
         }
         return $result;
-    }
-
-
-    public static function deleteME() {
-        $database = new Database();
-
-        $os = $database->doSelect('os INNER JOIN contas_aberto ON contas_aberto.centro_custo = os.centro_custo', 'os.*, contas_aberto.Chave', "contas_aberto.Chave IS NOT NULL");
-        $osFiltradas = [];
-        
-        foreach($os as $ordem) {
-            if ($ordem["centro_custo"] != 0 || $ordem["Data_Faturamento"] == null || $ordem["Data_Faturamento"] == "0000-00-00 00:00") {
-                array_push($osFiltradas, $ordem);
-            } else {
-                $database->doDelete('contas_aberto', "Chave = ".$ordem["Chave"]);
-            }
-        }
-
-        $counter = 0;
-        foreach ($osFiltradas as $ordem) {
-            $counter++;
-            $eventos = $database->doSelect('os_servicos_itens', '*', "chave_os = ".$ordem["Chave"]);
-
-            $roe = $ordem["ROE"];
-            if (!$roe || $roe == 0) {
-                $roe = 5;
-            }
-
-            $valor = 0;
-            $valorDescontos = 0;
-
-            foreach($eventos as $evento) {
-                if ($evento["tipo_sub"] == 3 && $evento["cancelada"] == 0) {
-                    if ($evento["Moeda"] == 5) {
-                        $valorDescontos += $evento["valor"];
-                    } else if ($evento["Moeda"] == 6) {
-                        $valorDescontos += ($evento["valor"] * $roe);
-                    }
-                } else if ($evento["cancelada"] == 0) {
-                    if ($evento["repasse"] != 0 || $evento["Fornecedor_Custeio"] != 0)
-                    if ($evento["Moeda"] == 5) {
-                        $valor += $evento["valor"];
-                    } else if ($evento["Moeda"] == 6) {
-                        $valor += ($evento["valor"] * $roe);
-                    }
-                }
-            }
-            $valor += $ordem["bankCharges"];
-            $valor += $ordem["governmentTaxes"]; 
-            
-            $conta = $database->doSelect('contas_aberto', '*', "tipo = 0 AND Centro_Custo = ".$ordem["centro_custo"]." AND Centro_Custo != ''");
-            if ($conta[0]) {
-                $conta = $conta[0];
-                $database->doUpdate('contas_aberto', "valor = '$valor', saldo = '$valor'", "Chave = ".$conta["Chave"]."");
-            } else {
-                $cols = 'Lancto, Tipo, Pessoa, Conta_Contabil, RepCodBar, Centro_Custo, Historico, Conta_Desconto, Parc_Ini, Parc_Fim, Valor, Vencimento, Vencimento_Original, Conta_Provisao, Saldo, Operador, Empresa, Docto, tipodocto, meio_pagamento';
-                $values = "'".$ordem["Data_Faturamento"]."', '0', '".$ordem["Chave_Cliente"]."', '0', '0', '".$ordem["centro_custo"]."', '',  0,0, 0, '$valor', '', '', '', '$valor', '1', '1', 0, 0, 0";
-                $conta = $database->doInsert('contas_aberto', $cols, $values);
-                $conta = $conta[0];
-            }
-
-
-            if ($valorDescontos) {
-                $database->doInsert('contas_aberto_cc', "chave_conta_aberto, chave_conta, valor, complemento, tipo", "'".$conta['Chave']."', 0, '$valorDescontos', 'Desconto de ".$ordem["codigo"]."', 'DESCONTO'");
-            }
-
-        }
-        return $counter;
     }
 }

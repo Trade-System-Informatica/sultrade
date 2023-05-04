@@ -7,6 +7,7 @@ import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
+import Alert from '../../../components/alert'
 import { apiEmployee } from '../../../services/apiamrg'
 import moment from 'moment'
 import Select from 'react-select';
@@ -50,6 +51,7 @@ const estadoInicial = {
     acessosPermissoes: [],
 
     bloqueado: false,
+    alert: {type: "", msg: ""}
 }
 
 class AddCentroCusto extends Component {
@@ -127,7 +129,9 @@ class AddCentroCusto extends Component {
         })
 
         if (parseInt(this.state.chave) === 0 && validForm) {
-            await this.setState({codigo: await loader.getCodigoCC()});
+            if (!this.state.codigo) {
+                await this.setState({codigo: await loader.getCodigoCC()});    
+            }
             
             await apiEmployee.post(`insertCentroCusto.php`, {
                 token: true,
@@ -140,8 +144,10 @@ class AddCentroCusto extends Component {
                         await this.setState({ chave: res.data[0].Chave })
                         loader.salvaLogs('centros_custos', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
                         await this.setState({ loading: false, bloqueado: false })
+                    } else if (res.data.error) {
+                        this.setState({alert: {type: "error", msg: res.data.error}})
                     } else {
-                        console.log(res)
+                        console.log(res);
                     }
                 },
                 async res => await console.log(`Erro: ${res.data}`)
@@ -196,6 +202,7 @@ class AddCentroCusto extends Component {
     render() {
         const validations = [];
         validations.push(this.state.descricao);
+        validations.push(!this.state.codigo || this.state.codigo == parseInt(this.state.codigo));
         validations.push(!this.state.bloqueado);
 
 
@@ -211,6 +218,7 @@ class AddCentroCusto extends Component {
                 <section>
                     <Header voltarCentrosCustos titulo="Centro de Custo" chave={this.state.chave != 0 ? this.state.chave : ''}/>
                 </section>
+                <Alert alert={this.state.alert} setAlert={(value) => this.setState({ alert: value })} />
 
                 {this.state.chave !=0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                     <div className="logButton">
@@ -247,25 +255,17 @@ class AddCentroCusto extends Component {
                                         <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12 ">
 
                                             <div className="row addservicos">
-                                                {this.state.codigo != 0 &&
                                                     <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
                                                         <label>Codigo</label>
                                                     </div>
-                                                }
-                                                {this.state.codigo != 0 &&
                                                     <div className='col-1'></div>
-                                                }
-                                                {this.state.codigo != 0 &&
                                                     <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10 ">
-                                                        <Field className="form-control" style={{ backgroundColor: '#dddddd' }} type="text" disabled value={this.state.codigo} />
+                                                        <Field className="form-control" type="text" disabled={this.state.chave != 0} value={this.state.codigo} onChange={(e) => this.state.chave == 0 ? this.setState({codigo: e.currentTarget.value}) : {}}/>
                                                     </div>
-                                                }
-                                                {this.state.codigo != 0 &&
                                                     <div className="col-xl-4 col-lg-4 col-md-3 col-sm-1 col-1 ">
                                                     </div>
-                                                }
-
-                                                <div className={this.state.codigo == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
+                                                
+                                                <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
                                                     <label>Descricao</label>
                                                 </div>
                                                 <div className="col-1 errorMessage">

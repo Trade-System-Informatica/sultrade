@@ -234,9 +234,7 @@ class AddOS extends Component {
 
         if (parseInt(id) !== 0) {
             await this.setState({ os: await loader.getOne('getOSUma.php', null, null, { chave_os: this.state.chave }) })
-            console.log(this.state.os);
-            //console.log('Servicos: ' + JSON.stringify(this.state.tiposervico))
-            //await this.loadData(this.state.tiposervico)
+
             await this.setState({
                 descricao: this.state.os.Descricao,
                 codigo: this.state.os.codigo,
@@ -432,7 +430,6 @@ class AddOS extends Component {
             async res => {
                 if (res.data) {
                     this.setState({ custeios_subagentes: [...res.data] });
-                    console.log(res.data);
                 }
             },
             async res => await console.log(`Erro: ${res}`)
@@ -780,8 +777,9 @@ class AddOS extends Component {
     }
 
     getCentrosCustos = async () => {
-        await apiEmployee.post('getCentrosCustosAtivos.php', {
-            token: true
+        await apiEmployee.post('getCentrosCustosLivres.php', {
+            token: true,
+            os_chave: this.state.chave
         }).then(
             async res => {
                 await this.setState({ centrosCustos: res.data })
@@ -794,7 +792,6 @@ class AddOS extends Component {
 
                 if (centroCusto) {
                     this.setState({ centroCusto: centroCusto.Chave });
-                    console.log({ centroCusto })
                 }
                 options.unshift({ label: '--', value: '' })
 
@@ -1004,20 +1001,39 @@ class AddOS extends Component {
 
         let valuesRet = "";
 
-        if (valorDesconto != 0) {
-            valuesRet = `'0', '${parseFloat(valorDesconto)}', 'Desconto de ${this.state.codigo}', 'DESCONTO'`;
-        }
+        if (this.state.faturadoPor == 0) {
+            if (valorDesconto != 0) {
+                valuesRet = `'0', '${parseFloat(valorDesconto)}', 'Desconto de ${this.state.codigo}', 'DESCONTO'`;
+            }
 
-        await apiEmployee.post(`insertContaOS.php`, {
-            token: true,
-            values: `'${moment(this.state.faturamento).format("YYYY-MM-DD")}', '0', '${this.state.cliente}', '0', '0', '${this.state.centroCusto}', '',  0,0, 0, '${parseFloat(`${valor}`)}', '${parseFloat(`${valor}`)}', '0', '0', '${0}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', 0, 0, 0, ''`,
-            valuesRet
-        }).then(
-            async res => {
-                console.log(res.data);
-            },
-            async res => await console.log(`Erro: ${res.data}`)
-        )
+            await apiEmployee.post(`insertContaOS.php`, {
+                token: true,
+                values: `'${moment(this.state.faturamento).format("YYYY-MM-DD")}', '0', '${this.state.cliente}', '0', '0', '${this.state.centroCusto}', '',  0,0, 0, '${parseFloat(`${valor}`)}', '${parseFloat(`${valor}`)}', '0', '0', '${0}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', 0, 0, 0, ''`,
+                valuesRet
+            }).then(
+                async res => {
+                    console.log(res.data);
+                },
+                async res => await console.log(`Erro: ${res.data}`)
+            )
+        } else {
+            await apiEmployee.post(`updateContaOS.php`, {
+                token: true,
+                Lancto: moment(this.state.faturamento).format("YYYY-MM-DD"),
+                Pessoa: this.state.cliente,
+                Centro_Custo: this.state.centroCusto,
+                Valor: parseFloat(valor),
+                Saldo: parseFloat(valor),
+                Operador: this.state.usuarioLogado.codigo,
+                Empres: this.state.empresa,
+                valuesRet: parseFloat(valorDesconto)
+            }).then(
+                async res => {
+                    console.log(res.data);
+                },
+                async res => await console.log(`Erro: ${res.data}`)
+            )
+        }
     }
 
     calculaValorTotal = async () => {
@@ -1114,7 +1130,6 @@ class AddOS extends Component {
             }
         })
 
-        console.log(grupos);
 
         await apiEmployee.post(`contabilizaCusteioSubagente.php`, {
             token: true,
@@ -1122,7 +1137,6 @@ class AddOS extends Component {
         }).then(
             async res => {
                 if (res.data === true) {
-                    console.log(res.data);
                     await this.setState({ loading: false })
                 } else {
                     await alert(`Erro ${JSON.stringify(res)}`)
@@ -3561,10 +3575,10 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
-                                                                <Select className='SearchSelect' options={this.state.centrosCustosOptions.filter(e => this.filterSearchCentroCusto(e, this.state.centrosCustosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ centrosCustosOptionsTexto: e }) }} value={this.state.centrosCustosOptions.filter(option => option.value == this.state.centroCusto)[0]} search={true} onChange={(e) => { this.setState({ centroCusto: e.value, }) }} />
+                                                                <Select isDisabled={this.state.codigo.slice(2) >= 5850} className='SearchSelect' options={this.state.centrosCustosOptions.filter(e => this.filterSearchCentroCusto(e, this.state.centrosCustosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ centrosCustosOptionsTexto: e }) }} value={this.state.centrosCustosOptions.filter(option => option.value == this.state.centroCusto)[0]} search={true} onChange={(e) => { this.setState({ centroCusto: e.value, }) }} />
                                                             </div>
                                                             <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
-                                                                {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CENTROS_CUSTOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                                                {this.state.codigo.slice(2) < 5850 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CENTROS_CUSTOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                                                     <div className='insideFormButton' onClick={async () => {
                                                                         if (this.state.centrosCustos[0]) { } else {
                                                                             await this.setState({
