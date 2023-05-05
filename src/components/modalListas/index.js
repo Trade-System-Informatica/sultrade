@@ -989,7 +989,9 @@ class ModalListas extends Component {
             return;
         }
         this.setState({ centroCustoBloqueado: true });
-        await this.setState({ centroCustoCodigo: await loader.getCodigoCC() });
+        if (!this.state.centroCustoCodigo) {
+            await this.setState({ centroCustoCodigo: await loader.getCodigoCC() });
+        }
 
         await this.setState({
             dadosFinais: [
@@ -3992,19 +3994,15 @@ class ModalListas extends Component {
                                                 <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
 
                                                     <div className="row addservicos">
-                                                        {this.state.centroCustoCodigo &&
-                                                            <>
-                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
-                                                                    <label>Código</label>
-                                                                </div>
-                                                                <div className='col-1'></div>
-                                                                <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10">
-                                                                    <Field className="form-control" style={{ textAlign: 'center', backgroundColor: '#dddddd' }} type="text" disabled value={this.state.centroCustoCodigo} />
-                                                                </div>
-                                                                <div className="col-xl-5 col-lg-5 col-md-3 col-sm-1 col-1">
-                                                                </div>
-                                                            </>
-                                                        }
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
+                                                            <label>Código</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10">
+                                                            <Field className="form-control" style={{ textAlign: 'center', backgroundColor: '#dddddd' }} type="text" disabled={this.state.centroCustoChave != 0} value={this.state.centroCustoCodigo} onChange={(e) => this.setState({centroCustoCodigo: e.currentTarget.value})} />
+                                                        </div>
+                                                        <div className="col-xl-5 col-lg-5 col-md-3 col-sm-1 col-1">
+                                                        </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Descricao</label>
                                                         </div>

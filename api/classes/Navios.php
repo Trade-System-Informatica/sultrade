@@ -79,7 +79,7 @@ class Navios
         paises.nome AS pais,
         pessoas_enderecos.complemento AS complemento',
 
-            "os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.fornecedor_custeio != 0)
+            "os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND (os_servicos_itens.tipo_sub = 0 OR os_servicos_itens.tipo_sub = 1) AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.fornecedor_custeio != 0)
             ORDER BY os_servicos_itens.ordem ASC"
 /*            "(os_taxas.tipo='R' OR os_servicos_itens.repasse= 1 OR (os_servicos_itens.fornecedor_custeio != '0' AND os_servicos_itens.fornecedor_custeio != '')) AND os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0
             ORDER BY os_servicos_itens.ordem ASC"*/
@@ -188,7 +188,7 @@ class Navios
         pessoas_enderecos.endereco as address, 
         os_portos.descricao as name_of_port,
         os_navios.nome as vessel_name",
-            "os.codigo='" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.Fornecedor_Custeio != '') ORDER BY os_servicos_itens.ordem ASC"
+            "os.codigo='" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND (os_servicos_itens.tipo_sub = 0 OR os_servicos_itens.tipo_sub = 1) AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.Fornecedor_Custeio != '') ORDER BY os_servicos_itens.ordem ASC"
         );
 
         $result['chaves'] = $database->doSelect(
@@ -225,7 +225,7 @@ class Navios
             pessoas_enderecos.endereco as address, 
             os_portos.descricao as name_of_port,
             os_navios.nome as vessel_name",
-            "os.codigo='" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.Fornecedor_Custeio != '') GROUP BY os_subgrupos_taxas.chave ORDER BY os_servicos_itens.ordem ASC"
+            "os.codigo='" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND (os_servicos_itens.tipo_sub = 0 OR os_servicos_itens.tipo_sub = 1) AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.Fornecedor_Custeio != '') GROUP BY os_subgrupos_taxas.chave ORDER BY os_servicos_itens.ordem ASC"
         );
 
         $database->closeConection();
@@ -259,7 +259,7 @@ class Navios
             pessoas.chave as fornecedor_custeioCodigo, 
             pessoas_enderecos.uf AS UF,
             os_navios.nome as nome_navio",
-            "os.codigo='" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.fornecedor_custeio != 0) ORDER BY os_servicos_itens.ordem ASC"
+            "os.codigo='" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND (os_servicos_itens.tipo_sub = 0 OR os_servicos_itens.tipo_sub = 1) AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.fornecedor_custeio != 0) ORDER BY os_servicos_itens.ordem ASC"
         );
 
         $database->closeConection();

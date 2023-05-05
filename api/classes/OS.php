@@ -143,10 +143,11 @@ class OS
         $database = new Database();
 
         $result = $database->doSelect(
-            'os_servicos_itens LEFT JOIN pessoas ON pessoas.chave = os_servicos_itens.fornecedor LEFT JOIN moedas ON moedas.chave = os_servicos_itens.moeda',
+            'os_servicos_itens LEFT JOIN pessoas ON pessoas.chave = os_servicos_itens.fornecedor LEFT JOIN moedas ON moedas.chave = os_servicos_itens.moeda LEFT JOIN contas_aberto ON contas_aberto.Docto_Origem = os_servicos_itens.chave',
             'os_servicos_itens.*, 
-                                      pessoas.nome AS fornecedorNome,
-                                      moedas.Sigla',
+            pessoas.nome AS fornecedorNome,
+            moedas.Sigla,
+            contas_aberto.chave AS conta',
             "os_servicos_itens.chave_os = '" . $chave_os . "' ORDER BY os_servicos_itens.ordem"
         );
         $database->closeConection();
@@ -393,7 +394,8 @@ class OS
             SUM(os_servicos_itens.valor1) as valor,
             custeios_subagentes.chave as chave_grupo,
             pessoas.nome as fornecedorNome,
-            os_servicos_itens.tipo_sub as tipo',
+            os_servicos_itens.tipo_sub as tipo,
+            custeios_subagentes.contabilizado',
             "custeios_subagentes.os = '" . $chave_os . "' GROUP BY custeios_subagentes.grupo"
         );
         $database->closeConection();

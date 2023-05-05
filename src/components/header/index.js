@@ -133,9 +133,6 @@ class Header extends Component {
             } else if (this.props.user.expiry) {
                 //await this.expirarSessao();
             }
-
-
-            await this.setState({ anexosNaoValidados: await loader.getBody(`getAnexosNaoValidados.php`) })
         }
 
 
@@ -209,21 +206,6 @@ class Header extends Component {
                         setAlert={(e) => this.setState({ alert: e })}
                         alertFunction={() => this.sendEmails()}
                     />
-                    {this.props.sair && this.state.anexosNaoValidados.filter((e, index) => index <= 5).map((anexo, index) => {
-                        const link = util.completarDocuments(`fornDocs/${anexo.anexo}`);
-                        const editAnexo = anexo.validado == 0 ? { pathname: `/ordensservico/addanexo/${anexo.chave}`, state: { anexo } } : { pathname: `/ordensservico/addevento/${anexo.evento}` };
-                        const hoursRemaining = 48 - (moment().diff(moment(anexo.validado == 0 ? anexo.envio : anexo.validadoData), 'hour'));
-
-                        return (
-                        <Notification
-                        notification={{ type: hoursRemaining <= 12 ? `urgent` : "", msg: `${hoursRemaining} horas para ${anexo.validado == 0 ? `aprovar` : `validar`}` }}
-                        close={() => this.setState({anexosNaoValidados: this.state.anexosNaoValidados.filter((an) => an.chave != anexo.chave)})}
-                        link={link}
-                        editAnexo={editAnexo}
-                        index={index}
-                        />
-                        )
-                    })}
 
                     <div className="headerSimbolos">
                             <div className="setaAcima">

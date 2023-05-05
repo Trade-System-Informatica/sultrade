@@ -8,7 +8,7 @@ import ModalItem from '../../../components/modalItem'
 import Skeleton from '../../../components/skeleton'
 import util from '../../../classes/util'
 import loader from '../../../classes/loader'
-import { NOME_EMPRESA, CAMINHO_DOCUMENTOS } from '../../../config'
+import { NOME_EMPRESA, CAMINHO_DOCUMENTOS, CAMBIO_LIQUIDAR } from '../../../config'
 import { connect } from 'react-redux'
 import { Link, Redirect } from 'react-router-dom'
 import ModalLogs from '../../../components/modalLogs'
@@ -22,6 +22,7 @@ import { PDFExport } from "@progress/kendo-react-pdf";
 import Modal from '@material-ui/core/Modal';
 import Alert from '../../../components/alert'
 import Util from '../../../classes/util'
+import Notification from '../../../components/notification'
 
 const estadoInicial = {
     os: '',
@@ -140,7 +141,7 @@ const estadoInicial = {
     cpfAprovado: false,
 
     eventos: [],
-    todasEventos: [],
+    todosEventos: [],
     documentos: [],
 
     documentoModal: false,
@@ -202,6 +203,8 @@ const estadoInicial = {
     contabiliza: false,
     eventosContabilizando: [],
     paginaContabiliza: 0,
+
+    anexosNaoValidados: [],
 
     faturado: false,
 }
@@ -413,6 +416,7 @@ class AddOS extends Component {
             await this.getCentrosCustos();
             await this.getServicosItens();
             await this.getDocumentos();
+            await this.getAnexos();
         }
 
         await this.setState({
@@ -447,11 +451,11 @@ class AddOS extends Component {
             return false;
         }
 
-        if (!this.state.agrupadorEventos[0]) {
+        if (!this.state.agrupadorEventos[0] && !item.conta) {
             return true;
         }
         const firstItem = this.state.eventos.find((evento) => evento.chave == this.state.agrupadorEventos[0]);
-
+        
         if (item.tipo_sub != firstItem.tipo_sub || item.fornecedor != firstItem.fornecedor) {
             return false;
         }
@@ -495,10 +499,10 @@ class AddOS extends Component {
         const contaCredito = [];
 
         for (const evento of eventos) {
-            if (evento.tipo_sub == 2) {
+            if (evento.tipo_sub == 1) {
                 contaCredito.push(await loader.getContaTaxa(evento.taxa));
                 contaDebito.push(await loader.getContaPessoa(this.state.cliente));
-            } else {
+            } else if (evento.tipo_sub == 0) {
                 if (evento.repasse == 1) {
                     contaCredito.push(await loader.getContaPessoa(!evento.fornecedor || evento.fornecedor === "0" ? evento.Fornecedor_Custeio : evento.fornecedor, "provisao"));
                     contaDebito.push(await loader.getContaPessoa(this.state.cliente));
@@ -506,6 +510,12 @@ class AddOS extends Component {
                     contaCredito.push(await loader.getContaPessoa(!evento.fornecedor || evento.fornecedor === "0" ? evento.Fornecedor_Custeio : evento.fornecedor, "provisao"));
                     contaDebito.push("");
                 }
+            } else if (evento.tipo_sub == 2) {
+                contaCredito.push(await loader.getContaPessoa(this.state.cliente));
+                contaDebito.push(CAMBIO_LIQUIDAR);
+            } else if (evento.tipo_sub == 3) {
+                contaCredito.push(await loader.getContaPessoa(this.state.cliente));
+                contaDebito.push()
             }
         }
 
@@ -613,7 +623,7 @@ class AddOS extends Component {
 
         }).then(
             async response => {
-                const todasEventos = [... this.state.todasEventos, ...response.data];
+                const todosEventos = [... this.state.todosEventos, ...response.data];
 
                 const eventos = [... this.state.eventos, ...response.data.filter((e) => e.cancelada != 1)]
 
@@ -621,7 +631,7 @@ class AddOS extends Component {
                     this.setState({ error: { type: "error", msg: "Foram encontrados eventos sem valor de moeda. Por favor contate o setor de desenvolvimento" } });
                 }
 
-                await this.setState({ eventos, todasEventos })
+                await this.setState({ eventos, todosEventos })
 
             },
             response => { this.erroApi(response) }
@@ -640,6 +650,31 @@ class AddOS extends Component {
                 await this.setState({ documentos: documentos })
 
             },
+            response => { this.erroApi(response) }
+
+        )
+    }
+
+    getAnexos = async () => {
+        await apiEmployee.post(`getAnexosNaoValidados.php`, {
+            token: true,
+            os: this.state.chave
+        }).then(
+            async response => {
+                const anexos = [...response.data]
+                const eventosContabilizados = [
+                    ...this.state.custeios_subagentes.filter((grupo) => grupo.contabilizado == 1).map((grupo) => grupo.evento?.split(","))?.flat(),
+                    ...this.state.eventos.filter((evento) => !!evento.conta)
+            ];
+                this.state.eventos.filter((evento) => !eventosContabilizados.includes(evento)).map((evento) => {
+                    anexos.push(({fornecedor: evento.fornecedor, evento: evento.chave, eventoChave: evento.chave, anexo: "", validado: 2, validadoPor: -1}))
+                })
+
+                this.setState({
+                    anexosNaoValidados: anexos
+                });
+                console.log(anexos);
+        },
             response => { this.erroApi(response) }
 
         )
@@ -928,8 +963,6 @@ class AddOS extends Component {
             if (((!moment(this.state.os.Data_Faturamento) || !moment(this.state.os.Data_Faturamento).isValid()) || !this.state.os.centro_custo == 0) && this.state.faturamento && moment(this.state.faturamento).isValid() && this.state.centroCusto != 0) {
                 await this.faturaOS();
             }
-
-
             await apiEmployee.post(`updateOS.php`, {
                 token: true,
                 Chave: this.state.chave,
@@ -964,6 +997,7 @@ class AddOS extends Component {
                     if (res.data === true) {
                         await loader.salvaLogs('os', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `OS: ${this.state.codigo}`);
                         await this.setState({ loading: false, bloqueado: false })
+                        window.location.reload();
                     } else {
                         await alert(`Erro ${JSON.stringify(res)}`)
                     }
@@ -986,7 +1020,7 @@ class AddOS extends Component {
                 } else if (evento.Moeda == 6) {
                     valorDesconto += (parseFloat(evento.valor) * (parseFloat(this.state.roe) == 0 ? 5 : parseFloat(this.state.roe)));
                 }
-            } else if (evento.cancelada == 0) {
+            } else if ([3,2].includes(evento.tipo_sub) && evento.cancelada == 0) {
                 if (evento.repasse != 0 || evento.Fornecedor_Custeio != 0) {
                     if (evento.Moeda == 5) {
                         valor += parseFloat(evento.valor);
@@ -2286,7 +2320,7 @@ class AddOS extends Component {
     };
 
     openLogs = async () => {
-        let logs = await loader.getLogsOS(this.state.chave, this.state.todasEventos.map((e) => e.chave));
+        let logs = await loader.getLogsOS(this.state.chave, this.state.todosEventos.map((e) => e.chave));
 
         logs = logs.map((e) => {
             if (e.Tabela == "os_servicos_itens" && (e.Campos.includes('Inclusão') || e.Campos.includes('Cancelamento'))) {
@@ -3100,6 +3134,23 @@ class AddOS extends Component {
                             <Header voltarOS titulo="OS" chave={this.state.codigo != 0 ? this.state.codigo : ''} />
                             <br />
                         </section>
+
+                    {/* {this.state.os.Data_Encerramento && moment(this.state.os.Data_Encerramento).isValid() && this.state.anexosNaoValidados.filter((e, index) => index <= 5).map((anexo, index) => {
+                        const link = anexo.anexo ? util.completarDocuments(`fornDocs/${anexo.anexo}`) : false;
+                        const editAnexo = anexo.validado == 0 ? { pathname: `/ordensservico/addanexo/${anexo.chave}`, state: { anexo } } : { pathname: `/ordensservico/addevento/${anexo.evento}` };
+                        const hoursRemaining = 48 - (moment().diff(moment(this.state.os.Data_Encerramento), 'hour'));
+
+                        return (
+                            <Notification
+                                notification={{ type: hoursRemaining <= 12 ? `urgent` : "", msg: `Evento-${anexo.eventoChave}: ${hoursRemaining} horas para ${anexo.anexo ? anexo.validado == 0 ? `aprovar` : `validar` : `contabilizar`}` }}
+                                close={() => this.setState({ anexosNaoValidados: this.state.anexosNaoValidados.filter((an) => an.chave != anexo.chave) })}
+                                link={link}
+                                editAnexo={editAnexo}
+                                index={index}
+                            />
+                        )
+                    })} */}
+
                         <div style={{ width: '100%', textAlign: 'center', marginTop: '-20px', marginBottom: '2%' }}>
                             <h6 style={{ color: 'red' }}>{this.state.erro}</h6>
                         </div>

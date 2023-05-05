@@ -1,7 +1,7 @@
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import React, { Component } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faExclamationTriangle, faPaperclip, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faExclamationTriangle, faPaperclip, faTimes, faFileContract } from '@fortawesome/free-solid-svg-icons'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 
 import './styles.css'
@@ -18,7 +18,10 @@ class Notification extends Component {
                     <div className="notificationWrapper" style={{ bottom: 10 + (85 * this.props.index) }}>
                         <div className={`notificationMessage ${this.props.notification.type === "urgent" ? "notificationUrgent" : ""}`}>
                             <div className="notificationClose">
+                                {this.props.link &&
                                 <a className="nonLink" target="_blank" href={this.props.link}><FontAwesomeIcon icon={faPaperclip} /></a>
+                                }
+                                <FontAwesomeIcon icon={faFileContract} />
                                 <div onClick={this.props.close} ><FontAwesomeIcon icon={faTimes} /></div>
                             </div>
                             <div style={this.props.notification.type === "urgent" ? { color: "red", fontWeight: "bolder" } : {}}>

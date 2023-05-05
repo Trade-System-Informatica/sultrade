@@ -88,15 +88,17 @@ class Relatorio extends Component {
                 this.setState({ categoria: '1%' })
             }
 
-            if (this.props.location.state.backTo == 'contasPagar' || this.props.location.state.backTo == 'contasReceber') {
+            if (this.props.location.state.backTo == 'contasPagar') {
                 porOptions.push({ label: "Por Vencimento", value: 'porVencimento' });
+                this.setState({ tipo: 'aberto' });
+            } else if (this.props.location.state.backTo == 'contasReceber') {
+                porOptions.push({ label: "Por Lançamento", value: 'porLancamento' });
                 this.setState({ tipo: 'aberto' });
             } else {
                 porOptions.push({ label: 'Por Data de Recebimento', value: 'porData' })
                 this.setState({ tipo: 'liquidado' });
             }
-
-            await this.setState({ porOptions })
+            await this.setState({ porOptions });
         } else {
             this.setState({ redirect: true })
         }
@@ -214,12 +216,12 @@ class Relatorio extends Component {
         const conta = this.state.conta ? `contas_aberto.Conta_Contabil = '${this.state.conta}'` : '';
         const centroCusto = this.state.centroCusto ? `contas_aberto.Centro_Custo = '${this.state.centroCusto}'` : '';
         const pessoa = this.state.pessoa ? `contas_aberto.pessoa = '${this.state.pessoa}'` : '';
-        let periodoInicial = this.state.periodoInicial ? this.state.tipo == 'aberto' ? `contas_aberto.vencimento >= '${moment(this.state.periodoInicial).format('YYYY-MM-DD')}'` : `contas_aberto.data_pagto >= '${moment(this.state.periodoInicial).format('YYYY-MM-DD')}'` : '';
-        let periodoFinal = this.state.periodoFinal ? this.state.tipo == 'aberto' ? `contas_aberto.vencimento <= '${moment(this.state.periodoFinal).format('YYYY-MM-DD')}'` : `contas_aberto.data_pagto <= '${moment(this.state.periodoFinal).format('YYYY-MM-DD')}'` : '';
-        const lancamentoInicial = this.state.lancamentoInicial ? `contas_aberto.lancto >= '${moment(this.state.lancamentoInicial).format('YYYY-MM-DD')}'` : '';
-        const lancamentoFinal = this.state.lancamentoFinal ? `contas_aberto.lancto <= '${moment(this.state.lancamentoFinal).format('YYYY-MM-DD')}'` : '';
-        const exclusao = (this.state.excluirTipos || this.state.tiposDocumentos[0]) ? 'NOT' : '';
-        const tiposDocumento = this.state.tiposDocumentos[0] ? `contas_aberto.tipodocto ${exclusao} IN (${this.state.tiposDocumentos.join(',')})` : ``;
+        let periodoInicial = "1=1"//this.state.periodoInicial ? this.state.tipo == 'aberto' ? `contas_aberto.vencimento >= '${moment(this.state.periodoInicial).format('YYYY-MM-DD')}'` : `contas_aberto.data_pagto >= '${moment(this.state.periodoInicial).format('YYYY-MM-DD')}'` : '';
+        let periodoFinal = "1=1"//this.state.periodoFinal ? this.state.tipo == 'aberto' ? `contas_aberto.vencimento <= '${moment(this.state.periodoFinal).format('YYYY-MM-DD')}'` : `contas_aberto.data_pagto <= '${moment(this.state.periodoFinal).format('YYYY-MM-DD')}'` : '';
+        const lancamentoInicial = "1=1"//this.state.lancamentoInicial ? `contas_aberto.lancto >= '${moment(this.state.lancamentoInicial).format('YYYY-MM-DD')}'` : '';
+        const lancamentoFinal = "1=1"//this.state.lancamentoFinal ? `contas_aberto.lancto <= '${moment(this.state.lancamentoFinal).format('YYYY-MM-DD')}'` : '';
+        const exclusao = "1=1"//(this.state.excluirTipos || this.state.tiposDocumentos[0]) ? 'NOT' : '';
+        const tiposDocumento = "1=1"//this.state.tiposDocumentos[0] ? `contas_aberto.tipodocto ${exclusao} IN (${this.state.tiposDocumentos.join(',')})` : ``;
 
         let tipo_sub = 0;
         if (this.props.location.state.backTo) {
@@ -252,6 +254,8 @@ class Relatorio extends Component {
             por = 'GROUP BY contas_aberto.pessoa';
         } else if (por == 'porVencimento') {
             por = 'GROUP BY contas_aberto.vencimento';
+        } else if (por == 'porLancamento') {
+            por = 'GROUP BY contas_aberto.Lancto';
         } else if (por == 'porData') {
             por = 'GROUP BY contas_aberto.data_pagto';
         }
@@ -414,7 +418,6 @@ class Relatorio extends Component {
                                             let FDA = 0;
                                             let discount = 0;
                                             let received = 0;
-                                            console.log(e.os_moeda) 
 
                                             if (this.state.moeda == 5) {
                                                 FDA = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.valor.split("@.@")[index]) : '0,00';
@@ -445,7 +448,7 @@ class Relatorio extends Component {
 
                                             if (parseFloat(balance.replaceAll('.', '').replaceAll(",", ".")) > 0) {
                                                 return (
-                                                    <tr style={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#999999", fontSize:14 }}>
+                                                    <tr style={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#999999", fontSize: 14 }}>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : e.navio_manual ? util.removeAcentos(e.navio_manual.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.porto ? util.removeAcentos(e.porto.split('@.@')[index]) : e.porto_manual ? util.removeAcentos(e.porto_manual.split('@.@')[index]) : ''}</td>
@@ -459,7 +462,7 @@ class Relatorio extends Component {
                                                 )
                                             }
                                         })}
-                                        <tr style={{fontSize:14}}>
+                                        <tr style={{ fontSize: 14 }}>
                                             <th colSpan='5'>{"Total ->"}</th>
                                             <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDAPorGrupo)}</td>
                                             <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalDiscountPorGrupo)}</td>
@@ -511,8 +514,8 @@ class Relatorio extends Component {
 
                                     <table className='pdfTable'>
                                         <tr>
-                                            <th style={{minWidth: 100}}>Nº DOCTO</th>
-                                            <th style={{ minWidth:75 }}>PO</th>
+                                            <th style={{ minWidth: 100 }}>Nº DOCTO</th>
+                                            <th style={{ minWidth: 75 }}>PO</th>
                                             <th style={{ minWidth: 100 }}>PESSOA</th>
                                             <th style={{ minWidth: 150 }}>HISTORICO</th>
                                             <th style={{ minWidth: 100 }}>SALDO</th>
@@ -741,14 +744,14 @@ class Relatorio extends Component {
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Select className='SearchSelect' options={this.state.porOptions} value={this.state.porOptions.filter(option => option.value == this.state.por)[0]} search={true} onChange={(e) => { this.setState({ por: e.value, }) }} />
                                                         </div>
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                        {/* <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Conta</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.conta)[0]} search={true} onChange={(e) => { this.setState({ conta: e.value, }) }} />
-                                                        </div>
+                                                        </div> */}
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Centro de Custo</label>
                                                         </div>
@@ -774,7 +777,7 @@ class Relatorio extends Component {
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Select className='SearchSelect' options={this.state.moedasOptions.filter(e => this.filterSearch(e, this.state.moedasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ moedasOptionsTexto: e }) }} value={this.state.moedasOptions.filter(option => option.value == this.state.moeda)[0]} search={true} onChange={(e) => { this.setState({ moeda: e.value, }) }} />
                                                         </div>
-                                                        <div className="col-12">
+                                                        {/* <div className="col-12">
                                                             <label className="center relatorioLabelTitulo">Período</label>
                                                         </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -836,7 +839,7 @@ class Relatorio extends Component {
                                                                     </div>
                                                                 </div>
                                                             ))}
-                                                        </div>
+                                                        </div> */}
                                                     </div>
 
 

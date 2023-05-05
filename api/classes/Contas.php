@@ -456,11 +456,26 @@ class Contas
     {
         $database = new Database();
 
-        $result = $database->doSelect(
-            'contas_aberto',
-            'contas_aberto.*',
-            "contas_aberto.Docto_Origem = '" . $Docto_Origem . "'"
+        $grupo = $database->doSelect(
+            'custeios_subagentes',
+            'custeios_subagentes.chave',
+            "evento = $Docto_Origem"
         );
+
+        if (!$grupo[0]) {
+            $result = $database->doSelect(
+                'contas_aberto',
+                'contas_aberto.*',
+                "contas_aberto.Docto_Origem = '"
+                 . $Docto_Origem . "'"
+            );
+        } else {
+            $result = $database->doSelect(
+                'contas_aberto',
+                'contas_aberto.*',
+                "contas_aberto.grupo_origem = '" . $grupo["chave"] . "'"
+            );
+        }
         $database->closeConection();
         return $result;
     }

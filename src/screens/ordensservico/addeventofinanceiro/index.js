@@ -14,6 +14,7 @@ import Skeleton from '../../../components/skeleton'
 import ModalListas from '../../../components/modalListas'
 import Select from 'react-select';
 import Modal from '@material-ui/core/Modal';
+import { CAMBIO_LIQUIDAR } from '../../../config'
 
 const estadoInicial = {
     evento: '',
@@ -645,14 +646,14 @@ class AddEventoFinanceiro extends Component {
         console.log(this.state.evento)
         await this.setState({ tipo: value, pessoa: '', contaDesconto: '' });
 
-        if (this.state.evento.tipo_sub == 2) {
+        if (this.state.evento.tipo_sub == 1) {
             if (this.state.tipo == '0') {
                 this.setState({ contaDesconto: await loader.getContaTaxa(this.state.evento.taxa) })
                 console.log(this.state.contaDesconto);
             } else if (this.state.tipo == 1) {
                 this.setState({ contaDesconto: await loader.getContaPessoa(this.state.os.Chave_Cliente) })
             }
-        } else {
+        } else if (this.state.evento.tipo_sub == 0) {
             if (this.state.repasse) {
                 if (this.state.tipo == '0') {
                     this.setState({
@@ -676,6 +677,16 @@ class AddEventoFinanceiro extends Component {
                     });
                 }
             }
+        } else if (this.state.evento.tipo_sub == 2) {
+            this.setState({
+                contaDesconto: CAMBIO_LIQUIDAR, 
+                contaCredito: await loader.getContaPessoa(this.state.os.Chave_Cliente)
+            });
+        } else if (this.state.evento.tipo_sub == 3) {
+            this.setState({
+                contaDesconto: CAMBIO_LIQUIDAR,
+                contaCredito: await loader.getContaPessoa(this.state.os.Chave_Cliente)
+            });
         }
     }
 
