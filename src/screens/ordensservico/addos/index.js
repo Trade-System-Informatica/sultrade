@@ -1020,7 +1020,7 @@ class AddOS extends Component {
                 } else if (evento.Moeda == 6) {
                     valorDesconto += (parseFloat(evento.valor) * (parseFloat(this.state.roe) == 0 ? 5 : parseFloat(this.state.roe)));
                 }
-            } else if ([3,2].includes(evento.tipo_sub) && evento.cancelada == 0) {
+            } else if (![3,2].includes(evento.tipo_sub) && evento.cancelada == 0) {
                 if (evento.repasse != 0 || evento.Fornecedor_Custeio != 0) {
                     if (evento.Moeda == 5) {
                         valor += parseFloat(evento.valor);
