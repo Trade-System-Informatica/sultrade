@@ -48,8 +48,8 @@ export default class Util {
 
     static async apenasNumeros(string) {
         if (typeof string == "string") {
-            return string.replace(/\D/g,'');
-        } 
+            return string.replace(/\D/g, '');
+        }
 
         return "";
     }
@@ -63,7 +63,7 @@ export default class Util {
             return "";
         }
 
-        return parseFloat(valor.replace('.','').replace(',','.')).toFixed(2);
+        return parseFloat(valor.replace('.', '').replace(',', '.')).toFixed(2);
     }
 
     static formataDinheiroBrasileiro(valor) {
@@ -126,7 +126,7 @@ export default class Util {
     static completarPictures(valor) {
         return `${CAMINHO_DOCUMENTOS}/pictures/${valor}.png`
     }
-    
+
     static completarDocuments(valor) {
         return `${CAMINHO_DOCUMENTOS}/${valor}`
     }
@@ -197,7 +197,7 @@ export default class Util {
         if (typeof data == "string") {
             const start = data.indexOf(",\"texto\":");
             const end = data.indexOf("}],\"l")
-            
+
             if (start != -1 && end != -1) {
                 return JSON.parse(data.replaceAll(data.slice(start, end), ""));
             } else {
@@ -210,17 +210,17 @@ export default class Util {
     }
 
     static async turnToOption(array, label, value) {
-        return array.map((key) => ({label: key[label], value: key[value]}));
+        return array.map((key) => ({ label: key[label], value: key[value] }));
     }
 
     static formataCPF(input) {
         input = `${input}`;
-        
+
         if (input.length <= 11) {
             for (; input.length < 11;) {
                 input = `0${input}`;
             }
-            
+
             return `${input.substring(0, 3)}.${input.substring(3, 6)}.${input.substring(6, 9)}-${input.substring(9)}`;
         } else {
             for (; input.length < 14;) {
@@ -233,24 +233,24 @@ export default class Util {
 
     static formataData(input) {
         input = `${input}`
-        
+
         for (; input.length < 8;) {
             input = `0${input}`;
         }
-        
-        return `${input.substring(0, 2)}/${input.substring(2, 4)}/${input.substring(4)}`;   
+
+        return `${input.substring(0, 2)}/${input.substring(2, 4)}/${input.substring(4)}`;
     }
 
     static cleanStates(states, exceptions = null) {
         const keys = Object.keys(states);
-        
+
         let returnObj = {};
 
         keys.map((k) => {
             if (exceptions && exceptions[0] && exceptions.includes(k)) {
                 returnObj[k] = states[k];
             } else {
-                returnObj[k] = typeof states[k] == "string" ? states[k].replaceAll("'","\'").replaceAll('"','\"').trim() : states[k];
+                returnObj[k] = typeof states[k] == "string" ? states[k].replaceAll("'", "\'").replaceAll('"', '\"').trim() : states[k];
             }
         });
 
@@ -284,34 +284,36 @@ export default class Util {
         ];
 
         let bigHeader = [
-            "",
-            "",
             "FATURAMENTO SUL TRADE AGENCIAMENTOS MARITIMOS LTDA",
+            "",
+            "",
             "",
             ""
         ];
 
         XLSX.utils.sheet_add_aoa(worksheet, [firstHeader, bigHeader, smallHeaders]);
-        console.log("ASD3");
+        worksheet["!merges"] = [
+            { s: { c: 0, r: 1 }, e: { c: 4, r: 1 } }
+        ]
 
         let content = [{
             "evento": "IMMIGRATION CLEARANCE AT FIRST AIRPORT - 03SUPTD",
             "conta": "",
             "valor_a_cobrar": 756.24,
             "valor_pago": 0,
-            "valor_liquido": 756.24
+            "valor_liquido": 0
         }, {
             "evento": "CUSTOMS/IMMIGRATIONCLEARANCE IN PORT - 03SUPTD",
             "conta": "",
             "valor_a_cobrar": 1436.86,
             "valor_pago": 0,
-            "valor_liquido": 1436.86,
+            "valor_liquido": 0,
         }, {
             "evento": "SPECIAL SANITARY AUTHORITY CLEARANCE (COVID-19) - 03SUPTD",
             "conta": "",
             "valor_a_cobrar": 378.12,
             "valor_pago": 0,
-            "valor_liquido": 378.12,
+            "valor_liquido": 0,
         }, {
             "evento": "CAR HIRE TO ANTICIPATE CLEARANCE WITH AUTHORITIES",
             "conta": "",
@@ -329,7 +331,7 @@ export default class Util {
             "conta": "",
             "valor_a_cobrar": 756.24,
             "valor_pago": 0,
-            "valor_liquido": 756.24,
+            "valor_liquido": 0,
         }, {
             "evento": "IMMIGRATION/SANITARY CLEARANCE FOR DISEMBARK CREW AT ANCHORAGE AREA",
             "conta": "",
@@ -347,13 +349,13 @@ export default class Util {
             "conta": "",
             "valor_a_cobrar": 1512.48,
             "valor_pago": 0,
-            "valor_liquido": 1512.48,
+            "valor_liquido": 0,
         }, {
             "evento": "01 OFF/S - HOTEL AND MEALS",
             "conta": "",
             "valor_a_cobrar": 4285.36,
             "valor_pago": 0,
-            "valor_liquido": 4285.36,
+            "valor_liquido": 0,
         }];
 
         XLSX.utils.sheet_add_json(worksheet, content, {
@@ -361,6 +363,45 @@ export default class Util {
             origin: -1
         })
         console.log("ASD2");
+
+        const wsCols = [
+            { wch: 75 },
+            { wch: 15 },
+            { wch: 15 },
+            { wch: 15 },
+            { wch: 15 }
+        ];
+        worksheet['!cols'] = wsCols;
+
+        const range = XLSX.utils.decode_range(worksheet["!ref"] ?? "");
+        const rowCount = range.e.r;
+        const colCount = range.e.c;
+        for (let row = 0; row <= rowCount; row++) {
+            for (let col = 0; col <= colCount; col++) {
+                const cell = XLSX.utils.encode_cell({ r: row, c: col });
+
+                if (row === 1) {
+                    worksheet[cell].s = {
+                        alignment: { horizontal: "center", vertical: "center" },
+                        font: {
+                            sz: 14,
+                            bold: true,
+                        },
+                        fill: {
+                            patternType: "solid",
+                            fgColor: { rgb: "888888" },
+                            bgColor: { rgb: "888888" }
+                        },
+                    }
+                }
+                if (col === 4 && ![0,1,2].includes(row)) {
+                    const valorCobrar = XLSX.utils.encode_cell({r: row, c: cell - 2});
+                    const valorPago = XLSX.utils.encode_cell({r: row, c: cell - 1});
+
+                    worksheet[cell].f = `${valorCobrar}-${valorPago}`;
+                }
+            }
+        }
 
         // let footer = {
         //     titulo: "VALOR DA NF A SER EMITIDA",
@@ -387,9 +428,9 @@ export default class Util {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "filename";
+        a.download = "filename.xlsx";
         a.click();
-        
+
     }
 
 }

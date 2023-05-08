@@ -1025,8 +1025,8 @@ class AddEvento extends Component {
         const validations = []
         validations.push(this.state.chave_os)
         validations.push(this.state.data)
-        validations.push(this.state.taxa || this.state.tipo == 2)
-        validations.push(this.state.fornecedor || this.state.tipo == 1 || this.state.tipo == 2)
+        validations.push(this.state.taxa || this.state.tipo == 2 || this.state.tipo == 3)
+        validations.push(this.state.fornecedor || this.state.tipo == 1 || this.state.tipo == 2 || this.state.tipo == 3)
         validations.push(this.state.fornecedorCusteio || this.state.tipo != 1)
         validations.push(this.state.valor && this.state.valor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')))
         validations.push((!this.state.repasse && !this.state.vlrc) || this.state.vlrc.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.vlrc.replaceAll('.', '').replaceAll(',', '.')) && (!this.state.repasse || this.state.vlrc == this.state.valor))
@@ -1548,7 +1548,7 @@ class AddEvento extends Component {
                                                             <label>Taxa</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
-                                                            {!this.state.taxa && this.state.tipo != 2 &&
+                                                            {!this.state.taxa && this.state.tipo != 2 && this.state.tipo != 3 &&
                                                                 <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
                                                             }
                                                         </div>
@@ -1565,7 +1565,7 @@ class AddEvento extends Component {
                                                             <label>Fornecedor</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
-                                                            {!this.state.fornecedor && this.state.tipo != 1 && this.state.tipo != 2 &&
+                                                        {!this.state.fornecedor && this.state.tipo != 1 && this.state.tipo != 2 && this.state.tipo != 3 &&
                                                                 <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
                                                             }
                                                         </div>
