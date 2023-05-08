@@ -376,11 +376,20 @@ export default class Util {
         // });
         console.log("ASD");
 
-        const url = await XLSX.write(workbook, {
+        const data = await XLSX.write(workbook, {
             type: "buffer",
             cellStyles: true
         });
-        console.log(url);
+
+        const buffer = Buffer.from(data);
+        const blob = new Blob([buffer]);
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "filename";
+        a.click();
+        
     }
 
 }

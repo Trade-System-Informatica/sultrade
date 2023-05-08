@@ -14,7 +14,7 @@ import Skeleton from '../../../components/skeleton'
 import ModalListas from '../../../components/modalListas'
 import Select from 'react-select';
 import Modal from '@material-ui/core/Modal';
-import { CAMBIO_LIQUIDAR } from '../../../config'
+import { CAMBIO_LIQUIDAR, DESCONTOS_CONCEDIDOS } from '../../../config'
 
 const estadoInicial = {
     evento: '',
@@ -684,7 +684,7 @@ class AddEventoFinanceiro extends Component {
             });
         } else if (this.state.evento.tipo_sub == 3) {
             this.setState({
-                contaDesconto: CAMBIO_LIQUIDAR,
+                contaDesconto: DESCONTOS_CONCEDIDOS,
                 contaCredito: await loader.getContaPessoa(this.state.os.Chave_Cliente)
             });
         }
@@ -1296,7 +1296,7 @@ class AddEventoFinanceiro extends Component {
                                                 </div>
 
                                                 <div className="row">
-                                                    {!this.state.conta && this.state.evento.centroCusto != '0' && (this.state.tipo == 1 && (this.state.repasse && this.state.contaCliente && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || (!this.state.repasse && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || this.state.tipo == 0 && (this.state.contaCliente && this.state.contaTaxa)) && !this.testaValores() &&
+                                                {!this.state.conta && this.state.evento.centroCusto != '0' && (this.state.tipo == 1 && (this.state.repasse && this.state.contaCliente && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || (!this.state.repasse && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || this.state.tipo == 0 && (this.state.contaCliente && this.state.contaTaxa) || this.state.tipo == 2 && (this.state.contaCliente) || this.state.tipo == 3 && (this.state.contaCliente)) && !this.testaValores() &&
                                                         <>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                                                 <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
@@ -1306,7 +1306,7 @@ class AddEventoFinanceiro extends Component {
                                                             </div>
                                                         </>
                                                     }
-                                                    {!(!this.state.conta && this.state.evento.centroCusto != '0' && (this.state.tipo == 1 && (this.state.repasse && this.state.contaCliente && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || (!this.state.repasse && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || this.state.tipo == 0 && (this.state.contaCliente && this.state.contaTaxa)) && !this.testaValores()) &&
+                                                {!(!this.state.conta && this.state.evento.centroCusto != '0' && (this.state.tipo == 1 && (this.state.repasse && this.state.contaCliente && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || (!this.state.repasse && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || this.state.tipo == 0 && (this.state.contaCliente && this.state.contaTaxa) || this.state.tipo == 2 && (this.state.contaCliente) || this.state.tipo == 3 && (this.state.contaCliente)) && !this.testaValores()) &&
                                                         <>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                                                 <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
