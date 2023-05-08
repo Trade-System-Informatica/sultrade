@@ -896,7 +896,7 @@ class AddOS extends Component {
         })
     }
 
-    salvarOS = async (validForm) => {
+    salvarOS = async (validForm, reload = true) => {
         await this.setState({
             governmentTaxes: this.state.governmentTaxes ? this.state.governmentTaxes : 0,
             bankCharges: this.state.bankCharges ? this.state.bankCharges : 0,
@@ -951,7 +951,7 @@ class AddOS extends Component {
                         await loader.salvaLogs('os', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
 
                         await this.setState({ loading: false, bloqueado: false });
-                        this.setState({ recarregaPagina: true });
+                        this.setState({ recarregaPagina: reload });
                     } else {
                         console.log(res.data)
                     }
@@ -997,7 +997,9 @@ class AddOS extends Component {
                     if (res.data === true) {
                         await loader.salvaLogs('os', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `OS: ${this.state.codigo}`);
                         await this.setState({ loading: false, bloqueado: false })
-                        window.location.reload();
+                        if (reload) {
+                            window.location.reload();
+                        }
                     } else {
                         await alert(`Erro ${JSON.stringify(res)}`)
                     }
@@ -1284,7 +1286,7 @@ class AddOS extends Component {
                 return;
             }
 
-            await this.salvarOS(validForm)
+            await this.salvarOS(validForm, false)
 
             this.setState({ pdfNome: "Capa" })
 
@@ -1617,7 +1619,7 @@ class AddOS extends Component {
                 return;
             }
 
-            await this.salvarOS(validForm)
+            await this.salvarOS(validForm, false)
 
             this.setState({ pdfNome: "Relatorio_liquidos" })
 
@@ -1828,7 +1830,7 @@ class AddOS extends Component {
                 return;
             }
 
-            await this.salvarOS(validForm)
+            await this.salvarOS(validForm, false)
 
             this.setState({ pdfNome: "Vouchers" })
 
@@ -2023,7 +2025,7 @@ class AddOS extends Component {
                 return;
             }
 
-            await this.salvarOS(validForm)
+            await this.salvarOS(validForm, false)
 
             this.setState({ pdfNome: "Close_to_Real" })
 
