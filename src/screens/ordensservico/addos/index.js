@@ -2304,7 +2304,7 @@ class AddOS extends Component {
         await apiEmployee.post(`updateSolicitacaoValor.php`, {
             chave: this.state.eventoChave,
             Moeda: this.state.eventoMoeda,
-            valor: this.state.eventoValor,
+            valor: this.state.eventoValor.replaceAll('.', '').replaceAll(',', '.'),
         }).then(
             async res => {
                 await loader.salvaLogs('os_servicos_itens', this.state.usuarioLogado.codigo, this.state.dadosIniciaisSol, this.state.dadosFinaisSol, this.state.eventoChave);
