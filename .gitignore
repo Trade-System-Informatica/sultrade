@@ -1,5 +1,3 @@
 node_modules
-package.json
-src/config.js
 api/classes/Database.php
 api/employee/enviaEmail.php
