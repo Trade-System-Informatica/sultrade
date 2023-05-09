@@ -22,6 +22,7 @@ import { PDFExport } from "@progress/kendo-react-pdf";
 import Modal from '@material-ui/core/Modal';
 import Alert from '../../../components/alert'
 import Util from '../../../classes/util'
+import XLSX from "xlsx-js-style";
 import Notification from '../../../components/notification'
 
 const estadoInicial = {
@@ -455,8 +456,8 @@ class AddOS extends Component {
             return true;
         }
         const firstItem = this.state.eventos.find((evento) => evento.chave == this.state.agrupadorEventos[0]);
-        
-        if (item.tipo_sub != firstItem.tipo_sub || item.fornecedor != firstItem.fornecedor) {
+
+        if (item.tipo_sub != firstItem?.tipo_sub || item.fornecedor != firstItem?.fornecedor) {
             return false;
         }
 
@@ -665,16 +666,16 @@ class AddOS extends Component {
                 const eventosContabilizados = [
                     ...this.state.custeios_subagentes.filter((grupo) => grupo.contabilizado == 1).map((grupo) => grupo.evento?.split(","))?.flat(),
                     ...this.state.eventos.filter((evento) => !!evento.conta)
-            ];
+                ];
                 this.state.eventos.filter((evento) => !eventosContabilizados.includes(evento)).map((evento) => {
-                    anexos.push(({fornecedor: evento.fornecedor, evento: evento.chave, eventoChave: evento.chave, anexo: "", validado: 2, validadoPor: -1}))
+                    anexos.push(({ fornecedor: evento.fornecedor, evento: evento.chave, eventoChave: evento.chave, anexo: "", validado: 2, validadoPor: -1 }))
                 })
 
                 this.setState({
                     anexosNaoValidados: anexos
                 });
                 console.log(anexos);
-        },
+            },
             response => { this.erroApi(response) }
 
         )
@@ -959,8 +960,12 @@ class AddOS extends Component {
                 async res => await console.log(`Erro: ${res}`)
             )
 
-        } else if (validForm) {
             if (((!moment(this.state.os.Data_Faturamento) || !moment(this.state.os.Data_Faturamento).isValid()) || !this.state.os.centro_custo == 0) && this.state.faturamento && moment(this.state.faturamento).isValid() && this.state.centroCusto != 0) {
+            } else if (validForm) {
+                console.log(this.state.os.Data_Faturamento);
+                console.log(this.state.os.centro_custo);
+                console.log(this.state.faturamento);
+                console.log(this.state.centroCusto);
                 await this.faturaOS();
             }
             await apiEmployee.post(`updateOS.php`, {
@@ -1022,7 +1027,7 @@ class AddOS extends Component {
                 } else if (evento.Moeda == 6) {
                     valorDesconto += (parseFloat(evento.valor) * (parseFloat(this.state.roe) == 0 ? 5 : parseFloat(this.state.roe)));
                 }
-            } else if (![3,2].includes(evento.tipo_sub) && evento.cancelada == 0) {
+            } else if (![3, 2].includes(evento.tipo_sub) && evento.cancelada == 0) {
                 if (evento.repasse != 0 || evento.Fornecedor_Custeio != 0) {
                     if (evento.Moeda == 5) {
                         valor += parseFloat(evento.valor);
@@ -1055,6 +1060,7 @@ class AddOS extends Component {
         } else {
             await apiEmployee.post(`updateContaOS.php`, {
                 token: true,
+                old_Centro_Custo: this.state.os.Centro_Custo,
                 Lancto: moment(this.state.faturamento).format("YYYY-MM-DD"),
                 Pessoa: this.state.cliente,
                 Centro_Custo: this.state.centroCusto,
@@ -1309,6 +1315,7 @@ class AddOS extends Component {
                 return this.setState({ error: { type: "error", msg: "Há eventos sem taxas" }, loading: false })
             }
 
+            console.log(this.state.pdfContent);
             const vouchers = [];
             this.state.pdfContent.filter((content) => content.tipo != 2).map((content) => {
                 if (!vouchers.includes(content.chavTaxa)) {
@@ -1613,6 +1620,458 @@ class AddOS extends Component {
     }
 
     FaturamentoCusteio = async (codigo, validForm) => {
+        /*try {
+            if (!validForm) {
+                await this.setState({ error: { type: "error", msg: "Verifique se as informações estão corretas!" } });
+                return;
+            }
+
+            await this.salvarOS(validForm, false)
+
+            this.setState({ pdfNome: "Relatorio_liquidos" })
+
+
+            await this.setState({
+                loading: true,
+                pdfContent: await loader.getBody(`faturamentoCusteio.php`, { token: true, codigo: codigo })
+            })
+
+            //console.log(this.state.pdfContent);
+
+            if (!this.state.pdfContent || !this.state.pdfContent[0]) {
+                return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
+            }
+
+            let totalConsolidado = 0;
+            let valorTotal = 0;
+            let valorTotalCobrar = 0;
+            let valorTotalPago = 0;
+            let valorTotalLiquido = 0;
+            let contasCodigos = [];
+            let contas = [];
+            let contasValores = [];
+            let pdf = '';
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.json_to_sheet([]);
+
+            XLSX.utils.book_append_sheet(workbook, worksheet, "FATURAMENTOS");
+            const smallHeaders = [
+                "Evento",
+                "Conta",
+                "Valor à Cobrar",
+                "Valor Pago",
+                "Valor Líquido"
+            ];
+
+            const footer = [{
+                titulo: "VALOR DA NF A SER EMITIDA",
+                blank: "",
+                valor_a_cobrar: "",
+                valor_pago: "",
+                valor_liquido: ""
+            }];
+
+            const emptyLine = [{
+                _0: "",
+                _1: "",
+                _2: "",
+                _3: "",
+                _4: ""
+            }]
+
+            const wsCols = [
+                { wch: 75 },
+                { wch: 15 },
+                { wch: 15 },
+                { wch: 15 },
+                { wch: 15 }
+            ];
+            worksheet['!cols'] = wsCols;
+
+            let rowCount = 0;
+            const colCount = 4;
+
+            const titlesRows = [];
+            const accountsTitlesRows = [];
+            const fieldsRows = [];
+            const accountsRows = [];
+            const accountsTotalRows = [];
+            const footersRows = [];
+            const headersRows = [];
+            const totalRows = [];
+            const emptyRows = [];
+
+            const { pdfContent } = this.state;
+            const pdfCusteio = [];
+            const pdfCusteioCodigo = [];
+
+            if (!pdfContent[0]) {
+                await this.setState({ erro: 'Sem as informações necessárias para gerar o documento!', loading: false })
+                return;
+            }
+
+            pdfContent.map((content) => {
+                if (!pdfCusteio.includes(content.fornecedor_custeio)) {
+                    pdfCusteio.push(content.fornecedor_custeio);
+                    pdfCusteioCodigo.push(content.fornecedor_custeioCodigo);
+                }
+            })
+            let roe = 5;
+
+            if (pdfContent[0].ROE && pdfContent[0].ROE != 0) {
+                roe = pdfContent[0].ROE;
+            }
+
+            if (pdfContent) {
+                pdfCusteio.map((custeio, custeioIndex) => {
+                    valorTotalCobrar = 0;
+                    valorTotalLiquido = 0;
+                    valorTotalPago = 0;
+                    valorTotal = 0;
+
+                    if (custeio) {
+                        const firstHeader = [
+                            `NAVIO ${pdfContent[0].nome_navio ? pdfContent[0].nome_navio.toUpperCase() : ""}`,
+                            "",
+                            "",
+                            "",
+                            `ROE: ${roe}`
+                        ]
+
+                        const bigHeader = [
+                            `FATURAMENTO ${custeio}`,
+                            "",
+                            "",
+                            "",
+                            "",
+                        ];
+
+                        if (rowCount == 0) {
+                            XLSX.utils.sheet_add_aoa(worksheet, [firstHeader, bigHeader, smallHeaders]);
+                            headersRows.push(rowCount);
+                            titlesRows.push(rowCount + 1);
+                            headersRows.push(rowCount + 2);
+                            rowCount += 3;
+                        } else {
+                            XLSX.utils.sheet_add_aoa(worksheet, [bigHeader, smallHeaders], {
+                                skipHeader: true,
+                                origin: -1
+                            });
+                            titlesRows.push(rowCount);
+                            headersRows.push(rowCount + 1);
+                            rowCount += 2;
+                        }
+
+                        const fields = [];
+                        if (!["17", "16"].includes(pdfCusteioCodigo[custeioIndex])) {
+
+                            pdfContent.filter((content) => content.fornecedor_custeio == custeio).map((content, index) => {
+                                let valor_cobrar = content.valor_cobrar;
+                                let valor_pago = content.valor_pago;
+
+                                if (content.moeda == 6) {
+                                    valor_cobrar = Util.toFixed(parseFloat(valor_cobrar) * parseFloat(roe), 2);
+                                }
+
+                                valorTotalCobrar += parseFloat(valor_cobrar);
+                                valorTotalPago += parseFloat(valor_pago);
+                                let valor_liquido = parseFloat(valor_cobrar) - parseFloat(valor_pago);
+
+                                valorTotal += valor_liquido;
+                                totalConsolidado += parseFloat(valor_cobrar);
+                                valorTotalLiquido += parseFloat(valor_cobrar);
+
+                                fields.push({
+                                    evento: content.evento.trim(),
+                                    conta: content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod ? content.contaCod : "",
+                                    valor_a_cobrar: parseFloat(valor_cobrar),
+                                    valor_pago: 0,
+                                    valor_liquido: "",
+                                })
+                                fieldsRows.push(rowCount);
+                                rowCount++;
+                            })
+                        } else {
+                            pdfContent.filter((content) => !!content.fornecedor_custeio).map((content, index) => {
+                                let valor_cobrar = content.valor_cobrar;
+                                let valor_pago = content.valor_pago;
+
+                                if (content.moeda == 6) {
+                                    valor_cobrar = Util.toFixed(parseFloat(valor_cobrar) * parseFloat(roe), 2);
+                                }
+
+                                valorTotalPago += parseFloat(content.fornecedor_custeio == custeio ? 0 : valor_pago);
+                                valorTotalCobrar += parseFloat(content.fornecedor_custeio == custeio ? valor_cobrar : 0);
+                                valorTotalLiquido += parseFloat(content.fornecedor_custeio == custeio ? valor_cobrar : -valor_pago);
+
+                                totalConsolidado += content.fornecedor_custeio == custeio ? valor_cobrar : 0;
+
+                                if (contasCodigos[0] && contasCodigos.find((cnt) => cnt.conta == (content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod) && cnt.custeio == content.fornecedor_custeioCodigo)) {
+                                    contasCodigos = contasCodigos.map((cnt) => cnt.conta == (content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod) && cnt.custeio == content.fornecedor_custeioCodigo ? ({ ...cnt, row: [...cnt.row, rowCount] }) : ({ ...cnt }))
+                                } else {
+                                    contasCodigos.push({
+                                        conta: content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod,
+                                        row: [rowCount],
+                                        custeio: content.fornecedor_custeioCodigo
+                                    });
+                                }
+
+                                fields.push({
+                                    evento: content.evento.trim(),
+                                    conta: content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod ? content.contaCod : "",
+                                    valor_a_cobrar: content.fornecedor_custeio == custeio ? parseFloat(valor_cobrar) : 0,
+                                    valor_pago: parseFloat(valor_pago),
+                                    valor_liquido: "",
+                                })
+                                fieldsRows.push(rowCount);
+                                rowCount++;
+
+                            });
+                        }
+
+                        XLSX.utils.sheet_add_json(worksheet, fields, {
+                            skipHeader: true,
+                            origin: -1
+                        })
+
+                        XLSX.utils.sheet_add_json(worksheet, footer, {
+                            skipHeader: true,
+                            origin: -1
+                        });
+                        footersRows.push(rowCount);
+                        rowCount++;
+
+                        XLSX.utils.sheet_add_json(worksheet, emptyLine, {
+                            skipHeader: true,
+                            origin: -1
+                        });
+                        emptyRows.push(rowCount);
+                        rowCount++;
+                    }
+                })
+
+                totalRows.push(rowCount);
+                emptyRows.push(rowCount+1);
+                rowCount+= 2;
+
+                pdfCusteioCodigo.filter((custeio) => !!custeio && contasCodigos.find((conta) => conta.custeio == custeio && !!conta.conta)).map((custeio, custeioIndex) => {
+                    let contaValor = 0;
+
+                    contas.push({
+                        _0: "",
+                        _1: "",
+                        _2: "",
+                        _3: pdfCusteio[custeioIndex],
+                        _4: ""
+                    });
+                    accountsTitlesRows.push(rowCount);
+                    rowCount++;
+
+                    contasCodigos.filter((conta) => conta.custeio == custeio && !!conta.conta).map((conta) => {
+                        contaValor += parseFloat(conta.valor);
+
+                        contas.push({
+                            _0: "",
+                            _1: "",
+                            _2: "",
+                            _3: "Conta",
+                            _4: "Valor"
+                        });
+                        headersRows.push(rowCount);
+                        rowCount++;
+
+                        contas.push({
+                            _0: "",
+                            _1: "",
+                            _2: "",
+                            _3: conta.conta,
+                            _4: ""
+                        })
+                        accountsRows.push(rowCount);
+                        rowCount++;
+
+                    })
+                    contas.push({
+                        _0: "",
+                        _1: "",
+                        _2: "",
+                        _3: "TOTAL",
+                        _4: ""
+                    })
+                    accountsTotalRows.push(rowCount)
+                    rowCount++;
+                })
+
+                XLSX.utils.sheet_add_json(worksheet, [{
+                    title: "TOTAL CONSOLIDADO",
+                    _1: "",
+                    _2: "",
+                    _3: "",
+                    _4: ""
+                }], {
+                    skipHeader: true,
+                    origin: -1
+                });
+
+                XLSX.utils.sheet_add_json(worksheet, emptyLine, {
+                    skipHeader: true,
+                    origin: -1
+                });
+
+                XLSX.utils.sheet_add_json(worksheet, contas, {
+                    skipHeader: true,
+                    origin: -1
+                });
+
+                worksheet["!merges"] = [
+                    ...titlesRows.map((r) => ({ s: { c: 0, r }, e: { c: 4, r } })),
+                    ...footersRows.map((r) => ({ s: { c: 0, r }, e: { c: 1, r } })),
+                    ...totalRows.map((r) => ({ s: { c: 0, r }, e: { c: 3, r } })),
+                    ...accountsTitlesRows.map((r) => ({ s: {c: 3, r}, e: {c: 4, r}})),
+                ]
+                let footerCobrar = [];
+                let footerPago = [];
+                let accountTotal = [];
+                let totalValor = [];
+                console.log({footersRows, fieldsRows, titlesRows, emptyRows, headersRows});
+                for (let row = 0; row < rowCount; row++) {
+                    for (let col = 0; col <= colCount; col++) {
+                        const cell = XLSX.utils.encode_cell({ r: row, c: col });
+                        //console.log({row, col, cell, sheet: worksheet[cell]});
+
+                        if (titlesRows.includes(row)) {
+                            worksheet[cell].s = {
+                                alignment: { horizontal: "center", vertical: "center" },
+                                font: {
+                                    sz: 18,
+                                    bold: true,
+                                },
+                                fill: {
+                                    patternType: "solid",
+                                    fgColor: { rgb: "888888" },
+                                    bgColor: { rgb: "888888" }
+                                },
+                            }
+                        }
+                        if ([...accountsTitlesRows, ...accountsRows, ...accountsTotalRows].includes(row)) {
+                            if ([3,4].includes(col) && accountsTitlesRows.includes(row)) {
+                                worksheet[cell].s = {
+                                    alignment: {horizontal: "center", vertical: "center"},
+                                    fill: {
+                                        patternType: "solid",
+                                        fgColor: { rgb: "888888" },
+                                    bgColor: { rgb: "888888" }
+                                },
+                            }
+                            }
+                            worksheet[cell].s = {
+                                ...worksheet[cell].s,
+                                font: {
+                                    sz:8,
+                                },
+                            }
+                            if (col === 4 && accountsRows.includes(row)) {
+                                const prevCell = worksheet[XLSX.utils.encode_cell({ r: row, c: col-3 })]?.v;
+
+                                worksheet[cell].f = contas.filter((e) => e.conta == prevCell)?.map((e) => XLSX.utils.encode_cell({ r: e.row, c: 4 }))?.join("+");
+                                accountTotal.push(worksheet[cell]);
+                            }
+                            if (col === 4 && accountsTotalRows.includes(row)) {
+                                worksheet[cell].f = accountTotal.join("+");
+                                accountTotal = [];
+                            }
+                        }
+                        if (footersRows.includes(row)) {
+                            if (footerCobrar[0] && footerPago[0]) {
+                                if (col === 2) {
+                                    worksheet[cell].f = footerCobrar.join('+');
+                                } else if (col === 3) {
+                                    worksheet[cell].f = footerPago.join('+');
+                                } else if (col === 4) {
+                                    const valorCobrar = XLSX.utils.encode_cell({ r: row, c: 2 });
+                                    const valorPago = XLSX.utils.encode_cell({ r: row, c: 3 });
+
+                                    worksheet[cell].f = `${valorCobrar} - ${valorPago}`;
+                                    footerCobrar = [];
+                                    footerPago = [];
+                                    totalValor.push(XLSX.utils.encode_cell({ r: row, c: col }));
+                                }
+                            }
+                        }
+                        if (fieldsRows.includes(row)) {
+                            worksheet[cell].s = {
+                                border: {
+                                    right: {
+                                        style: "thin",
+                                        color: "000000"
+                                    },
+                                    left: {
+                                        style: "thin",
+                                        color: "000000"
+                                    },
+                                    top: {
+                                        style: "thin",
+                                        color: "000000"
+                                    },
+                                    bottom: {
+                                        style: "thin",
+                                        color: "000000"
+                                    }
+                                }
+                            }
+                            if (col === 4) {
+                                const valorCobrar = XLSX.utils.encode_cell({ r: row, c: 2 });
+                                footerCobrar.push(valorCobrar);
+                                const valorPago = XLSX.utils.encode_cell({ r: row, c: 3 });
+                                footerPago.push(valorPago);
+
+                                worksheet[cell].f = `${valorCobrar} - ${valorPago}`;
+                            }
+                        }
+
+                        if ([2, 3, 4].includes(col) && [...fieldsRows, ...footersRows].includes(row)) {
+                            worksheet[cell].s = {
+                                ...worksheet[cell].s,
+                                numFmt: "R$ #,##0.00"
+                            }
+                        }
+
+                        if (totalRows.includes(row)) {
+                            worksheet[cell].s = {
+                                font: {
+                                    bold: true
+                                }
+                            }
+                            if (col === 4) {
+                                worksheet[cell].f = totalValor.join('+');
+                            }
+                        }
+                    }
+                }
+
+                const data = await XLSX.write(workbook, {
+                    type: "buffer",
+                    cellStyles: true
+                });
+
+                const buffer = Buffer.from(data);
+                const blob = new Blob([buffer]);
+
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "relatorios_liquidos.xlsx";
+                a.click();
+            } else {
+                await this.setState({ erro: 'Sem as informações necessárias para gerar o documento!', loading: false })
+                return;
+            }
+        } catch (err) {
+            console.log(err);
+            await this.setState({ erro: "Erro ao criar o documento", loading: false });
+        }
+        this.setState({ loading: false });*/
+
         try {
             if (!validForm) {
                 await this.setState({ error: { type: "error", msg: "Verifique se as informações estão corretas!" } });
@@ -1849,6 +2308,8 @@ class AddOS extends Component {
 
             const pdfContent = this.state.pdfContent.itens;
             const pdfChaves = this.state.pdfContent.chaves;
+            console.log(pdfChaves
+                )
 
 
             const getDescricaoItem = (item) => {
@@ -1943,18 +2404,18 @@ class AddOS extends Component {
                                                 }
                                             </tr>
                                             <tr>
-                                                {chave.data_faturamento && moment(chave.data_faturamento).isValid() &&
-                                                    <td colSpan={3} className="pdf_large_column"><b>Date of Billing:</b> {moment(chave.data_faturamento).format('DD/MM/YYYY')}</td>
+                                                {chave.Data_Faturamento && moment(chave.Data_Faturamento).isValid() &&
+                                                    <td colSpan={3} className="pdf_large_column"><b>Date of Billing:</b> {moment(chave.Data_Faturamento).format('DD/MM/YYYY')}</td>
                                                 }
                                                 {chave.eta && moment(chave.eta).isValid() &&
-                                                    <td colSpan={3} className={chave.data_faturamento && moment(chave.data_faturamento).isValid() ? "pdf_money_col" : "pdf_small_col"}><b>Arrived:</b> {moment(chave.eta).format('DD/MM/YYYY')}</td>
+                                                    <td colSpan={3} className={chave.Data_Faturamento && moment(chave.Data_Faturamento).isValid() ? "pdf_money_col" : "pdf_small_col"}><b>Arrived:</b> {moment(chave.eta).format('DD/MM/YYYY')}</td>
                                                 }
                                             </tr>
                                             <tr>
                                                 {chave.vessel_name &&
                                                     <td colSpan={3} className="pdf_large_column"><b>Vessel Name:</b> {chave.vessel_name}</td>
                                                 }
-                                                {chave.data_saida && moment(chave.data_saida).isValid() &&
+                                                {chave.Data_Saida && moment(chave.Data_Saida).isValid() &&
                                                     <td colSpan={3} className={chave.vessel_name ? "pdf_money_col" : "pdf_small_col"}><b>Sailed:</b> {moment(chave.Data_Saida).format('DD/MM/YYYY')}</td>
                                                 }
                                             </tr>
@@ -2056,7 +2517,7 @@ class AddOS extends Component {
                 }
                 if (this.state.pdfContent[0].bankCharges > 0) {
                     valorTotal += parseFloat(this.state.pdfContent[0].bankCharges);
-                    valorTotalDolar += parseFloat(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe));
+                    valorTotalDolar += Util.toFixed(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe));
                 }
 
                 if (this.state.pdfContent.find((os) => !os.chavTaxa)) {
@@ -3137,7 +3598,7 @@ class AddOS extends Component {
                             <br />
                         </section>
 
-                    {/* {this.state.os.Data_Encerramento && moment(this.state.os.Data_Encerramento).isValid() && this.state.anexosNaoValidados.filter((e, index) => index <= 5).map((anexo, index) => {
+                        {/* {this.state.os.Data_Encerramento && moment(this.state.os.Data_Encerramento).isValid() && this.state.anexosNaoValidados.filter((e, index) => index <= 5).map((anexo, index) => {
                         const link = anexo.anexo ? util.completarDocuments(`fornDocs/${anexo.anexo}`) : false;
                         const editAnexo = anexo.validado == 0 ? { pathname: `/ordensservico/addanexo/${anexo.chave}`, state: { anexo } } : { pathname: `/ordensservico/addevento/${anexo.evento}` };
                         const hoursRemaining = 48 - (moment().diff(moment(this.state.os.Data_Encerramento), 'hour'));
