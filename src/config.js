@@ -43,3 +43,6 @@ export const URL_SOAPACTION = "http://tempuri.org/GerarNota";
 
 export const URL_SIGISS_CANCELAMENTO = "https://riogrande.sigiss.com.br/riogrande/ws/sigiss_ws.php?wsdl";
 export const URL_SOAPACTION_CANCELAMENTO = "http://tempuri.org/CancelarNota";
+
+export const DESCONTOS_CONCEDIDOS = 371;
+export const CAMBIO_LIQUIDAR = 2096;
