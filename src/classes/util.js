@@ -264,7 +264,6 @@ export default class Util {
     static async testExcell() {
         const workbook = XLSX.utils.book_new();
         const worksheet = XLSX.utils.json_to_sheet([]);
-        console.log("QWE");
 
         XLSX.utils.book_append_sheet(workbook, worksheet, "FATURAMENTOS");
         const firstHeader = [
@@ -292,77 +291,91 @@ export default class Util {
         ];
 
         XLSX.utils.sheet_add_aoa(worksheet, [firstHeader, bigHeader, smallHeaders]);
-        worksheet["!merges"] = [
-            { s: { c: 0, r: 1 }, e: { c: 4, r: 1 } }
-        ]
 
         let content = [{
             "evento": "IMMIGRATION CLEARANCE AT FIRST AIRPORT - 03SUPTD",
             "conta": "",
             "valor_a_cobrar": 756.24,
             "valor_pago": 0,
-            "valor_liquido": 0
+            "valor_liquido": "",
         }, {
             "evento": "CUSTOMS/IMMIGRATIONCLEARANCE IN PORT - 03SUPTD",
             "conta": "",
             "valor_a_cobrar": 1436.86,
             "valor_pago": 0,
-            "valor_liquido": 0,
+            "valor_liquido": "",
         }, {
             "evento": "SPECIAL SANITARY AUTHORITY CLEARANCE (COVID-19) - 03SUPTD",
             "conta": "",
             "valor_a_cobrar": 378.12,
             "valor_pago": 0,
-            "valor_liquido": 0,
+            "valor_liquido": "",
         }, {
             "evento": "CAR HIRE TO ANTICIPATE CLEARANCE WITH AUTHORITIES",
             "conta": "",
             "valor_a_cobrar": 0,
             "valor_pago": 0,
-            "valor_liquido": 0,
+            "valor_liquido": "",
         }, {
             "evento": "03SUPTD - CAR TRANSPORTATION SSA AIRPORT X HOTEL",
             "conta": "",
             "valor_a_cobrar": 0,
             "valor_pago": 0,
-            "valor_liquido": 0,
+            "valor_liquido": "",
         }, {
             "evento": "03SUPTD - CAR TRANSPORTATION HOTEL X VESSEL ON ARP/ 03",
             "conta": "",
             "valor_a_cobrar": 756.24,
             "valor_pago": 0,
-            "valor_liquido": 0,
+            "valor_liquido": "",
         }, {
             "evento": "IMMIGRATION/SANITARY CLEARANCE FOR DISEMBARK CREW AT ANCHORAGE AREA",
             "conta": "",
             "valor_a_cobrar": 0,
             "valor_pago": 0,
-            "valor_liquido": 0,
+            "valor_liquido": "",
         }, {
             "evento": "CAR HIRE TO TRANSFER MR. CLENTON BELONGS - BOAT STATION X OFFICE",
             "conta": "",
             "valor_a_cobrar": 0,
             "valor_pago": 0,
-            "valor_liquido": 0,
+            "valor_liquido": "",
         }, {
             "evento": "COORDINATION FEE ON HUSBANDRY SERVICES",
             "conta": "",
             "valor_a_cobrar": 1512.48,
             "valor_pago": 0,
-            "valor_liquido": 0,
+            "valor_liquido": "",
         }, {
             "evento": "01 OFF/S - HOTEL AND MEALS",
             "conta": "",
             "valor_a_cobrar": 4285.36,
             "valor_pago": 0,
-            "valor_liquido": 0,
+            "valor_liquido": "",
         }];
 
         XLSX.utils.sheet_add_json(worksheet, content, {
             skipHeader: true,
             origin: -1
         })
-        console.log("ASD2");
+
+        let footer = [{
+            titulo: "VALOR DA NF A SER EMITIDA",
+            blank: "",
+            valor_a_cobrar: 9125.3,
+            valor_pago: 0,
+            valor_liquido: ""
+        }];
+
+        worksheet["!merges"] = [
+            { s: { c: 0, r: 1 }, e: { c: 4, r: 1 } },
+            { s: { c: 0, r: content.length + 3 }, e: { c: 1, r: content.length + 3 } }
+        ]
+
+        XLSX.utils.sheet_add_json(worksheet, footer, {
+            skipHeader: true,
+            origin: -1
+        });
 
         const wsCols = [
             { wch: 75 },
@@ -376,6 +389,9 @@ export default class Util {
         const range = XLSX.utils.decode_range(worksheet["!ref"] ?? "");
         const rowCount = range.e.r;
         const colCount = range.e.c;
+
+        const footerCobrar = [];
+        const footerPago = [];
         for (let row = 0; row <= rowCount; row++) {
             for (let col = 0; col <= colCount; col++) {
                 const cell = XLSX.utils.encode_cell({ r: row, c: col });
@@ -394,28 +410,52 @@ export default class Util {
                         },
                     }
                 }
-                if (col === 4 && ![0,1,2].includes(row)) {
-                    const valorCobrar = XLSX.utils.encode_cell({r: row, c: cell - 2});
-                    const valorPago = XLSX.utils.encode_cell({r: row, c: cell - 1});
+                if (row === content.length + 3) {
+                    if (col === 2) {
+                        worksheet[cell].f = footerCobrar.join('+');
+                    } else if (col === 3) {
+                        worksheet[cell].f = footerPago.join('+');
+                    }
+                }
+                if (col === 4 && ![0, 1, 2].includes(row)) {
+                    const valorCobrar = XLSX.utils.encode_cell({ r: row, c: 2 });
+                    footerCobrar.push(valorCobrar);
+                    const valorPago = XLSX.utils.encode_cell({ r: row, c: 3 });
+                    footerPago.push(valorPago);
 
-                    worksheet[cell].f = `${valorCobrar}-${valorPago}`;
+                    worksheet[cell].f = `= ${valorCobrar} - ${valorPago}`;
+                }
+                if (![0, 1, 2, content.length + 3].includes(row)) {
+                    worksheet[cell].s = {
+                        border: {
+                            right: {
+                                style: "thin",
+                                color: "000000"
+                            },
+                            left: {
+                                style: "thin",
+                                color: "000000"
+                            },
+                            top: {
+                                style: "thin",
+                                color: "000000"
+                            },
+                            bottom: {
+                                style: "thin",
+                                color: "000000"
+                            }
+                        }
+                    }
+                }
+
+                if ([2, 3, 4].includes(col) && ![0,1].includes(row)) {
+                    worksheet[cell].s = {
+                        ...worksheet[cell].s,
+                        numFmt: "R$ #,###.00"
+                    }
                 }
             }
         }
-
-        // let footer = {
-        //     titulo: "VALOR DA NF A SER EMITIDA",
-        //     blank: "",
-        //     valor_a_cobrar: 9125.3,
-        //     valor_pago: 0,
-        //     valor_liquido: 9125.3
-        // };
-
-        // XLSX.utils.sheet_add_json(worksheet, footer, {
-        //     skipHeader: true,
-        //     origin: -1
-        // });
-        console.log("ASD");
 
         const data = await XLSX.write(workbook, {
             type: "buffer",
