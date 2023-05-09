@@ -142,7 +142,7 @@ class Navios
             paises.nome AS pais,
             pessoas_enderecos.complemento AS complemento',
 
-            "os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0  AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.fornecedor_custeio != 0) ORDER BY  os_subgrupos_taxas.codigo ASC LIMIT 100"
+            "os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0  AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.fornecedor_custeio != 0) GROUP BY os_servicos_itens.chave ORDER BY  os_subgrupos_taxas.codigo ASC LIMIT 100"
         );
 
 
