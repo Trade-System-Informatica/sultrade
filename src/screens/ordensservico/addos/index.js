@@ -930,6 +930,7 @@ class AddOS extends Component {
             bloqueado: true
         })
 
+        console.log("here1");
         if (parseInt(this.state.chave) === 0 && validForm) {
             await this.getCodigo();
             let clienteEncurtado = this.state.clientesOptions.find((cliente) => cliente.value == this.state.cliente)?.label;
@@ -960,8 +961,8 @@ class AddOS extends Component {
                 async res => await console.log(`Erro: ${res}`)
             )
 
+        } else if (validForm) {
             if (((!moment(this.state.os.Data_Faturamento) || !moment(this.state.os.Data_Faturamento).isValid()) || !this.state.os.centro_custo == 0) && this.state.faturamento && moment(this.state.faturamento).isValid() && this.state.centroCusto != 0) {
-            } else if (validForm) {
                 console.log(this.state.os.Data_Faturamento);
                 console.log(this.state.os.centro_custo);
                 console.log(this.state.faturamento);
@@ -2309,7 +2310,7 @@ class AddOS extends Component {
             const pdfContent = this.state.pdfContent.itens;
             const pdfChaves = this.state.pdfContent.chaves;
             console.log(pdfChaves
-                )
+            )
 
 
             const getDescricaoItem = (item) => {
