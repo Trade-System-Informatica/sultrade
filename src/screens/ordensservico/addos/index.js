@@ -1801,6 +1801,19 @@ class AddOS extends Component {
                                 totalConsolidado += parseFloat(valor_cobrar);
                                 valorTotalLiquido += parseFloat(valor_cobrar);
 
+                                console.log(pdfCusteioCodigo[custeioIndex]);
+                                console.log(pdfCusteio[custeioIndex]);
+                                if (contasCodigos[0] && contasCodigos.find((cnt) => cnt.conta == (content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod) && cnt.custeioCodigo == pdfCusteioCodigo[custeioIndex])) {
+                                    contasCodigos = contasCodigos.map((cnt) => cnt.conta == (content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod) && cnt.custeioCodigo == pdfCusteioCodigo[custeioIndex] ? ({ ...cnt, row: [...cnt.row, rowCount] }) : ({ ...cnt }))
+                                } else {
+                                    contasCodigos.push({
+                                        conta: content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod,
+                                        row: [rowCount],
+                                        custeioCodigo: pdfCusteioCodigo[custeioIndex],
+                                        custeioNome: pdfCusteio[custeioIndex]
+                                    });
+                                }
+
                                 fields.push({
                                     evento: content.evento.trim(),
                                     conta: content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod ? content.contaCod : "",
@@ -1826,13 +1839,16 @@ class AddOS extends Component {
 
                                 totalConsolidado += content.fornecedor_custeio == custeio ? valor_cobrar : 0;
 
-                                if (contasCodigos[0] && contasCodigos.find((cnt) => cnt.conta == (content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod) && cnt.custeio == content.fornecedor_custeioCodigo)) {
-                                    contasCodigos = contasCodigos.map((cnt) => cnt.conta == (content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod) && cnt.custeio == content.fornecedor_custeioCodigo ? ({ ...cnt, row: [...cnt.row, rowCount] }) : ({ ...cnt }))
+                                console.log(pdfCusteioCodigo[custeioIndex]);
+                                console.log(pdfCusteio[custeioIndex]);
+                                if (contasCodigos[0] && contasCodigos.find((cnt) => cnt.conta == (content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod) && cnt.custeioCodigo == pdfCusteioCodigo[custeioIndex])) {
+                                    contasCodigos = contasCodigos.map((cnt) => cnt.conta == (content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod) && cnt.custeioCodigo == pdfCusteioCodigo[custeioIndex] ? ({ ...cnt, row: [...cnt.row, rowCount] }) : ({ ...cnt }))
                                 } else {
                                     contasCodigos.push({
                                         conta: content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod,
                                         row: [rowCount],
-                                        custeio: content.fornecedor_custeioCodigo
+                                        custeioCodigo: pdfCusteioCodigo[custeioIndex],
+                                        custeioNome: pdfCusteio[custeioIndex]
                                     });
                                 }
 
@@ -1875,7 +1891,7 @@ class AddOS extends Component {
                 rowCount += 2;
 
                 pdfCusteioCodigo.map((custeio, custeioIndex) => {
-                    if (!custeio || !contasCodigos.find((conta) => conta.custeio == custeio && !!conta.conta)) {
+                    if (!custeio || !contasCodigos.find((conta) => conta.custeioCodigo == pdfCusteioCodigo[custeioIndex] && !!conta.conta)) {
                         return;
                     }
                     let contaValor = 0;
@@ -1912,7 +1928,7 @@ class AddOS extends Component {
                     headersRows.push(rowCount);
                     rowCount++;
 
-                    contasCodigos.filter((conta) => conta.custeio == custeio && !!conta.conta).map((conta) => {
+                    contasCodigos.filter((conta) => conta.custeioCodigo == custeio && !!conta.conta).map((conta) => {
                         contaValor += parseFloat(conta.valor);
 
                         contas.push({
@@ -1957,6 +1973,7 @@ class AddOS extends Component {
                     skipHeader: true,
                     origin: -1
                 });
+                console.log(contasCodigos)
 
                 worksheet["!merges"] = [
                     ...titlesRows.map((r) => ({ s: { c: 0, r }, e: { c: 4, r } })),
@@ -2020,7 +2037,8 @@ class AddOS extends Component {
                                 const prevCell = worksheet[XLSX.utils.encode_cell({ r: row, c: col - 1 })]?.v;
 
                                 const accountCells = [];
-                                contasCodigos.filter((e) => e.conta == prevCell).forEach((cell) => {
+                                console.log({ prevCell, accountTitle, conta: contasCodigos.filter((e) => e.conta == prevCell && e.custeioNome == accountTitle) });
+                                contasCodigos.filter((e) => e.conta == prevCell && e.custeioNome == accountTitle).forEach((cell) => {
                                     cell.row.forEach((r) => {
                                         accountCells.push(r)
                                     })
