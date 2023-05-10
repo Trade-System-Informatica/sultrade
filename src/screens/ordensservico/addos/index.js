@@ -2022,7 +2022,7 @@ class AddOS extends Component {
 
                                 const accountCells = [];
                                 console.log(contasCodigos);
-                                contasCodigos.filter((e) => e.conta == prevCell && e.custeio == accountTitle.replace("FATURAMENTO ",""))?.forEach((cell) => {
+                                contasCodigos.filter((e) => e.conta == prevCell)?.forEach((cell) => {
                                     cell.row.forEach((r) => {
                                         accountCells.push(r)
                                     })
