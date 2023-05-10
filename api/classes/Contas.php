@@ -467,7 +467,7 @@ class Contas
                 'contas_aberto',
                 'contas_aberto.*',
                 "contas_aberto.Docto_Origem = '"
-                 . $Docto_Origem . "'"
+                    . $Docto_Origem . "'"
             );
         } else {
             $result = $database->doSelect(
@@ -1107,14 +1107,23 @@ class Contas
         $database = new Database();
 
         $query = "Lancto = '" . $Lancto . "', Pessoa = '" . $Pessoa . "', Centro_Custo = '" . $Centro_Custo . "', Valor = '" . $Valor . "', Saldo = '" . $Saldo . "', Empresa = '" . $Empresa . "'";
-        
-        $conta = $database->doSelect('contas_aberto LEFT JOIN contas_aberto_cc ON contas_aberto_cc.chave_conta_aberto = contas_aberto.chave', 'contas_aberto.chave AS chave, contas_aberto.codigo AS codigo, contas_aberto_cc.chave as chave_cc', 'contas_aberto.Centro_Custo = ' . $old_centro_custo. ' AND contas_aberto_cc.tipo == "DESCONTO"');
-        $database->doUpdate('contas_aberto', $query, 'Centro_Custo = ' . $old_centro_custo);
+
+        $conta = $database->doSelect('contas_aberto LEFT JOIN contas_aberto_cc ON contas_aberto_cc.chave_conta_aberto = contas_aberto.chave LEFT JOIN os ON contas_aberto.Centro_Custo = os.centro_custo', 'contas_aberto.chave AS chave, os.codigo AS codigo, contas_aberto_cc.chave as chave_cc', 'contas_aberto.Centro_Custo = ' . $old_centro_custo . ' AND contas_aberto_cc.tipo = "DESCONTO"');
+
+        $contaBase = $database->doSelect('contas_aberto LEFT JOIN os ON contas_aberto.Centro_Custo = os.centro_custo', 'contas_aberto.chave AS chave, os.codigo AS codigo', 'contas_aberto.Centro_Custo = ' . $old_centro_custo . '');
+        if (!$contaBase[0]) {
+            $cols = 'Lancto, Tipo, Pessoa, Conta_Contabil, RepCodBar, Centro_Custo, Historico, Conta_Desconto, Parc_Ini, Parc_Fim, Valor, Saldo, Vencimento, Vencimento_Original, Conta_Provisao, Operador, Empresa, Docto, tipodocto, meio_pagamento, docto_origem';
+
+            $database->doInsert('contas_aberto', $cols, "'$Lancto', 0, '$Pessoa', 0, 0, '$Centro_Custo', '', 0,0,0, '$Valor', '$Valor', 0, 0, 0, 0, 0, $Empresa, 0, 0, 0, ''");
+            $conta = $database->doSelect('contas_aberto LEFT JOIN contas_aberto_cc ON contas_aberto_cc.chave_conta_aberto = contas_aberto.chave LEFT JOIN os ON contas_aberto.Centro_Custo = os.centro_custo', 'contas_aberto.chave AS chave, os.codigo AS codigo, contas_aberto_cc.chave as chave_cc', 'contas_aberto.Centro_Custo = ' . $old_centro_custo . ' AND contas_aberto_cc.tipo = "DESCONTO"');
+        } else {
+            $database->doUpdate('contas_aberto', $query, 'Centro_Custo = ' . $old_centro_custo);
+        }
 
         if ($conta[0] && $conta[0]["chave"]) {
-            $database->doUpdate("contas_aberto_cc", "valor = '$valuesRet'", "contas_aberto_cc.chave = ".$conta[0]["chave"]);
+            $database->doUpdate("contas_aberto_cc", "valor = '$valuesRet'", "contas_aberto_cc.chave = " . $conta[0]["chave"]);
         } else {
-            $database->doInsert("contas_aberto_cc", "valor, complemento, tipo", "'$valuesRet', 'Desconto de ".$conta[0]["codigo"]."', 'DESCONTO'");
+            $database->doInsert("contas_aberto_cc", "chave_conta_aberto, valor, complemento, tipo", "'".$contaBase[0]["chave"]."', '$valuesRet', 'Desconto de " . $contaBase[0]["codigo"] . "', 'DESCONTO'");
         }
 
         $database->closeConection();
@@ -1351,7 +1360,7 @@ class Contas
                                           GROUP_CONCAT((SELECT os_portos.Descricao FROM os AS Ordem LEFT JOIN os_portos ON Ordem.porto = os_portos.chave WHERE Ordem.chave = os.chave ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto,                                         
                                           GROUP_CONCAT((SELECT os_navios.nome FROM contas_aberto AS Cont LEFT JOIN os_navios ON Cont.navio_manual = os_navios.chave WHERE Cont.chave = contas_aberto.chave ORDER BY Cont.chave DESC LIMIT 1) SEPARATOR '@.@') AS navio_manual,                                        
                                           GROUP_CONCAT((SELECT os_portos.Descricao FROM contas_aberto AS Cont LEFT JOIN os_portos ON Cont.porto_manual = os_portos.chave WHERE Cont.chave = contas_aberto.chave ORDER BY Cont.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto_manual",
-                             "contas_aberto.Tipo = '$tipo' " . $groupBy
+                "contas_aberto.Tipo = '$tipo' " . $groupBy
             );
         }
         return $result;

@@ -226,7 +226,7 @@ class AddOS extends Component {
         if (!this.state.usuarioLogado?.codigo) {
             return;
         }
-        //util.testExcell();
+
         window.scrollTo(0, 0)
         var id = await this.props.match.params.id
         await this.setState({ chave: id })
@@ -930,7 +930,6 @@ class AddOS extends Component {
             bloqueado: true
         })
 
-        console.log("here1");
         if (parseInt(this.state.chave) === 0 && validForm) {
             await this.getCodigo();
             let clienteEncurtado = this.state.clientesOptions.find((cliente) => cliente.value == this.state.cliente)?.label;
@@ -1061,7 +1060,7 @@ class AddOS extends Component {
         } else {
             await apiEmployee.post(`updateContaOS.php`, {
                 token: true,
-                old_Centro_Custo: this.state.os.Centro_Custo,
+                old_Centro_Custo: this.state.os.centro_custo,
                 Lancto: moment(this.state.faturamento).format("YYYY-MM-DD"),
                 Pessoa: this.state.cliente,
                 Centro_Custo: this.state.centroCusto,
@@ -1621,7 +1620,7 @@ class AddOS extends Component {
     }
 
     FaturamentoCusteio = async (codigo, validForm) => {
-        /*try {
+        try {
             if (!validForm) {
                 await this.setState({ error: { type: "error", msg: "Verifique se as informações estão corretas!" } });
                 return;
@@ -1852,11 +1851,26 @@ class AddOS extends Component {
                 })
 
                 totalRows.push(rowCount);
-                emptyRows.push(rowCount+1);
-                rowCount+= 2;
+                emptyRows.push(rowCount + 1);
+                rowCount += 2;
 
-                pdfCusteioCodigo.filter((custeio) => !!custeio && contasCodigos.find((conta) => conta.custeio == custeio && !!conta.conta)).map((custeio, custeioIndex) => {
+                pdfCusteioCodigo.map((custeio, custeioIndex) => {
+                    if (!custeio || !contasCodigos.find((conta) => conta.custeio == custeio && !!conta.conta)) {
+                        return;
+                    }
                     let contaValor = 0;
+
+                    if (contas[0]) {
+                        contas.push({
+                            _0: "",
+                            _1: "",
+                            _2: "",
+                            _3: "",
+                            _4: ""
+                        });
+                        emptyRows.push(rowCount);
+                        rowCount++;
+                    }
 
                     contas.push({
                         _0: "",
@@ -1868,18 +1882,18 @@ class AddOS extends Component {
                     accountsTitlesRows.push(rowCount);
                     rowCount++;
 
+                    contas.push({
+                        _0: "",
+                        _1: "",
+                        _2: "",
+                        _3: "Conta",
+                        _4: "Valor"
+                    });
+                    headersRows.push(rowCount);
+                    rowCount++;
+
                     contasCodigos.filter((conta) => conta.custeio == custeio && !!conta.conta).map((conta) => {
                         contaValor += parseFloat(conta.valor);
-
-                        contas.push({
-                            _0: "",
-                            _1: "",
-                            _2: "",
-                            _3: "Conta",
-                            _4: "Valor"
-                        });
-                        headersRows.push(rowCount);
-                        rowCount++;
 
                         contas.push({
                             _0: "",
@@ -1928,13 +1942,13 @@ class AddOS extends Component {
                     ...titlesRows.map((r) => ({ s: { c: 0, r }, e: { c: 4, r } })),
                     ...footersRows.map((r) => ({ s: { c: 0, r }, e: { c: 1, r } })),
                     ...totalRows.map((r) => ({ s: { c: 0, r }, e: { c: 3, r } })),
-                    ...accountsTitlesRows.map((r) => ({ s: {c: 3, r}, e: {c: 4, r}})),
+                    ...accountsTitlesRows.map((r) => ({ s: { c: 3, r }, e: { c: 4, r } })),
                 ]
                 let footerCobrar = [];
                 let footerPago = [];
                 let accountTotal = [];
                 let totalValor = [];
-                console.log({footersRows, fieldsRows, titlesRows, emptyRows, headersRows});
+                console.log({ footersRows, fieldsRows, titlesRows, emptyRows, headersRows });
                 for (let row = 0; row < rowCount; row++) {
                     for (let col = 0; col <= colCount; col++) {
                         const cell = XLSX.utils.encode_cell({ r: row, c: col });
@@ -1955,31 +1969,53 @@ class AddOS extends Component {
                             }
                         }
                         if ([...accountsTitlesRows, ...accountsRows, ...accountsTotalRows].includes(row)) {
-                            if ([3,4].includes(col) && accountsTitlesRows.includes(row)) {
-                                worksheet[cell].s = {
-                                    alignment: {horizontal: "center", vertical: "center"},
-                                    fill: {
-                                        patternType: "solid",
-                                        fgColor: { rgb: "888888" },
-                                    bgColor: { rgb: "888888" }
-                                },
-                            }
-                            }
+
                             worksheet[cell].s = {
                                 ...worksheet[cell].s,
                                 font: {
-                                    sz:8,
+                                    sz: 8,
                                 },
                             }
-                            if (col === 4 && accountsRows.includes(row)) {
-                                const prevCell = worksheet[XLSX.utils.encode_cell({ r: row, c: col-3 })]?.v;
-
-                                worksheet[cell].f = contas.filter((e) => e.conta == prevCell)?.map((e) => XLSX.utils.encode_cell({ r: e.row, c: 4 }))?.join("+");
-                                accountTotal.push(worksheet[cell]);
+                            if ([3, 4].includes(col) && accountsTitlesRows.includes(row)) {
+                                worksheet[cell].s = {
+                                    ...worksheet[cell].s,
+                                    alignment: { horizontal: "center", vertical: "center" },
+                                    fill: {
+                                        patternType: "solid",
+                                        fgColor: { rgb: "888888" },
+                                        bgColor: { rgb: "888888" }
+                                    },
+                                    font: {
+                                        ...worksheet[cell].s?.font,
+                                        bold: true
+                                    }
+                                }
                             }
-                            if (col === 4 && accountsTotalRows.includes(row)) {
-                                worksheet[cell].f = accountTotal.join("+");
-                                accountTotal = [];
+                            if (col === 4 && accountsRows.includes(row)) {
+                                const prevCell = worksheet[XLSX.utils.encode_cell({ r: row, c: col - 1 })]?.v;
+
+                                const accountCells = [];
+                                contasCodigos.filter((e) => e.conta == prevCell).forEach((cell) => {
+                                    cell.row.forEach((r) => {
+                                        accountCells.push(r)
+                                    })
+                                })
+
+                                worksheet[cell].f = accountCells?.map((e) => XLSX.utils.encode_cell({ r: e, c: 4 }))?.join("+");
+                                accountTotal.push(cell);
+                            }
+                            if (accountsTotalRows.includes(row)) {
+                                worksheet[cell].s = {
+                                    ...worksheet[cell].s,
+                                    font: {
+                                        ...worksheet[cell].s?.font,
+                                        bold: true
+                                    }
+                                }
+                                if (col === 4) {
+                                    worksheet[cell].f = accountTotal.join("+");
+                                    accountTotal = [];
+                                }
                             }
                         }
                         if (footersRows.includes(row)) {
@@ -2071,9 +2107,9 @@ class AddOS extends Component {
             console.log(err);
             await this.setState({ erro: "Erro ao criar o documento", loading: false });
         }
-        this.setState({ loading: false });*/
+        this.setState({ loading: false });
 
-        try {
+        /*try {
             if (!validForm) {
                 await this.setState({ error: { type: "error", msg: "Verifique se as informações estão corretas!" } });
                 return;
@@ -2280,7 +2316,7 @@ class AddOS extends Component {
         } catch (err) {
             console.log(err);
             await this.setState({ erro: "Erro ao criar o pdf", loading: false });
-        }
+        }*/
     }
 
     RelatorioVoucher = async (codigo, validForm) => {
