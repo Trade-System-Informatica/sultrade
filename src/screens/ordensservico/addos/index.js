@@ -1311,11 +1311,11 @@ class AddOS extends Component {
                 return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
             }
 
-            if (this.state.pdfContent.find((os) => !os.chavTaxa && (os.repasse == 1 || os.fornecedorCusteio))) {
+            console.log(this.state.pdfContent);
+            if (this.state.pdfContent.find((os) => !os.chavTaxa)) {
                 return this.setState({ error: { type: "error", msg: "Há eventos sem taxas" }, loading: false })
             }
 
-            console.log(this.state.pdfContent);
             const vouchers = [];
             this.state.pdfContent.filter((content) => content.tipo != 2).map((content) => {
                 if (!vouchers.includes(content.chavTaxa)) {
