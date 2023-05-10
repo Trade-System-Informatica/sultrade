@@ -674,7 +674,7 @@ class AddOS extends Component {
                 this.setState({
                     anexosNaoValidados: anexos
                 });
-                console.log(anexos);
+                //console.log(anexos);
             },
             response => { this.erroApi(response) }
 
@@ -962,10 +962,10 @@ class AddOS extends Component {
 
         } else if (validForm) {
             if (((!moment(this.state.os.Data_Faturamento) || !moment(this.state.os.Data_Faturamento).isValid()) || this.state.os.centro_custo == 0) && this.state.faturamento && moment(this.state.faturamento).isValid() && this.state.centroCusto != 0) {
-                console.log(this.state.os.Data_Faturamento);
-                console.log(this.state.os.centro_custo);
-                console.log(this.state.faturamento);
-                console.log(this.state.centroCusto);
+                // console.log(this.state.os.Data_Faturamento);
+                // console.log(this.state.os.centro_custo);
+                // console.log(this.state.faturamento);
+                // console.log(this.state.centroCusto);
                 await this.faturaOS();
             }
             await apiEmployee.post(`updateOS.php`, {
@@ -1460,7 +1460,7 @@ class AddOS extends Component {
                                         return (
                                             <>
                                                 {this.state.pdfContent.filter((e) => e.tipo != 2 && e.tipo != 3 && e.chavTaxa == voucher && (e.repasse || e.faturamentoCusteio)).map((e, i) => {
-                                                    console.log(e);
+                                                    //console.log(e);
                                                     if (e.tipo != 3) {
                                                         if (e.moeda == 5) {
                                                             valorTotal += parseFloat(e.valor);
@@ -1517,7 +1517,7 @@ class AddOS extends Component {
                                     }
 
                                     {this.state.pdfContent.filter((e) => e.tipo == 3).map((e) => {
-                                        console.log(e);
+                                        //console.log(e);
                                         if (e.moeda == 5) {
                                             //valorTotal -= parseFloat(e.valor);
                                             descontoFinal += parseFloat(e.valor);
@@ -1529,7 +1529,7 @@ class AddOS extends Component {
                                         }
                                     })}
                                     {this.state.pdfContent.filter((e) => e.tipo == 2).map((e) => {
-                                        console.log(e);
+                                        //console.log(e);
                                         if (e.moeda == 5) {
                                             //valorTotal -= parseFloat(e.valor);
                                             recebimentoFinal += parseFloat(e.valor);
@@ -1968,7 +1968,7 @@ class AddOS extends Component {
                 let footerPago = [];
                 let accountTotal = [];
                 let totalValor = [];
-                console.log({ footersRows, fieldsRows, titlesRows, emptyRows, headersRows });
+                //console.log({ footersRows, fieldsRows, titlesRows, emptyRows, headersRows });
                 for (let row = 0; row < rowCount; row++) {
                     for (let col = 0; col <= colCount; col++) {
                         const cell = XLSX.utils.encode_cell({ r: row, c: col });
@@ -2365,8 +2365,7 @@ class AddOS extends Component {
 
             const pdfContent = this.state.pdfContent.itens;
             const pdfChaves = this.state.pdfContent.chaves;
-            console.log(pdfChaves
-            )
+            //console.log(pdfChaves)
 
 
             const getDescricaoItem = (item) => {
