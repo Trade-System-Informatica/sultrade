@@ -1832,8 +1832,7 @@ class AddOS extends Component {
                                     contasCodigos.push({
                                         conta: content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod,
                                         row: [rowCount],
-                                        custeio: content.fornecedor_custeioCodigo,
-                                        custeioNome: custeio
+                                        custeio: content.fornecedor_custeioCodigo
                                     });
                                 }
 
@@ -2021,8 +2020,7 @@ class AddOS extends Component {
                                 const prevCell = worksheet[XLSX.utils.encode_cell({ r: row, c: col - 1 })]?.v;
 
                                 const accountCells = [];
-                                console.log(contasCodigos);
-                                contasCodigos.filter((e) => e.conta == prevCell)?.forEach((cell) => {
+                                contasCodigos.filter((e) => e.conta == prevCell).forEach((cell) => {
                                     cell.row.forEach((r) => {
                                         accountCells.push(r)
                                     })
