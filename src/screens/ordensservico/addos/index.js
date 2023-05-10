@@ -1460,7 +1460,7 @@ class AddOS extends Component {
 
                                         return (
                                             <>
-                                                {this.state.pdfContent.filter((e) => e.tipo != 2 && e.chavTaxa == voucher).map((e, i) => {
+                                                {this.state.pdfContent.filter((e) => e.tipo != 2 && e.tipo != 3 && e.chavTaxa == voucher && e.repasse && e.faturamentoCusteio).map((e, i) => {
 
                                                     if (e.tipo != 3) {
                                                         if (e.moeda == 5) {

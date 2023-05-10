@@ -134,6 +134,8 @@ class Navios
             os_servicos_itens.valor as valor,
             os_servicos_itens.moeda,
             os_servicos_itens.tipo_sub AS tipo,
+            os_servicos_itens.repasse AS repasse,
+            os_servicos_itens.Fornecedor_Custeio AS fornecedorCusteio,
             pessoas_enderecos.endereco AS rua,
             pessoas_enderecos.numero AS numero,
             pessoas_enderecos.cidade_descricao AS cidade,
@@ -142,7 +144,7 @@ class Navios
             paises.nome AS pais,
             pessoas_enderecos.complemento AS complemento',
 
-            "os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0  AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.fornecedor_custeio != 0) GROUP BY os_servicos_itens.chave ORDER BY os_subgrupos_taxas.codigo ASC LIMIT 100"
+            "os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY os_subgrupos_taxas.codigo ASC LIMIT 100"
     );
 
 
