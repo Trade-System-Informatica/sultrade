@@ -2022,14 +2022,19 @@ class AddOS extends Component {
                                 })
 
                                 worksheet[cell].f = accountCells?.map((e) => XLSX.utils.encode_cell({ r: e, c: 4 }))?.join("+");
+                                worksheet[cell].s = {
+                                    ...worksheet[cell].s,
+                                    numFmt: "R$ #,##0.00"
+                                }
                                 accountTotal.push(cell);
                             }
                             if (accountsTotalRows.includes(row)) {
                                 worksheet[cell].s = {
                                     ...worksheet[cell].s,
+                                    numFmt: "R$ #,##0.00",
                                     font: {
                                         ...worksheet[cell].s?.font,
-                                        bold: true
+                                        bold: true,
                                     }
                                 }
                                 if (col === 4) {
