@@ -1311,7 +1311,7 @@ class AddOS extends Component {
                 return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
             }
 
-            if (this.state.pdfContent.find((os) => !os.chavTaxa && (os.repasse == 1 || os.fornecedorCusteio))) {
+            if (this.state.pdfContent.find((os) => !os.chavTaxa && [0,1].includes(os.tipo))) {
                 return this.setState({ error: { type: "error", msg: "Há eventos sem taxas" }, loading: false })
             }
 
