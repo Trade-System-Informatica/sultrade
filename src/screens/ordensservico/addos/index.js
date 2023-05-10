@@ -1334,6 +1334,8 @@ class AddOS extends Component {
             let totalFinalDolar = 0;
             let descontoFinal = 0;
             let descontoFinalDolar = 0;
+            let recebimentoFinal = 0;
+            let recebimentoFinalDolar = 0;
 
             let company = util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].cliente);
             let address = `${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].complemento)} ${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].rua)} ${this.state.pdfContent[0].numero && this.state.pdfContent[0].numero != "0" ? this.state.pdfContent[0].numero : ""} ${this.state.pdfContent[0].cep && this.state.pdfContent[0].cep != "0" ? this.state.pdfContent[0].cep : ""}`;
@@ -1482,7 +1484,7 @@ class AddOS extends Component {
                                                         }
                                                     }
                                                 })}
-                                                {this.state.pdfContent.filter((e) => e.tipo == 2).map((e) => {
+                                                {this.state.pdfContent.filter((e) => e.tipo == 3).map((e) => {
                                                     if (e.moeda == 5) {
                                                         valorTotal -= parseFloat(e.valor);
                                                         descontoFinal += parseFloat(e.valor);
@@ -1491,6 +1493,17 @@ class AddOS extends Component {
                                                         valorTotal -= Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
                                                         descontoFinal += Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
                                                         descontoFinalDolar += parseFloat(e.valor);
+                                                    }
+                                                })}
+                                                {this.state.pdfContent.filter((e) => e.tipo == 2).map((e) => {
+                                                    if (e.moeda == 5) {
+                                                        valorTotal -= parseFloat(e.valor);
+                                                        recebimentoFinal += parseFloat(e.valor);
+                                                        recebimentoFinalDolar += Util.toFixed(parseFloat(e.valor / this.state.pdfContent[0].roe), 2);
+                                                    } else {
+                                                        valorTotal -= Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
+                                                        recebimentoFinal += Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
+                                                        recebimentoFinalDolar += parseFloat(e.valor);
                                                     }
                                                 })}
 
@@ -1535,14 +1548,19 @@ class AddOS extends Component {
                                         <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinal))}</td>
                                     </tr>
                                     <tr>
-                                        <td colSpan='5' className='pdfTitle pdf_small_col'>Total Final Discounts</td>
-                                        <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinal))}</td>
-                                        <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinalDolar))}</td>
+                                        <td colSpan='5' className='pdf_small_col'>Funds Received</td>
+                                        <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(recebimentoFinal))}</td>
+                                        <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(recebimentoFinalDolar))}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colSpan='5' className='pdf_small_col'>Discount</td>
+                                        <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinal))}</td>
+                                        <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinalDolar))}</td>
                                     </tr>
                                     <tr>
                                         <td colSpan='5' className='pdfTitle pdf_small_col'>Final Blce/Debit Customer</td>
-                                        <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinalDolar) - parseFloat(descontoFinalDolar))}</td>
-                                        <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinal) - parseFloat(descontoFinal))}</td>
+                                        <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinalDolar) - parseFloat(descontoFinalDolar) - parseFloat(recebimentoFinalDolar))}</td>
+                                        <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinal) - parseFloat(descontoFinal) - parseFloat(recebimentoFinal))}</td>
                                     </tr>
                                 </table>
                                 <table className='pdfTable' style={{ width: "80%", marginLeft: "5%" }}>
