@@ -1832,7 +1832,8 @@ class AddOS extends Component {
                                     contasCodigos.push({
                                         conta: content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod,
                                         row: [rowCount],
-                                        custeio: content.fornecedor_custeioCodigo
+                                        custeio: content.fornecedor_custeioCodigo,
+                                        custeioNome: custeio
                                     });
                                 }
 
@@ -1967,6 +1968,7 @@ class AddOS extends Component {
                 let footerCobrar = [];
                 let footerPago = [];
                 let accountTotal = [];
+                let accountTitle = "";
                 let totalValor = [];
                 //console.log({ footersRows, fieldsRows, titlesRows, emptyRows, headersRows });
                 for (let row = 0; row < rowCount; row++) {
@@ -2010,12 +2012,17 @@ class AddOS extends Component {
                                         bold: true
                                     }
                                 }
+                                if (col === 3) {
+                                    accountTitle = worksheet[cell].v;
+                                }
                             }
                             if (col === 4 && accountsRows.includes(row)) {
+                                
                                 const prevCell = worksheet[XLSX.utils.encode_cell({ r: row, c: col - 1 })]?.v;
 
                                 const accountCells = [];
-                                contasCodigos.filter((e) => e.conta == prevCell).forEach((cell) => {
+                                console.log(contasCodigos);
+                                contasCodigos.filter((e) => e.conta == prevCell && e.custeio == accountTitle.replace("FATURAMENTO ",""))?.forEach((cell) => {
                                     cell.row.forEach((r) => {
                                         accountCells.push(r)
                                     })
@@ -2040,6 +2047,7 @@ class AddOS extends Component {
                                 if (col === 4) {
                                     worksheet[cell].f = accountTotal.join("+");
                                     accountTotal = [];
+                                    accountTitle = "";
                                 }
                             }
                         }
