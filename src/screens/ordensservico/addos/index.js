@@ -961,7 +961,7 @@ class AddOS extends Component {
             )
 
         } else if (validForm) {
-            if (((!moment(this.state.os.Data_Faturamento) || !moment(this.state.os.Data_Faturamento).isValid()) || !this.state.os.centro_custo == 0) && this.state.faturamento && moment(this.state.faturamento).isValid() && this.state.centroCusto != 0) {
+            if (((!moment(this.state.os.Data_Faturamento) || !moment(this.state.os.Data_Faturamento).isValid()) || this.state.os.centro_custo == 0) && this.state.faturamento && moment(this.state.faturamento).isValid() && this.state.centroCusto != 0) {
                 console.log(this.state.os.Data_Faturamento);
                 console.log(this.state.os.centro_custo);
                 console.log(this.state.faturamento);
@@ -1311,8 +1311,7 @@ class AddOS extends Component {
                 return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
             }
 
-            console.log(this.state.pdfContent);
-            if (this.state.pdfContent.find((os) => !os.chavTaxa)) {
+            if (this.state.pdfContent.find((os) => !os.chavTaxa && (os.repasse == 1 || os.fornecedorCusteio))) {
                 return this.setState({ error: { type: "error", msg: "Há eventos sem taxas" }, loading: false })
             }
 
