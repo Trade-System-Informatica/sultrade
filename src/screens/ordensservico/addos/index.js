@@ -1551,13 +1551,13 @@ class AddOS extends Component {
                                     </tr>
                                     <tr>
                                         <td colSpan='5' className='pdf_small_col'>Funds Received</td>
-                                        <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(recebimentoFinal))}</td>
                                         <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(recebimentoFinalDolar))}</td>
+                                        <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(recebimentoFinal))}</td>
                                     </tr>
                                     <tr>
                                         <td colSpan='5' className='pdf_small_col'>Discount</td>
-                                        <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinal))}</td>
                                         <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinalDolar))}</td>
+                                        <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinal))}</td>
                                     </tr>
                                     <tr>
                                         <td colSpan='5' className='pdfTitle pdf_small_col'>Final Blce/Debit Customer</td>
