@@ -1460,7 +1460,7 @@ class AddOS extends Component {
                                         return (
                                             <>
                                                 {this.state.pdfContent.filter((e) => e.tipo != 2 && e.tipo != 3 && e.chavTaxa == voucher && e.repasse && e.faturamentoCusteio).map((e, i) => {
-
+                                                    console.log(e);
                                                     if (e.tipo != 3) {
                                                         if (e.moeda == 5) {
                                                             valorTotal += parseFloat(e.valor);
@@ -1484,23 +1484,25 @@ class AddOS extends Component {
                                                     }
                                                 })}
                                                 {this.state.pdfContent.filter((e) => e.tipo == 3).map((e) => {
+                                                    console.log(e);
                                                     if (e.moeda == 5) {
-                                                        valorTotal -= parseFloat(e.valor);
+                                                        //valorTotal -= parseFloat(e.valor);
                                                         descontoFinal += parseFloat(e.valor);
                                                         descontoFinalDolar += Util.toFixed(parseFloat(e.valor / this.state.pdfContent[0].roe), 2);
                                                     } else {
-                                                        valorTotal -= Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
+                                                        //valorTotal -= Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
                                                         descontoFinal += Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
                                                         descontoFinalDolar += parseFloat(e.valor);
                                                     }
                                                 })}
                                                 {this.state.pdfContent.filter((e) => e.tipo == 2).map((e) => {
+                                                    console.log(e);
                                                     if (e.moeda == 5) {
-                                                        valorTotal -= parseFloat(e.valor);
+                                                        //valorTotal -= parseFloat(e.valor);
                                                         recebimentoFinal += parseFloat(e.valor);
                                                         recebimentoFinalDolar += Util.toFixed(parseFloat(e.valor / this.state.pdfContent[0].roe), 2);
                                                     } else {
-                                                        valorTotal -= Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
+                                                        //valorTotal -= Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
                                                         recebimentoFinal += Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
                                                         recebimentoFinalDolar += parseFloat(e.valor);
                                                     }
