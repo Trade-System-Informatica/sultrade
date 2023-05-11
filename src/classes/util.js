@@ -258,6 +258,10 @@ export default class Util {
     }
 
     static toFixed(num, precision) {
+        if (isNaN(parseInt(num))) {
+            return 0;
+        }
+    
         return parseFloat((+(Math.round(+(num + 'e' + precision)) + 'e' + -precision)).toFixed(precision));
     }
 

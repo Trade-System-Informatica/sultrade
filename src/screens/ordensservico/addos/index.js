@@ -1038,7 +1038,7 @@ class AddOS extends Component {
             }
         });
         valor += parseFloat(this.state.bankCharges.replaceAll(".","").replaceAll(",","."));
-        valor += parseFloat(this.state.governmentTaxes.replaceAll(".","").replaceAll(",","."));
+        valor += parseFloat(this.state.governmentTaxes.replaceAll(".", "").replaceAll(",", "."));
 
         let valuesRet = "";
 
