@@ -1067,7 +1067,7 @@ class AddOS extends Component {
                 Valor: parseFloat(valor),
                 Saldo: parseFloat(valor),
                 Operador: this.state.usuarioLogado.codigo,
-                Empres: this.state.empresa,
+                Empresa: this.state.empresa,
                 valuesRet: parseFloat(valorDesconto)
             }).then(
                 async res => {

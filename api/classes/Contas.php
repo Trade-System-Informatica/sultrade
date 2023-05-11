@@ -1114,7 +1114,7 @@ class Contas
         if (!$contaBase[0]) {
             $cols = 'Lancto, Tipo, Pessoa, Conta_Contabil, RepCodBar, Centro_Custo, Historico, Conta_Desconto, Parc_Ini, Parc_Fim, Valor, Saldo, Vencimento, Vencimento_Original, Conta_Provisao, Operador, Empresa, Docto, tipodocto, meio_pagamento, docto_origem';
 
-            $database->doInsert('contas_aberto', $cols, "'$Lancto', 0, '$Pessoa', 0, 0, '$Centro_Custo', '', 0,0,0, '$Valor', '$Valor', 0, 0, 0, 0, 0, $Empresa, 0, 0, 0, ''");
+            $database->doInsert('contas_aberto', $cols, "'$Lancto', 0, '$Pessoa', 0, 0, '$Centro_Custo', '', 0,1,1, '$Valor', '$Valor', '', '', 0, 0, 0, $Empresa, 0, 0, 0, ''");
             $conta = $database->doSelect('contas_aberto LEFT JOIN contas_aberto_cc ON contas_aberto_cc.chave_conta_aberto = contas_aberto.chave LEFT JOIN os ON contas_aberto.Centro_Custo = os.centro_custo', 'contas_aberto.chave AS chave, os.codigo AS codigo, contas_aberto_cc.chave as chave_cc', 'contas_aberto.Centro_Custo = ' . $old_centro_custo . ' AND contas_aberto_cc.tipo = "DESCONTO"');
         } else {
             $database->doUpdate('contas_aberto', $query, 'Centro_Custo = ' . $old_centro_custo);
