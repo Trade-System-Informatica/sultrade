@@ -1019,7 +1019,7 @@ class AddOS extends Component {
     faturaOS = async () => {
         let valor = 0;
         let valorDesconto = 0;
-
+        alert("ENTROU NO FATURAR OS")
         this.state.eventos.map((evento) => {
             if (evento.tipo_sub == 3 && evento.cancelada == 0) {
                 if (evento.Moeda == 5) {
@@ -1037,8 +1037,9 @@ class AddOS extends Component {
                 }
             }
         });
-        valor += parseFloat(this.state.bankCharges.replaceAll(".","").replaceAll(",","."));
-        valor += parseFloat(this.state.governmentTaxes.replaceAll(".", "").replaceAll(",", "."));
+       
+        valor += parseFloat(this.state.bankCharges.toString().replaceAll(".","").replaceAll(",","."));
+        valor += parseFloat(this.state.governmentTaxes.toString().replaceAll(".", "").replaceAll(",", "."));
 
         let valuesRet = "";
 
