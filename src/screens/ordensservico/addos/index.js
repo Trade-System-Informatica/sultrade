@@ -961,7 +961,7 @@ class AddOS extends Component {
             )
 
         } else if (validForm) {
-            if (((!moment(this.state.os.Data_Faturamento) || !moment(this.state.os.Data_Faturamento).isValid()) || this.state.os.centro_custo == 0) && this.state.faturamento && moment(this.state.faturamento).isValid() && this.state.centroCusto != 0) {
+            if (this.state.faturamento && moment(this.state.faturamento).isValid() && this.state.centroCusto != 0) {
                 // console.log(this.state.os.Data_Faturamento);
                 // console.log(this.state.os.centro_custo);
                 // console.log(this.state.faturamento);
