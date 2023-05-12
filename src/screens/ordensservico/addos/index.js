@@ -1055,7 +1055,6 @@ class AddOS extends Component {
                 valuesRet
             }).then(
                 async res => {
-                    alert("oops");
                     console.log(res.data);
                 },
                 async res => await console.log(`Erro: ${res.data}`)
@@ -1075,7 +1074,6 @@ class AddOS extends Component {
             }).then(
                 async res => {
                     console.log(res.data);
-                    alert(res.data);
                 },
                 async res => await console.log(`Erro: ${res.data}`)
             )
