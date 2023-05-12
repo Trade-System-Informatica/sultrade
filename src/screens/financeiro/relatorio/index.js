@@ -437,6 +437,13 @@ class Relatorio extends Component {
                                 return (<></>)
                             }
 
+
+
+                            let totalFDAPorGrupo = 0;
+                            let totalDiscountPorGrupo = 0;
+                            let totalReceivedPorGrupo = 0;
+                            let totalBalancePorGrupo = 0;
+                            
                             return (
                                 <div>
 
