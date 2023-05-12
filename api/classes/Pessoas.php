@@ -174,6 +174,17 @@ class Pessoas
         return $result;
     }
 
+    public static function getEventosNaoContabilizados()
+    {
+        $database = new Database();
+        
+        $result = $database->doSelect("os_servicos_itens LEFT JOIN os ON os.chave = os_servicos_itens.chave_os LEFT JOIN contas_aberto ON os_servicos_itens.chave = contas_aberto.Docto_Origem LEFT JOIN custeios_subagentes ON custeios_subagentes.evento = os_servicos_itens.chave", "os_servicos_itens.*", "TIMESTAMPDIFF(HOUR,os.Data_Faturamento,NOW())<=48 AND (custeios_subagentes.chave IS NULL OR custeios_subagentes.contabilizado = 0) AND contas_aberto.chave IS NULL");
+        
+        $database->closeConection();
+        return $result;
+    }
+
+    
     public static function getEnderecos($pessoa)
     {
         $database = new Database();

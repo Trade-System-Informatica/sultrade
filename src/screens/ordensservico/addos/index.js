@@ -417,7 +417,6 @@ class AddOS extends Component {
             await this.getCentrosCustos();
             await this.getServicosItens();
             await this.getDocumentos();
-            await this.getAnexos();
         }
 
         await this.setState({
@@ -650,31 +649,6 @@ class AddOS extends Component {
                 const documentos = [... this.state.documentos, ...response.data]
                 await this.setState({ documentos: documentos })
 
-            },
-            response => { this.erroApi(response) }
-
-        )
-    }
-
-    getAnexos = async () => {
-        await apiEmployee.post(`getAnexosNaoValidados.php`, {
-            token: true,
-            os: this.state.chave
-        }).then(
-            async response => {
-                const anexos = [...response.data]
-                const eventosContabilizados = [
-                    ...this.state.custeios_subagentes.filter((grupo) => grupo.contabilizado == 1).map((grupo) => grupo.evento?.split(","))?.flat(),
-                    ...this.state.eventos.filter((evento) => !!evento.conta)
-                ];
-                this.state.eventos.filter((evento) => !eventosContabilizados.includes(evento)).map((evento) => {
-                    anexos.push(({ fornecedor: evento.fornecedor, evento: evento.chave, eventoChave: evento.chave, anexo: "", validado: 2, validadoPor: -1 }))
-                })
-
-                this.setState({
-                    anexosNaoValidados: anexos
-                });
-                //console.log(anexos);
             },
             response => { this.erroApi(response) }
 
@@ -3686,22 +3660,6 @@ class AddOS extends Component {
                             <Header voltarOS titulo="OS" chave={this.state.codigo != 0 ? this.state.codigo : ''} />
                             <br />
                         </section>
-
-                        {/* {this.state.os.Data_Encerramento && moment(this.state.os.Data_Encerramento).isValid() && this.state.anexosNaoValidados.filter((e, index) => index <= 5).map((anexo, index) => {
-                        const link = anexo.anexo ? util.completarDocuments(`fornDocs/${anexo.anexo}`) : false;
-                        const editAnexo = anexo.validado == 0 ? { pathname: `/ordensservico/addanexo/${anexo.chave}`, state: { anexo } } : { pathname: `/ordensservico/addevento/${anexo.evento}` };
-                        const hoursRemaining = 48 - (moment().diff(moment(this.state.os.Data_Encerramento), 'hour'));
-
-                        return (
-                            <Notification
-                                notification={{ type: hoursRemaining <= 12 ? `urgent` : "", msg: `Evento-${anexo.eventoChave}: ${hoursRemaining} horas para ${anexo.anexo ? anexo.validado == 0 ? `aprovar` : `validar` : `contabilizar`}` }}
-                                close={() => this.setState({ anexosNaoValidados: this.state.anexosNaoValidados.filter((an) => an.chave != anexo.chave) })}
-                                link={link}
-                                editAnexo={editAnexo}
-                                index={index}
-                            />
-                        )
-                    })} */}
 
                         <div style={{ width: '100%', textAlign: 'center', marginTop: '-20px', marginBottom: '2%' }}>
                             <h6 style={{ color: 'red' }}>{this.state.erro}</h6>
