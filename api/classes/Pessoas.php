@@ -168,7 +168,7 @@ class Pessoas
         $database->doUpdate('anexos LEFT JOIN os_servicos_itens AS eventos ON eventos.chave = anexos.evento LEFT JOIN os ON os.chave = eventos.chave_os', "validado = 1, validadoPor = -1, validadoData = '" . date("Y-m-d H:i:s") . "'", "validado = 0 AND os.Data_Abertura <= '$expiration'");
         $database->doUpdate('anexos', "validado = 1, validadoPor = -1, validadoData = '" . date("Y-m-d H:i:s") . "'", "validado = 2 AND validadoData <= '$expiration'");
 
-        $result = $database->doSelect("anexos", "anexos.*", "validado IN(0,2) ORDER BY envio DESC");
+        $result = $database->doSelect("anexos LEFT JOIN os_servicos_itens evento ON evento.chave = anexos.evento LEFT JOIN os ON evento.chave_os = os.chave", "anexos.*, os.Data_Abertura AS data", "validado IN(0,2) ORDER BY envio DESC");
         
         $database->closeConection();
         return $result;
@@ -178,7 +178,7 @@ class Pessoas
     {
         $database = new Database();
         
-        $result = $database->doSelect("os_servicos_itens LEFT JOIN os ON os.chave = os_servicos_itens.chave_os LEFT JOIN contas_aberto ON os_servicos_itens.chave = contas_aberto.Docto_Origem LEFT JOIN custeios_subagentes ON custeios_subagentes.evento = os_servicos_itens.chave", "os_servicos_itens.*", "TIMESTAMPDIFF(HOUR,os.Data_Faturamento,NOW())<=48 AND (custeios_subagentes.chave IS NULL OR custeios_subagentes.contabilizado = 0) AND contas_aberto.chave IS NULL");
+        $result = $database->doSelect("os_servicos_itens LEFT JOIN os ON os.chave = os_servicos_itens.chave_os LEFT JOIN contas_aberto ON os_servicos_itens.chave = contas_aberto.Docto_Origem LEFT JOIN custeios_subagentes ON custeios_subagentes.evento = os_servicos_itens.chave", "os_servicos_itens.*, os.Data_Abertura AS data", "TIMESTAMPDIFF(HOUR,os.Data_Faturamento,NOW())<=48 AND (custeios_subagentes.chave IS NULL OR custeios_subagentes.contabilizado = 0) AND contas_aberto.chave IS NULL");
         
         $database->closeConection();
         return $result;

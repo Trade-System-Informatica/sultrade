@@ -156,7 +156,7 @@ class Header extends Component {
         }).then(
             async response => {
                 response.data.map((evento) => {
-                    anexos.push(({ fornecedor: evento.fornecedor, evento: evento.chave, eventoChave: evento.chave, anexo: "", validado: 2, validadoPor: -1 }))
+                    anexos.unshift(({ fornecedor: evento.fornecedor, evento: evento.chave, eventoChave: evento.chave, anexo: "", validado: 2, validadoPor: -1, data: evento.data }))
                 })
             },
             response => { this.erroApi(response) }
@@ -241,7 +241,7 @@ class Header extends Component {
                     {this.state.anexosNaoValidados.filter((e, index) => index <= 5).map((anexo, index) => {
                         const link = anexo.anexo ? util.completarDocuments(`fornDocs/${anexo.anexo}`) : false;
                         const editAnexo = anexo.validado == 0 ? { pathname: `/ordensservico/addanexo/${anexo.chave}`, state: { anexo } } : { pathname: `/ordensservico/addevento/${anexo.evento}` };
-                        const hoursRemaining = 48 - (moment().diff(moment(this.state.os.Data_Encerramento), 'hour'));
+                        const hoursRemaining = 48 - (moment().diff(moment(anexo?.data), 'hour'));
 
                         return (
                             <Notification
