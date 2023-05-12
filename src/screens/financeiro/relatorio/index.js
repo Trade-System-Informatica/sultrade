@@ -437,13 +437,11 @@ class Relatorio extends Component {
                                 return (<></>)
                             }
 
-
-
                             let totalFDAPorGrupo = 0;
                             let totalDiscountPorGrupo = 0;
                             let totalReceivedPorGrupo = 0;
                             let totalBalancePorGrupo = 0;
-                            
+
                             return (
                                 <div>
 
@@ -483,6 +481,7 @@ class Relatorio extends Component {
                                                         FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[eventIndex] && e.ROE.split("@.@")[eventIndex] != 0 ? e.ROE.split("@.@")[eventIndex] : 5), 2) : 0;
                                                     }
                                                 }
+                                                console.log({ FDA, valor: e.evento_valor.split("@.@")[eventIndex], moeda: e.evento_moeda.split("@.@")[eventIndex], formatted: util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]), 2)})
                                             });
                                             if (this.state.moeda == 5) {
                                                 FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? parseFloat(e.bankCharges.split("@.@")[index]) : 0;
