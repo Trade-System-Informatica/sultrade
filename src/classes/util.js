@@ -262,6 +262,7 @@ export default class Util {
             return 0;
         }
     
+        console.log({TOFIXED: num});
         return parseFloat((+(Math.round(+(num + 'e' + precision)) + 'e' + -precision)).toFixed(precision));
     }
 
