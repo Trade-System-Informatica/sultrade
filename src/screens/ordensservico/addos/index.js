@@ -961,7 +961,8 @@ class AddOS extends Component {
             )
 
         } else if (validForm) {
-            if (this.state.faturamento && moment(this.state.faturamento).isValid() && this.state.centroCusto != 0) {
+            console.log(this.state.faturamento && moment(this.state.faturamento).isValid() && this.state.centroCusto != 0 && this.state.centroCusto != "");
+            if (this.state.faturamento && moment(this.state.faturamento).isValid() && this.state.centroCusto != 0 && this.state.centroCusto != "") {
                 // console.log(this.state.os.Data_Faturamento);
                 // console.log(this.state.os.centro_custo);
                 // console.log(this.state.faturamento);
@@ -1054,6 +1055,7 @@ class AddOS extends Component {
                 valuesRet
             }).then(
                 async res => {
+                    alert("oops");
                     console.log(res.data);
                 },
                 async res => await console.log(`Erro: ${res.data}`)
@@ -1073,6 +1075,7 @@ class AddOS extends Component {
             }).then(
                 async res => {
                     console.log(res.data);
+                    alert(res.data);
                 },
                 async res => await console.log(`Erro: ${res.data}`)
             )
