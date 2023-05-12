@@ -226,7 +226,6 @@ class AddOS extends Component {
         if (!this.state.usuarioLogado?.codigo) {
             return;
         }
-        console.log(util.toFixed(1081.356814088453, 2));
 
         window.scrollTo(0, 0)
         var id = await this.props.match.params.id

@@ -1319,6 +1319,8 @@ class Contas
                                           GROUP_CONCAT(contas_aberto.valor SEPARATOR '@.@') AS valor,
                                           GROUP_CONCAT((SELECT contas_aberto_cc.valor FROM contas_aberto_cc WHERE contas_aberto_cc.tipo = 'DESCONTO' AND contas_aberto_cc.chave_conta_aberto = contas_aberto.chave LIMIT 1) SEPARATOR '@.@') AS desconto,
                                           GROUP_CONCAT(os.codigo SEPARATOR '@.@') AS os,
+                                          GROUP_CONCAT(os.governmentTaxes SEPARATOR '@.@') AS governmentTaxes,
+                                          GROUP_CONCAT(os.bankCharges SEPARATOR '@.@') AS bankCharges,
                                           GROUP_CONCAT(os.data_saida SEPARATOR '@.@') AS sailed,
                                           GROUP_CONCAT(os.ROE SEPARATOR '@.@') AS ROE,
                                           GROUP_CONCAT((SELECT GROUP_CONCAT(os_servicos_itens.moeda SEPARATOR '@.@') FROM os AS Ordem LEFT JOIN os_servicos_itens ON Ordem.chave = os_servicos_itens.chave_os WHERE Ordem.chave = os.chave AND os_servicos_itens.cancelada != 1 AND os_servicos_itens.tipo_sub IN (0,1) AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.Fornecedor_Custeio != '') ORDER BY os.chave DESC LIMIT 1) SEPARATOR '@.@') AS evento_moeda,
