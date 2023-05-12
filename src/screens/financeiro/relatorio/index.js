@@ -429,7 +429,7 @@ class Relatorio extends Component {
                                                 } else if (this.state.moeda == 6) {
                                                     FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
                                                 }
-                                                console.log({valor: e.evento_valor.split("@.@")[eventIndex], moeda: e.evento_moeda.split("@.@")[eventIndex]})
+                                                console.log({thisMoeda: this.state.moeda, valor: e.evento_valor.split("@.@")[eventIndex], moeda: e.evento_moeda.split("@.@")[eventIndex]})
                                             });
                                             console.log(FDA)
                                             if (this.state.moeda == 5) {
