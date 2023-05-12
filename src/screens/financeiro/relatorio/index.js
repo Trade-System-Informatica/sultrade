@@ -348,7 +348,7 @@ class Relatorio extends Component {
         let totalReceived = 0;
         let totalBalance = 0;
 
-        let testBalance = 0;
+        let checkBalance = 0;
 
         let totalValor = 0;
         let totalSaldo = 0;
