@@ -348,6 +348,8 @@ class Relatorio extends Component {
         let totalReceived = 0;
         let totalBalance = 0;
 
+        let testBalance = 0;
+
         let totalValor = 0;
         let totalSaldo = 0;
 
@@ -377,11 +379,6 @@ class Relatorio extends Component {
                 {this.props.location.state.backTo != 'contasPagas' && this.props.location.state.backTo != 'contasPagar' &&
                     <div className='pdfContent'>
                         {relatorio.map((e) => {
-                            totalFDAPorGrupo = 0;
-                            totalDiscountPorGrupo = 0;
-                            totalReceivedPorGrupo = 0;
-                            totalBalancePorGrupo = 0;
-
                             if (this.state.por == 'porCliente' && !e.pessoa) {
                                 e.pessoa = '';
                             }
@@ -392,6 +389,54 @@ class Relatorio extends Component {
                                 e.dataPagamento = '';
                             }
                             map = this.state.por == "porCliente" ? e.pessoa.split('@.@') : this.state.por == "porVencimento" ? e.vencimento.split('@.@') : e.dataPagamento.split('@.@');
+                            map.map((el, index) => {
+                                const eventMap = e.evento_valor.split('@.@');
+
+                                let FDA = 0;
+                                let discount = 0;
+                                let received = 0;
+
+                                eventMap.map((elem, eventIndex) => {
+                                    if (e.evento_os.split("@.@")[eventIndex] == e.os.split("@.@")[index]) {
+                                        if (this.state.moeda == e.evento_moeda.split("@.@")[eventIndex]) {
+                                            FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]), 2) : 0;
+                                        } else if (this.state.moeda == 5) {
+                                            FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[eventIndex] && e.ROE.split("@.@")[eventIndex] != 0 ? e.ROE.split("@.@")[eventIndex] : 5), 2) : 0;
+                                        } else if (this.state.moeda == 6) {
+                                            FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[eventIndex] && e.ROE.split("@.@")[eventIndex] != 0 ? e.ROE.split("@.@")[eventIndex] : 5), 2) : 0;
+                                        }
+                                    }
+                                });
+                                if (this.state.moeda == 5) {
+                                    FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? parseFloat(e.bankCharges.split("@.@")[index]) : 0;
+                                    FDA += e.governmentTaxes.split("@.@")[index] && e.governmentTaxes.split("@.@")[index] > 0 ? parseFloat(e.governmentTaxes.split("@.@")[index]) : 0;
+                                } else if (this.state.moeda == 6) {
+                                    FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? util.toFixed(parseFloat(e.bankCharges.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
+                                    FDA += e.governmentTaxes.split("@.@")[index] && e.governmentTaxes.split("@.@")[index] > 0 ? util.toFixed(parseFloat(e.governmentTaxes.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
+
+                                }
+
+
+                                FDA = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(FDA);
+
+                                if (this.state.moeda == e.os_moeda.split("@.@")[index]) {
+                                    discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.desconto.split("@.@")[index]) : "0,00";
+                                    received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.received.split("@.@")[index]) : "0,00";
+                                } else if (this.state.moeda == 5) {
+                                    discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.desconto.split("@.@")[index]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
+                                    received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.received.split("@.@")[index]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
+                                } else if (this.state.moeda == 6) {
+                                    discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.desconto.split("@.@")[index]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
+                                    received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.received.split("@.@")[index]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
+                                }
+
+                                checkBalance = parseFloat(FDA.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(discount.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(received.replaceAll('.', '').replaceAll(",", "."));
+                            });
+
+                            if (checkBalance <= 0) {
+                                return (<></>);
+                            }
+
                             return (
                                 <div>
 
@@ -428,7 +473,7 @@ class Relatorio extends Component {
                                                     } else if (this.state.moeda == 5) {
                                                         FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[eventIndex] && e.ROE.split("@.@")[eventIndex] != 0 ? e.ROE.split("@.@")[eventIndex] : 5), 2) : 0;
                                                     } else if (this.state.moeda == 6) {
-                                                        FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[eventIndex] && e.ROE.split("@.@")[eventIndex] != 0 ? e.ROE.split("@.@")[eventIndex] : 5), 2) : 0;
+                                                        FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[eventIndex] && e.ROE.split("@.@")[eventIndex] != 0 ? e.ROE.split("@.@")[eventIndex] : 5), 2) : 0;
                                                     }
                                                 }
                                             });
@@ -436,8 +481,8 @@ class Relatorio extends Component {
                                                 FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? parseFloat(e.bankCharges.split("@.@")[index]) : 0;
                                                 FDA += e.governmentTaxes.split("@.@")[index] && e.governmentTaxes.split("@.@")[index] > 0 ? parseFloat(e.governmentTaxes.split("@.@")[index]) : 0;
                                             } else if (this.state.moeda == 6) {
-                                                FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? util.toFixed(parseFloat(e.bankCharges.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
-                                                FDA += e.governmentTaxes.split("@.@")[index] && e.governmentTaxes.split("@.@")[index] > 0 ? util.toFixed(parseFloat(e.governmentTaxes.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
+                                                FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? util.toFixed(parseFloat(e.bankCharges.split("@.@")[index]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
+                                                FDA += e.governmentTaxes.split("@.@")[index] && e.governmentTaxes.split("@.@")[index] > 0 ? util.toFixed(parseFloat(e.governmentTaxes.split("@.@")[index]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
 
                                             }
                                             
@@ -448,11 +493,11 @@ class Relatorio extends Component {
                                                 discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.desconto.split("@.@")[index]) : "0,00";
                                                 received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.received.split("@.@")[index]) : "0,00";
                                             } else if (this.state.moeda == 5) {
-                                                discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.desconto.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
-                                                received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.received.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
-                                            } else if (this.state.moeda == 6) {
                                                 discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.desconto.split("@.@")[index]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
                                                 received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.received.split("@.@")[index]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
+                                            } else if (this.state.moeda == 6) {
+                                                discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.desconto.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
+                                                received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.received.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
                                             }
 
                                             let balance = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(FDA.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(discount.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(received.replaceAll('.', '').replaceAll(",", ".")));
@@ -460,7 +505,6 @@ class Relatorio extends Component {
                                             if (!e.os_moeda || (!(e.ROE?.split("@.@")[index]) || e.ROE?.split("@.@")[index] == 0) && this.state.moeda != e.os_moeda.split("@.@")[index]) {
                                                 return;
                                             }
-
 
                                             totalFDA += parseFloat(FDA.replaceAll('.', '').replaceAll(',', '.'));
                                             totalDiscount += parseFloat(discount.replaceAll('.', '').replaceAll(',', '.'));
