@@ -476,12 +476,11 @@ class Relatorio extends Component {
                                                     if (this.state.moeda == e.evento_moeda.split("@.@")[eventIndex]) {
                                                         FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]), 2) : 0;
                                                     } else if (this.state.moeda == 5) {
-                                                        FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[eventIndex] && e.ROE.split("@.@")[eventIndex] != 0 ? e.ROE.split("@.@")[eventIndex] : 5), 2) : 0;
+                                                        FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
                                                     } else if (this.state.moeda == 6) {
-                                                        FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[eventIndex] && e.ROE.split("@.@")[eventIndex] != 0 ? e.ROE.split("@.@")[eventIndex] : 5), 2) : 0;
+                                                        FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
                                                     }
                                                 }
-                                                console.log({ FDA, valor: e.evento_valor.split("@.@")[eventIndex], moeda: e.evento_moeda.split("@.@")[eventIndex], formatted: util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]), 2)})
                                             });
                                             if (this.state.moeda == 5) {
                                                 FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? parseFloat(e.bankCharges.split("@.@")[index]) : 0;
