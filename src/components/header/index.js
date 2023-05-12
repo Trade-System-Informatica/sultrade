@@ -147,9 +147,6 @@ class Header extends Component {
         }).then(
             async response => {
                 anexos = [...response.data];
-                this.state.eventos.filter((evento) => !eventosContabilizados.includes(evento)).map((evento) => {
-                    anexos.push(({ fornecedor: evento.fornecedor, evento: evento.chave, eventoChave: evento.chave, anexo: "", validado: 2, validadoPor: -1 }))
-                })
             },
             response => { this.erroApi(response) }
         )
