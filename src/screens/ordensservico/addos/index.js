@@ -1019,7 +1019,7 @@ class AddOS extends Component {
     faturaOS = async () => {
         let valor = 0;
         let valorDesconto = 0;
-        
+
         this.state.eventos.map((evento) => {
             if (evento.tipo_sub == 3 && evento.cancelada == 0) {
                 if (evento.Moeda == 5) {
@@ -1037,8 +1037,8 @@ class AddOS extends Component {
                 }
             }
         });
-       
-        valor += parseFloat(this.state.bankCharges.toString().replaceAll(".","").replaceAll(",","."));
+
+        valor += parseFloat(this.state.bankCharges.toString().replaceAll(".", "").replaceAll(",", "."));
         valor += parseFloat(this.state.governmentTaxes.toString().replaceAll(".", "").replaceAll(",", "."));
 
         let valuesRet = "";
@@ -1312,7 +1312,7 @@ class AddOS extends Component {
                 return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
             }
 
-            if (this.state.pdfContent.find((os) => !os.chavTaxa && [0,1].includes(os.tipo))) {
+            if (this.state.pdfContent.find((os) => !os.chavTaxa && [0, 1].includes(os.tipo))) {
                 return this.setState({ error: { type: "error", msg: "Há eventos sem taxas" }, loading: false })
             }
 
@@ -2034,7 +2034,7 @@ class AddOS extends Component {
                                 }
                             }
                             if (col === 4 && accountsRows.includes(row)) {
-                                
+
                                 const prevCell = worksheet[XLSX.utils.encode_cell({ r: row, c: col - 1 })]?.v;
 
                                 const accountCells = [];
@@ -2599,11 +2599,11 @@ class AddOS extends Component {
             if (this.state.pdfContent[0]) {
                 if (this.state.pdfContent[0].governmentTaxes > 0) {
                     valorTotal += parseFloat(this.state.pdfContent[0].governmentTaxes);
-                    valorTotalDolar += Util.toFixed(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe), 2);
+                    valorTotalDolar += Util.toFixed(parseFloat(this.state.pdfContent[0].governmentTaxes / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)), 2);
                 }
                 if (this.state.pdfContent[0].bankCharges > 0) {
                     valorTotal += parseFloat(this.state.pdfContent[0].bankCharges);
-                    valorTotalDolar += Util.toFixed(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe));
+                    valorTotalDolar += Util.toFixed(parseFloat(this.state.pdfContent[0].bankCharges / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)), 2);
                 }
 
                 if (this.state.pdfContent.find((os) => !os.chavTaxa)) {
@@ -2633,9 +2633,11 @@ class AddOS extends Component {
                                         <td className="pdf_money_col" colSpan='2'><b style={{ paddingRight: 5 }}>Name of Port:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomePorto)}</td>
                                     </tr>
                                     <tr>
-                                        <td className="pdf_small_col" colSpan='2'><b style={{ paddingRight: 5 }}>Arrived:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].data_chegada)).format('MMMM DD, YYYY')}</td>
+                                        {this.state.pdfContent[0].data_chegada && moment(this.state.pdfContent[0].data_chegada).isValid() &&
+                                            <td className="pdf_small_col" colSpan='2'><b style={{ paddingRight: 5 }}>Arrived:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].data_chegada)).format('MMMM DD, YYYY')}</td>
+                                        }
                                         {this.state.pdfContent[0].data_saida && moment(this.state.pdfContent[0].data_saida).format("DD/MM/YYYY") != "Invalid date" &&
-                                            <td className="pdf_money_col" colSpan='2'><b style={{ paddingRight: 5 }}>Sailed:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].data_saida)).format('MMMM DD, YYYY')}</td>
+                                            <td className={`${this.state.pdfContent[0].data_chegada && moment(this.state.pdfContent[0].data_chegada).isValid ? "pdf_money_col" : "pdf_small_col"}`} colSpan='2'><b style={{ paddingRight: 5 }}>Sailed:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].data_saida)).format('MMMM DD, YYYY')}</td>
                                         }
                                     </tr>
                                     <tr>
@@ -2666,30 +2668,30 @@ class AddOS extends Component {
                                 {this.state.pdfContent.map((e, index) => {
                                     if (e.moeda == 5) {
                                         valorTotal += parseFloat(e.valor);
-                                        valorTotalDolar += Util.toFixed(parseFloat(e.valor / this.state.pdfContent[0].roe), 2)
+                                        valorTotalDolar += Util.toFixed(parseFloat(e.valor / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)), 2)
                                     } else {
-                                        valorTotal += Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
+                                        valorTotal += Util.toFixed(parseFloat(e.valor * (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)), 2);
                                         valorTotalDolar += parseFloat(e.valor)
                                     }
                                     return (
                                         <tr style={{ background: index % 2 == 0 ? "white" : "#dddddd" }}>
                                             <td colSpan='7' className='pdf_large_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.descos}</td>
-                                            <td className='pdf_money_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.moeda == 5 ? util.formataDinheiroBrasileiro(parseFloat(e.valor / this.state.pdfContent[0].roe)) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
-                                            <td className='pdf_money_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.moeda == 6 ? util.formataDinheiroBrasileiro(parseFloat(e.valor * this.state.pdfContent[0].roe)) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
+                                            <td className='pdf_money_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.moeda == 5 ? util.formataDinheiroBrasileiro(parseFloat(e.valor / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5))) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
+                                            <td className='pdf_money_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.moeda == 6 ? util.formataDinheiroBrasileiro(parseFloat(e.valor * (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5))) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
                                         </tr>
                                     )
                                 })}
                                 {this.state.pdfContent[0].governmentTaxes > 0 &&
                                     <tr>
                                         <td colSpan='7' className='pdf_large_col reduce_font'><b>GOVERNMENT TAXES</b></td>
-                                        <td className='pdf_money_col reduce_font'><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe))}</b></td>
+                                        <td className='pdf_money_col reduce_font'><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)))}</b></td>
                                         <td className='pdf_money_col reduce_font'><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes))}</b></td>
                                     </tr>
                                 }
                                 {this.state.pdfContent[0].bankCharges > 0 &&
                                     <tr styles={{ padding: "37px 0px 37px 0px" }}>
                                         <td colSpan='7' className='pdf_large_col reduce_font'><b>BANK CHARGES</b></td>
-                                        <td className='pdf_money_col reduce_font'><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe))}</b></td>
+                                        <td className='pdf_money_col reduce_font'><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)))}</b></td>
                                         <td className='pdf_money_col reduce_font'><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges))}</b></td>
                                     </tr>
                                 }
