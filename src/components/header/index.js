@@ -155,7 +155,7 @@ class Header extends Component {
             token: true
         }).then(
             async response => {
-                response.data.filter.map((evento) => {
+                response.data.map((evento) => {
                     anexos.push(({ fornecedor: evento.fornecedor, evento: evento.chave, eventoChave: evento.chave, anexo: "", validado: 2, validadoPor: -1 }))
                 })
             },
