@@ -415,7 +415,7 @@ class Relatorio extends Component {
                                             </th>
                                         </tr>
                                         {map.map((el, index) => {
-                                            const eventMap = e.eventos.split('@.@');
+                                            const eventMap = e.evento_valor.split('@.@');
 
                                             let FDA = 0;
                                             let discount = 0;
