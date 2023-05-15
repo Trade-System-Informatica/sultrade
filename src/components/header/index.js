@@ -129,7 +129,7 @@ class Header extends Component {
 
             }
 
-            if (this.props.voltar) {
+            if (this.props.sair) {
                 await this.getAnexos();
             }
             if (this.props.user.expiry && moment().isSameOrBefore(this.props.user.expiry)) {
