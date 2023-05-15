@@ -208,6 +208,22 @@ const estadoInicial = {
     anexosNaoValidados: [],
 
     faturado: false,
+
+
+    eventoData: '',
+    eventoFornecedor: '',
+    eventoMoeda: '',
+    eventoFornecedorInicial: '',
+    eventoTaxa: '',
+    eventoDescricao: '',
+    eventoTipo: '',
+    eventoOrdem: '',
+    eventoRemarks: '',
+    eventoValor: '',
+    eventoValor: '',
+    eventoVlrc: '',
+    eventoRepasse: '',
+    eventoFornecedorCusteio: ''
 }
 
 class AddOS extends Component {
@@ -372,7 +388,8 @@ class AddOS extends Component {
                 } else {
                     this.setState({ bankCharges: "0,00" })
                 }
-            } else if (e.Tipo == "GT" && ["SIM", "S"].includes(e.Campo1.toUpperCase())) {
+            } 
+            if (e.Tipo == "GT" && ["SIM", "S"].includes(e.Campo1.toUpperCase())) {
                 let valor = 0;
 
                 this.state.eventos.filter((evento) => evento.Fornecedor_Custeio != 0).map((evento) => {

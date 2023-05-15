@@ -169,7 +169,14 @@ const estadoInicial = {
 
     manual: false,
     bloqueado: false,
-    loading: true
+    loading: true,
+
+    roe: 5,
+
+    bankCharges: 0,
+    bankChargesChecked: false,
+    governmentTaxes: 0,
+    governmentTaxesChecked: false
 }
 
 class AddConta extends Component {
@@ -243,14 +250,13 @@ class AddConta extends Component {
                     { titulo: 'tipodocto', valor: this.state.tipoDocumento },
                     { titulo: 'meio_pagamento', valor: this.state.meioPagamento },
                 ]
-
-
             })
             if (this.state.contaProvisao != 0) {
                 await this.setState({ provisaoCheck: true })
             }
 
             await this.setState({ ultimaTransacao: await loader.getBody(`getUltimaTransacaoConta.php`, { chave: this.state.chave }) });
+            this.getDadosCliente();
         }
         await this.loadAll();
 
@@ -269,6 +275,29 @@ class AddConta extends Component {
             }
         })
 
+    }
+
+    getDadosCliente = async () => {
+        const info = await loader.getBody(`getContatos.php`, { token: true, pessoa: this.state.pessoa })
+
+        this.setState({ bankCharges: 0, governmentTaxes: 0 });
+
+        for (let i = 0; i < info.length; i++) {
+            const e = info[i];
+
+            if (e.Tipo == "BK" && ["SIM", "S"].includes(e.Campo1.toUpperCase())) {
+                const parametros = await loader.getBody(`getParametros.php`, { token: true, empresa: this.state.usuarioLogado.empresa });
+
+                if (parametros[0].bank_charges) {
+                    this.setState({ bankCharges: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parametros[0].bank_charges) });
+                } else {
+                    this.setState({ bankChargesChecked: false })
+                }
+            }
+            if (e.Tipo == "GT" && ["SIM", "S"].includes(e.Campo1.toUpperCase())) {
+                this.setState({ governmentTaxesChecked: true });
+            }
+        }
     }
 
     componentDidUpdate = async (prevProps, prevState) => {
@@ -495,7 +524,7 @@ class AddConta extends Component {
                         values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.centroCusto}', '${this.state.contaDesconto}', '${this.state.historico}', '${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${this.state.numBoleto}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}'`,
                         meioPagamento: this.state.meioPagamentoNome,
                         valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
-                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}'` : ""
+                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${this.state.bankCharges}', '${this.state.governmentTaxes}'` : ""
                     }).then(
                         async res => {
                             console.log(res.data);
@@ -575,7 +604,7 @@ class AddConta extends Component {
                         darfOutros: parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.')),
                         darfPagamento: parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.')),
                         tipo_pix: this.state.tipoPix,
-                        
+
                         os_manual: this.state.os,
                         navio_manual: this.state.navio,
                         porto_manual: this.state.porto
@@ -634,7 +663,7 @@ class AddConta extends Component {
                         darfOutros: parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.')),
                         darfPagamento: parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.')),
                         tipo_pix: this.state.tipoPix,
-                        
+
                         os_manual: this.state.os,
                         navio_manual: this.state.navio,
                         porto_manual: this.state.porto
@@ -952,6 +981,8 @@ class AddConta extends Component {
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.dataApuracao)
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfValor && this.state.darfValor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.')))
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfPagamento && this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.')))
+        validations.push(!this.state.manual || !this.state.governmentTaxesChecked || !isNaN(this.state.governmentTaxes) && this.state.governmentTaxes > 0);
+        validations.push(!this.state.manual || !this.state.bankChargesChecked || !isNaN(this.state.bankCharges) && this.state.bankCharges > 0);
         validations.push(!this.state.bloqueado)
 
         const validForm = validations.reduce((t, a) => t && a)
@@ -1060,7 +1091,7 @@ class AddConta extends Component {
                                                                     <label className='smallCheckbox'>INSS</label>
                                                                     <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoInssCheck} onChange={async (e) => { await this.mudaRetencao("INSS") }} />
                                                                 </div>
-                                                                <div> 
+                                                                <div>
                                                                     <label className='smallCheckbox'>IR</label>
                                                                     <input className='smallCheckbox' type='checkbox' checked={this.state.retencaoIrCheck} onChange={async (e) => { await this.mudaRetencao("IR") }} />
                                                                 </div>
@@ -1359,7 +1390,7 @@ class AddConta extends Component {
                                                         {this.state.tipo &&
                                                             <>
                                                                 <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
-                                                                    <Select className='SearchSelect' options={this.state.pessoasOptions.filter(e => this.filterSearch(e, this.state.pessoasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ pessoasOptionsTexto: e }) }} value={this.state.pessoasOptions.filter(option => option.value == this.state.pessoa)[0]} search={true} onChange={async (e) => { await this.setState({ pessoa: e.value, }); if (this.state.tipo == 1 && this.state.provisaoCheck) { await this.setState({ contaProvisao: await loader.getContaPessoa(this.state.pessoa, 'provisao') }) } else if (this.state.tipo == 0) { await this.setState({ contaDesconto: await loader.getContaPessoa(this.state.pessoa) }) } }} />
+                                                                    <Select className='SearchSelect' options={this.state.pessoasOptions.filter(e => this.filterSearch(e, this.state.pessoasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ pessoasOptionsTexto: e }) }} value={this.state.pessoasOptions.filter(option => option.value == this.state.pessoa)[0]} search={true} onChange={async (e) => { await this.setState({ pessoa: e.value, }); if (this.state.tipo == 1 && this.state.provisaoCheck) { await this.setState({ contaProvisao: await loader.getContaPessoa(this.state.pessoa, 'provisao') }) } else if (this.state.tipo == 0) { await this.setState({ contaDesconto: await loader.getContaPessoa(this.state.pessoa) }); this.getDadosCliente(); } }} />
                                                                 </div>
                                                                 <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
                                                                     {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
@@ -1409,65 +1440,55 @@ class AddConta extends Component {
                                                                 }}>...</div>
                                                             }
                                                         </div>
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Histórico Padrão</label>
-                                                        </div>
-                                                        <div className='col-1'></div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.historicosOptions.filter(e => this.filterSearch(e, this.state.historicosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ historicosOptionsTexto: e }) }} value={this.state.historicosOptions.filter(option => option.label == this.state.historico)[0]} search={true} onChange={(e) => { this.setState({ historico: e.label, }) }} />
-                                                        </div>
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Histórico</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Field className="form-control" type="text" value={this.state.historico} onChange={async e => { this.setState({ historico: e.currentTarget.value }) }} />
-                                                        </div>
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Documento</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Field className="form-control" type="text" value={this.state.documento} onChange={async e => { this.setState({ documento: e.currentTarget.value }) }} />
-                                                        </div>
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Tipo de Documento</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.tiposDocumentosOptions.filter(e => this.filterSearch(e, this.state.tiposDocumentosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ tiposDocumentosOptionsTexto: e }) }} value={this.state.tiposDocumentosOptions.filter(option => option.value == this.state.tipoDocumento)[0]} search={true} onChange={(e) => { this.setState({ tipoDocumento: e.value }) }} />
-                                                        </div>
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Parcelas</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                        </div>
-                                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-4 col-4">
-                                                            <Field className="form-control" type="number" value={this.state.parcelaInicial} onChange={async e => { this.setState({ parcelaInicial: e.currentTarget.value }) }} />
-                                                        </div>
-                                                        <div className='col-xl-1 col-lg-1 col-md-1 col-sm-1 col-1 labelForm'>
-                                                            <label>/</label>
-                                                        </div>
-                                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-4 col-4">
-                                                            <Field className="form-control" type="number" value={this.state.parcelaFinal} onChange={async e => { this.setState({ parcelaFinal: e.currentTarget.value }) }} />
-                                                        </div>
-                                                        <div className='col-1'></div>
-                                                        {this.state.tipo === '0' &&
-                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                <label>Boleto</label>
-                                                            </div>
-                                                        }
-                                                        {this.state.tipo === '0' &&
-                                                            <div className='col-1 errorMessage'>
-                                                            </div>
-                                                        }
-                                                        {this.state.tipo === '0' &&
-                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                <Field className="form-control" type="text" value={this.state.numBoleto} onChange={async e => { this.setState({ numBoleto: e.currentTarget.value }) }} />
-                                                            </div>
+                                                        {this.state.tipo == 1 &&
+                                                            <>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Histórico Padrão</label>
+                                                                </div>
+                                                                <div className='col-1'></div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Select className='SearchSelect' options={this.state.historicosOptions.filter(e => this.filterSearch(e, this.state.historicosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ historicosOptionsTexto: e }) }} value={this.state.historicosOptions.filter(option => option.label == this.state.historico)[0]} search={true} onChange={(e) => { this.setState({ historico: e.label, }) }} />
+                                                                </div>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Histórico</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control" type="text" value={this.state.historico} onChange={async e => { this.setState({ historico: e.currentTarget.value }) }} />
+                                                                </div>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Documento</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control" type="text" value={this.state.documento} onChange={async e => { this.setState({ documento: e.currentTarget.value }) }} />
+                                                                </div>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Tipo de Documento</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Select className='SearchSelect' options={this.state.tiposDocumentosOptions.filter(e => this.filterSearch(e, this.state.tiposDocumentosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ tiposDocumentosOptionsTexto: e }) }} value={this.state.tiposDocumentosOptions.filter(option => option.value == this.state.tipoDocumento)[0]} search={true} onChange={(e) => { this.setState({ tipoDocumento: e.value }) }} />
+                                                                </div>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Parcelas</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-4 col-4">
+                                                                    <Field className="form-control" type="number" value={this.state.parcelaInicial} onChange={async e => { this.setState({ parcelaInicial: e.currentTarget.value }) }} />
+                                                                </div>
+                                                                <div className='col-xl-1 col-lg-1 col-md-1 col-sm-1 col-1 labelForm'>
+                                                                    <label>/</label>
+                                                                </div>
+                                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-4 col-4">
+                                                                    <Field className="form-control" type="number" value={this.state.parcelaFinal} onChange={async e => { this.setState({ parcelaFinal: e.currentTarget.value }) }} />
+                                                                </div>
+                                                                <div className='col-1'></div>
+                                                            </>
                                                         }
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Valor</label>
@@ -1486,28 +1507,33 @@ class AddConta extends Component {
                                                             }
                                                         </div>
 
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Vencimento</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                            {!this.state.vencimento &&
-                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                            }
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Field className="form-control" type="date" value={this.state.vencimento} onChange={async e => { this.setState({ vencimento: e.currentTarget.value }) }} onBlur={async e => this.state.vencimentoOrig ? {} : this.setState({ vencimentoOrig: this.state.vencimento })} />
-                                                        </div>
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Venc. Original</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                            {!this.state.vencimentoOrig &&
-                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                            }
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Field className="form-control" type="date" value={this.state.vencimentoOrig} onChange={async e => { this.setState({ vencimentoOrig: e.currentTarget.value }) }} />
-                                                        </div>
+                                                        {this.state.tipo == 1 &&
+                                                            <>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Vencimento</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                    {!this.state.vencimento &&
+                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                    }
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control" type="date" value={this.state.vencimento} onChange={async e => { this.setState({ vencimento: e.currentTarget.value }) }} onBlur={async e => this.state.vencimentoOrig ? {} : this.setState({ vencimentoOrig: this.state.vencimento })} />
+                                                                </div>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Venc. Original</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                    {!this.state.vencimentoOrig &&
+                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                    }
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control" type="date" value={this.state.vencimentoOrig} onChange={async e => { this.setState({ vencimentoOrig: e.currentTarget.value }) }} />
+                                                                </div>
+                                                            </>
+                                                        }
+
                                                         {this.state.tipo == 1 &&
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 <label>Cód. Barras</label>
@@ -1562,7 +1588,7 @@ class AddConta extends Component {
                                                                 <div className='col-1 errorMessage'>
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Select className='SearchSelect' options={this.state.naviosOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ optionsTexto: e }) }} value={this.state.naviosOptions.filter(option => option.value == this.state.navio)[0]} search={true} onChange={(e) => { this.setState({ navio: e.value, }) }} />
+                                                                    <Select className='SearchSelect' options={this.state.naviosOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ optionsTexto: e }) }} value={this.state.naviosOptions.find(option => option.value == this.state.navio)} search={true} onChange={(e) => { this.setState({ navio: e.value, }) }} />
                                                                 </div>
                                                                 <div className='col-1'></div>
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -1571,10 +1597,51 @@ class AddConta extends Component {
                                                                 <div className='col-1 errorMessage'>
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Select className='SearchSelect' options={this.state.portosOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ optionsTexto: e }) }} value={this.state.portosOptions.filter(option => option.value == this.state.porto)[0]} search={true} onChange={(e) => { this.setState({ porto: e.value, }) }} />
+                                                                    <Select className='SearchSelect' options={this.state.portosOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ optionsTexto: e }) }} value={this.state.portosOptions.find(option => option.value == this.state.porto)} search={true} onChange={(e) => { this.setState({ porto: e.value, }) }} />
                                                                 </div>
                                                                 <div className='col-1'></div>
 
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>ROE</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control" type="text" value={this.state.roe} onChange={async e => { this.setState({ roe: e.currentTarget.value }) }} />
+                                                                </div>
+                                                                <div className='col-1'></div>
+
+                                                                {this.state.bankChargesChecked &&
+                                                                    <>
+                                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                            <label>Bank Charges</label>
+                                                                        </div>
+                                                                        <div className='col-1 errorMessage'>
+                                                                        </div>
+                                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                            <Field className="form-control" type="text" value={this.state.bankCharges} disabled={true} />
+                                                                        </div>
+                                                                        <div className="col-1">
+                                                                        </div>
+                                                                    </>
+                                                                }
+
+                                                                {this.state.governmentTaxesChecked &&
+                                                                    <>
+                                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                            <label>Government Taxes</label>
+                                                                        </div>
+                                                                        <div className='col-1 errorMessage'>
+                                                                            {!this.state.governmentTaxes &&
+                                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                            }
+                                                                        </div>
+                                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                            <Field className="form-control" type="text" value={this.state.governmentTaxes} onChange={async e => { this.setState({ governmentTaxes: e.currentTarget.value }) }} />
+                                                                        </div>
+                                                                        <div className='col-1'></div>
+                                                                    </>
+                                                                }
                                                             </>
                                                         }
 

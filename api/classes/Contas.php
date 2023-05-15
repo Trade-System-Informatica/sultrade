@@ -670,7 +670,7 @@ class Contas
 
         if ($dadosManuais) {
             $values = $values . ", " . $dadosManuais;
-            $cols = "os_manual, navio_manual, porto_manual";
+            $cols .= "os_manual, navio_manual, porto_manual, roe_manual, bank_charges_manual, government_taxes_manual";
         }
 
         $result = $database->doInsert('contas_aberto', $cols, $values);
