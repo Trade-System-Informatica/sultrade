@@ -2233,7 +2233,7 @@ class AddOS extends Component {
                             }
                         }
 
-                        if ([2, 3, 4].includes(col) && [...fieldsRepasseRows, ...fieldsRows].includes(row) || col === 4 && [...footersRows, ...totalRow, ...totalCusteioRow, ...totalDespesasRow, ...totalEsperadoRow, ...totalFDARow].includes(row)) {
+                        if ([2, 3, 4].includes(col) && [...fieldsRepasseRows, ...fieldsRows, ...footersRows].includes(row) || col === 4 && [...totalRow, ...totalCusteioRow, ...totalDespesasRow, ...totalEsperadoRow, ...totalFDARow].includes(row)) {
                             worksheet[cell].s = {
                                 ...worksheet[cell].s,
                                 numFmt: "R$ #,##0.00"
