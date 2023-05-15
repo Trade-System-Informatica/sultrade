@@ -935,7 +935,6 @@ class AddOS extends Component {
             )
 
         } else if (validForm) {
-            console.log(this.state.faturamento && moment(this.state.faturamento).isValid() && this.state.centroCusto != 0 && this.state.centroCusto != "");
             if (this.state.faturamento && moment(this.state.faturamento).isValid() && this.state.centroCusto != 0 && this.state.centroCusto != "") {
                 // console.log(this.state.os.Data_Faturamento);
                 // console.log(this.state.os.centro_custo);
@@ -1690,16 +1689,22 @@ class AddOS extends Component {
             const titlesRows = [];
             const accountsTitlesRows = [];
             const fieldsRows = [];
+            const fieldsRepasseRows = [];
             const accountsRows = [];
             const accountsTotalRows = [];
             const footersRows = [];
             const headersRows = [];
-            const totalRows = [];
+            const totalRow = [];
+            const totalCusteioRow = [];
+            const totalDespesasRow = [];
+            const totalFDARow = [];
+            const totalEsperadoRow = [];
             const emptyRows = [];
 
             const { pdfContent } = this.state;
             const pdfCusteio = [];
             const pdfCusteioCodigo = [];
+            const pdfRepasse = [];
 
             if (!pdfContent[0]) {
                 await this.setState({ erro: 'Sem as informações necessárias para gerar o documento!', loading: false })
@@ -1707,9 +1712,13 @@ class AddOS extends Component {
             }
 
             pdfContent.map((content) => {
-                if (!pdfCusteio.includes(content.fornecedor_custeio)) {
-                    pdfCusteio.push(content.fornecedor_custeio);
-                    pdfCusteioCodigo.push(content.fornecedor_custeioCodigo);
+                if (content.repasse == 1) {
+                    pdfRepasse.push(content);
+                } else {
+                    if (!pdfCusteio.includes(content.fornecedor_custeio)) {
+                        pdfCusteio.push(content.fornecedor_custeio);
+                        pdfCusteioCodigo.push(content.fornecedor_custeioCodigo);
+                    }
                 }
             })
             let roe = 5;
@@ -1777,8 +1786,6 @@ class AddOS extends Component {
                                 totalConsolidado += parseFloat(valor_cobrar);
                                 valorTotalLiquido += parseFloat(valor_cobrar);
 
-                                console.log(pdfCusteioCodigo[custeioIndex]);
-                                console.log(pdfCusteio[custeioIndex]);
                                 if (contasCodigos[0] && contasCodigos.find((cnt) => cnt.conta == (content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod) && cnt.custeioCodigo == pdfCusteioCodigo[custeioIndex])) {
                                     contasCodigos = contasCodigos.map((cnt) => cnt.conta == (content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod) && cnt.custeioCodigo == pdfCusteioCodigo[custeioIndex] ? ({ ...cnt, row: [...cnt.row, rowCount] }) : ({ ...cnt }))
                                 } else {
@@ -1815,8 +1822,6 @@ class AddOS extends Component {
 
                                 totalConsolidado += content.fornecedor_custeio == custeio ? valor_cobrar : 0;
 
-                                console.log(pdfCusteioCodigo[custeioIndex]);
-                                console.log(pdfCusteio[custeioIndex]);
                                 if (contasCodigos[0] && contasCodigos.find((cnt) => cnt.conta == (content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod) && cnt.custeioCodigo == pdfCusteioCodigo[custeioIndex])) {
                                     contasCodigos = contasCodigos.map((cnt) => cnt.conta == (content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod) && cnt.custeioCodigo == pdfCusteioCodigo[custeioIndex] ? ({ ...cnt, row: [...cnt.row, rowCount] }) : ({ ...cnt }))
                                 } else {
@@ -1862,11 +1867,152 @@ class AddOS extends Component {
                     }
                 })
 
-                totalRows.push(rowCount);
+                XLSX.utils.sheet_add_json(worksheet, [{
+                    title: "TOTAL CONSOLIDADO",
+                    _1: "",
+                    _2: "",
+                    _3: "",
+                    _4: ""
+                }], {
+                    skipHeader: true,
+                    origin: -1
+                });
+                XLSX.utils.sheet_add_json(worksheet, emptyLine, {
+                    skipHeader: true,
+                    origin: -1
+                });
+                totalRow.push(rowCount);
                 emptyRows.push(rowCount + 1);
                 rowCount += 2;
 
-                pdfCusteioCodigo.map((custeio, custeioIndex) => {
+                if (pdfRepasse[0]) {
+                    const bigHeader = [
+                        `DESPESAS PARA REPASSE`,
+                        "",
+                        "",
+                        "",
+                        "",
+                    ];
+
+                    XLSX.utils.sheet_add_aoa(worksheet, [bigHeader, smallHeaders], {
+                        skipHeader: true,
+                        origin: -1
+                    });
+                    titlesRows.push(rowCount);
+                    headersRows.push(rowCount + 1);
+                    rowCount += 2;
+                    pdfRepasse.map((repasse, repasseIndex) => {
+                        valorTotalCobrar = 0;
+                        valorTotalLiquido = 0;
+                        valorTotalPago = 0;
+                        valorTotal = 0;
+
+                        const fields = [];
+                        let valor_cobrar = repasse.valor_cobrar;
+                        let valor_pago = repasse.valor_pago;
+
+                        if (repasse.moeda == 6) {
+                            valor_cobrar = Util.toFixed(parseFloat(valor_cobrar) * parseFloat(roe), 2);
+                        }
+
+                        valorTotalCobrar += parseFloat(valor_cobrar);
+                        valorTotalPago += parseFloat(valor_pago);
+                        let valor_liquido = parseFloat(valor_cobrar) - parseFloat(valor_pago);
+
+                        valorTotal += valor_liquido;
+                        totalConsolidado += parseFloat(valor_cobrar);
+                        valorTotalLiquido += parseFloat(valor_cobrar);
+
+                        if (contasCodigos[0] && contasCodigos.find((cnt) => cnt.conta == (repasse.uf == 81 ? repasse.contaEstrangeiraCod : repasse.contaCod) && cnt.custeioCodigo == 0)) {
+                            contasCodigos = contasCodigos.map((cnt) => cnt.conta == (repasse.uf == 81 ? repasse.contaEstrangeiraCod : repasse.contaCod) && cnt.custeioCodigo == 0 ? ({ ...cnt, row: [...cnt.row, rowCount] }) : ({ ...cnt }))
+                        } else {
+                            contasCodigos.push({
+                                conta: repasse.uf == 81 ? repasse.contaEstrangeiraCod : repasse.contaCod,
+                                row: [rowCount],
+                                custeioCodigo: 0,
+                                custeioNome: "Despesas para Repasse"
+                            });
+                        }
+
+                        fields.push({
+                            evento: repasse.evento.trim(),
+                            conta: repasse.uf == 81 ? repasse.contaEstrangeiraCod : repasse.contaCod ? repasse.contaCod : "",
+                            valor_a_cobrar: parseFloat(valor_pago),
+                            valor_pago: parseFloat(valor_pago),
+                            valor_liquido: "",
+                        })
+                        fieldsRepasseRows.push(rowCount);
+                        rowCount++;
+
+                        XLSX.utils.sheet_add_json(worksheet, fields, {
+                            skipHeader: true,
+                            origin: -1
+                        })
+                    });
+
+                    XLSX.utils.sheet_add_json(worksheet, footer, {
+                        skipHeader: true,
+                        origin: -1
+                    });
+                    footersRows.push(rowCount);
+                    rowCount++;
+
+                    XLSX.utils.sheet_add_json(worksheet, emptyLine, {
+                        skipHeader: true,
+                        origin: -1
+                    });
+                    emptyRows.push(rowCount);
+                    rowCount++;
+                }
+
+                XLSX.utils.sheet_add_json(worksheet, [{
+                    title: "TOTAL DO CUSTEIO SEM BANK CHARGES E GOVERNMENT TAXES",
+                    _1: "",
+                    _2: "",
+                    _3: "",
+                    _4: ""
+                }, {
+                    title: "BANK CHARGES + GOVERNMENT TAXES (C. DESPESAS RECUPERADAS)",
+                    _1: "",
+                    _2: "",
+                    _3: "",
+                    _4: ""
+                }, {
+                    title: "TOTAL FINAL DO FDA",
+                    _1: "",
+                    _2: "",
+                    _3: "",
+                    _4: ""
+                }], {
+                    skipHeader: true,
+                    origin: -1
+                });
+                XLSX.utils.sheet_add_json(worksheet, emptyLine, {
+                    skipHeader: true,
+                    origin: -1
+                })
+
+                XLSX.utils.sheet_add_json(worksheet, [
+                    {
+                        title: "TOTAL CTA CUSTEIO ESPERADO ANTES DO FATURAMENTO",
+                        _1: "",
+                        _2: "",
+                        _3: "",
+                        _4: ""
+                    }
+                ], {
+                    skipHeader: true,
+                    origin: -1
+                });
+
+                totalCusteioRow.push(rowCount);
+                totalDespesasRow.push(rowCount + 1);
+                totalFDARow.push(rowCount + 2);
+                emptyRows.push(rowCount + 3);
+                totalEsperadoRow.push(rowCount + 4);
+                rowCount += 5;
+
+                [...pdfCusteioCodigo, 0].map((custeio, custeioIndex) => {
                     if (!custeio || !contasCodigos.find((conta) => conta.custeioCodigo == pdfCusteioCodigo[custeioIndex] && !!conta.conta)) {
                         return;
                     }
@@ -1929,32 +2075,17 @@ class AddOS extends Component {
                     rowCount++;
                 })
 
-                XLSX.utils.sheet_add_json(worksheet, [{
-                    title: "TOTAL CONSOLIDADO",
-                    _1: "",
-                    _2: "",
-                    _3: "",
-                    _4: ""
-                }], {
-                    skipHeader: true,
-                    origin: -1
-                });
-
-                XLSX.utils.sheet_add_json(worksheet, emptyLine, {
-                    skipHeader: true,
-                    origin: -1
-                });
-
-                XLSX.utils.sheet_add_json(worksheet, contas, {
-                    skipHeader: true,
-                    origin: -1
-                });
-                console.log(contasCodigos)
+                if (contas[0]) {
+                    XLSX.utils.sheet_add_json(worksheet, contas, {
+                        skipHeader: true,
+                        origin: -1
+                    });
+                }
 
                 worksheet["!merges"] = [
                     ...titlesRows.map((r) => ({ s: { c: 0, r }, e: { c: 4, r } })),
                     ...footersRows.map((r) => ({ s: { c: 0, r }, e: { c: 1, r } })),
-                    ...totalRows.map((r) => ({ s: { c: 0, r }, e: { c: 3, r } })),
+                    ...[...totalRow, ...totalCusteioRow, ...totalDespesasRow, ...totalFDARow, ...totalFDARow].map((r) => ({ s: { c: 0, r }, e: { c: 3, r } })),
                     ...accountsTitlesRows.map((r) => ({ s: { c: 3, r }, e: { c: 4, r } })),
                 ]
                 let footerCobrar = [];
@@ -1962,11 +2093,14 @@ class AddOS extends Component {
                 let accountTotal = [];
                 let accountTitle = "";
                 let totalValor = [];
-                //console.log({ footersRows, fieldsRows, titlesRows, emptyRows, headersRows });
+                let totalCusteio = [];
+                let totalFDA = [];
+                let totalEsperado = [];
+                //console.log({ titlesRows, accountsTitlesRows, fieldsRows, fieldsRepasseRows, accountsRows, accountsTotalRows, footersRows, headersRows, totalRow, totalCusteioRow, totalDespesasRow, totalFDARow, totalEsperadoRow, emptyRows });
                 for (let row = 0; row < rowCount; row++) {
                     for (let col = 0; col <= colCount; col++) {
                         const cell = XLSX.utils.encode_cell({ r: row, c: col });
-                        //console.log({row, col, cell, sheet: worksheet[cell]});
+                        //console.log({cell, row, col, value: worksheet[cell]})
 
                         if (titlesRows.includes(row)) {
                             worksheet[cell].s = {
@@ -2013,7 +2147,6 @@ class AddOS extends Component {
                                 const prevCell = worksheet[XLSX.utils.encode_cell({ r: row, c: col - 1 })]?.v;
 
                                 const accountCells = [];
-                                console.log({ prevCell, accountTitle, conta: contasCodigos.filter((e) => e.conta == prevCell && e.custeioNome == accountTitle) });
                                 contasCodigos.filter((e) => e.conta == prevCell && e.custeioNome == accountTitle).forEach((cell) => {
                                     cell.row.forEach((r) => {
                                         accountCells.push(r)
@@ -2047,8 +2180,17 @@ class AddOS extends Component {
                             if (footerCobrar[0] && footerPago[0]) {
                                 if (col === 2) {
                                     worksheet[cell].f = footerCobrar.join('+');
+
+                                    if (footersRows[footersRows.length - 1] !== row) {
+                                        totalCusteio.push(XLSX.utils.encode_cell({ r: row, c: col }));
+                                    }
                                 } else if (col === 3) {
                                     worksheet[cell].f = footerPago.join('+');
+
+                                    if (footersRows[footersRows.length - 1] === row) {
+                                        totalCusteio.push(XLSX.utils.encode_cell({ r: row, c: col }));
+                                    }
+                                    totalEsperado.push(XLSX.utils.encode_cell({ r: row, c: col }));
                                 } else if (col === 4) {
                                     const valorCobrar = XLSX.utils.encode_cell({ r: row, c: 2 });
                                     const valorPago = XLSX.utils.encode_cell({ r: row, c: 3 });
@@ -2060,7 +2202,7 @@ class AddOS extends Component {
                                 }
                             }
                         }
-                        if (fieldsRows.includes(row)) {
+                        if ([...fieldsRows, ...fieldsRepasseRows].includes(row)) {
                             worksheet[cell].s = {
                                 border: {
                                     right: {
@@ -2083,22 +2225,22 @@ class AddOS extends Component {
                             }
                             if (col === 4) {
                                 const valorCobrar = XLSX.utils.encode_cell({ r: row, c: 2 });
-                                footerCobrar.push(valorCobrar);
                                 const valorPago = XLSX.utils.encode_cell({ r: row, c: 3 });
+                                footerCobrar.push(valorCobrar);
                                 footerPago.push(valorPago);
 
                                 worksheet[cell].f = `${valorCobrar} - ${valorPago}`;
                             }
                         }
 
-                        if ([2, 3, 4].includes(col) && [...fieldsRows, ...footersRows].includes(row)) {
+                        if ([2, 3, 4].includes(col) && [...fieldsRepasseRows, ...fieldsRows].includes(row) || col === 4 && [...footersRows, ...totalRow, ...totalCusteioRow, ...totalDespesasRow, ...totalEsperadoRow, ...totalFDARow].includes(row)) {
                             worksheet[cell].s = {
                                 ...worksheet[cell].s,
                                 numFmt: "R$ #,##0.00"
                             }
                         }
-
-                        if (totalRows.includes(row)) {
+                            
+                        if (totalRow.includes(row)) {
                             worksheet[cell].s = {
                                 font: {
                                     bold: true
@@ -2107,6 +2249,33 @@ class AddOS extends Component {
                             if (col === 4) {
                                 worksheet[cell].f = totalValor.join('+');
                             }
+                        }
+
+                        if (totalCusteioRow.includes(row) && col === 4) {
+                            worksheet[cell].f = totalCusteio.join("+");
+                            totalFDA.push(XLSX.utils.encode_cell({ r: row, c: col }));
+                        }
+
+                        if (totalDespesasRow.includes(row) && col === 4) {
+                            worksheet[cell].f = `${pdfContent[0]?.governmentTaxes} + ${pdfContent[0]?.bankCharges}`;
+                            totalFDA.push(XLSX.utils.encode_cell({ r: row, c: col }));
+                        }
+
+                        if (totalFDARow.includes(row)) {
+                            worksheet[cell].s = {
+                                ...worksheet[cell].s,
+                                font: {
+                                    ...worksheet[cell].s?.font,
+                                    bold: true,
+                                }
+                            }
+                            if (col === 4) {
+                                worksheet[cell].f = totalFDA.join("+");
+                            }
+                        }
+
+                        if (totalEsperadoRow.includes(row) && col === 4) {
+                            worksheet[cell].f = totalEsperado.join("+");
                         }
                     }
                 }
@@ -2122,7 +2291,7 @@ class AddOS extends Component {
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = "relatorios_liquidos.xlsx";
+                a.download = `${this.state.codigo} ${this.state.naviosOptions.find((e) => e.value == this.state.navio)?.label}.xlsx`;
                 a.click();
             } else {
                 await this.setState({ erro: 'Sem as informações necessárias para gerar o documento!', loading: false })

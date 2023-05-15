@@ -256,6 +256,7 @@ class Navios
             planocontas_estrangeiras.Codigo_Red as contaEstrangeiraCod, 
             os_servicos_itens.valor as valor_cobrar, 
             os_servicos_itens.valor1 as valor_pago, 
+            os_servicos_itens.repasse as repasse, 
             os_servicos_itens.moeda as moeda, 
             pessoas.nome as fornecedor_custeio, 
             pessoas.chave as fornecedor_custeioCodigo, 
