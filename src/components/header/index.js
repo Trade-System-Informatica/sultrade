@@ -127,9 +127,11 @@ class Header extends Component {
                     }
                 }
 
-                await this.getAnexos();
             }
 
+            if (this.props.voltar) {
+                await this.getAnexos();
+            }
             if (this.props.user.expiry && moment().isSameOrBefore(this.props.user.expiry)) {
                 await this.props.extendExpiration({ ...this.props.user });
             } else if (this.props.user.expiry) {
@@ -141,7 +143,7 @@ class Header extends Component {
 
     getAnexos = async () => {
         let anexos = [];
-        
+
         await apiEmployee.post(`getAnexosNaoValidados.php`, {
             token: true,
         }).then(
