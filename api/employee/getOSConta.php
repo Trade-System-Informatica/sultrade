@@ -11,19 +11,14 @@ $objData = json_decode($data);
 
 if($objData != NULL){
     $token = prepareInput($objData->token);
-    $chave_os = prepareInput($objData->chave_os);
+    $codigo = prepareInput($objData->codigo);
+
     $os = new OS();
 
-    //$operadores = $operadores->checkToken($token);
-    //if($result == 'true'){
-        $result = $os->getOSUma($chave_os);
-		//$result = 'Entrou aqui';
-        //}
+        $result = $os->getOSConta($codigo);
     } else {
         $result = "false";
     }
     
 echo(json_encode($result));
 exit;
-
-?>

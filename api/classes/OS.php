@@ -75,6 +75,28 @@ class OS
         return $result;
     }
 
+    public static function getOSConta($codigo)
+    {
+        $database = new Database();
+
+        $result = $database->doSelect(
+            'os LEFT JOIN contas_aberto ON contas_aberto.Centro_Custo = os.centro_custo',
+            'os.*, contas_aberto.chave as conta',
+            "codigo = '$codigo'"
+        );
+
+        if (!$result[0]) {
+            $result = $database->doSelect(
+                'contas_aberto',
+                'contas_aberto.chave as conta',
+                "os_manual = '$codigo'"
+            );
+        }
+
+        $database->closeConection();
+        return $result;
+    }
+
     public static function getCodigos($tipo)
     {
         $database = new Database();

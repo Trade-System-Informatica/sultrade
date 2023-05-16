@@ -107,4 +107,3 @@ function savePDF($picture, $name = null){
 function deletePicture ($name){
     unlink('../pictures/'.$name.'.png');
 }
-?>

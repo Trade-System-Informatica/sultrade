@@ -10,6 +10,7 @@ import { Redirect } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import ModalLogs from '../../../components/modalLogs'
+import Alert from '../../../components/alert'
 import { apiEmployee } from '../../../services/apiamrg'
 import moment from 'moment'
 import loader from '../../../classes/loader'
@@ -169,6 +170,7 @@ const estadoInicial = {
 
     manual: false,
     bloqueado: false,
+    osExiste: false,
     loading: true,
 
     roe: 5,
@@ -176,7 +178,9 @@ const estadoInicial = {
     bankCharges: 0,
     bankChargesChecked: false,
     governmentTaxes: 0,
-    governmentTaxesChecked: false
+    governmentTaxesChecked: false,
+
+    alert: {type: "", msg: ""}
 }
 
 class AddConta extends Component {
@@ -850,6 +854,40 @@ class AddConta extends Component {
         })
     }
 
+    procuraOS = async () => {
+        const os = await loader.getBody(`getOSConta.php`, {
+            token: true,
+            codigo: this.state.os,
+        });
+
+        if (os && os[0] && os[0].Chave) {
+            if (os[0].Data_Faturamento && moment(os[0].Data_Faturamento).isValid() && os[0].centro_custo) {
+                this.setState({
+                    alert: {
+                        type: "error",
+                        msg: "Já há uma conta com essa ST!"
+                    },
+                    osExiste: true
+                })
+            } else {
+                this.setState({
+                    alert: {
+                        type: "error",
+                        msg: "OS já existe no sistema!"
+                    },
+                    osExiste: true
+                })
+            }
+        } else if (os && os[0]?.conta) {
+            this.setState({
+                alert: {
+                    type: "error",
+                    msg: "Já há uma conta com essa ST!"
+                },
+                osExiste: true
+            })
+        }
+    }
     erroApi = async (res) => {
         console.log(res)
         await this.setState({ redirect: true })
@@ -983,6 +1021,7 @@ class AddConta extends Component {
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfPagamento && this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.')))
         validations.push(!this.state.manual || !this.state.governmentTaxesChecked || !isNaN(this.state.governmentTaxes) && this.state.governmentTaxes > 0);
         validations.push(!this.state.manual || !this.state.bankChargesChecked || !isNaN(this.state.bankCharges) && this.state.bankCharges > 0);
+        validations.push(!this.state.osExiste)
         validations.push(!this.state.bloqueado)
 
         const validForm = validations.reduce((t, a) => t && a)
@@ -1031,6 +1070,10 @@ class AddConta extends Component {
 
                         </section>
 
+                    <Alert
+                        alert={this.state.alert}
+                        setAlert={(e) => this.setState({ alert: e })}
+                    />
                         {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                             <div className="logButton">
                                 <button onClick={() => this.openLogs()}>Logs</button>
@@ -1578,7 +1621,7 @@ class AddConta extends Component {
                                                                 <div className='col-1 errorMessage'>
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Field className="form-control" type="text" value={this.state.os} onChange={async e => { this.setState({ os: e.currentTarget.value }) }} />
+                                                                    <Field className="form-control" type="text" value={this.state.os} onChange={async e => { this.setState({ os: e.currentTarget.value, osExiste: false }); }} onBlur={() => this.procuraOS()}/>
                                                                 </div>
                                                                 <div className='col-1'></div>
 

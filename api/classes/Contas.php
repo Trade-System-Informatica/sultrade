@@ -1299,7 +1299,7 @@ class Contas
         if ($tipo_sub == 1) {
             $tipo = 0;
         }
-
+        
         if ($where != "") {
             $result = $database->doSelect(
                 'contas_aberto 
