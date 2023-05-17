@@ -5,6 +5,7 @@ import Select from "react-select";
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import loader from '../../../classes/loader'
+import util from '../../../classes/util'
 import moment from 'moment';
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
@@ -97,11 +98,11 @@ class AddAnexo extends Component {
         if (this.state.chave != 0) {
             this.setState({
                 dadosIniciais: [
-                    { titulo: 'Fornecedor', valor: utils.formatForLogs(this.state.fornecedor, 'options', '', '', this.state.fornecedoresOptions) },
-                    { titulo: 'OS', valor: utils.formatForLogs(this.state.os) },
-                    { titulo: 'Validado', valor: utils.formatForLogs(this.state.validado, 'bool') },
-                    { titulo: 'Validado por', valor: utils.formatForLogs(this.state.usuarioLogado, 'options', '', '', this.state.operadores, 'Codigo', 'Nome') },
-                    { titulo: 'Data de Validação', valor: utils.formatForLogs(this.state.validadoData, 'date') },
+                    { titulo: 'Fornecedor', valor: util.formatForLogs(this.state.fornecedor, 'options', '', '', this.state.fornecedoresOptions) },
+                    { titulo: 'OS', valor: util.formatForLogs(this.state.os) },
+                    { titulo: 'Validado', valor: util.formatForLogs(this.state.validado, 'bool') },
+                    { titulo: 'Validado por', valor: util.formatForLogs(this.state.usuarioLogado, 'options', '', '', this.state.operadores, 'Codigo', 'Nome') },
+                    { titulo: 'Data de Validação', valor: util.formatForLogs(this.state.validadoData, 'date') },
                 ]
             })
         }
@@ -137,11 +138,11 @@ class AddAnexo extends Component {
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'Fornecedor', valor: utils.formatForLogs(this.state.fornecedor, 'options', '', '', this.state.fornecedoresOptions) },
-                { titulo: 'OS', valor: utils.formatForLogs(this.state.os) },
-                { titulo: 'Validado', valor: utils.formatForLogs(this.state.validado, 'bool') },
-                { titulo: 'Validado por', valor: utils.formatForLogs(this.state.usuarioLogado, 'options', '', '', this.state.operadores, 'Codigo', 'Nome') },
-                { titulo: 'Data de Validação', valor: utils.formatForLogs(this.state.validadoData, 'date') },
+                { titulo: 'Fornecedor', valor: util.formatForLogs(this.state.fornecedor, 'options', '', '', this.state.fornecedoresOptions) },
+                { titulo: 'OS', valor: util.formatForLogs(this.state.os) },
+                { titulo: 'Validado', valor: util.formatForLogs(this.state.validado, 'bool') },
+                { titulo: 'Validado por', valor: util.formatForLogs(this.state.usuarioLogado, 'options', '', '', this.state.operadores, 'Codigo', 'Nome') },
+                { titulo: 'Data de Validação', valor: util.formatForLogs(this.state.validadoData, 'date') },
             ],
             loading: true
         })

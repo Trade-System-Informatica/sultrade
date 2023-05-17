@@ -13,6 +13,7 @@ import moment from 'moment'
 import Select from 'react-select';
 import ModalLogs from '../../../components/modalLogs'
 import loader from '../../../classes/loader';
+import util from '../../../classes/util'
 
 const estadoInicial = {
     data: '',
@@ -84,10 +85,10 @@ class AddCentroCusto extends Component {
         if (this.state.chave != 0) {
             await this.setState({
                 dadosIniciais: [
-                    { titulo: 'Cliente', valor: Util.formatForLogs(this.state.cliente, 'options', '', '', this.state.pessoasOptions) },
-                    { titulo: 'Descrição', valor: Util.formatForLogs(this.state.descricao) },
-                    { titulo: 'Data', valor: Util.formatForLogs(this.state.data, 'date') },
-                    { titulo: 'Encerrado', valor: Util.formatForLogs(this.state.encerrado, 'date') },
+                    { titulo: 'Cliente', valor: util.formatForLogs(this.state.cliente, 'options', '', '', this.state.pessoasOptions) },
+                    { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                    { titulo: 'Data', valor: util.formatForLogs(this.state.data, 'date') },
+                    { titulo: 'Encerrado', valor: util.formatForLogs(this.state.encerrado, 'date') },
                 ]
             })
         }
@@ -114,7 +115,7 @@ class AddCentroCusto extends Component {
     }
 
     salvarCentroCusto = async (validForm) => {
-        this.setState({ ...utils.cleanStates(this.state) });
+        this.setState({ ...util.cleanStates(this.state) });
 
         if (this.state.variavel) {
             this.setState({ variavel: 1 })
@@ -125,10 +126,10 @@ class AddCentroCusto extends Component {
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'Cliente', valor: Util.formatForLogs(this.state.cliente, 'options', '', '', this.state.pessoasOptions) },
-                { titulo: 'Descrição', valor: Util.formatForLogs(this.state.descricao) },
-                { titulo: 'Data', valor: Util.formatForLogs(this.state.data, 'date') },
-                { titulo: 'Encerrado', valor: Util.formatForLogs(this.state.encerrado, 'date') },
+                { titulo: 'Cliente', valor: util.formatForLogs(this.state.cliente, 'options', '', '', this.state.pessoasOptions) },
+                { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                { titulo: 'Data', valor: util.formatForLogs(this.state.data, 'date') },
+                { titulo: 'Encerrado', valor: util.formatForLogs(this.state.encerrado, 'date') },
             ],
             loading: true
         })

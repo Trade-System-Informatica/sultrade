@@ -14,6 +14,7 @@ import Alert from '../../../components/alert'
 import { apiEmployee } from '../../../services/apiamrg'
 import moment from 'moment'
 import loader from '../../../classes/loader'
+import util from '../../../classes/util'
 import Select from 'react-select';
 import { Modal } from '@material-ui/core'
 
@@ -258,7 +259,7 @@ class AddConta extends Component {
                     { titulo: 'Histórico', valor: util.formatForLogs(this.state.historico) },
                     { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') },
                     { titulo: 'Vencimento Original', valor: util.formatForLogs(this.state.vencimentoOrig, 'date') },
-                    { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, money) },
+                    { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, 'money') },
                     { titulo: 'Saldo', valor: util.formatForLogs(this.state.saldo, 'money') },
                     { titulo: 'Centro Custo', valor: util.formatForLogs(this.state.centroCusto, 'options', '', '', this.state.centrosCustosOptions) },
                     { titulo: 'Conta Provisão', valor: util.formatForLogs(this.state.contaProvisao, 'options', '', '', this.state.planosContasOptions) },
@@ -515,7 +516,7 @@ class AddConta extends Component {
                 { titulo: 'Histórico', valor: util.formatForLogs(this.state.historico) },
                 { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') },
                 { titulo: 'Vencimento Original', valor: util.formatForLogs(this.state.vencimentoOrig, 'date') },
-                { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, money) },
+                { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, 'money') },
                 { titulo: 'Saldo', valor: util.formatForLogs(this.state.saldo, 'money') },
                 { titulo: 'Centro Custo', valor: util.formatForLogs(this.state.centroCusto, 'options', '', '', this.state.centrosCustosOptions) },
                 { titulo: 'Conta Provisão', valor: util.formatForLogs(this.state.contaProvisao, 'options', '', '', this.state.planosContasOptions) },
