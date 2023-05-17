@@ -498,8 +498,6 @@ class AddConta extends Component {
                 }
             }
 
-            console.log(chave)
-            console.log(contatos)
             if (!this.state.tipoPix) {
                 this.setState({ loading: false });
                 return;
@@ -1021,7 +1019,7 @@ class AddConta extends Component {
         validations.push(this.state.vencimento)
         validations.push(this.state.vencimentoOrig)
         validations.push(this.state.valor && this.state.valor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')))
-        validations.push(this.state.meioPagamento)
+        validations.push(this.state.meioPagamento || this.state.tipo == 0)
         validations.push(this.state.tipo == 0 || this.state.contaDesconto)
         validations.push(this.state.meioPagamentoNome != 'GRU' && this.state.meioPagamentoNome != 'BOL' || this.state.codBarras)
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.codigoReceita)
@@ -1467,14 +1465,18 @@ class AddConta extends Component {
                                                                 </div>
                                                             </>
                                                         }
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Conta Débito</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.contaContabil)[0]} search={true} onChange={(e) => { this.setState({ contaContabil: e.value, }) }} />
-                                                        </div>
+                                                        {this.state.tipo == 1 &&
+                                                            <>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Conta Débito</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.contaContabil)[0]} search={true} onChange={(e) => { this.setState({ contaContabil: e.value, }) }} />
+                                                                </div>
+                                                            </>}
+
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Centro de Custo</label>
                                                         </div>
@@ -1606,17 +1608,21 @@ class AddConta extends Component {
                                                                 <Field className="form-control" type="text" value={this.state.codBarras} onChange={async e => { this.setState({ codBarras: e.currentTarget.value }) }} />
                                                             </div>
                                                         }
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Banco</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                            {!this.state.contaDesconto &&
-                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                            }
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.contaDesconto)[0]} search={true} onChange={(e) => { this.setState({ contaDesconto: e.value, }) }} />
-                                                        </div>
+                                                        {this.state.tipo == 1 &&
+                                                            <>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Banco</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                    {!this.state.contaDesconto &&
+                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                    }
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.contaDesconto)[0]} search={true} onChange={(e) => { this.setState({ contaDesconto: e.value, }) }} />
+                                                                </div>
+                                                            </>
+                                                        }
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Inserção manual</label>
                                                         </div>
@@ -1700,17 +1706,20 @@ class AddConta extends Component {
                                                             </>
                                                         }
 
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Meio de Pagamento</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                            {!this.state.meioPagamento &&
-                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                            }
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.meiosPagamentosOptions.filter(e => this.filterSearch(e, this.state.meiosPagamentosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ meiosPagamentosOptionsTexto: e }) }} value={this.state.meiosPagamentosOptions.filter(option => option.value == this.state.meioPagamento)[0]} search={true} onChange={(e) => { this.setState({ meioPagamento: e.value, meioPagamentoNome: e.label }) }} />
-                                                        </div>
+                                                        {this.state.tipo == 1 &&
+                                                            <>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Meio de Pagamento</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                    {!this.state.meioPagamento &&
+                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                    }
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Select className='SearchSelect' options={this.state.meiosPagamentosOptions.filter(e => this.filterSearch(e, this.state.meiosPagamentosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ meiosPagamentosOptionsTexto: e }) }} value={this.state.meiosPagamentosOptions.filter(option => option.value == this.state.meioPagamento)[0]} search={true} onChange={(e) => { this.setState({ meioPagamento: e.value, meioPagamentoNome: e.label }) }} />
+                                                                </div>
+                                                            </>}
 
                                                         {(this.state.meioPagamentoNome == 'DARF' || this.state.meioPagamentoNome == 'GPS' || this.state.meioPagamentoNome == 'GRU') &&
                                                             <>
