@@ -244,6 +244,7 @@ class AddConta extends Component {
             }
 
             await this.setState({ ultimaTransacao: await loader.getBody(`getUltimaTransacaoConta.php`, { chave: this.state.chave }) });
+            console.log(this.state.ultimaTransacao);
             this.getDadosCliente();
         }
         await this.loadAll();
@@ -331,7 +332,6 @@ class AddConta extends Component {
             planosContasOptions: await loader.getPlanosContasAnaliticasOptions(),
 
             centrosCustos: await loader.getBase('getCentrosCustos.php'),
-            centrosCustosOptions: await loader.getBaseOptions('getCentrosCustos.php', 'Descricao', 'Chave'),
 
             tiposDocumentos: await loader.getBase('getTiposLancamento.php'),
             tiposDocumentosOptions: await loader.getTiposLancamentoOptions(),
@@ -347,8 +347,11 @@ class AddConta extends Component {
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php')
         })
-        console.log(this.state.naviosOptions);
-        console.log(this.state.portosOptions);
+        
+        this.setState({
+            centrosCustosOptions: this.state.centrosCustos.map((c) => ({label: `CC: ${c.Codigo} - ${c.Descricao}`, value: c.chave}))
+        })
+        console.log(this.state.centrosCustosOptions.length);
 
         if (this.state.chave) {
             const contabilizada = await loader.getBody(`getLancamentoConta.php`, { chavePr: this.state.chave });
@@ -860,10 +863,13 @@ class AddConta extends Component {
         await this.setState({ modalAberto: false });
         await this.setState({
             centrosCustos: await loader.getBase('getCentrosCustos.php'),
-            centrosCustosOptions: await loader.getBaseOptions('getCentrosCustos.php', 'Descricao', 'Chave')
         })
-    }
 
+        await this.setState({
+            centrosCustosOptions: this.state.centrosCustos.map((c) => ({ label: `CC: ${c.Codigo} - ${c.Descricao}`, value: c.chave }))
+        })
+
+    }
     procuraOS = async () => {
         const os = await loader.getBody(`getOSConta.php`, {
             token: true,
@@ -1016,8 +1022,8 @@ class AddConta extends Component {
         validations.push(this.state.tipo)
         validations.push(this.state.pessoa)
         validations.push(!this.state.ultimaTransacao[0] || this.state.ultimaTransacao[0].id_status == 0 || this.state.ultimaTransacao[0].id_status == 1)
-        validations.push(this.state.vencimento)
-        validations.push(this.state.vencimentoOrig)
+        validations.push(this.state.vencimento || this.state.tipo == 0)
+        validations.push(this.state.vencimentoOrig || this.state.tipo == 0)
         validations.push(this.state.valor && this.state.valor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')))
         validations.push(this.state.meioPagamento || this.state.tipo == 0)
         validations.push(this.state.tipo == 0 || this.state.contaDesconto)

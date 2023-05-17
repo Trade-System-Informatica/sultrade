@@ -267,7 +267,11 @@ export default class Util {
 
     static formatForLogs(value, type = 'text', falseReturn = '', trueReturn = '', options = [], optionKeyValue = 'value', optionLabelValue = 'label') {
         if (type == 'money') {
-            return value.replaceAll('.', '').replaceAll(',', '.') ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value.replaceAll('.', '').replaceAll(',', '.')) : falseReturn;
+            if (typeof value == "string") {
+                return value.replaceAll('.', '').replaceAll(',', '.') ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value.replaceAll('.', '').replaceAll(',', '.')) : falseReturn;
+            } else {
+                return value;
+            }
         } else if (type == 'date') {
             return value && moment(value).isValid() ? moment(value).format("DD/MM/YYYY") : falseReturn;
         } else if (type == 'bool') {
