@@ -282,9 +282,9 @@ export default class Util {
             }
         } else if (type == 'options') {
             if (options && options[0]) {
-                const trueValue = options.find((opt) => opt[optionKeyValue]);
+                const trueValue = options.find((opt) => opt && opt[optionKeyValue]);
                 
-                return trueValue ? trueValue[optionLabelValue] : falseReturn;
+                return trueValue && trueValue[optionLabelValue] ? trueValue[optionLabelValue] : falseReturn;
             } else {
                 return value;
             }
