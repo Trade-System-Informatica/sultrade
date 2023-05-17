@@ -351,7 +351,6 @@ class AddConta extends Component {
         this.setState({
             centrosCustosOptions: this.state.centrosCustos.map((c) => ({label: `CC: ${c.Codigo} - ${c.Descricao}`, value: c.chave}))
         })
-        console.log(this.state.centrosCustosOptions.length);
 
         if (this.state.chave) {
             const contabilizada = await loader.getBody(`getLancamentoConta.php`, { chavePr: this.state.chave });
