@@ -61,7 +61,7 @@ class AddDescricao extends Component {
 
             this.setState({
                 dadosIniciais: [
-                    {titulo: 'Descricao', valor: this.state.descricao}
+                    {titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao)}
                 ]
             })
         }
@@ -126,12 +126,12 @@ class AddDescricao extends Component {
 
 
     salvarDescricao = async (validForm) => {
-        //this.getMaxNews()
-        this.setState({bloqueado: true})
+        this.setState({...util.cleanStates(this.state)});
+        this.setState({bloqueado: true});
 
         await this.setState({
             dadosFinais: [
-                {titulo: 'Descricao', valor: this.state.descricao}
+                {titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao)}
             ],
             loading: true
         })

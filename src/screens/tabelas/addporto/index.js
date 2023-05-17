@@ -52,17 +52,19 @@ class AddPorto extends Component {
                 descricao: this.state.porto.Descricao,
                 sigla: this.state.porto.Codigo
             })
-            
-            await this.setState({
-                dadosIniciais: [
-                    {titulo: 'Descricao', valor: this.state.descricao},
-                    {titulo: 'Codigo', valor: this.state.sigla}
-                ]
-            })
         }
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
         await this.testaAcesso()
+
+        if (this.state.chave != 0) {
+            await this.setState({
+                dadosIniciais: [
+                    { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                    { titulo: 'Sigla', valor: util.formatForLogs(this.state.sigla) }
+                ]
+            })
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "PORTOS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "PORTOS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -119,13 +121,13 @@ class AddPorto extends Component {
     }
 
     salvarPorto = async (validForm) => {
-        //this.getMaxNews()
+        this.setState({...util.cleanStates(this.state)})
         this.setState({ bloqueado: true });
 
         await this.setState({
             dadosFinais: [
-                {titulo: 'Descricao', valor: this.state.descricao},
-                {titulo: 'Codigo', valor: this.state.sigla}
+                {titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao)},
+                {titulo: 'Sigla', valor: util.formatForLogs(this.state.sigla)}
             ],
             loading: true
         })

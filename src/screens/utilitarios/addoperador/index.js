@@ -60,7 +60,7 @@ class AddPessoa extends Component {
         window.scrollTo(0, 0)
         var id = await this.props.match.params.id
         await this.setState({ codigo: id })
-        
+
         if (this.state.usuarioLogado.empresa != 0) {
             await this.setState({ empresa: this.state.usuarioLogado.empresa });
         }
@@ -69,7 +69,7 @@ class AddPessoa extends Component {
                 await this.setState({ operador: this.props.location.state.operador })
             } else {
                 const operador = await loader.getBody(`getOperador.php`, { codigo: this.state.codigo });
-                await this.setState({ operador: operador[0]});
+                await this.setState({ operador: operador[0] });
             }
             //console.log('Servicos: ' + JSON.stringify(this.state.tiposervico))
             //await this.loadData(this.state.tiposervico)
@@ -79,25 +79,28 @@ class AddPessoa extends Component {
                 trocarSenha: false,
             })
 
-            await this.setState({
-                dadosIniciais: [
-                    { titulo: 'Nome', valor: this.state.nome },
-                ]
-            })
         }
         //this.carregaLugares();
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
         await this.testaAcesso()
 
+        if (this.state.chave != 0) {
+            await this.setState({
+                dadosIniciais: [
+                    { titulo: 'Nome', valor: util.formatForLogs(this.state.nome) },
+                ]
+            })
+        }
+
         this.state.acessosPermissoes.map((e) => {
             if (((e.acessoAcao == "OPERADORES" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "OPERADORES" && e.permissaoEdita == 0 && this.state.codigo != 0))) {
                 if (this.state.codigo != this.state.usuarioLogado.codigo) {
                     this.setState({ bloqueado: true })
                 } else {
-                    this.setState({ notAllowed: true});
+                    this.setState({ notAllowed: true });
                 }
-                
+
             }
         })
     }
@@ -164,20 +167,20 @@ class AddPessoa extends Component {
     }
 
     salvarOperador = async (validForm) => {
-        //this.getMaxNews()
+        this.setState({...util.cleanStates(this.state)})
         this.setState({ loading: true });
         const senha = util.encrypt(this.state.senha)
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'Nome', valor: this.state.nome },
+                { titulo: 'Nome', valor: util.formatForLogs(this.state.nome) },
             ],
             loading: true
         })
 
         await this.testaNome();
         if (this.state.bloqueado || !validForm) {
-            this.setState({loading:false});
+            this.setState({ loading: false });
             return;
         }
 

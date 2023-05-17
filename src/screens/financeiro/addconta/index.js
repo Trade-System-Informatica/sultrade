@@ -114,6 +114,12 @@ const estadoInicial = {
     tiposDocumentosOptions: [],
     tiposDocumentosOptionsTexto: '',
 
+    tiposOptions: [
+        { label: '', value: '', },
+        { label: 'Pagar', value: 0 },
+        { label: 'Receber', value: 0 }
+    ],
+
     dadosIniciais: [],
     dadosFinais: [],
     dadosIniciaisDarf: [
@@ -180,7 +186,7 @@ const estadoInicial = {
     governmentTaxes: 0,
     governmentTaxesChecked: false,
 
-    alert: {type: "", msg: ""}
+    alert: { type: "", msg: "" }
 }
 
 class AddConta extends Component {
@@ -232,29 +238,6 @@ class AddConta extends Component {
                 porto: this.state.conta.porto_manual
             })
 
-            await this.setState({
-                dadosIniciais: [
-                    { titulo: 'Tipo', valor: this.state.Tipo },
-                    { titulo: 'Lancto', valor: this.state.lancamento },
-                    { titulo: 'Docto', valor: this.state.documento },
-                    { titulo: 'Parc_Ini', valor: this.state.parcelaInicial },
-                    { titulo: 'Parc_Fim', valor: this.state.parcelaFinal },
-                    { titulo: 'Historico', valor: this.state.historico },
-                    { titulo: 'Vencimento', valor: this.state.vencimento },
-                    { titulo: 'Vencimento_Original', valor: this.state.vencimentoOrig },
-                    { titulo: 'Valor', valor: this.state.valor },
-                    { titulo: 'Saldo', valor: this.state.saldo },
-                    { titulo: 'Centro_Custo', valor: this.state.centroCusto },
-                    { titulo: 'Conta_Provisao', valor: this.state.contaProvisao },
-                    { titulo: 'Conta_Contabil', valor: this.state.contaContabil },
-                    { titulo: 'Conta_Desconto', valor: this.state.contaDesconto },
-                    { titulo: 'Pessoa', valor: this.state.pessoa },
-                    { titulo: 'Operador', valor: this.state.conta.Operador },
-                    { titulo: 'Conta_Bloqueto', valor: this.state.contaBloqueto },
-                    { titulo: 'tipodocto', valor: this.state.tipoDocumento },
-                    { titulo: 'meio_pagamento', valor: this.state.meioPagamento },
-                ]
-            })
             if (this.state.contaProvisao != 0) {
                 await this.setState({ provisaoCheck: true })
             }
@@ -263,6 +246,32 @@ class AddConta extends Component {
             this.getDadosCliente();
         }
         await this.loadAll();
+
+        if (this.state.chave != 0) {
+            await this.setState({
+                dadosIniciais: [
+                    { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tiposOptions) },
+                    { titulo: 'Lançamento', valor: util.formatForLogs(this.state.lancamento, 'date') },
+                    { titulo: 'Documento', valor: util.formatForLogs(this.state.documento) },
+                    { titulo: 'Parcela Inicial', valor: util.formatForLogs(this.state.parcelaInicial) },
+                    { titulo: 'Parcela Final', valor: util.formatForLogs(this.state.parcelaFinal) },
+                    { titulo: 'Histórico', valor: util.formatForLogs(this.state.historico) },
+                    { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') },
+                    { titulo: 'Vencimento Original', valor: util.formatForLogs(this.state.vencimentoOrig, 'date') },
+                    { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, money) },
+                    { titulo: 'Saldo', valor: util.formatForLogs(this.state.saldo, 'money') },
+                    { titulo: 'Centro Custo', valor: util.formatForLogs(this.state.centroCusto, 'options', '', '', this.state.centrosCustosOptions) },
+                    { titulo: 'Conta Provisão', valor: util.formatForLogs(this.state.contaProvisao, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Conta Débito', valor: util.formatForLogs(this.state.contaContabil, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Conta Desconto', valor: util.formatForLogs(this.state.contaDesconto, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Pessoa', valor: util.formatForLogs(this.state.pessoa, 'options', '', '', this.state.pessoasOptions) },
+                    { titulo: 'Operador', valor: util.formatForLogs(this.state.usuarioLogado.nome) },
+                    { titulo: 'Conta Bloqueto', valor: util.formatForLogs(this.state.contaBloqueto, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Tipo de Documento', valor: util.formatForLogs(this.state.tipoDocumento, 'options', '', '', this.state.tiposDocumentosOptions) },
+                    { titulo: 'Meio Pagamento', valor: util.formatForLogs(this.state.meioPagamento, 'options', '', '', this.state.meiosPagamentos) },
+                ]
+            });
+        }
 
         const meioPagamentoNome = this.state.meiosPagamentos.filter((e) => e.chave == this.state.meioPagamento);
         if (meioPagamentoNome && meioPagamentoNome[0]) {
@@ -465,6 +474,8 @@ class AddConta extends Component {
 
 
     salvarConta = async (validForm) => {
+        this.setState({ ...util.cleanState(this.state) })
+
         this.setState({ bloqueado: true, loading: true });
 
         if (this.state.meioPagamentoNome === "PIX") {
@@ -496,25 +507,25 @@ class AddConta extends Component {
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'Tipo', valor: this.state.Tipo },
-                { titulo: 'Lancto', valor: this.state.lancamento },
-                { titulo: 'Docto', valor: this.state.documento },
-                { titulo: 'Parc_Ini', valor: this.state.parcelaInicial },
-                { titulo: 'Parc_Fim', valor: this.state.parcelaFinal },
-                { titulo: 'Historico', valor: this.state.historico },
-                { titulo: 'Vencimento', valor: this.state.vencimento },
-                { titulo: 'Vencimento_Original', valor: this.state.vencimentoOrig },
-                { titulo: 'Valor', valor: this.state.valor },
-                { titulo: 'Saldo', valor: this.state.saldo },
-                { titulo: 'Centro_Custo', valor: this.state.centroCusto },
-                { titulo: 'Conta_Provisao', valor: this.state.contaProvisao },
-                { titulo: 'Conta_Contabil', valor: this.state.contaContabil },
-                { titulo: 'Conta_Desconto', valor: this.state.contaDesconto },
-                { titulo: 'Pessoa', valor: this.state.pessoa },
-                { titulo: 'Operador', valor: this.state.usuarioLogado.codigo },
-                { titulo: 'Conta_Bloqueto', valor: this.state.contaBloqueto },
-                { titulo: 'tipodocto', valor: this.state.tipoDocumento },
-                { titulo: 'meio_pagamento', valor: this.state.meioPagamento },
+                { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tiposOptions) },
+                { titulo: 'Lançamento', valor: util.formatForLogs(this.state.lancamento, 'date') },
+                { titulo: 'Documento', valor: util.formatForLogs(this.state.documento) },
+                { titulo: 'Parcela Inicial', valor: util.formatForLogs(this.state.parcelaInicial) },
+                { titulo: 'Parcela Final', valor: util.formatForLogs(this.state.parcelaFinal) },
+                { titulo: 'Histórico', valor: util.formatForLogs(this.state.historico) },
+                { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') },
+                { titulo: 'Vencimento Original', valor: util.formatForLogs(this.state.vencimentoOrig, 'date') },
+                { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, money) },
+                { titulo: 'Saldo', valor: util.formatForLogs(this.state.saldo, 'money') },
+                { titulo: 'Centro Custo', valor: util.formatForLogs(this.state.centroCusto, 'options', '', '', this.state.centrosCustosOptions) },
+                { titulo: 'Conta Provisão', valor: util.formatForLogs(this.state.contaProvisao, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Conta Débito', valor: util.formatForLogs(this.state.contaContabil, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Conta Desconto', valor: util.formatForLogs(this.state.contaDesconto, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Pessoa', valor: util.formatForLogs(this.state.pessoa, 'options', '', '', this.state.pessoasOptions) },
+                { titulo: 'Operador', valor: util.formatForLogs(this.state.usuarioLogado.nome) },
+                { titulo: 'Conta Bloqueto', valor: util.formatForLogs(this.state.contaBloqueto, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Tipo de Documento', valor: util.formatForLogs(this.state.tipoDocumento, 'options', '', '', this.state.tiposDocumentosOptions) },
+                { titulo: 'Meio Pagamento', valor: util.formatForLogs(this.state.meioPagamento, 'options', '', '', this.state.meiosPagamentos) },
             ],
             loading: true
         })
@@ -1070,10 +1081,10 @@ class AddConta extends Component {
 
                         </section>
 
-                    <Alert
-                        alert={this.state.alert}
-                        setAlert={(e) => this.setState({ alert: e })}
-                    />
+                        <Alert
+                            alert={this.state.alert}
+                            setAlert={(e) => this.setState({ alert: e })}
+                        />
                         {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                             <div className="logButton">
                                 <button onClick={() => this.openLogs()}>Logs</button>
@@ -1399,9 +1410,9 @@ class AddConta extends Component {
                                                         {this.state.chave == 0 &&
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                 <select value={this.state.tipo} onChange={async (e) => { await this.setState({ tipo: e.currentTarget.value, pessoa: '' }); await this.getPessoas() }} className='form-control'>
-                                                                    <option value=''></option>
-                                                                    <option value='0'>Receber</option>
-                                                                    <option value='1'>Pagar</option>
+                                                                    {this.state.tiposOptions.map((t) => (
+                                                                        <option value={t.value}>{t.label}</option>
+                                                                    ))}
                                                                 </select>
                                                             </div>
                                                         }
@@ -1621,7 +1632,7 @@ class AddConta extends Component {
                                                                 <div className='col-1 errorMessage'>
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Field className="form-control" type="text" value={this.state.os} onChange={async e => { this.setState({ os: e.currentTarget.value, osExiste: false }); }} onBlur={() => this.procuraOS()}/>
+                                                                    <Field className="form-control" type="text" value={this.state.os} onChange={async e => { this.setState({ os: e.currentTarget.value, osExiste: false }); }} onBlur={() => this.procuraOS()} />
                                                                 </div>
                                                                 <div className='col-1'></div>
 

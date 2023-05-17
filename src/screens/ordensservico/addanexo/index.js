@@ -88,20 +88,23 @@ class AddAnexo extends Component {
                 validadoPor: this.props.location.state.anexo.validadoPor,
             })
 
-            this.setState({
-                dadosIniciais: [
-                    { titulo: 'fornecedor', valor: this.state.fornecedor },
-                    { titulo: 'os', valor: this.state.os },
-                    { titulo: 'validado', valor: this.state.validado },
-                    { titulo: 'validadoPor', valor: this.state.usuarioLogado },
-                    { titulo: 'validadoData', valor: this.state.validadoData },
-                ]
-            })
         } else {
             this.setState({ savedRedirect: true });
         }
 
         await this.loadAll();
+
+        if (this.state.chave != 0) {
+            this.setState({
+                dadosIniciais: [
+                    { titulo: 'Fornecedor', valor: utils.formatForLogs(this.state.fornecedor, 'options', '', '', this.state.fornecedoresOptions) },
+                    { titulo: 'OS', valor: utils.formatForLogs(this.state.os) },
+                    { titulo: 'Validado', valor: utils.formatForLogs(this.state.validado, 'bool') },
+                    { titulo: 'Validado por', valor: utils.formatForLogs(this.state.usuarioLogado, 'options', '', '', this.state.operadores, 'Codigo', 'Nome') },
+                    { titulo: 'Data de Validação', valor: utils.formatForLogs(this.state.validadoData, 'date') },
+                ]
+            })
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "ANEXOS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "ANEXOS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -129,16 +132,16 @@ class AddAnexo extends Component {
     }
 
     salvarAnexo = async (validForm) => {
-
+        this.setState({ ...util.cleanStates(this.state) })
         this.setState({ bloqueado: true })
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'fornecedor', valor: this.state.fornecedor },
-                { titulo: 'os', valor: this.state.os },
-                { titulo: 'validado', valor: this.state.validado },
-                { titulo: 'validadoPor', valor: this.state.usuarioLogado },
-                { titulo: 'validadoData', valor: this.state.validadoData },
+                { titulo: 'Fornecedor', valor: utils.formatForLogs(this.state.fornecedor, 'options', '', '', this.state.fornecedoresOptions) },
+                { titulo: 'OS', valor: utils.formatForLogs(this.state.os) },
+                { titulo: 'Validado', valor: utils.formatForLogs(this.state.validado, 'bool') },
+                { titulo: 'Validado por', valor: utils.formatForLogs(this.state.usuarioLogado, 'options', '', '', this.state.operadores, 'Codigo', 'Nome') },
+                { titulo: 'Data de Validação', valor: utils.formatForLogs(this.state.validadoData, 'date') },
             ],
             loading: true
         })

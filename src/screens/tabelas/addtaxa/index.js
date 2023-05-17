@@ -72,6 +72,13 @@ const estadoInicial = {
     modalLista: [],
     modalPesquisa: '',
 
+    tiposOptions: [
+        { label: 'Pagar', value: 'P' },
+        { label: 'Receber', value: 'R' },
+        { label: 'Government Taxes', value: 'GT' },
+        { label: 'Bank Charges', value: 'BC' }
+    ]
+
 }
 
 class AddTaxa extends Component {
@@ -101,23 +108,25 @@ class AddTaxa extends Component {
                 formula_ate: this.state.taxa.formula_ate,
                 subgrupo: this.state.taxa.sub_grupo
             })
+        }
+        await this.loadAll();
 
+        if (this.state.chave != 0) {
             await this.setState({
                 dadosIniciais: [
-                    { titulo: 'descricao', valor: this.state.descricao },
-                    { titulo: 'valor', valor: this.state.valor },
-                    { titulo: 'variavel', valor: this.state.variavel },
-                    { titulo: 'Moeda', valor: this.state.moeda },
-                    { titulo: 'Tipo', valor: this.state.tipo },
-                    { titulo: 'Conta_Contabil', valor: this.state.conta_contabil },
-                    { titulo: 'conta_credito', valor: this.state.conta_credito },
-                    { titulo: 'historico_padrao', valor: this.state.historico_padrao },
-                    { titulo: 'formula_ate', valor: this.state.formula_ate },
-                    { titulo: 'sub_grupo', valor: this.state.subgrupo }
+                    { titulo: 'Descricao', valor: util.formatForLogs(this.state.descricao) },
+                    { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, 'money') },
+                    { titulo: 'Variável', valor: util.formatForLogs(this.state.variavel, 'bool') },
+                    { titulo: 'Moeda', valor: util.formatForLogs(this.state.moeda, 'options', '', '', this.state.moedas, 'Chave', 'Sigla') },
+                    { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tiposOptions) },
+                    { titulo: 'Conta Contabil', valor: util.formatForLogs(this.state.conta_contabil, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Conta Credito', valor: util.formatForLogs(this.state.conta_credito, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Historico Padrão', valor: util.formatForLogs(this.state.historico_padrao) },
+                    { titulo: 'Formula Ate', valor: util.formatForLogs(this.state.formula_ate) },
+                    { titulo: 'Subgrupo', valor: util.formatForLogs(this.state.subgrupo, 'options', '', '', this.state.subgruposOptions) }
                 ]
             })
         }
-        await this.loadAll();
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "TAXAS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "TAXAS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -199,20 +208,21 @@ class AddTaxa extends Component {
         } else {
             this.setState({ variavel: 0 })
         }
+        this.setState({ ...util.cleanStates(this.state)})
         this.setState({ bloqueado: true })
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'descricao', valor: this.state.descricao },
-                { titulo: 'valor', valor: this.state.valor },
-                { titulo: 'variavel', valor: this.state.variavel },
-                { titulo: 'Moeda', valor: this.state.moeda },
-                { titulo: 'Tipo', valor: this.state.tipo },
-                { titulo: 'Conta_Contabil', valor: this.state.conta_contabil },
-                { titulo: 'conta_credito', valor: this.state.conta_credito },
-                { titulo: 'historico_padrao', valor: this.state.historico_padrao },
-                { titulo: 'formula_ate', valor: this.state.formula_ate },
-                { titulo: 'sub_grupo', valor: this.state.subgrupo }
+                { titulo: 'Descricao', valor: util.formatForLogs(this.state.descricao) },
+                { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, 'money') },
+                { titulo: 'Variável', valor: util.formatForLogs(this.state.variavel, 'bool') },
+                { titulo: 'Moeda', valor: util.formatForLogs(this.state.moeda, 'options', '', '', this.state.moedas, 'Chave', 'Sigla') },
+                { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tiposOptions) },
+                { titulo: 'Conta Contabil', valor: util.formatForLogs(this.state.conta_contabil, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Conta Credito', valor: util.formatForLogs(this.state.conta_credito, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Historico Padrão', valor: util.formatForLogs(this.state.historico_padrao) },
+                { titulo: 'Formula Ate', valor: util.formatForLogs(this.state.formula_ate) },
+                { titulo: 'Subgrupo', valor: util.formatForLogs(this.state.subgrupo, 'options', '', '', this.state.subgruposOptions) }
             ]
         })
 
@@ -268,7 +278,7 @@ class AddTaxa extends Component {
 
     salvarPortosContas = async () => {
         const portosContas = this.state.portosContas.filter((portos) => portos.porto !== "");
-        
+
         await apiEmployee.post(`setTaxasPortos.php`, {
             token: true,
             chaves: portosContas.map((portos) => portos.chave),
@@ -464,10 +474,9 @@ class AddTaxa extends Component {
                                                 <div className='col-1'></div>
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                     <select className='form-control' value={this.state.tipo} onChange={(e) => { this.setState({ tipo: e.currentTarget.value }) }}>
-                                                        <option value={'P'}>Pagar</option>
-                                                        <option value={'R'}>Receber</option>
-                                                        <option value={'GT'}>Government Taxes</option>
-                                                        <option value={'BC'}>Bank Charges</option>
+                                                        {this.state.tiposOptions.map((t) => (
+                                                            <optin value={t.value}>{t.label}</optin>
+                                                        ))}
                                                     </select>
                                                 </div>
                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">

@@ -82,6 +82,13 @@ const estadoInicial = {
     descricoesPadraoOptions: [],
     descricoesPadraoOptionsTexto: '',
 
+    tiposSubOptions: [
+        { value: 0, label: 'Pagar' },
+        { value: 1, label: 'Receber' },
+        { value: 2, label: 'Recebimento de Remessa' },
+        { value: 3, label: 'Desconto' }
+    ],
+
     acessos: [],
     permissoes: [],
     acessosPermissoes: [],
@@ -200,18 +207,18 @@ class AddEvento extends Component {
 
             await this.setState({
                 dadosIniciais: [
-                    { titulo: 'data', valor: this.state.data },
-                    { titulo: 'fornecedor', valor: this.state.fornecedor },
-                    { titulo: 'taxa', valor: this.state.taxa },
-                    { titulo: 'Moeda', valor: this.state.moeda },
-                    { titulo: 'valor', valor: this.state.valor },
-                    { titulo: 'valor1', valor: this.state.vlrc },
-                    { titulo: 'repasse', valor: this.state.repasse },
-                    { titulo: 'descricao', valor: this.state.descricao },
-                    { titulo: 'tipo_sub', valor: this.state.tipo },
-                    { titulo: 'ordem', valor: this.state.ordem },
-                    { titulo: 'remarks', valor: this.state.remarks },
-                    { titulo: 'Fornecedor_Custeio', valor: this.state.fornecedorCusteio }
+                    { titulo: 'Data', valor: util.formatForLogs(this.state.data, 'date') },
+                    { titulo: 'Fornecedor', valor: util.formatForLogs(this.state.fornecedor, 'options', '', '', this.state.pessoasOptions) },
+                    { titulo: 'Taxa', valor: util.formatForLogs(this.state.taxa, 'options', '', '', this.state.taxasOptions) },
+                    { titulo: 'Moeda', valor: util.formatForLogs(this.state.moeda, 'options', '', '', this.state.moedas, 'Chave', 'Sigla') },
+                    { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, 'money', '0,00') },
+                    { titulo: 'VCP', valor: util.formatForLogs(this.state.vlrc, 'money', '0,00') },
+                    { titulo: 'Repasse', valor: util.formatForLogs(this.state.repasse, 'bool') },
+                    { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                    { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tiposSubOptions) },
+                    { titulo: 'Ordem', valor: util.formatForLogs(this.state.ordem) },
+                    { titulo: 'Remarks', valor: util.formatForLogs(this.state.remarks) },
+                    { titulo: 'Fornecedor Custeio', valor: util.formatForLogs(this.state.fornecedorCusteio, 'options', '', '', this.state.fornecedoresOptions) }
                 ]
             })
         }
@@ -807,22 +814,26 @@ class AddEvento extends Component {
 
     }
 
-    salvarServicoItem = async (validForm) => {
+    salvarEvento = async (validForm) => {
+        this.setState({ ...util.cleanStates(this.state) })
+        
         this.setState({ bloqueado: true });
 
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'data', valor: this.state.data },
-                { titulo: 'fornecedor', valor: this.state.fornecedor },
-                { titulo: 'taxa', valor: this.state.taxa },
-                { titulo: 'Moeda', valor: this.state.moeda },
-                { titulo: 'valor', valor: this.state.valor },
-                { titulo: 'descricao', valor: this.state.descricao },
-                { titulo: 'tipo_sub', valor: this.state.tipo },
-                { titulo: 'ordem', valor: this.state.ordem },
-                { titulo: 'remarks', valor: this.state.remarks },
-                { titulo: 'Fornecedor_Custeio', valor: this.state.fornecedorCusteio }
+                { titulo: 'Data', valor: util.formatForLogs(this.state.data, 'date') },
+                { titulo: 'Fornecedor', valor: util.formatForLogs(this.state.fornecedor, 'options', '', '', this.state.pessoasOptions) },
+                { titulo: 'Taxa', valor: util.formatForLogs(this.state.taxa, 'options', '', '', this.state.taxasOptions) },
+                { titulo: 'Moeda', valor: util.formatForLogs(this.state.moeda, 'options', '', '', this.state.moedas, 'Chave', 'Sigla') },
+                { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, 'money', '0,00') },
+                { titulo: 'VCP', valor: util.formatForLogs(this.state.vlrc, 'money', '0,00') },
+                { titulo: 'Repasse', valor: util.formatForLogs(this.state.repasse, 'bool') },
+                { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tiposSubOptions) },
+                { titulo: 'Ordem', valor: util.formatForLogs(this.state.ordem) },
+                { titulo: 'Remarks', valor: util.formatForLogs(this.state.remarks) },
+                { titulo: 'Fornecedor Custeio', valor: util.formatForLogs(this.state.fornecedorCusteio, 'options', '', '', this.state.fornecedoresOptions) }
             ],
             loading: true
         })
@@ -1438,7 +1449,7 @@ class AddEvento extends Component {
                                         }}
                                         onSubmit={async values => {
                                             await new Promise(r => setTimeout(r, 1000))
-                                            this.salvarServicoItem(validForm)
+                                            this.salvarEvento(validForm)
                                         }}
                                     >
                                         <Form className="contact-form">
@@ -1524,10 +1535,9 @@ class AddEvento extends Component {
                                                         <div className='col-1'></div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <select className='form-control' value={this.state.tipo} onChange={async e => { await this.setState({ tipo: e.currentTarget.value }); if (this.state.tipo == 1) { await this.setState({ fornecedor: '' }) } else if (this.state.fornecedor == '' && this.state.chave != 0) { await this.setState({ fornecedor: this.state.fornecedorInicial }) } await this.getTaxasOptions() }}>
-                                                                <option value={0}>Pagar</option>
-                                                                <option value={1}>Receber</option>
-                                                                <option value={2}>Recebimento de Remessa</option>
-                                                                <option value={3}>Desconto</option>
+                                                                {this.state.tiposSubOptions.map((t) => (
+                                                                    <option value={t.value}>{t.label}</option>
+                                                                ))}
                                                             </select>
                                                         </div>
 
@@ -1565,7 +1575,7 @@ class AddEvento extends Component {
                                                             <label>Fornecedor</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
-                                                        {!this.state.fornecedor && this.state.tipo != 1 && this.state.tipo != 2 && this.state.tipo != 3 &&
+                                                            {!this.state.fornecedor && this.state.tipo != 1 && this.state.tipo != 2 && this.state.tipo != 3 &&
                                                                 <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
                                                             }
                                                         </div>
@@ -1682,17 +1692,17 @@ class AddEvento extends Component {
 
                                                 <div className="col-8" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                                     {validForm && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'EVENTOS_FINANCEIRO') { return e } }).map((e) => e.permissaoInsere)[0] == 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'EVENTOS_FINANCEIRO') { return e } }).map((e) => e.permissaoEdita)[0] == 1 &&
-                                                        <button title="Financeiro" style={{ borderRadius: 15, margin: 3 }} onClick={async () => { await this.setState({ financeiro: true }); await this.salvarServicoItem(validForm) }}>
+                                                        <button title="Financeiro" style={{ borderRadius: 15, margin: 3 }} onClick={async () => { await this.setState({ financeiro: true }); await this.salvarEvento(validForm) }}>
                                                             <FontAwesomeIcon icon={faDollarSign} />
                                                         </button>
                                                     }
                                                     {(validForm || this.state.failures[0]) &&
-                                                        <button title="Enviar Email" style={{ borderRadius: 15, margin: 3 }} onClick={() => { this.setState({ email: true }); this.salvarServicoItem(validForm) }}>
+                                                        <button title="Enviar Email" style={{ borderRadius: 15, margin: 3 }} onClick={() => { this.setState({ email: true }); this.salvarEvento(validForm) }}>
                                                             <FontAwesomeIcon icon={faEnvelope} />
                                                         </button>
                                                     }
                                                     {validForm && this.state.anexosForn[0] && this.state.anexosForn.find((anexo) => anexo.validado == 2) &&
-                                                        <button title="Validar" style={{ borderRadius: 15, margin: 3 }} onClick={() => { this.salvarServicoItem(); this.validarAnexo() }}>
+                                                        <button title="Validar" style={{ borderRadius: 15, margin: 3 }} onClick={() => { this.salvarEvento(); this.validarAnexo() }}>
                                                             <FontAwesomeIcon icon={faPaperclip} />
                                                         </button>
                                                     }

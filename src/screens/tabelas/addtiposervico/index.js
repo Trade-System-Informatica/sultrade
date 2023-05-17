@@ -62,18 +62,20 @@ class AddTipoServico extends Component {
                 descricao: this.state.tiposervico.descricao,
                 prazo: this.state.tiposervico.prazo
             })
-
-            await this.setState({
-                dadosIniciais: [
-                    { titulo: 'descricao', valor: this.state.descricao },
-                    { titulo: 'prazo', valor: this.state.prazo }
-                ]
-            })
         }
 
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
         await this.testaAcesso()
+
+        if (this.state.chave) {
+            await this.setState({
+                dadosIniciais: [
+                    { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                    { titulo: 'Prazo', valor: util.formatForLogs(this.state.prazo) }
+                ]
+            })
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "TIPOS_SERVICOS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "TIPOS_SERVICOS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -130,12 +132,13 @@ class AddTipoServico extends Component {
     }
 
     salvarServico = async (validForm) => {
+        this.setState({...util.cleanStates(this.state)})
         this.setState({ bloqueado: true })
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'descricao', valor: this.state.descricao },
-                { titulo: 'prazo', valor: this.state.prazo }
+                { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                { titulo: 'Prazo', valor: util.formatForLogs(this.state.prazo) }
             ],
             loading: true
         })

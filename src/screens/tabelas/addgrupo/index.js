@@ -10,6 +10,7 @@ import { apiEmployee } from '../../../services/apiamrg'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import ModalLogs from '../../../components/modalLogs'
+import { utils } from 'xlsx-js-style/types'
 
 const estadoInicial = {
     data: '',
@@ -63,16 +64,18 @@ class AddGrupo extends Component {
             await this.setState({
                 descricao: this.state.grupo.descricao
             })
-
-            await this.setState({
-                dadosIniciais: [
-                    { titulo: 'descricao', valor: this.state.descricao }
-                ]
-            })
         }
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
         await this.testaAcesso()
+
+        if (this.state.chave != 0) {
+            await this.setState({
+                dadosIniciais: [
+                    { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) }
+                ]
+            })
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "GRUPOS_TAXAS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "GRUPOS_TAXAS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -129,12 +132,12 @@ class AddGrupo extends Component {
     }
 
     salvarGrupo = async (validForm) => {
+        this.setState({ ...util.cleanStates(this.state) })
         this.setState({ bloqueado: true })
-
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'descricao', valor: this.state.descricao }
+                { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) }
             ],
             loading: true
         })
@@ -211,7 +214,7 @@ class AddGrupo extends Component {
                 {this.state.redirect &&
                     <Redirect to={'/'} />
                 }
-                
+
                 <section>
                     <Header voltarGrupos titulo="Grupos de Taxa" chave={this.state.chave != 0 ? this.state.chave : ''} />
                 </section>

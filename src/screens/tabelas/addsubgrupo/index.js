@@ -64,18 +64,21 @@ class AddSubgrupo extends Component {
                 descricao: this.state.subgrupo.descricao,
                 grupo: this.state.subgrupo.chave_grupo
             })
-
-            await this.setState({
-                dadosIniciais: [
-                    { titulo: 'descricao', valor: this.state.descricao },
-                    { titulo: 'chave_grupo', valor: this.state.grupo }
-                ]
-            })
         }
         await this.carregaGrupos()
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
         await this.testaAcesso()
+
+        if (this.state.chave != 0) {
+            await this.setState({
+                dadosIniciais: [
+                    { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                    { titulo: 'Grupo', valor: util.formatForLogs(this.state.grupo, 'options', '', '', this.state.gruposOptions) }
+                ]
+            })
+
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "SUBGRUPOS_TAXAS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "SUBGRUPOS_TAXAS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -149,13 +152,14 @@ class AddSubgrupo extends Component {
     }
 
     salvarSubgrupo = async (validForm) => {
+        this.setState({ ...util.cleanStates(this.state) })
         this.setState({ bloqueado: true })
 
-        
+
         await this.setState({
             dadosFinais: [
-                { titulo: 'descricao', valor: this.state.descricao },
-                { titulo: 'chave_grupo', valor: this.state.grupo }
+                { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                { titulo: 'Grupo', valor: util.formatForLogs(this.state.grupo, 'options', '', '', this.state.gruposOptions) }
             ],
             loading: true
         })
@@ -236,10 +240,10 @@ class AddSubgrupo extends Component {
                 }
 
                 <section>
-                    <Header voltarSubgrupos titulo="Subgrupos de Taxa" chave={this.state.chave != 0 ? this.state.chave : ''}/>
+                    <Header voltarSubgrupos titulo="Subgrupos de Taxa" chave={this.state.chave != 0 ? this.state.chave : ''} />
                 </section>
 
-                {this.state.chave !=0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                     <div className="logButton">
                         <button onClick={() => this.openLogs()}>Logs</button>
                     </div>

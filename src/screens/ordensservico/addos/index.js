@@ -4,7 +4,6 @@ import { Formik, Field, Form } from 'formik'
 import Header from '../../../components/header'
 import Rodape from '../../../components/rodape'
 import ModalListas from '../../../components/modalListas'
-import ModalItem from '../../../components/modalItem'
 import Skeleton from '../../../components/skeleton'
 import util from '../../../classes/util'
 import loader from '../../../classes/loader'
@@ -23,7 +22,7 @@ import Modal from '@material-ui/core/Modal';
 import Alert from '../../../components/alert'
 import Util from '../../../classes/util'
 import XLSX from "xlsx-js-style";
-import Notification from '../../../components/notification'
+import ModalEventoEdit from '../../../components/modalEventoEdit'
 
 const estadoInicial = {
     os: '',
@@ -59,8 +58,6 @@ const estadoInicial = {
     deleteSolicitao: false,
 
     eventoChave: '',
-    eventoMoeda: '',
-    eventoValor: '',
 
     clientes: [],
     clientesOptions: [],
@@ -112,7 +109,7 @@ const estadoInicial = {
     itemAdd: {},
     itemEdit: {},
     itemFinanceiro: {},
-    itemEditMini: {},
+    itemEdit: {},
     itemDelete: '',
 
     navioNome: '',
@@ -220,10 +217,18 @@ const estadoInicial = {
     eventoOrdem: '',
     eventoRemarks: '',
     eventoValor: '',
-    eventoValor: '',
     eventoVlrc: '',
     eventoRepasse: '',
-    eventoFornecedorCusteio: ''
+    eventoFornecedorCusteio: '',
+
+    taxas: [],
+    taxasOptions: [],
+    fornecedoresOptions: [],
+    descricoesPadraoOptions: [],
+    tiposSubOptions: [{ label: "Pagar", value: 0 }, { label: "Receber", value: 1 }, { label: "Recebimento de Remessa", value: 2 }, { label: "Desconto", value: 3 }],
+
+    dadosIniciaisSol: [],
+    dadosFinaisSol: [],
 }
 
 class AddOS extends Component {
@@ -290,39 +295,42 @@ class AddOS extends Component {
                     address: cabecalho.address
                 })
             }
-
-            await this.setState({
-                dadosIniciais: [
-                    { titulo: 'Descricao', valor: this.state.descricao },
-                    { titulo: 'codigo', valor: this.state.codigo },
-                    { titulo: 'Chave_Cliente', valor: this.state.cliente },
-                    { titulo: 'chave_navio', valor: this.state.navio },
-                    { titulo: 'Data_Abertura', valor: this.state.abertura },
-                    { titulo: 'Data_Chegada', valor: this.state.chegada },
-                    { titulo: 'chave_tipo_servico', valor: this.state.tipoServico },
-                    { titulo: 'viagem', valor: this.state.viagem },
-                    { titulo: 'porto', valor: this.state.porto },
-                    { titulo: 'eta', valor: this.state.eta },
-                    { titulo: 'atb', valor: this.state.atb },
-                    { titulo: 'etb', valor: this.state.etb },
-                    { titulo: 'governmentTaxes', valor: this.state.governmentTaxes },
-                    { titulo: 'bankCharges', valor: this.state.bankCharges },
-                    { titulo: 'etb', valor: this.state.etb },
-                    { titulo: 'Data_Saida', valor: this.state.data_saida },
-                    { titulo: 'Data_Encerramento', valor: this.state.encerramento },
-                    { titulo: 'Data_Faturamento', valor: this.state.faturamento },
-                    { titulo: 'centro_custo', valor: this.state.centroCusto },
-                    { titulo: 'ROE', valor: this.state.roe },
-                    { titulo: 'Comentario_Voucher', valor: this.state.comentario },
-                    { titulo: 'encerradoPor', valor: this.state.encerradoPor },
-                    { titulo: 'faturadoPor', valor: this.state.faturadoPor },
-                    { titulo: 'operador', valor: this.state.operador },
-                ]
-            })
         }
         await this.loadAll()
         await this.calculaTotal();
         await this.getDadosCliente();
+
+        if (this.state.chave != 0) {
+
+            await this.setState({
+                dadosIniciais: [
+                    { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                    { titulo: 'Código', valor: util.formatForLogs(this.state.codigo) },
+                    { titulo: 'Cliente', valor: util.formatForLogs(this.state.cliente, 'options', '', '', this.state.pessoasOptions) },
+                    { titulo: 'Navio', valor: util.formatForLogs(this.state.navio, 'options', '', '', this.state.naviosOptions) },
+                    { titulo: 'Data de Abertura', valor: util.formatForLogs(this.state.abertura, 'date') },
+                    { titulo: 'Data de Chegada', valor: util.formatForLogs(this.state.chegada, 'date') },
+                    { titulo: 'Tipo de Servico', valor: util.formatForLogs(this.state.tipoServico, 'options', '', '', this.state.tiposServicosOptions) },
+                    { titulo: 'Viagem', valor: util.formatForLogs(this.state.viagem) },
+                    { titulo: 'Porto', valor: util.formatForLogs(this.state.porto, 'options', '', '', this.state.portosOptions) },
+                    { titulo: 'ETA', valor: util.formatForLogs(this.state.eta, 'date') },
+                    { titulo: 'ATB', valor: util.formatForLogs(this.state.atb, 'date') },
+                    { titulo: 'ETB', valor: util.formatForLogs(this.state.etb, 'date') },
+                    { titulo: 'Government Taxes', valor: util.formatForLogs(this.state.governmentTaxes, 'money') },
+                    { titulo: 'Bank Charges', valor: util.formatForLogs(this.state.bankCharges, 'money') },
+                    { titulo: 'Data de Saida', valor: util.formatForLogs(this.state.data_saida, 'date') },
+                    { titulo: 'Data de Encerramento', valor: util.formatForLogs(this.state.encerramento, 'date') },
+                    { titulo: 'Data de Faturamento', valor: util.formatForLogs(this.state.faturamento, 'date') },
+                    { titulo: 'Centro de Custo', valor: util.formatForLogs(this.state.centroCusto, 'options', '', '', this.state.centrosCustosOptions) },
+                    { titulo: 'ROE', valor: util.formatForLogs(this.state.roe) },
+                    { titulo: 'Comentario Voucher', valor: util.formatForLogs(this.state.comentario) },
+                    { titulo: 'Encerrado por', valor: util.formatForLogs(this.state.encerradoPor, 'options', '', '', this.state.operadoresOptions) },
+                    { titulo: 'Faturado por', valor: util.formatForLogs(this.state.faturadoPor, 'options', '', '', this.state.operadoresOptions) },
+                    { titulo: 'Operador', valor: util.formatForLogs(this.state.operador, 'options', '', '', this.state.operadoresOptions) },
+                ]
+            })
+        }
+
 
         if (this.state.faturamento != "T.B.I." && this.state.chave != 0) {
             let permissao = false;
@@ -388,7 +396,7 @@ class AddOS extends Component {
                 } else {
                     this.setState({ bankCharges: "0,00" })
                 }
-            } 
+            }
             if (e.Tipo == "GT" && ["SIM", "S"].includes(e.Campo1.toUpperCase())) {
                 let valor = 0;
 
@@ -589,7 +597,7 @@ class AddOS extends Component {
                                         os: this.state.chave
                                     }).then(
                                         async response => {
-                                            await loader.salvaLogs('grupo', this.state.usuarioLogado.codigo, null, "Exclusão", grupo);
+                                            await loader.salvaLogs('custeios_subagentes', this.state.usuarioLogado.codigo, null, "Exclusão", grupo);
 
                                             this.getCusteiosSubagentes();
                                         },
@@ -610,24 +618,230 @@ class AddOS extends Component {
         })
     }
 
-    reloadItemEditMini = async () => {
+    getTaxasOptions = async () => {
+        let taxas = [];
+        if (this.state.taxas[0]) {
+            taxas = this.state.taxas;
+        } else {
+            taxas = await apiEmployee.post(`getTaxas.php`, {
+                token: true,
+            }).then(
+                async res => {
+                    return res.data;
+                },
+                async err => { this.erroApi(err) }
+            )
+        }
+
+        if (this.state.eventoTipo == 0) {
+            const options = taxas.filter((taxa) => taxa.Tipo == "P").map((e) => {
+                return { label: e.descricao, value: e.chave, money: e.valor }
+            })
+
+            await this.setState({ taxasOptions: options })
+        } else if (this.state.eventoTipo == 1) {
+            const options = taxas.filter((taxa) => taxa.Tipo == "R").map((e) => {
+                return { label: e.descricao, value: e.chave, money: e.valor }
+            })
+
+            await this.setState({ taxasOptions: options })
+        } else {
+            const options = taxas.map((e) => {
+                return { label: e.descricao, value: e.chave, money: e.valor }
+            })
+
+            await this.setState({ taxasOptions: options })
+        }
+    }
+
+    getFornecedores = async () => {
+        await apiEmployee.post(`getFornecedores.php`, {
+            token: true,
+        }).then(
+            async res => {
+                if (res.data[0]) {
+                    const options = res.data.map((e) => {
+                        return { label: `${e.Nome_Fantasia ? e.Nome_Fantasia : e.Nome}${e.Cnpj_Cpf ? ` - ${util.formataCPF(e.Cnpj_Cpf)}` : ""}`, value: e.Chave }
+                    })
+
+                    options.unshift({ label: 'Nenhum', value: '' })
+
+                    await this.setState({ fornecedoresOptions: options })
+                }
+            },
+            async err => { this.erroApi(err) }
+        )
+    }
+
+    getDescricaoPadrao = async () => {
+        await apiEmployee.post(`getDescricaoPadrao.php`, {
+            token: true,
+        }).then(
+            async res => {
+                if (res.data[0]) {
+                    const options = res.data.map((e) => {
+                        return { label: e.descricao, value: e.chave }
+                    })
+
+                    await this.setState({ descricoesPadraoOptions: options })
+                }
+            },
+            async err => { this.erroApi(err) }
+        )
+    }
+
+    setItemEdit = async (evento = null) => {
+        if (evento) {
+            await this.setState({
+                eventoData: evento.data,
+                eventoFornecedor: evento.fornecedor,
+                eventoMoeda: evento.Moeda,
+                eventoTaxa: evento.taxa,
+                eventoDescricao: evento.descricao,
+                eventoTipo: evento.tipo_sub,
+                eventoOrdem: evento.ordem,
+                eventoRemarks: evento.remarks,
+                eventoValor: evento.valor.replace('.', ','),
+                eventoVlrc: evento.valor1.replace('.', ','),
+                eventoRepasse: evento.repasse,
+                eventoFornecedorCusteio: evento.Fornecedor_Custeio,
+
+                modalItemAberto: true,
+                itemNome: evento.descricao,
+                itemChave: evento.chave,
+                itemPermissao: "SERVICOS_ITENS",
+
+                dadosIniciaisSol: [
+                    { titulo: 'Data', valor: util.formatForLogs(this.state.eventoData, 'date') },
+                    { titulo: 'Fornecedor', valor: util.formatForLogs(this.state.eventoFornecedor, 'options', '', '', this.state.fornecedoresOptions) },
+                    { titulo: 'Taxa', valor: util.formatForLogs(this.state.eventoTaxa, 'options', '', '', this.state.taxasOptions) },
+                    { titulo: 'Moeda', valor: util.formatForLogs(this.state.eventoMoeda, 'options', '', '', this.state.moedas, 'Chave', 'Sigla') },
+                    { titulo: 'Valor', valor: util.formatForLogs(this.state.eventoValor, 'money', '0,00') },
+                    { titulo: 'VCP', valor: util.formatForLogs(this.state.eventoVlrc, 'money', '0,00') },
+                    { titulo: 'Repasse', valor: util.formatForLogs(this.state.eventoRepasse, 'bool') },
+                    { titulo: 'Descrição', valor: util.formatForLogs(this.state.eventoDescricao) },
+                    { titulo: 'Tipo', valor: util.formatForLogs(this.state.eventoTipo, 'options', '', '', this.state.tiposSubOptions) },
+                    { titulo: 'Ordem', valor: util.formatForLogs(this.state.eventoOrdem) },
+                    { titulo: 'Remarks', valor: util.formatForLogs(this.state.eventoRemarks) },
+                    { titulo: 'Fornecedor Custeio', valor: util.formatForLogs(this.state.eventoFornecedorCusteio, 'options', '', '', this.state.fornecedoresOptions) }
+                ],
+            })
+        } else {
+            await this.setState({
+                eventoData: moment().format("YYYY-MM-DD"),
+                eventoFornecedor: '',
+                eventoMoeda: 5,
+                eventoTaxa: '',
+                eventoDescricao: '',
+                eventoTipo: 0,
+                eventoOrdem: `${Math.floor(Math.max(this.state.eventos.map((e) => parseFloat(e.ordem)))) + 1}`,
+                eventoRemarks: '',
+                eventoValor: '0,00',
+                eventoVlrc: '0,00',
+                eventoRepasse: false,
+                eventoFornecedorCusteio: '',
+
+                modalItemAberto: true,
+                itemNome: '',
+                itemChave: 0,
+                itemPermissao: "SERVICOS_ITENS",
+
+                dadosIniciaisSol: [],
+            })
+
+        }
+
+        await this.getTaxasOptions();
+        if (!this.state.fornecedoresOptions[0]) {
+            await this.getFornecedores();
+        }
+        if (!this.state.descricoesPadraoOptions[0]) {
+            await this.getDescricaoPadrao();
+        }
+
         await this.setState({
-            itemEditMini: {
-                onSubmit: async () => await this.mudaValorEvento(),
+            itemEdit: {
+                onSubmit: async () => await this.salvarEvento(),
                 valores: [
                     {
+                        titulo: 'Data',
+                        valor: this.state.eventoData,
+                        tipo: 'date',
+                        onChange: async (valor) => { await this.setState({ eventoData: valor }); },
+                    },
+                    {
+                        titulo: 'Ordem',
+                        valor: this.state.eventoOrdem,
+                        tipo: 'text',
+                        onChange: async (valor) => { await this.setState({ eventoOrdem: valor }); },
+                    },
+                    {
+                        titulo: 'Tipo',
+                        valor: this.state.eventoTipo,
+                        tipo: 'select',
+                        options: this.state.tiposSubOptions,
+                        onChange: async (valor) => { await this.setState({ eventoTipo: valor }); },
+                    },
+                    {
+                        titulo: 'Repasse',
+                        valor: this.state.eventoRepasse == 1 ? true : false,
+                        tipo: 'check',
+                        onChange: async (valor) => await this.setState({ eventoRepasse: valor })
+                    },
+                    {
+                        titulo: 'Taxa',
+                        valor: this.state.eventoTaxa,
+                        tipo: 'select',
+                        options: this.state.taxasOptions,
+                        onChange: async (valor) => { await this.setState({ eventoTaxa: valor }); },
+                    },
+                    {
+                        titulo: 'Fornecedor',
+                        valor: this.state.eventoFornecedor,
+                        tipo: 'select',
+                        options: this.state.fornecedoresOptions,
+                        onChange: async (valor) => { await this.setState({ eventoFornecedor: valor }); },
+                    },
+                    {
+                        titulo: 'Fornecedor Custeio',
+                        valor: this.state.eventoFornecedorCusteio,
+                        tipo: 'select',
+                        options: this.state.fornecedoresOptions,
+                        onChange: async (valor) => { await this.setState({ eventoFornecedorCusteio: valor }); },
+                    },
+                    {
+                        titulo: 'Descrição Padrão',
+                        valor: this.state.eventoDescricao,
+                        tipo: 'select',
+                        options: this.state.descricoesPadraoOptions,
+                        onChange: async (valor) => { await this.setState({ eventoDescricao: valor }); },
+                    },
+                    {
+                        titulo: 'Descrição',
+                        valor: this.state.eventoDescricao,
+                        tipo: 'text',
+                        onChange: async (valor) => {
+                            await this.setState({ eventoDescricao: valor });
+                        },
+                    }, {
                         half: true,
                         titulo: "Valor",
                         valor1: this.state.eventoMoeda,
                         tipo1: "select",
                         options1: this.state.moedasOptions,
-                        onChange1: async (valor) => { await this.setState({ eventoMoeda: valor }); await this.reloadItemEditMini() },
+                        onChange1: async (valor) => { await this.setState({ eventoMoeda: valor }); },
                         valor2: this.state.eventoValor,
                         tipo2: "text",
-                        onChange2: async (valor) => { await this.setState({ eventoValor: valor }); await this.reloadItemEditMini() },
-                        onBlur2: async (valor) => { await this.setState({ eventoValor: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); await this.reloadItemEditMini() },
+                        onChange2: async (valor) => { await this.setState({ eventoValor: valor }); },
+                        onBlur2: async (valor) => { await this.setState({ eventoValor: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); },
                     },
-
+                    {
+                        titulo: "VCP",
+                        valor: this.state.eventoVlrc,
+                        tipo: "money",
+                        onChange: async (valor) => { await this.setState({ eventoVlrc: valor }); },
+                        onBlur: async (valor) => { await this.setState({ eventoVlrc: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); },
+                    }
                 ]
             }
         })
@@ -889,33 +1103,35 @@ class AddOS extends Component {
     }
 
     salvarOS = async (validForm, reload = true) => {
+        this.setState({ ...util.cleanStates(this.state) });
+
         await this.setState({
             governmentTaxes: this.state.governmentTaxes ? this.state.governmentTaxes : 0,
             bankCharges: this.state.bankCharges ? this.state.bankCharges : 0,
             dadosFinais: [
-                { titulo: 'Descricao', valor: this.state.descricao },
-                { titulo: 'codigo', valor: this.state.codigo },
-                { titulo: 'Chave_Cliente', valor: this.state.cliente },
-                { titulo: 'chave_navio', valor: this.state.navio },
-                { titulo: 'Data_Abertura', valor: this.state.abertura },
-                { titulo: 'Data_Chegada', valor: this.state.chegada },
-                { titulo: 'chave_tipo_servico', valor: this.state.tipoServico },
-                { titulo: 'viagem', valor: this.state.viagem },
-                { titulo: 'porto', valor: this.state.porto },
-                { titulo: 'eta', valor: this.state.eta },
-                { titulo: 'atb', valor: this.state.atb },
-                { titulo: 'etb', valor: this.state.etb },
-                { titulo: 'governmentTaxes', valor: this.state.governmentTaxes },
-                { titulo: 'bankCharges', valor: this.state.bankCharges },
-                { titulo: 'Data_Saida', valor: this.state.data_saida },
-                { titulo: 'Data_Encerramento', valor: this.state.encerramento },
-                { titulo: 'Data_Faturamento', valor: this.state.faturamento },
-                { titulo: 'centro_custo', valor: this.state.centroCusto },
-                { titulo: 'ROE', valor: this.state.roe },
-                { titulo: 'Comentario_Voucher', valor: this.state.comentario },
-                { titulo: 'encerradoPor', valor: this.state.encerradoPor },
-                { titulo: 'faturadoPor', valor: this.state.faturadoPor },
-                { titulo: 'operador', valor: this.state.operador },
+                { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                { titulo: 'Código', valor: util.formatForLogs(this.state.codigo) },
+                { titulo: 'Cliente', valor: util.formatForLogs(this.state.cliente, 'options', '', '', this.state.pessoasOptions) },
+                { titulo: 'Navio', valor: util.formatForLogs(this.state.navio, 'options', '', '', this.state.naviosOptions) },
+                { titulo: 'Data de Abertura', valor: util.formatForLogs(this.state.abertura, 'date') },
+                { titulo: 'Data de Chegada', valor: util.formatForLogs(this.state.chegada, 'date') },
+                { titulo: 'Tipo de Servico', valor: util.formatForLogs(this.state.tipoServico, 'options', '', '', this.state.tiposServicosOptions) },
+                { titulo: 'Viagem', valor: util.formatForLogs(this.state.viagem) },
+                { titulo: 'Porto', valor: util.formatForLogs(this.state.porto, 'options', '', '', this.state.portosOptions) },
+                { titulo: 'ETA', valor: util.formatForLogs(this.state.eta, 'date') },
+                { titulo: 'ATB', valor: util.formatForLogs(this.state.atb, 'date') },
+                { titulo: 'ETB', valor: util.formatForLogs(this.state.etb, 'date') },
+                { titulo: 'Government Taxes', valor: util.formatForLogs(this.state.governmentTaxes, 'money') },
+                { titulo: 'Bank Charges', valor: util.formatForLogs(this.state.bankCharges, 'money') },
+                { titulo: 'Data de Saida', valor: util.formatForLogs(this.state.data_saida, 'date') },
+                { titulo: 'Data de Encerramento', valor: util.formatForLogs(this.state.encerramento, 'date') },
+                { titulo: 'Data de Faturamento', valor: util.formatForLogs(this.state.faturamento, 'date') },
+                { titulo: 'Centro de Custo', valor: util.formatForLogs(this.state.centroCusto, 'options', '', '', this.state.centrosCustosOptions) },
+                { titulo: 'ROE', valor: util.formatForLogs(this.state.roe) },
+                { titulo: 'Comentario Voucher', valor: util.formatForLogs(this.state.comentario) },
+                { titulo: 'Encerrado por', valor: util.formatForLogs(this.state.encerradoPor, 'options', '', '', this.state.operadoresOptions) },
+                { titulo: 'Faturado por', valor: util.formatForLogs(this.state.faturadoPor, 'options', '', '', this.state.operadoresOptions) },
+                { titulo: 'Operador', valor: util.formatForLogs(this.state.operador, 'options', '', '', this.state.operadoresOptions) },
             ],
             loading: true,
             bloqueado: true
@@ -1096,6 +1312,8 @@ class AddOS extends Component {
     }
 
     salvarConta = async () => {
+        this.setState({ ...util.cleanStates(this.state) });
+
         this.setState({ loading: true, contabiliza: false });
 
         let grupos = [];
@@ -1182,6 +1400,7 @@ class AddOS extends Component {
     }
 
     salvarCabecalho = async () => {
+        this.setState({ ...util.cleanStates(this.state) });
         await this.setState({ loading: true, cabecalhoModal: false });
 
         const cabecalho = `{"company": "${this.state.company.replaceAll('"', '\\"')}", "address": "${this.state.address.replaceAll('"', '\\"')}"}`
@@ -2256,7 +2475,7 @@ class AddOS extends Component {
                                 numFmt: "R$ #,##0.00"
                             }
                         }
-                            
+
                         if (totalRow.includes(row)) {
                             worksheet[cell].s = {
                                 font: {
@@ -2946,9 +3165,9 @@ class AddOS extends Component {
 
             await this.setState({
                 dadosFinaisDoc: [
-                    { titulo: 'descricao', valor: this.state.documentoDescricao },
-                    { titulo: 'tipo_doto', valor: this.state.documentoTipo },
-                    { titulo: 'caminho', valor: documentoDescricao.join('') }
+                    { titulo: 'Descricao', valor: util.formatForLogs(this.state.documentoDescricao) },
+                    { titulo: 'Tipo de Documento', valor: util.formatForLogs(this.state.documentoTipo, 'options', '', '', this.state.tiposDocumentosOptions) },
+                    { titulo: 'Caminho', valor: util.formatForLogs(documentoDescricao.join('')) }
                 ]
             })
 
@@ -3003,27 +3222,73 @@ class AddOS extends Component {
         }
     }
 
-    mudaValorEvento = async () => {
-        this.setState({
+    salvarEvento = async () => {
+        this.setState({ ...util.cleanStates(this.state) });
+
+        await this.setState({
             dadosFinaisSol: [
-                { titulo: 'Moeda', valor: this.state.eventoMoeda },
-                { titulo: 'valor', valor: this.state.eventoValor }
-            ]
+                { titulo: 'Data', valor: util.formatForLogs(this.state.eventoData, 'date') },
+                { titulo: 'Fornecedor', valor: util.formatForLogs(this.state.eventoFornecedor, 'options', '', '', this.state.fornecedoresOptions) },
+                { titulo: 'Taxa', valor: util.formatForLogs(this.state.eventoTaxa, 'options', '', '', this.state.taxasOptions) },
+                { titulo: 'Moeda', valor: util.formatForLogs(this.state.eventoMoeda, 'options', '', '', this.state.moedas, 'Chave', 'Sigla') },
+                { titulo: 'Valor', valor: util.formatForLogs(this.state.eventoValor, 'money', '0,00') },
+                { titulo: 'VCP', valor: util.formatForLogs(this.state.eventoVlrc, 'money', '0,00') },
+                { titulo: 'Repasse', valor: util.formatForLogs(this.state.eventoRepasse, 'bool') },
+                { titulo: 'Descrição', valor: util.formatForLogs(this.state.eventoDescricao) },
+                { titulo: 'Tipo', valor: util.formatForLogs(this.state.eventoTipo, 'options', '', '', this.state.tiposSubOptions) },
+                { titulo: 'Ordem', valor: util.formatForLogs(this.state.eventoOrdem) },
+                { titulo: 'Remarks', valor: util.formatForLogs(this.state.eventoRemarks) },
+                { titulo: 'Fornecedor Custeio', valor: util.formatForLogs(this.state.eventoFornecedorCusteio, 'options', '', '', this.state.fornecedoresOptions) }
+            ],
+            loading: true
         })
 
-        await apiEmployee.post(`updateSolicitacaoValor.php`, {
-            chave: this.state.eventoChave,
-            Moeda: this.state.eventoMoeda,
-            valor: this.state.eventoValor.replaceAll('.', '').replaceAll(',', '.'),
-        }).then(
-            async res => {
-                await loader.salvaLogs('os_servicos_itens', this.state.usuarioLogado.codigo, this.state.dadosIniciaisSol, this.state.dadosFinaisSol, this.state.eventoChave);
+        if (parseInt(this.state.eventoChave) === 0) {
+            await apiEmployee.post(`insertServicoItemBasico.php`, {
+                token: true,
+                values: `'${this.state.chave}', '${this.state.eventoData}', '${this.state.eventoFornecedor}', '${this.state.eventoTaxa}', '${this.state.eventoDescricao}', '${this.state.eventoTipo}', '${this.state.eventoFornecedorCusteio}', '${this.state.eventoRemarks}', '${this.state.eventoMoeda}', '${parseFloat(this.state.eventoValor == "" ? 0 : this.state.eventoValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.eventoVlrc == "" ? 0 : this.state.eventoVlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.eventoRepasse ? 1 : 0}'`,
+                chave_os: this.state.chave,
+                ordem: this.state.eventoOrdem.replaceAll(',', '.')
+            }).then(
+                async res => {
+                    await loader.salvaLogs('os_servicos_itens', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
 
-                await this.setState({ loading: true })
-                window.location.reload();
-            },
-            async err => await console.log(`Erro: ${err}`)
-        )
+                    window.location.reload();
+                },
+                async res => await console.log(`Erro: ${res.data}`)
+            )
+        } else {
+            await apiEmployee.post(`updateServicoItem.php`, {
+                token: true,
+                chave: this.state.eventoChave,
+                chave_os: this.state.chave,
+                data: this.state.eventoData,
+                Moeda: this.state.eventoMoeda,
+                valor: parseFloat(this.state.eventoValor == "" ? 0 : this.state.eventoValor.replaceAll('.', '').replaceAll(',', '.')),
+                valor1: parseFloat(this.state.eventoVlrc.replaceAll('.', '').replaceAll(',', '.')),
+                repasse: this.state.eventoRepasse ? 1 : 0,
+                fornecedor: this.state.eventoFornecedor,
+                taxa: this.state.eventoTaxa,
+                descricao: this.state.eventoDescricao,
+                ordem: this.state.eventoOrdem.replaceAll(',', '.'),
+                tipo_sub: this.state.eventoTipo,
+                Fornecedor_Custeio: this.state.eventoFornecedorCusteio,
+                remarks: this.state.eventoRemarks,
+            }).then(
+                async res => {
+                    if (res.data[0]) {
+                        await loader.salvaLogs('os_servicos_itens', this.state.usuarioLogado.codigo, this.state.dadosIniciaisSol, this.state.dadosFinaisSol, this.state.eventoChave, `EVENTO: ${this.state.descricao}`);
+
+                        window.location.reload();
+                    } else {
+                        await alert(`Erro ${JSON.stringify(res)}`)
+                    }
+                },
+                async res => await console.log(`Erro: ${res}`)
+            )
+        }
+
+        await this.setState({ modalItemAberto: false });
     }
 
     handleExportWithComponent = event => {
@@ -3073,6 +3338,19 @@ class AddOS extends Component {
 
         //const validFormContabiliza = validationsContabiliza.reduce((t, a) => t && a)
         const validFormContabiliza = true;
+
+        const validationsEvento = [];
+        validationsEvento.push(this.state.chave);
+        validationsEvento.push(this.state.eventoData);
+        validationsEvento.push(this.state.eventoTaxa || this.state.eventoTipo == 2 || this.state.eventoTipo == 3)
+        validationsEvento.push(this.state.eventoFornecedor || this.state.eventoTipo == 1 || this.state.eventoTipo == 2 || this.state.eventoTipo == 3)
+        validationsEvento.push(this.state.eventoFornecedorCusteio || this.state.eventoTipo != 1)
+        validationsEvento.push(this.state.eventoValor && !isNaN(this.state.eventoValor.replaceAll('.', '').replaceAll(',', '.')))
+        validationsEvento.push((!this.state.eventoRepasse && !this.state.eventoVlrc) || !isNaN(this.state.eventoVlrc.replaceAll('.', '').replaceAll(',', '.')) && (!this.state.eventoRepasse || this.state.eventoVlrc == this.state.eventoValor))
+        validationsEvento.push(this.state.eventoDescricao)
+        validationsEvento.push(this.state.eventoOrdem && this.state.eventoOrdem.replaceAll(',', '.') == parseFloat(this.state.eventoOrdem.replaceAll(',', '.')))
+
+        const validFormEvento = validationsEvento.reduce((a, b) => a && b);
 
         return (
             <div className='allContent'>
@@ -3734,7 +4012,7 @@ class AddOS extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.darfValor[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfValor: this.state.darfValor.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfValor: this.state.darfValor.map((d, index) => index == this.state.paginaContabiliza || !d ? Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' : d) }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfValor[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfValor: this.state.darfValor.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfValor: this.state.darfValor.map((d, index) => index == this.state.paginaContabiliza || !d ? Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' : d) }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Multa</label>
@@ -3745,7 +4023,7 @@ class AddOS extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.darfMulta[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfMulta: this.state.darfMulta.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfMulta: this.state.darfMulta.map((d, index) => index == this.state.paginaContabiliza || !d ? Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' : d) }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfMulta[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfMulta: this.state.darfMulta.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfMulta: this.state.darfMulta.map((d, index) => index == this.state.paginaContabiliza || !d ? Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' : d) }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Juros</label>
@@ -3756,7 +4034,7 @@ class AddOS extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.darfJuros[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfJuros: this.state.darfJuros.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfJuros: this.state.darfJuros.map((d, index) => index == this.state.paginaContabiliza || !d ? Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' : d) }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfJuros[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfJuros: this.state.darfJuros.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfJuros: this.state.darfJuros.map((d, index) => index == this.state.paginaContabiliza || !d ? Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' : d) }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Valor de Pagamento</label>
@@ -3767,7 +4045,7 @@ class AddOS extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.darfPagamento[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfPagamento: this.state.darfPagamento.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfPagamento: this.state.darfPagamento.map((d, index) => index == this.state.paginaContabiliza || !d ? Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' : d) }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfPagamento[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfPagamento: this.state.darfPagamento.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfPagamento: this.state.darfPagamento.map((d, index) => index == this.state.paginaContabiliza || !d ? Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' : d) }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Outros Valores</label>
@@ -3778,7 +4056,7 @@ class AddOS extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.darfOutros[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfOutros: this.state.darfOutros.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfOutros: this.state.darfOutros.map((d, index) => index == this.state.paginaContabiliza || !d ? Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' : d) }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfOutros[this.state.paginaContabiliza]} onChange={async e => { this.setState({ darfOutros: this.state.darfOutros.map((d, index) => index == this.state.paginaContabiliza ? e.currentTarget.value : d) }) }} onBlur={async e => { this.setState({ darfOutros: this.state.darfOutros.map((d, index) => index == this.state.paginaContabiliza || !d ? Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' : d) }) }} />
                                                                         </div>
                                                                     </>
                                                                 }
@@ -3826,20 +4104,15 @@ class AddOS extends Component {
                             closeModal={() => { this.setState({ modalAberto: false }) }}
                         />
 
-                        <ModalItem
+                        <ModalEventoEdit
                             closeModal={() => { this.setState({ modalItemAberto: false }) }}
-                            itens={this.state.itemInfo}
                             nome={this.state.itemNome}
-                            chave={this.state.itemChave}
                             modalAberto={this.state.modalItemAberto}
                             itemPermissao={this.state.itemPermissao}
-                            itemAdd={this.state.itemAdd}
-                            itemEdit={this.state.itemEdit}
-                            itemDelete={this.state.itemDelete}
                             acessosPermissoes={this.state.acessosPermissoes}
-                            evento
-                            itemFinanceiro={this.state.itemFinanceiro}
-                            itemEditMini={this.state.itemEditMini}
+                            itemEdit={this.state.itemEdit}
+                            onSubmit={this.salvarEvento}
+                            valid={validFormEvento}
                         />
 
                         <section>
@@ -4476,15 +4749,7 @@ class AddOS extends Component {
                                                                             <th className='text-center'>
                                                                                 <span>
                                                                                     {!this.state.eventos[1] &&
-
-                                                                                        <Link to=
-                                                                                            {{
-                                                                                                pathname: `/ordensservico/addevento/0`,
-                                                                                                state: { evento: {}, os: { ...this.state.os, addOS: true } }
-                                                                                            }}
-                                                                                        >
-                                                                                            <FontAwesomeIcon icon={faPlus} />
-                                                                                        </Link>
+                                                                                        <FontAwesomeIcon icon={faPlus} onClick={() => this.setItemEdit()} />
                                                                                     }
                                                                                 </span>
                                                                             </th>
@@ -4493,50 +4758,10 @@ class AddOS extends Component {
                                                                             <>
                                                                                 {window.innerWidth < 500 &&
                                                                                     <tr
-                                                                                        onClick={() => {
+                                                                                        onClick={async () => {
+                                                                                            await this.setItemEdit(feed);
                                                                                             this.setState({
-                                                                                                eventoChave: feed.chave,
-                                                                                                eventoMoeda: feed.Moeda,
-                                                                                                eventoValor: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor),
-                                                                                                dadosIniciaisSol: [
-                                                                                                    { titulo: 'Moeda', valor: feed.Moeda },
-                                                                                                    { titulo: 'valor', valor: feed.valor },
-                                                                                                ],
-                                                                                                modalItemAberto: true,
-                                                                                                itemInfo: [{ titulo: 'Chave', valor: feed.chave }, { titulo: 'Tipo', valor: this.state.tiposServicosItens[feed.tipo_sub] }, { titulo: 'Ordem', valor: feed.ordem.replaceAll(',', '.') }, { titulo: 'Fornecedor', valor: feed.fornecedorNome }, { titulo: "Fornecedor Custeio", valor: feed.fornecedorCusteioNome }],
-                                                                                                itemNome: feed.descricao,
-                                                                                                itemChave: feed.chave,
-                                                                                                itemPermissao: "SERVICOS_ITENS",
-                                                                                                itemAdd: {
-                                                                                                    pathname: `/ordensservico/addevento/0`,
-                                                                                                    state: { evento: { ...feed }, os: { ...this.state.os, addOS: true } }
-                                                                                                },
-                                                                                                itemEdit: {
-                                                                                                    pathname: `/ordensservico/addevento/${feed.chave}`,
-                                                                                                    state: { evento: { ...feed }, os: { ... this.state.os, addOS: true } }
-                                                                                                },
-                                                                                                itemFinanceiro: {
-                                                                                                    pathname: `/ordensservico/addeventofinanceiro/${feed.chave}`,
-                                                                                                    state: { evento: { ...feed }, os: { ...this.state.os, addOS: true } }
-                                                                                                },
-                                                                                                itemEditMini: feed.repasse == 0 ? {
-                                                                                                    onSubmit: async () => await this.mudaValorEvento(),
-                                                                                                    valores: [
-                                                                                                        {
-                                                                                                            half: true,
-                                                                                                            titulo: "Valor",
-                                                                                                            valor1: feed.Moeda,
-                                                                                                            tipo1: "select",
-                                                                                                            options1: this.state.moedasOptions,
-                                                                                                            onChange1: async (valor) => { await this.setState({ eventoMoeda: valor }); await this.reloadItemEditMini() },
-                                                                                                            valor2: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor),
-                                                                                                            tipo2: "text",
-                                                                                                            onChange2: async (valor) => { await this.setState({ eventoValor: valor }); await this.reloadItemEditMini() },
-                                                                                                            onBlur2: async (valor) => { await this.setState({ eventoValor: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); await this.reloadItemEditMini() },
-                                                                                                        }
-                                                                                                    ]
-                                                                                                } : false,
-                                                                                                itemDelete: this.deleteServicoItem
+
                                                                                             })
                                                                                         }}
                                                                                         className={index % 2 == 0 ? "parTr" : "imparTr"}>
@@ -4598,51 +4823,8 @@ class AddOS extends Component {
                                                                                 }
                                                                                 {window.innerWidth >= 500 &&
                                                                                     <tr
-                                                                                        onClick={() => {
-                                                                                            this.setState({
-                                                                                                eventoChave: feed.chave,
-                                                                                                eventoMoeda: feed.Moeda,
-                                                                                                eventoValor: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor),
-                                                                                                dadosIniciaisSol: [
-                                                                                                    { titulo: 'Moeda', valor: feed.Moeda },
-                                                                                                    { titulo: 'valor', valor: feed.valor },
-                                                                                                ],
-                                                                                                modalItemAberto: true,
-                                                                                                itemInfo: [{ titulo: 'Chave', valor: feed.chave }, { titulo: 'Tipo', valor: this.state.tiposServicosItens[feed.tipo_sub] }, { titulo: 'Ordem', valor: feed.ordem.replaceAll(',', '.') }, { titulo: 'Fornecedor', valor: feed.fornecedorNome }, { titulo: "Fornecedor Custeio", valor: feed.fornecedorCusteioNome }],
-                                                                                                itemNome: feed.descricao,
-                                                                                                itemChave: feed.chave,
-                                                                                                itemPermissao: "SERVICOS_ITENS",
-                                                                                                itemAdd: {
-                                                                                                    pathname: `/ordensservico/addevento/0`,
-                                                                                                    state: { evento: { ...feed }, os: { ...this.state.os, addOS: true } }
-                                                                                                },
-                                                                                                itemEdit: {
-                                                                                                    pathname: `/ordensservico/addevento/${feed.chave}`,
-                                                                                                    state: { evento: { ...feed }, os: { ... this.state.os, addOS: true } }
-                                                                                                },
-                                                                                                itemFinanceiro: {
-                                                                                                    pathname: `/ordensservico/addeventofinanceiro/${feed.chave}`,
-                                                                                                    state: { evento: { ...feed }, os: { ...this.state.os, addOS: true } }
-                                                                                                },
-                                                                                                itemEditMini: feed.repasse == 0 ? {
-                                                                                                    onSubmit: async () => await this.mudaValorEvento(),
-                                                                                                    valores: [
-                                                                                                        {
-                                                                                                            half: true,
-                                                                                                            titulo: "Valor",
-                                                                                                            valor1: feed.Moeda,
-                                                                                                            tipo1: "select",
-                                                                                                            options1: this.state.moedasOptions,
-                                                                                                            onChange1: async (valor) => { await this.setState({ eventoMoeda: valor }); await this.reloadItemEditMini() },
-                                                                                                            valor2: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor),
-                                                                                                            tipo2: "text",
-                                                                                                            onChange2: async (valor) => { await this.setState({ eventoValor: valor }); await this.reloadItemEditMini() },
-                                                                                                            onBlur2: async (valor) => { await this.setState({ eventoValor: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); await this.reloadItemEditMini() },
-                                                                                                        }
-                                                                                                    ]
-                                                                                                } : false,
-                                                                                                itemDelete: this.deleteServicoItem
-                                                                                            })
+                                                                                        onClick={async () => {
+                                                                                            await this.setItemEdit(feed);
                                                                                         }}
                                                                                         className={index % 2 == 0 ? "parTr" : "imparTr"}>
                                                                                         <td className="text-center">

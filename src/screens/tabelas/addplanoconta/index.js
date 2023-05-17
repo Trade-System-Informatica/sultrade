@@ -41,6 +41,20 @@ const estadoInicial = {
 
     codigoMask: '9.',
     codigoLimpo: '',
+
+    indicadoresOptions: [
+        {label: 'Analítico', value: 'A'},
+        {label: 'Sintético', value: 'S'},
+    ],
+
+    gruposOptions: [
+        {label: 'Contas de Ativo', value: '00'},
+        {label: 'Passivo Circulante e Não Circulante', value: '01'},
+        {label: 'Patrimônio Líquido', value: '02'},
+        {label: 'Contas de Resultado', value: '03'},
+        {label: 'Contas de Compensação', value: '04'},
+        {label: 'Outra', value: '05'}
+    ]
 }
 
 class AddPlanoConta extends Component {
@@ -69,17 +83,6 @@ class AddPlanoConta extends Component {
                 grupo: this.state.planoConta.grupo
             })
 
-            await this.setState({
-                dadosIniciais: [
-                    {titulo: 'Codigo', valor: this.state.codigoLimpo},
-                    {titulo: 'Codigo_Red', valor: this.state.codigoReduzido},
-                    {titulo: 'Nivel', valor: this.state.nivel},
-                    {titulo: 'Indicador', valor: this.state.indicador},
-                    {titulo: 'Descricao', valor: this.state.descricao},
-                    {titulo: 'Conta_Inativa', valor: this.state.contaInativa},
-                    {titulo: 'grupo', valor: this.state.grupo},
-                ]
-            })
         } else {
             if (this.props.location.state && this.props.location.state.planoPai) {
                 await this.setState({ planoConta: this.props.location.state.planoPai })
@@ -93,6 +96,20 @@ class AddPlanoConta extends Component {
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
         await this.testaAcesso()
+
+        if (this.state.chave != 0 ) {
+            await this.setState({
+                dadosIniciais: [
+                    { titulo: 'Código', valor: util.formatForLogs(this.state.codigoLimpo) },
+                    { titulo: 'Código Red', valor: util.formatForLogs(this.state.codigoReduzido) },
+                    { titulo: 'Nível', valor: util.formatForLogs(this.state.nivel) },
+                    { titulo: 'Indicador', valor: util.formatForLogs(this.state.indicador, 'options', '', '', this.state.indicadoresOptions) },
+                    { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                    { titulo: 'Conta Inativa', valor: util.formatForLogs(this.state.contaInativa, 'bool') },
+                    { titulo: 'Grupo', valor: util.formatForLogs(this.state.grupo, 'options', '', '', this.state.gruposOptions) },
+                ]
+            })
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "PLANOS_CONTAS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "PLANOS_CONTAS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -298,6 +315,8 @@ class AddPlanoConta extends Component {
     }
 
     salvarPlanoConta = async (validForm) => {
+        this.setState({...util.cleanStates(this.state)});
+        
         const codigo = this.state.codigo.split('');
         if (codigo[codigo.length-1] == "." || codigo[codigo.length-1] == "_") {
             codigo.pop();
@@ -320,13 +339,13 @@ class AddPlanoConta extends Component {
 
         await this.setState({
             dadosFinais: [
-                {titulo: 'Codigo', valor: this.state.codigoLimpo},
-                {titulo: 'Codigo_Red', valor: this.state.codigoReduzido},
-                {titulo: 'Nivel', valor: this.state.nivel},
-                {titulo: 'Indicador', valor: this.state.indicador},
-                {titulo: 'Descricao', valor: this.state.descricao},
-                {titulo: 'Conta_Inativa', valor: this.state.contaInativa},
-                {titulo: 'grupo', valor: this.state.grupo},
+                { titulo: 'Código', valor: util.formatForLogs(this.state.codigoLimpo) },
+                { titulo: 'Código Red', valor: util.formatForLogs(this.state.codigoReduzido) },
+                { titulo: 'Nível', valor: util.formatForLogs(this.state.nivel) },
+                { titulo: 'Indicador', valor: util.formatForLogs(this.state.indicador, 'options', '', '', this.state.indicadoresOptions) },
+                { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                { titulo: 'Conta Inativa', valor: util.formatForLogs(this.state.contaInativa, 'bool') },
+                { titulo: 'Grupo', valor: util.formatForLogs(this.state.grupo, 'options', '', '', this.state.gruposOptions) },
             ],
             loading: true
         })
@@ -544,8 +563,9 @@ class AddPlanoConta extends Component {
                                                 </div>
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                     <select className="form-control" value={this.state.indicador} onChange={(e) => { this.setState({ indicador: e.currentTarget.value }) }}>
-                                                        <option value='A'>Analítico</option>
-                                                        <option value='S'>Sintético</option>
+                                                        {this.state.indicadoresOptions.map((i) => (
+                                                            <option value={i.value}>{i.label}</option>
+                                                        ))}
                                                     </select>
                                                 </div>
                                                 <div className="col-1"></div>
@@ -566,12 +586,9 @@ class AddPlanoConta extends Component {
                                                 </div>
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                     <select className="form-control" value={this.state.grupo} onChange={(e) => { this.setState({ grupo: e.currentTarget.value }) }}>
-                                                        <option value='00'>Contas de Ativo</option>
-                                                        <option value='01'>Passivo Circulante e Não Circulante</option>
-                                                        <option value='02'>Patrimônio Líquido</option>
-                                                        <option value='03'>Contas de Resultado</option>
-                                                        <option value='04'>Contas de Compensação</option>
-                                                        <option value='05'>Outra</option>
+                                                        {this.state.gruposOptions.map((g) => (
+                                                            <option value={g.value}>{g.label}</option>
+                                                        ))}
                                                     </select>
                                                 </div>
                                                 <div className="col-1"></div>

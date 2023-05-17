@@ -71,14 +71,6 @@ class AddPessoaContato extends Component {
                 campo1: this.state.contato.Campo1,
                 campo2: this.state.contato.Campo2,
             })
-
-            await this.setState({
-                dadosIniciais: [
-                    { titulo: 'Tipo', valor: this.state.tipo },
-                    { titulo: 'Campo1', valor: this.state.campo1 },
-                    { titulo: 'Campo2', valor: this.state.campo2 },
-                ]
-            })
         }
         this.setState({ chave_pessoa: this.props.match.params.id })
         this.carregaTipos();
@@ -87,6 +79,16 @@ class AddPessoaContato extends Component {
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
         await this.testaAcesso()
+
+        if (this.state.chave != 0) {
+            await this.setState({
+                dadosIniciais: [
+                    { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo) },
+                    { titulo: 'Descrição', valor: util.formatForLogs(this.state.campo1) },
+                    { titulo: 'Complementar', valor: util.formatForLogs(this.state.campo2) },
+                ]
+            });
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "PESSOAS_CONTATOS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "PESSOAS_CONTATOS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -159,14 +161,14 @@ class AddPessoaContato extends Component {
     }
 
     salvarContato = async (validForm) => {
-        //this.getMaxNews()
+        this.setState({ ...util.cleanStates(this.state) })
         this.setState({ bloqueado: true })
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'Tipo', valor: this.state.tipo },
-                { titulo: 'Campo1', valor: this.state.campo1 },
-                { titulo: 'Campo2', valor: this.state.campo2 },
+                { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo) },
+                { titulo: 'Descrição', valor: util.formatForLogs(this.state.campo1) },
+                { titulo: 'Complementar', valor: util.formatForLogs(this.state.campo2) },
             ],
             loading: true
         })

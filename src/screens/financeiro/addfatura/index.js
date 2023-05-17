@@ -41,6 +41,13 @@ const estadoInicial = {
     acessos: [],
     permissoes: [],
     acessosPermissoes: [],
+
+    atividadesOptions: [
+        { label: '', value: '' },
+        { label: 'Agenciamento Marítimo', value: '1006'},
+        { label: 'Outros servicos de transporte de natureza municipal', value: '1602'},
+        { label: 'Datilografia, digitação, estenografia, expediente', value: '1702' },
+    ]
 }
 
 class AddFatura extends Component {
@@ -75,22 +82,25 @@ class AddFatura extends Component {
                 discriminacaoServico: this.state.fatura.discriminacaoservico,
                 tributada: this.state.fatura.Cobranca && this.state.fatura.Cobranca != '0' ? true : false
             })
+        }
+        await this.loadAll();
 
+        if (this.state.chave != 0) {
             await this.setState({
                 dadosIniciais: [
-                    { titulo: 'Emissao', valor: this.state.emissao },
-                    { titulo: 'Vencto', valor: this.state.vencimento },
-                    { titulo: 'Praca_Pagto', valor: this.state.praca },
-                    { titulo: 'atividade', valor: this.state.atividade },
-                    { titulo: 'Cliente', valor: this.state.cliente },
-                    { titulo: 'Valor', valor: parseFloat(this.state.total.replaceAll('.', '').replaceAll('.', '')) },
-                    { titulo: 'Obs', valor: this.state.observacoes },
-                    { titulo: 'Cobranca', valor: this.state.tributada },
-
+                    { titulo: 'Emissao', valor: util.formatForLogs(this.state.emissao, 'date') },
+                    { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') },
+                    { titulo: 'Praça Pagamento', valor: util.formatForLogs(this.state.praca) },
+                    { titulo: 'Atividade', valor: util.formatForLogs(this.state.atividade, 'options', '', '', this.state.atividadesOptions) },
+                    { titulo: 'Cliente', valor: util.formatForLogs(this.state.cliente, 'options', '', '', this.state.pessoasOptions) },
+                    { titulo: 'Valor', valor: util.formatForLogs(this.state.total, 'money') },
+                    { titulo: 'Obs', valor: util.formatForLogs(this.state.observacoes) },
+                    { titulo: 'Formulário', valor: util.formatForLogs(this.state.formulario) },
+                    { titulo: 'Cobranca', valor: util.formatForLogs(this.state.tributada, 'bool') },
+                    { titulo: 'Discriminacao de Servico', valor: util.formatForLogs(this.state.discriminacaoServico) }
                 ]
             })
         }
-        await this.loadAll();
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "FATURAS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "FATURAS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -141,21 +151,22 @@ class AddFatura extends Component {
 
 
     salvarFatura = async (validForm) => {
+        this.setState({ ...util.cleanStates(this.state) })
         this.setState({ bloqueado: true });
 
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'Emissao', valor: this.state.emissao },
-                { titulo: 'Vencto', valor: this.state.vencimento },
-                { titulo: 'Praca_Pagto', valor: this.state.praca },
-                { titulo: 'atividade', valor: this.state.atividade },
-                { titulo: 'Cliente', valor: this.state.cliente },
-                { titulo: 'Valor', valor: parseFloat(this.state.total.replaceAll('.', '').replaceAll('.', '')) },
-                { titulo: 'Obs', valor: this.state.observacoes },
-                { titulo: 'Formulario', valor: this.state.formulario },
-                { titulo: 'Cobranca', valor: this.state.tributada },
-                { titulo: 'discriminacaoservico', valor: this.state.discriminacaoServico }
+                { titulo: 'Emissao', valor: util.formatForLogs(this.state.emissao, 'date') },
+                { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') },
+                { titulo: 'Praça Pagamento', valor: util.formatForLogs(this.state.praca) },
+                { titulo: 'Atividade', valor: util.formatForLogs(this.state.atividade, 'options', '', '', this.state.atividadesOptions) },
+                { titulo: 'Cliente', valor: util.formatForLogs(this.state.cliente, 'options', '', '', this.state.pessoasOptions) },
+                { titulo: 'Valor', valor: util.formatForLogs(this.state.total, 'money') },
+                { titulo: 'Obs', valor: util.formatForLogs(this.state.observacoes) },
+                { titulo: 'Formulário', valor: util.formatForLogs(this.state.formulario) },
+                { titulo: 'Cobranca', valor: util.formatForLogs(this.state.tributada, 'bool') },
+                { titulo: 'Discriminacao de Servico', valor: util.formatForLogs(this.state.discriminacaoServico) }
             ],
             loading: true
         })
@@ -362,10 +373,9 @@ class AddFatura extends Component {
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <select className='form-control' value={this.state.atividade} onChange={(e) => { this.setState({ atividade: e.currentTarget.value }) }} >
-                                                                <option value=""></option>
-                                                                <option value="1006">Agenciamento Marítimo</option>
-                                                                <option value="1602">Outros servicos de transporte de natureza municipal</option>
-                                                                <option value="1702">Datilografia, digitação, estenografia, expediente</option>
+                                                                {this.state.atividadesOptions.map((a) => (
+                                                                    <option value={a.value}>{a.label}</option>
+                                                                ))}
                                                             </select>
                                                         </div>
                                                         <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>

@@ -31,7 +31,7 @@ const estadoInicial = {
 
     dadosIniciais: [],
     dadosFinais: [],
-    
+
     acessos: [],
     permissoes: [],
     acessosPermissoes: [],
@@ -66,19 +66,22 @@ class AddMoeda extends Component {
                 plural: this.state.moeda.plural,
                 cotacao: new Intl.NumberFormat('pt-BR').format(this.state.moeda.Ultima_Cotacao),
             })
-
-            await this.setState({
-                dadosIniciais: [
-                    {titulo: 'Descricao', valor: this.state.descricao},
-                    {titulo: 'Sigla', valor: this.state.sigla},
-                    {titulo: 'plural', valor: this.state.plural},
-                    {titulo: 'cotacao', valor: this.state.cotacao}
-                ]
-            })
         }
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
         await this.testaAcesso()
+
+        if (this.state.chave != 0) {
+            await this.setState({
+                dadosIniciais: [
+                    { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                    { titulo: 'Sigla', valor: util.formatForLogs(this.state.sigla) },
+                    { titulo: 'Plural', valor: util.formatForLogs(this.state.plural) },
+                    { titulo: 'Cotação', valor: util.formatForLogs(this.state.cotacao, 'money') }
+                ]
+            })
+
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "MOEDAS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "MOEDAS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -137,10 +140,10 @@ class AddMoeda extends Component {
     salvarMoeda = async (validForm) => {
         await this.setState({
             dadosFinais: [
-                {titulo: 'Descricao', valor: this.state.descricao},
-                {titulo: 'Sigla', valor: this.state.sigla},
-                {titulo: 'plural', valor: this.state.plural},
-                {titulo: 'cotacao', valor: this.state.cotacao}
+                { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                { titulo: 'Sigla', valor: util.formatForLogs(this.state.sigla) },
+                { titulo: 'Plural', valor: util.formatForLogs(this.state.plural) },
+                { titulo: 'Cotação', valor: util.formatForLogs(this.state.cotacao, 'money') }
             ],
             loading: true
         })
@@ -149,7 +152,7 @@ class AddMoeda extends Component {
         if (parseInt(this.state.chave) === 0 && validForm) {
             await apiEmployee.post(`insertMoeda.php`, {
                 token: true,
-                values: `'${this.state.descricao}', '${this.state.sigla}', '${this.state.plural}', '${parseFloat(this.state.cotacao.replaceAll('.','').replaceAll(',', '.'))}'`,
+                values: `'${this.state.descricao}', '${this.state.sigla}', '${this.state.plural}', '${parseFloat(this.state.cotacao.replaceAll('.', '').replaceAll(',', '.'))}'`,
                 values2: `'${this.state.data}', '${this.state.cotacao}'`,
                 search: `Descricao = '${this.state.descricao}' AND Sigla = '${this.state.sigla}' AND plural = '${this.state.plural}' AND Ultima_Cotacao = '${this.state.cotacao}'`
             }).then(
@@ -172,13 +175,13 @@ class AddMoeda extends Component {
                 Descricao: this.state.descricao,
                 Sigla: this.state.sigla,
                 plural: this.state.plural,
-                Ultima_Cotacao: parseFloat(this.state.cotacao.replaceAll('.','').replaceAll(',', '.')),
+                Ultima_Cotacao: parseFloat(this.state.cotacao.replaceAll('.', '').replaceAll(',', '.')),
                 data: this.state.data
             }).then(
                 async res => {
                     if (res.data === true) {
                         await loader.salvaLogs('moedas', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `MOEDA: ${this.state.descricao}`);
-                        
+
                         await this.setState({ loading: false, bloqueado: false })
                     } else if (res.data && res.data.includes('Duplicate')) {
                         await alert("Não foi possivel alterar a moeda, o valor já foi alterado na data de hoje")
@@ -237,7 +240,7 @@ class AddMoeda extends Component {
         const validations = []
         validations.push(this.state.descricao)
         validations.push(this.state.plural)
-        validations.push(this.state.cotacao && this.state.cotacao.replaceAll('.','').replaceAll(',','.') == parseFloat(this.state.cotacao.replaceAll('.','').replaceAll(',','.')))
+        validations.push(this.state.cotacao && this.state.cotacao.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.cotacao.replaceAll('.', '').replaceAll(',', '.')))
         validations.push(this.state.sigla)
         validations.push(!this.state.bloqueado)
 
@@ -254,10 +257,10 @@ class AddMoeda extends Component {
                 }
 
                 <section>
-                    <Header voltarMoedas titulo="Moedas" chave={this.state.chave != 0 ? this.state.chave : ''}/>
+                    <Header voltarMoedas titulo="Moedas" chave={this.state.chave != 0 ? this.state.chave : ''} />
                 </section>
 
-                {this.state.chave !=0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                     <div className="logButton">
                         <button onClick={() => this.openLogs()}>Logs</button>
                     </div>
@@ -302,7 +305,7 @@ class AddMoeda extends Component {
                                                 }
                                                 {this.state.chave != 0 &&
                                                     <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10 ">
-                                                        <Field className="form-control" style={{backgroundColor: '#dddddd' }} type="text" disabled value={this.state.chave} />
+                                                        <Field className="form-control" style={{ backgroundColor: '#dddddd' }} type="text" disabled value={this.state.chave} />
                                                     </div>
                                                 }
                                                 {this.state.chave != 0 &&
@@ -349,12 +352,12 @@ class AddMoeda extends Component {
                                                     {!this.state.cotacao &&
                                                         <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
                                                     }
-                                                    {this.state.cotacao && !this.state.cotacao.replaceAll('.','').replaceAll(',','.') == parseFloat(this.state.cotacao.replaceAll('.','').replaceAll(',','.')) &&
+                                                    {this.state.cotacao && !this.state.cotacao.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.cotacao.replaceAll('.', '').replaceAll(',', '.')) &&
                                                         <FontAwesomeIcon title='Apenas numeros são permitidos' icon={faExclamationTriangle} />
                                                     }
                                                 </div>
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                    <Field className="form-control text-right" type="text" value={this.state.cotacao} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ cotacao: e.currentTarget.value }) }} onBlur={async e => { this.setState({cotacao: Number(e.currentTarget.value.replaceAll('.','').replaceAll(',','.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.','').replaceAll(',','.')) : ''})}} />
+                                                    <Field className="form-control text-right" type="text" value={this.state.cotacao} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ cotacao: e.currentTarget.value }) }} onBlur={async e => { this.setState({ cotacao: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                 </div>
                                             </div>
 

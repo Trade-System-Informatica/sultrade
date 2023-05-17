@@ -123,6 +123,7 @@ class AddContaCorrente extends Component {
     }
 
     salvarConta = async (validForm) => {
+        this.setState({ ...util.cleanStates(this.state) })
         this.setState({ bloqueado: true });
 
         await this.setState({
@@ -357,7 +358,7 @@ class AddContaCorrente extends Component {
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Field className="form-control" type="text" value={this.state.banco} onChange={async e => { this.setState({ banco: e.currentTarget.value }) }} />
                                                         </div>
-                                                        
+
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Agência</label>
                                                         </div>

@@ -58,17 +58,19 @@ class AddHistorico extends Component {
             await this.setState({
                 descricao: this.state.historico.Descricao,
             })
-
-            this.setState({
-                dadosIniciais: [
-                    {titulo: 'Descricao', valor: this.state.descricao}
-                ]
-            })
         }
 
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
         await this.testaAcesso()
+
+        if (this.state.chave != 0) {
+            this.setState({
+                dadosIniciais: [
+                    { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) }
+                ]
+            })
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "HISTORICOS_PADRAO" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "HISTORICOS_PADRAO" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -126,12 +128,12 @@ class AddHistorico extends Component {
 
 
     salvarHistorico = async (validForm) => {
-        //this.getMaxNews()
+        this.setState({...util.cleanStates(this.state)})
         this.setState({bloqueado: true})
 
         await this.setState({
             dadosFinais: [
-                {titulo: 'Descricao', valor: this.state.descricao}
+                { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) }
             ],
             loading: true
         })

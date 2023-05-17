@@ -94,7 +94,7 @@ class AddPessoaEndereco extends Component {
         ...estadoInicial,
         usuarioLogado: this.props.user
     }
-    
+
     componentDidMount = async () => {
         window.scrollTo(0, 0)
         var ed = await this.props.match.params.ed
@@ -124,21 +124,6 @@ class AddPessoaEndereco extends Component {
                 tipoNome: this.state.tipos[this.state.tipo].label
             })
 
-            await this.setState({
-                dadosIniciais: [
-                    {titulo: 'Tipo', valor: this.state.tipo},
-                    {titulo: 'Endereco', valor: this.state.endereco},
-                    {titulo: 'Numero', valor: this.state.numero},
-                    {titulo: 'Complemento', valor: this.state.complemento},
-                    {titulo: 'Cidade', valor: this.state.cidade},
-                    {titulo: 'Cep', valor: this.state.cepLimpo},
-                    {titulo: 'UF', valor: this.state.uf},
-                    {titulo: 'bairro', valor: this.state.bairro},
-                    {titulo: 'Cidade_Descricao', valor: this.state.cidade_descricao},
-                    {titulo: 'pais', valor: this.state.pais},
-                ]
-            })
-            
         } else {
             this.getCPF();
         }
@@ -147,6 +132,23 @@ class AddPessoaEndereco extends Component {
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
         await this.testaAcesso()
+
+        if (this.state.chave != 0) {
+            await this.setState({
+                dadosIniciais: [
+                    { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tipos) },
+                    { titulo: 'Endereço', valor: util.formatForLogs(this.state.endereco) },
+                    { titulo: 'Número', valor: util.formatForLogs(this.state.numero) },
+                    { titulo: 'Complemento', valor: util.formatForLogs(this.state.complemento) },
+                    { titulo: 'Cidade', valor: util.formatForLogs(this.state.cidade, 'options', '', '', this.state.cidadesOptions) },
+                    { titulo: 'Cep', valor: util.formatForLogs(this.state.cepLimpo) },
+                    { titulo: 'UF', valor: util.formatForLogs(this.state.uf, 'options', '', '', this.state.estadosOptions) },
+                    { titulo: 'Bairro', valor: util.formatForLogs(this.state.bairro) },
+                    { titulo: 'Cidade Descrição', valor: util.formatForLogs(this.state.cidade_descricao) },
+                    { titulo: 'País', valor: util.formatForLogs(this.state.pais, 'options', '', '', this.state.paisesOptions) },
+                ]
+            })
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "PESSOAS_ENDERECOS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "PESSOAS_ENDERECOS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -214,9 +216,9 @@ class AddPessoaEndereco extends Component {
         }).then(
             async res => {
                 if (!res.data[0] || !res.data[0].cpf) {
-                    this.setState({uf: 81, ufNome: "EXTERIOR"});
+                    this.setState({ uf: 81, ufNome: "EXTERIOR" });
                 }
-            }, 
+            },
             async err => {
                 console.log(err)
             }
@@ -259,20 +261,21 @@ class AddPessoaEndereco extends Component {
     }
 
     salvarEndereco = async (validForm) => {
+        this.setState({ ...util.cleanStates(this.state) })
         this.setState({ bloqueado: true });
 
         await this.setState({
             dadosFinais: [
-                {titulo: 'Tipo', valor: this.state.tipo},
-                {titulo: 'Endereco', valor: this.state.endereco},
-                {titulo: 'Numero', valor: this.state.numero},
-                {titulo: 'Complemento', valor: this.state.complemento},
-                {titulo: 'Cidade', valor: this.state.cidade},
-                {titulo: 'Cep', valor: this.state.cepLimpo},
-                {titulo: 'UF', valor: this.state.uf},
-                {titulo: 'bairro', valor: this.state.bairro},
-                {titulo: 'Cidade_Descricao', valor: this.state.cidade_descricao},
-                {titulo: 'pais', valor: this.state.pais},
+                { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tipos) },
+                { titulo: 'Endereço', valor: util.formatForLogs(this.state.endereco) },
+                { titulo: 'Número', valor: util.formatForLogs(this.state.numero) },
+                { titulo: 'Complemento', valor: util.formatForLogs(this.state.complemento) },
+                { titulo: 'Cidade', valor: util.formatForLogs(this.state.cidade, 'options', '', '', this.state.cidadesOptions) },
+                { titulo: 'Cep', valor: util.formatForLogs(this.state.cepLimpo) },
+                { titulo: 'UF', valor: util.formatForLogs(this.state.uf, 'options', '', '', this.state.estadosOptions) },
+                { titulo: 'Bairro', valor: util.formatForLogs(this.state.bairro) },
+                { titulo: 'Cidade Descrição', valor: util.formatForLogs(this.state.cidade_descricao) },
+                { titulo: 'País', valor: util.formatForLogs(this.state.pais, 'options', '', '', this.state.paisesOptions) },
             ],
             loading: true
         })
@@ -289,7 +292,7 @@ class AddPessoaEndereco extends Component {
                         await this.setState({ chave: res.data[0].Chave })
                         await loader.salvaLogs('pessoas_enderecos', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
 
-                        
+
                         await this.setState({ loading: false, bloqueado: false, savedRedirect: true })
                     } else {
                         alert(`Erro: ${JSON.stringify(res)}`)
@@ -400,16 +403,16 @@ class AddPessoaEndereco extends Component {
 
                 <section>
                     {this.props.location.state.backTo == 'addpessoa' &&
-                        <Header voltarAddPessoa pessoa={this.state.chave_pessoa} titulo="Endereços"/>
+                        <Header voltarAddPessoa pessoa={this.state.chave_pessoa} titulo="Endereços" />
                     }
                     {this.props.location.state.backTo == 'enderecos' &&
-                        <Header voltarPessoaEnderecos pessoa={this.state.chave_pessoa} titulo="Endereços" chave={this.state.chave != 0 ? this.state.chave : ''}/>
+                        <Header voltarPessoaEnderecos pessoa={this.state.chave_pessoa} titulo="Endereços" chave={this.state.chave != 0 ? this.state.chave : ''} />
                     }
                     <br />
                     <br />
                 </section>
 
-                {this.state.chave !=0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                     <div className="logButton">
                         <button onClick={() => this.openLogs()}>Logs</button>
                     </div>
@@ -475,12 +478,12 @@ class AddPessoaEndereco extends Component {
                                                 }
                                                 {this.state.uf != 81 &&
                                                     <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                        <InputMask 
-                                                        type='text' 
-                                                        mask='99.999-999' 
-                                                        className='form-control' 
-                                                        value={this.state.cep} 
-                                                        onChange={(e) => { this.setState({ cep: e.currentTarget.value }); if (this.state.ufLock) {this.setState({ cepLimpo: '', bairro: '', endereco: '', cidadeLock: '', ufLock: '', bairroLock: '', enderecoLock: '', ufNome: '', cidade_descricao: '' })} if (this.state.cep.length == 10) { this.buscarDados(e.currentTarget.value) } }}
+                                                        <InputMask
+                                                            type='text'
+                                                            mask='99.999-999'
+                                                            className='form-control'
+                                                            value={this.state.cep}
+                                                            onChange={(e) => { this.setState({ cep: e.currentTarget.value }); if (this.state.ufLock) { this.setState({ cepLimpo: '', bairro: '', endereco: '', cidadeLock: '', ufLock: '', bairroLock: '', enderecoLock: '', ufNome: '', cidade_descricao: '' }) } if (this.state.cep.length == 10) { this.buscarDados(e.currentTarget.value) } }}
                                                         />
                                                     </div>
                                                 }

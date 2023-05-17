@@ -162,14 +162,6 @@ class AddShip extends Component {
             await this.loadData(this.props.location.state.ship)
             //await this.carregaEmbarcadores(id)
             //await this.carregaDocumentos(id)
-
-            await this.setState({
-                dadosIniciais: [
-                    { titulo: 'nome', valor: this.state.nome },
-                    { titulo: 'bandeira', valor: this.state.bandeira },
-                    { titulo: 'imo', valor: this.state.imo }
-                ]
-            })
         }
         await this.carregaPessoas()
         await this.carregaPaises()
@@ -178,6 +170,16 @@ class AddShip extends Component {
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
         await this.testaAcesso()
+
+        if (this.state.chave != 0) {
+            await this.setState({
+                dadosIniciais: [
+                    { titulo: 'Nome', valor: util.formatForLogs(this.state.nome) },
+                    { titulo: 'Bandeira', valor: util.formatForLogs(this.state.bandeira, 'options', '', '', this.state.paisesOptions) },
+                    { titulo: 'IMO', valor: util.formatForLogs(this.state.imo) }
+                ]
+            })
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "NAVIOS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "NAVIOS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -288,6 +290,7 @@ class AddShip extends Component {
         if (!validForm) {
             return;
         }
+        this.setState({ ...util.cleanStates(this.state) })
         this.setState({ 
             bloqueado: true,
             loading: true
@@ -312,13 +315,14 @@ class AddShip extends Component {
         if (!validForm) {
             return;
         }
+        this.setState({...util.cleanStates(this.state)})
         this.setState({ bloqueado: true })
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'nome', valor: this.state.nome },
-                { titulo: 'bandeira', valor: this.state.bandeira },
-                { titulo: 'imo', valor: this.state.imo }
+                { titulo: 'Nome', valor: util.formatForLogs(this.state.nome) },
+                { titulo: 'Bandeira', valor: util.formatForLogs(this.state.bandeira, 'options', '', '', this.state.paisesOptions) },
+                { titulo: 'IMO', valor: util.formatForLogs(this.state.imo) }
             ],
             loading: true
         })

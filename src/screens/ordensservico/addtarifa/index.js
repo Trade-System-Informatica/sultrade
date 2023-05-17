@@ -107,19 +107,21 @@ class AddTarifa extends Component {
             )
 
             this.setState({ email: { ...this.state.email, endereco: contatos.find((contato) => contato.Tipo == "EM")?.Campo1 } });
-
-            this.setState({
-                dadosIniciais: [
-                    { titulo: 'fornecedor', valor: this.state.fornecedor },
-                    { titulo: 'portos', valor: this.state.portos.join(", ") },
-                    { titulo: 'servico', valor: this.state.servico },
-                    { titulo: 'anexo', valor: this.state.anexo },
-                    { titulo: 'vencimento', valor: this.state.vencimento }
-                ]
-            })
         }
 
         await this.loadAll();
+
+        if (this.state.chave != 0) {
+            this.setState({
+                dadosIniciais: [
+                    { titulo: 'Fornecedor', valor: util.formatForLogs(this.state.fornecedor, 'options', '', '', this.state.fornecedoresOptions) },
+                    { titulo: 'Portos', valor: this.state.portos.map((p) => util.formatForLogs(p, 'options', '', '', this.state.portosOptions)).join(", ") },
+                    { titulo: 'Servico', valor: util.formatForLogs(this.state.servico) },
+                    { titulo: 'Anexo', valor: util.formatForLogs(this.state.anexo) },
+                    { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') }
+                ]
+            })
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "TARIFAS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "TARIFAS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -144,16 +146,16 @@ class AddTarifa extends Component {
     }
 
     salvarTarifa = async (validForm) => {
-        //this.getMaxNews()
+        this.setState({ ...util.cleanStates(this.state) })
         this.setState({ bloqueado: true })
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'fornecedor', valor: this.state.fornecedor },
-                { titulo: 'portos', valor: this.state.portos.join(", ") },
-                { titulo: 'servico', valor: this.state.servico },
-                { titulo: 'anexo', valor: this.state.anexo },
-                { titulo: 'vencimento', valor: this.state.vencimento }
+                { titulo: 'Fornecedor', valor: util.formatForLogs(this.state.fornecedor, 'options', '', '', this.state.fornecedoresOptions) },
+                { titulo: 'Portos', valor: this.state.portos.map((p) => util.formatForLogs(p, 'options', '', '', this.state.portosOptions)).join(", ") },
+                { titulo: 'Servico', valor: util.formatForLogs(this.state.servico) },
+                { titulo: 'Anexo', valor: util.formatForLogs(this.state.anexo) },
+                { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') }
             ],
             loading: true
         })
@@ -263,8 +265,8 @@ class AddTarifa extends Component {
     alteraCliente = async (valor, categoria) => {
         if (categoria.split('')[1] == '1') {
             await this.setState({ fornecedor: valor });
-        } 
-        await this.setState({ modalAberto: false, fornecedores: await loader.getBase("getFornecedores.php"), fornecedoresOptions: await loader.getBaseOptions(`getFornecedores.php`, "Nome", "Chave")});
+        }
+        await this.setState({ modalAberto: false, fornecedores: await loader.getBase("getFornecedores.php"), fornecedoresOptions: await loader.getBaseOptions(`getFornecedores.php`, "Nome", "Chave") });
     }
 
     enviaEmail = async (validForm) => {
@@ -352,15 +354,15 @@ class AddTarifa extends Component {
                 </section>
 
                 <ModalListas
-                            pesquisa={this.state.modalPesquisa}
-                            alteraModal={this.alteraModal}
-                            alteraCliente={this.alteraCliente}
-                            acessosPermissoes={this.state.acessosPermissoes}
-                            modalAberto={this.state.modalAberto}
-                            modal={this.state.modal}
-                            modalLista={this.state.modalLista}
-                            closeModal={() => { this.setState({ modalAberto: false }) }}
-                        />
+                    pesquisa={this.state.modalPesquisa}
+                    alteraModal={this.alteraModal}
+                    alteraCliente={this.alteraCliente}
+                    acessosPermissoes={this.state.acessosPermissoes}
+                    modalAberto={this.state.modalAberto}
+                    modal={this.state.modal}
+                    modalLista={this.state.modalLista}
+                    closeModal={() => { this.setState({ modalAberto: false }) }}
+                />
 
 
                 {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
@@ -543,7 +545,7 @@ class AddTarifa extends Component {
                                                 </div>
                                                 <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
                                                     {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
-                                                        <div className='insideFormButton' onClick={() => { this.setState({ modalAberto: true, modal: 'listarCliente', modalPesquisa: this.state.fornecedor, modalLista: this.state.fornecedores })}}>...</div>
+                                                        <div className='insideFormButton' onClick={() => { this.setState({ modalAberto: true, modal: 'listarCliente', modalPesquisa: this.state.fornecedor, modalLista: this.state.fornecedores }) }}>...</div>
                                                     }
                                                 </div>
                                                 <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>

@@ -140,7 +140,7 @@ class AddEventoFinanceiro extends Component {
                 valor: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.evento.valor),
                 vlrc: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.evento.valor1),
                 documento: this.state.evento.documento,
-                tipoDocumento:  this.state.evento.tipo_documento,
+                tipoDocumento: this.state.evento.tipo_documento,
                 repasse: this.state.evento.repasse == 1 ? true : false,
                 emissao: moment(this.state.evento.emissao).format('YYYY-MM-DD'),
                 vencimento: moment(this.state.evento.vencimento).format('YYYY-MM-DD'),
@@ -197,35 +197,35 @@ class AddEventoFinanceiro extends Component {
 
             await this.setState({
                 dadosIniciais: [
-                    { titulo: 'Moeda', valor: this.state.moeda },
-                    { titulo: 'valor', valor: this.state.valor },
-                    { titulo: 'valor1', valor: this.state.vlrc },
-                    { titulo: 'repasse', valor: this.state.repasse },
-                    { titulo: 'emissao', valor: this.state.emissao },
-                    { titulo: 'vencimento', valor: this.state.vencimento },
-                    { titulo: 'desconto_valor', valor: this.state.desconto },
-                    { titulo: 'desconto_cpl', valor: this.state.descontoComplemento },
-                    { titulo: 'desconto_conta', valor: this.state.descontoConta },
-                    { titulo: 'retencao_inss_valor', valor: this.state.retencaoInss },
-                    { titulo: 'retencao_inss_cpl', valor: this.state.retencaoInssComplemento },
-                    { titulo: 'retencao_inss_conta', valor: this.state.retencaoInssConta },
-                    { titulo: 'retencao_ir_valor', valor: this.state.retencaoIr },
-                    { titulo: 'retencao_ir_cpl', valor: this.state.retencaoIrComplemento },
-                    { titulo: 'retencao_ir_conta', valor: this.state.retencaoIrConta },
-                    { titulo: 'retencao_iss_valor', valor: this.state.retencaoIss },
-                    { titulo: 'retencao_iss_cpl', valor: this.state.retencaoIssComplemento },
-                    { titulo: 'retencao_iss_conta', valor: this.state.retencaoIssConta },
-                    { titulo: 'retencao_pis_valor', valor: this.state.retencaoPis },
-                    { titulo: 'retencao_pis_cpl', valor: this.state.retencaoPisComplemento },
-                    { titulo: 'retencao_pis_conta', valor: this.state.retencaoPisConta },
-                    { titulo: 'retencao_cofins_valor', valor: this.state.retencaoCofins },
-                    { titulo: 'retencao_cofins_cpl', valor: this.state.retencaoCofinsComplemento },
-                    { titulo: 'retencao_cofins_conta', valor: this.state.retencaoCofinsConta },
-                    { titulo: 'retencao_csll_valor', valor: this.state.retencaoCsll },
-                    { titulo: 'retencao_csll_cpl', valor: this.state.retencaoCsllComplemento },
-                    { titulo: 'retencao_csll_conta', valor: this.state.retencaoCsllConta },
-                    { titulo: 'complemento', valor: this.state.complemento },
-                    { titulo: 'contaContabil', valor: this.state.contaContabil }
+                    { titulo: 'Moeda', valor: util.formatForLogs(this.state.moeda, 'options', '', '', this.state.moedas, 'Chave', 'Sigla') },
+                    { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, 'money') },
+                    { titulo: 'VCP', valor: util.formatForLogs(this.state.vlrc, 'money') },
+                    { titulo: 'Repasse', valor: util.formatForLogs(this.state.repasse, 'bool') },
+                    { titulo: 'Emissao', valor: util.formatForLogs(this.state.emissao, 'date') },
+                    { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') },
+                    { titulo: 'Valor de Desconto', valor: util.formatForLogs(this.state.desconto) },
+                    { titulo: 'Complemento de Desconto', valor: util.formatForLogs(this.state.descontoComplemento) },
+                    { titulo: 'Conta de Desconto', valor: util.formatForLogs(this.state.descontoConta, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Valor de INSS', valor: util.formatForLogs(this.state.retencaoInss, 'money') },
+                    { titulo: 'Complemento de INSS', valor: util.formatForLogs(this.state.retencaoInssComplemento) },
+                    { titulo: 'Conta de INSS', valor: util.formatForLogs(this.state.retencaoInssConta, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Valor de IR', valor: util.formatForLogs(this.state.retencaoIr, 'money') },
+                    { titulo: 'Complemento de IR', valor: util.formatForLogs(this.state.retencaoIrComplemento) },
+                    { titulo: 'Conta de IR', valor: util.formatForLogs(this.state.retencaoIrConta, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Valor de ISS', valor: util.formatForLogs(this.state.retencaoIss, 'money') },
+                    { titulo: 'Complemento de ISS', valor: util.formatForLogs(this.state.retencaoIssComplemento) },
+                    { titulo: 'Conta de ISS', valor: util.formatForLogs(this.state.retencaoIssConta, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Valor de PIS', valor: util.formatForLogs(this.state.retencaoPis, 'money') },
+                    { titulo: 'Complemento de PIS', valor: util.formatForLogs(this.state.retencaoPisComplemento) },
+                    { titulo: 'Conta de PIS', valor: util.formatForLogs(this.state.retencaoPisConta, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Valor de COFINS', valor: util.formatForLogs(this.state.retencaoCofins, 'money') },
+                    { titulo: 'Complemento de COFINS', valor: util.formatForLogs(this.state.retencaoCofinsComplemento) },
+                    { titulo: 'Conta de COFINS', valor: util.formatForLogs(this.state.retencaoCofinsConta, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Valor de CSLL', valor: util.formatForLogs(this.state.retencaoCsll, 'money') },
+                    { titulo: 'Complemento de CSLL', valor: util.formatForLogs(this.state.retencaoCsllComplemento) },
+                    { titulo: 'Conta de CSLL', valor: util.formatForLogs(this.state.retencaoCsllConta, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Complemento', valor: util.formatForLogs(this.state.complemento) },
+                    { titulo: 'Conta Contabil', valor: util.formatForLogs(this.state.contaContabil, 'options', '', '', this.state.planosContasOptions) }
                 ],
                 loading: false
             })
@@ -294,47 +294,49 @@ class AddEventoFinanceiro extends Component {
             retencaoCsllComplemento: this.state.retencaoCsllCheck ? `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}` : "",
             retencaoInssComplemento: this.state.retencaoInssCheck ? `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}` : "",
             retencaoIrComplemento: this.state.retencaoIrCheck ? `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}` : "",
-            retencaoIssComplemento: this.state.retencaoIssCheck ? `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}` : "",        })
+            retencaoIssComplemento: this.state.retencaoIssCheck ? `Valor referente Doc ${this.state.documento} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}` : "",
+        })
     }
 
     salvarServicoItem = async (validForm) => {
+        this.setState({ ...util.cleanStates(this.state) })
         this.setState({ bloqueado: true });
 
         this.setState({
             historico: `Valor referente Doc ${this.state.documento ? this.state.documento : ""} ${this.state.fornecedorNome} ${this.state.os.codigo} NAVIO ${this.state.navio}`
         })
-        
+
         await this.setState({
             dadosFinais: [
-                { titulo: 'Moeda', valor: this.state.moeda },
-                { titulo: 'valor', valor: this.state.valor },
-                { titulo: 'valor1', valor: this.state.vlrc },
-                { titulo: 'repasse', valor: this.state.repasse },
-                { titulo: 'emissao', valor: this.state.emissao },
-                { titulo: 'vencimento', valor: this.state.vencimento },
-                { titulo: 'desconto_valor', valor: this.state.desconto },
-                { titulo: 'desconto_cpl', valor: this.state.descontoComplemento },
-                { titulo: 'desconto_conta', valor: this.state.descontoConta },
-                { titulo: 'retencao_inss_valor', valor: this.state.retencaoInss },
-                { titulo: 'retencao_inss_cpl', valor: this.state.retencaoInssComplemento },
-                { titulo: 'retencao_inss_conta', valor: this.state.retencaoInssConta },
-                { titulo: 'retencao_ir_valor', valor: this.state.retencaoIr },
-                { titulo: 'retencao_ir_cpl', valor: this.state.retencaoIrComplemento },
-                { titulo: 'retencao_ir_conta', valor: this.state.retencaoIrConta },
-                { titulo: 'retencao_iss_valor', valor: this.state.retencaoIss },
-                { titulo: 'retencao_iss_cpl', valor: this.state.retencaoIssComplemento },
-                { titulo: 'retencao_iss_conta', valor: this.state.retencaoIssConta },
-                { titulo: 'retencao_pis_valor', valor: this.state.retencaoPis },
-                { titulo: 'retencao_pis_cpl', valor: this.state.retencaoPisComplemento },
-                { titulo: 'retencao_pis_conta', valor: this.state.retencaoPisConta },
-                { titulo: 'retencao_cofins_valor', valor: this.state.retencaoCofins },
-                { titulo: 'retencao_cofins_cpl', valor: this.state.retencaoCofinsComplemento },
-                { titulo: 'retencao_cofins_conta', valor: this.state.retencaoCofinsConta },
-                { titulo: 'retencao_csll_valor', valor: this.state.retencaoCsll },
-                { titulo: 'retencao_csll_cpl', valor: this.state.retencaoCsllComplemento },
-                { titulo: 'retencao_csll_conta', valor: this.state.retencaoCsllConta },
-                { titulo: 'complemento', valor: this.state.complemento },
-                { titulo: 'contaContabil', valor: this.state.contaContabil }
+                { titulo: 'Moeda', valor: util.formatForLogs(this.state.moeda, 'options', '', '', this.state.moedas, 'Chave', 'Sigla') },
+                { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, 'money') },
+                { titulo: 'VCP', valor: util.formatForLogs(this.state.vlrc, 'money') },
+                { titulo: 'Repasse', valor: util.formatForLogs(this.state.repasse, 'bool') },
+                { titulo: 'Emissao', valor: util.formatForLogs(this.state.emissao, 'date') },
+                { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') },
+                { titulo: 'Valor de Desconto', valor: util.formatForLogs(this.state.desconto) },
+                { titulo: 'Complemento de Desconto', valor: util.formatForLogs(this.state.descontoComplemento) },
+                { titulo: 'Conta de Desconto', valor: util.formatForLogs(this.state.descontoConta, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Valor de INSS', valor: util.formatForLogs(this.state.retencaoInss, 'money') },
+                { titulo: 'Complemento de INSS', valor: util.formatForLogs(this.state.retencaoInssComplemento) },
+                { titulo: 'Conta de INSS', valor: util.formatForLogs(this.state.retencaoInssConta, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Valor de IR', valor: util.formatForLogs(this.state.retencaoIr, 'money') },
+                { titulo: 'Complemento de IR', valor: util.formatForLogs(this.state.retencaoIrComplemento) },
+                { titulo: 'Conta de IR', valor: util.formatForLogs(this.state.retencaoIrConta, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Valor de ISS', valor: util.formatForLogs(this.state.retencaoIss, 'money') },
+                { titulo: 'Complemento de ISS', valor: util.formatForLogs(this.state.retencaoIssComplemento) },
+                { titulo: 'Conta de ISS', valor: util.formatForLogs(this.state.retencaoIssConta, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Valor de PIS', valor: util.formatForLogs(this.state.retencaoPis, 'money') },
+                { titulo: 'Complemento de PIS', valor: util.formatForLogs(this.state.retencaoPisComplemento) },
+                { titulo: 'Conta de PIS', valor: util.formatForLogs(this.state.retencaoPisConta, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Valor de COFINS', valor: util.formatForLogs(this.state.retencaoCofins, 'money') },
+                { titulo: 'Complemento de COFINS', valor: util.formatForLogs(this.state.retencaoCofinsComplemento) },
+                { titulo: 'Conta de COFINS', valor: util.formatForLogs(this.state.retencaoCofinsConta, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Valor de CSLL', valor: util.formatForLogs(this.state.retencaoCsll, 'money') },
+                { titulo: 'Complemento de CSLL', valor: util.formatForLogs(this.state.retencaoCsllComplemento) },
+                { titulo: 'Conta de CSLL', valor: util.formatForLogs(this.state.retencaoCsllConta, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Complemento', valor: util.formatForLogs(this.state.complemento) },
+                { titulo: 'Conta Contabil', valor: util.formatForLogs(this.state.contaContabil, 'options', '', '', this.state.planosContasOptions) }
             ],
             loading: true
         })
@@ -679,7 +681,7 @@ class AddEventoFinanceiro extends Component {
             }
         } else if (this.state.evento.tipo_sub == 2) {
             this.setState({
-                contaDesconto: CAMBIO_LIQUIDAR, 
+                contaDesconto: CAMBIO_LIQUIDAR,
                 contaCredito: await loader.getContaPessoa(this.state.os.Chave_Cliente)
             });
         } else if (this.state.evento.tipo_sub == 3) {
@@ -1296,7 +1298,7 @@ class AddEventoFinanceiro extends Component {
                                                 </div>
 
                                                 <div className="row">
-                                                {!this.state.conta && this.state.evento.centroCusto != '0' && (this.state.tipo == 1 && (this.state.repasse && this.state.contaCliente && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || (!this.state.repasse && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || this.state.tipo == 0 && (this.state.contaCliente && this.state.contaTaxa) || this.state.tipo == 2 && (this.state.contaCliente) || this.state.tipo == 3 && (this.state.contaCliente)) && !this.testaValores() &&
+                                                    {!this.state.conta && this.state.evento.centroCusto != '0' && (this.state.tipo == 1 && (this.state.repasse && this.state.contaCliente && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || (!this.state.repasse && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || this.state.tipo == 0 && (this.state.contaCliente && this.state.contaTaxa) || this.state.tipo == 2 && (this.state.contaCliente) || this.state.tipo == 3 && (this.state.contaCliente)) && !this.testaValores() &&
                                                         <>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                                                 <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
@@ -1306,7 +1308,7 @@ class AddEventoFinanceiro extends Component {
                                                             </div>
                                                         </>
                                                     }
-                                                {!(!this.state.conta && this.state.evento.centroCusto != '0' && (this.state.tipo == 1 && (this.state.repasse && this.state.contaCliente && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || (!this.state.repasse && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || this.state.tipo == 0 && (this.state.contaCliente && this.state.contaTaxa) || this.state.tipo == 2 && (this.state.contaCliente) || this.state.tipo == 3 && (this.state.contaCliente)) && !this.testaValores()) &&
+                                                    {!(!this.state.conta && this.state.evento.centroCusto != '0' && (this.state.tipo == 1 && (this.state.repasse && this.state.contaCliente && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || (!this.state.repasse && (this.state.contaFornecedor || this.state.contaFornecedorCusteio)) || this.state.tipo == 0 && (this.state.contaCliente && this.state.contaTaxa) || this.state.tipo == 2 && (this.state.contaCliente) || this.state.tipo == 3 && (this.state.contaCliente)) && !this.testaValores()) &&
                                                         <>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                                                 <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>

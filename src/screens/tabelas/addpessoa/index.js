@@ -153,21 +153,6 @@ class AddPessoa extends Component {
                 contaFaturar: this.state.pessoa.Conta_Faturar,
             })
             await this.converteCategoria();
-
-            await this.setState({
-                dadosIniciais: [
-                    { titulo: 'Nome', valor: this.state.nome },
-                    { titulo: 'Nome_Fantasia', valor: this.state.nome_fantasia },
-                    { titulo: 'Cnpj_Cpf', valor: this.state.cnpj_cpf },
-                    { titulo: 'Rg_Ie', valor: this.state.rg_ie },
-                    { titulo: 'Inscricao_Municipal', valor: this.state.inscricao_municipal },
-                    { titulo: 'Nascimento_Abertura', valor: this.state.nascimento },
-                    { titulo: 'Inclusao', valor: this.state.inclusao },
-                    { titulo: 'Conta_Provisao', valor: this.state.contaProvisao },
-                    { titulo: 'Conta_Contabil', valor: this.state.contaContabil },
-                    { titulo: 'Conta_Faturar', valor: this.state.contaFaturar }
-                ]
-            })
         }
 
         await this.loadAll();
@@ -175,6 +160,24 @@ class AddPessoa extends Component {
         await this.getPessoaContatos();
         await this.getTipos();
         await this.adicionaInformacao();
+
+        if (this.state.chave != 0) {
+            await this.setState({
+                dadosIniciais: [
+                    { titulo: 'Nome', valor: util.formatForLogs(this.state.nome) },
+                    { titulo: 'Nome Fantasia', valor: util.formatForLogs(this.state.nome_fantasia) },
+                    { titulo: 'Cnpj/Cpf', valor: util.formatForLogs(this.state.cnpj_cpf) },
+                    { titulo: 'Rg/Ie', valor: util.formatForLogs(this.state.rg_ie) },
+                    { titulo: 'Inscrição Municipal', valor: util.formatForLogs(this.state.inscricao_municipal) },
+                    { titulo: 'Nascimento/Abertura', valor: util.formatForLogs(this.state.nascimento, 'date') },
+                    { titulo: 'Inclusão', valor: util.formatForLogs(this.state.inclusao, 'date') },
+                    { titulo: 'Conta Pagar', valor: util.formatForLogs(this.state.contaProvisao, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Conta Receber', valor: util.formatForLogs(this.state.contaContabil, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Conta Faturar', valor: util.formatForLogs(this.state.contaFaturar, 'options', '', '', this.state.planosContasOptions) }
+                ],
+            })
+
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "PESSOAS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "PESSOAS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -496,16 +499,16 @@ class AddPessoa extends Component {
 
         this.setState({
             dadosFinais: [
-                { titulo: 'Nome', valor: this.state.nome },
-                { titulo: 'Nome_Fantasia', valor: this.state.nome_fantasia },
-                { titulo: 'Cnpj_Cpf', valor: this.state.cnpj_cpf },
-                { titulo: 'Rg_Ie', valor: this.state.rg_ie },
-                { titulo: 'Inscricao_Municipal', valor: this.state.inscricao_municipal },
-                { titulo: 'Nascimento_Abertura', valor: this.state.nascimento },
-                { titulo: 'Inclusao', valor: this.state.inclusao },
-                { titulo: 'Conta_Provisao', valor: this.state.contaProvisao },
-                { titulo: 'Conta_Contabil', valor: this.state.contaContabil },
-                { titulo: 'Conta_Faturar', valor: this.state.contaFaturar }
+                { titulo: 'Nome', valor: util.formatForLogs(this.state.nome) },
+                { titulo: 'Nome Fantasia', valor: util.formatForLogs(this.state.nome_fantasia) },
+                { titulo: 'Cnpj/Cpf', valor: util.formatForLogs(this.state.cnpj_cpf) },
+                { titulo: 'Rg/Ie', valor: util.formatForLogs(this.state.rg_ie) },
+                { titulo: 'Inscrição Municipal', valor: util.formatForLogs(this.state.inscricao_municipal) },
+                { titulo: 'Nascimento/Abertura', valor: util.formatForLogs(this.state.nascimento, 'date') },
+                { titulo: 'Inclusão', valor: util.formatForLogs(this.state.inclusao, 'date') },
+                { titulo: 'Conta Pagar', valor: util.formatForLogs(this.state.contaProvisao, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Conta Receber', valor: util.formatForLogs(this.state.contaContabil, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Conta Faturar', valor: util.formatForLogs(this.state.contaFaturar, 'options', '', '', this.state.planosContasOptions) }
             ],
             loading: true
         })

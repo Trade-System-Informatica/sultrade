@@ -57,16 +57,18 @@ class AddTipoDocumento extends Component {
             await this.setState({
                 descricao: this.state.tipoDocumento.Descricao,
             })
-
-            await this.setState({
-                dadosIniciais: [
-                    { titulo: 'Descricao', valor: this.state.descricao }
-                ]
-            })
         }
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
         await this.testaAcesso()
+
+        if (this.state.chave != 0) {
+            await this.setState({
+                dadosIniciais: [
+                    { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) }
+                ]
+            })
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "TIPOS_DOCUMENTOS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "TIPOS_DOCUMENTOS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -124,10 +126,11 @@ class AddTipoDocumento extends Component {
 
     salvarTipoDocumento = async (validForm) => {
         this.setState({ bloqueado: true })
+        this.setState({...util.cleanStates(this.state)})
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'Descricao', valor: this.state.descricao }
+                { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) }
             ],
             loading: true
         })
@@ -208,10 +211,10 @@ class AddTipoDocumento extends Component {
                 }
 
                 <section>
-                    <Header voltarTiposDocumentos titulo="Tipos de Documento" chave={this.state.chave != 0 ? this.state.chave : ''}/>
+                    <Header voltarTiposDocumentos titulo="Tipos de Documento" chave={this.state.chave != 0 ? this.state.chave : ''} />
                 </section>
 
-                {this.state.chave !=0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                     <div className="logButton">
                         <button onClick={() => this.openLogs()}>Logs</button>
                     </div>

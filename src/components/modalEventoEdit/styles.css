@@ -1,0 +1,21 @@
+.edit_modal_wrapper {
+    width: 50%;
+    margin-left: 25% !important;
+}
+
+.edit_modal_label {
+    text-align: center;
+}
+
+.edit_modal_label > * {
+    font-size: 1.1em !important;
+    height: 35px !important;
+}
+
+.edit_modal_input {
+    margin-bottom: 40px;
+}
+
+.color_black, .color_black > * {
+    color: black !important;
+}

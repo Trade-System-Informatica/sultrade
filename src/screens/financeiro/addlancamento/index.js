@@ -147,30 +147,33 @@ class AddLancamento extends Component {
                 conciliado: this.state.lancamento.Conciliado,
                 atualizado: this.state.lancamento.atualizado,
             })
-
-            this.setState({
-                dadosIniciais: [
-                    { titulo: 'Data', valor: this.state.data },
-                    { titulo: 'ContaDebito', valor: this.state.contaDebito },
-                    { titulo: 'ContaCredito', valor: this.state.contaCredito },
-                    { titulo: 'TipoDocto', valor: this.state.tipoDocto },
-                    { titulo: 'CentroControle', valor: this.state.centroControle },
-                    { titulo: 'Historico_Padrao', valor: this.state.historicoPadrao },
-                    { titulo: 'Historico', valor: this.state.historico },
-                    { titulo: 'Valor', valor: this.state.valor },
-                    { titulo: 'Usuario_Inclusao', valor: this.state.usuarioInclusao },
-                    { titulo: 'Usuario_Alteracao', valor: this.state.usuarioAlteracao },
-                    { titulo: 'Data_Inclusao', valor: this.state.dataInclusao },
-                    { titulo: 'Data_Alteração', valor: this.state.dataAlteracao },
-                    { titulo: 'Lote', valor: this.state.lote },
-                    { titulo: 'Conciliado', valor: this.state.conciliado },
-                    { titulo: 'atualizado', valor: this.state.atualizado }
-                ]
-            })
         }
 
 
         await this.loadAll();
+
+        if (this.state.chave != 0) {
+            this.setState({
+                dadosIniciais: [
+                    { titulo: 'Data', valor: this.state.data },
+                    { titulo: 'Conta Débito', valor: util.formatForLogs(this.state.contaDebito, 'options', '', '', this.state.planoContasOptions) },
+                    { titulo: 'Conta Crédito', valor: util.formatForLogs(this.state.contaCredito, 'options', '', '', this.state.planoContasOptions) },
+                    { titulo: 'Tipo de Documento', valor: util.formatForLogs(this.state.tipoDocto, 'options', '', '', this.state.tipoDocumentosOptions) },
+                    { titulo: 'Centro de Custo', valor: util.formatForLogs(this.state.centroControle, 'options', '', '', this.state.centrosCustosOptions) },
+                    { titulo: 'Histórico Padrão', valor: util.formatForLogs(this.state.historicoPadrao) },
+                    { titulo: 'Histórico', valor: util.formatForLogs(this.state.historico) },
+                    { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, 'money') },
+                    { titulo: 'Usuario da Inclusão', valor: util.formatForLogs(this.state.usuarioInclusao) },
+                    { titulo: 'Usuario da Alteração', valor: util.formatForLogs(this.state.usuarioAlteracao) },
+                    { titulo: 'Data de Inclusão', valor: util.formatForLogs(this.state.dataInclusao, 'date') },
+                    { titulo: 'Data de Alteração', valor: util.formatForLogs(this.state.dataAlteracao, 'date') },
+                    { titulo: 'Lote', valor: util.formatForLogs(this.state.lote) },
+                    { titulo: 'Conciliado', valor: util.formatForLogs(this.state.conciliado, 'bool') },
+                    { titulo: 'Atualizado', valor: util.formatForLogs(this.state.atualizado, 'bool') }
+                ]
+            })
+
+        }
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "LANCAMENTOS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "LANCAMENTOS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -191,7 +194,7 @@ class AddLancamento extends Component {
         });
 
         const planoContasOptions = this.state.planoContasOptions;
-        planoContasOptions.unshift({label: "Select...", value: "0"});
+        planoContasOptions.unshift({ label: "Select...", value: "0" });
 
         await this.setState({
             acessosPermissoes: await loader.testaAcesso(this.state.acessos, this.state.permissoes, this.state.usuarioLogado),
@@ -202,25 +205,26 @@ class AddLancamento extends Component {
     }
 
     salvarLancamento = async (validForm) => {
+        this.setState({ ...util.cleanStates(this.state) });
         this.setState({ bloqueado: true })
 
         await this.setState({
             dadosFinais: [
                 { titulo: 'Data', valor: this.state.data },
-                { titulo: 'ContaDebito', valor: this.state.contaDebito },
-                { titulo: 'ContaCredito', valor: this.state.contaCredito },
-                { titulo: 'TipoDocto', valor: this.state.tipoDocto },
-                { titulo: 'CentroControle', valor: this.state.centroControle },
-                { titulo: 'Historico_Padrao', valor: this.state.historicoPadrao },
-                { titulo: 'Historico', valor: this.state.historico },
-                { titulo: 'Valor', valor: this.state.valor },
-                { titulo: 'Usuario_Inclusao', valor: this.state.usuarioInclusao },
-                { titulo: 'Usuario_Alteracao', valor: this.state.usuarioAlteracao },
-                { titulo: 'Data_Inclusao', valor: this.state.dataInclusao },
-                { titulo: 'Data_Alteração', valor: this.state.dataAlteracao },
-                { titulo: 'Lote', valor: this.state.lote },
-                { titulo: 'Conciliado', valor: this.state.conciliado },
-                { titulo: 'atualizado', valor: this.state.atualizado }
+                { titulo: 'Conta Débito', valor: util.formatForLogs(this.state.contaDebito, 'options', '', '', this.state.planoContasOptions) },
+                { titulo: 'Conta Crédito', valor: util.formatForLogs(this.state.contaCredito, 'options', '', '', this.state.planoContasOptions) },
+                { titulo: 'Tipo de Documento', valor: util.formatForLogs(this.state.tipoDocto, 'options', '', '', this.state.tipoDocumentosOptions) },
+                { titulo: 'Centro de Custo', valor: util.formatForLogs(this.state.centroControle, 'options', '', '', this.state.centrosCustosOptions) },
+                { titulo: 'Histórico Padrão', valor: util.formatForLogs(this.state.historicoPadrao) },
+                { titulo: 'Histórico', valor: util.formatForLogs(this.state.historico) },
+                { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, 'money') },
+                { titulo: 'Usuario da Inclusão', valor: util.formatForLogs(this.state.usuarioInclusao) },
+                { titulo: 'Usuario da Alteração', valor: util.formatForLogs(this.state.usuarioAlteracao) },
+                { titulo: 'Data de Inclusão', valor: util.formatForLogs(this.state.dataInclusao, 'date') },
+                { titulo: 'Data de Alteração', valor: util.formatForLogs(this.state.dataAlteracao, 'date') },
+                { titulo: 'Lote', valor: util.formatForLogs(this.state.lote) },
+                { titulo: 'Conciliado', valor: util.formatForLogs(this.state.conciliado, 'bool') },
+                { titulo: 'Atualizado', valor: util.formatForLogs(this.state.atualizado, 'bool') }
             ],
             loading: true
         })
@@ -228,7 +232,7 @@ class AddLancamento extends Component {
         for (let i = 0; i < this.state.numeroContas; i++) {
             const contaDebito = this.state.contaDebito[i];
             const contaCredito = this.state.contaCredito[i];
-            const valor = this.state.valor[i].replaceAll(".","").replaceAll(",",".");
+            const valor = this.state.valor[i].replaceAll(".", "").replaceAll(",", ".");
             const historicoPadrao = this.state.historicoPadrao[i];
             const historico = this.state.historico[i];
             const chave = this.state.chave[i];
@@ -242,7 +246,7 @@ class AddLancamento extends Component {
                 }).then(
                     async res => {
                         if (res.data[0].Chave) {
-                            this.setState({lote: res.data[0].Lote})
+                            this.setState({ lote: res.data[0].Lote })
                             let chav = this.state.chave;
                             chav[i] = res.data[0].Chave;
 
@@ -279,7 +283,7 @@ class AddLancamento extends Component {
                     async res => {
 
                         if (res.data === true) {
-                            await loader.salvaLogs('lancamentos', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, chave, `HISTÓRICO PADRÃO: ${this.state.descricao}`);
+                            await loader.salvaLogs('lancamentos', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, chave, `LANÇAMENTO: ${this.state.descricao}`);
 
                             //await alert(`Serviço alterado`)
                             await this.setState({ loading: false, bloqueado: false })
@@ -334,18 +338,18 @@ class AddLancamento extends Component {
         } else if (this.state.numeroContas == 1) {
             return true;
         }
-        
+
         let valorCredito = 0;
         let valorDebito = 0;
-        
+
         [...Array(this.state.numeroContas)].map((conta, contaIndex) => {
             if (this.state.contaDebito[contaIndex] != 0 && this.state.contaCredito[contaIndex] == 0) {
-                valorDebito += parseFloat(this.state.valor[contaIndex].replaceAll(".","").replaceAll(",","."));
+                valorDebito += parseFloat(this.state.valor[contaIndex].replaceAll(".", "").replaceAll(",", "."));
             } else if (this.state.contaCredito[contaIndex] != 0 && this.state.contaDebito[contaIndex] == 0) {
-                valorCredito += parseFloat(this.state.valor[contaIndex].replaceAll(".","").replaceAll(",","."));
+                valorCredito += parseFloat(this.state.valor[contaIndex].replaceAll(".", "").replaceAll(",", "."));
             }
         })
-        
+
         return valorCredito == valorDebito;
     }
 
@@ -472,7 +476,7 @@ class AddLancamento extends Component {
                                                             <label>Conta Credito</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
-                                                            {((this.state.numeroContas > 1 && this.state.contaCredito[contaIndex] == 0 && this.state.contaDebito[contaIndex] == 0) || (this.state.numeroContas == 1 && !this.state.contaCredito[contaIndex]) || (this.state.numeroContas > 1 && this.state.contaCredito[contaIndex] != 0 && this.state.contaDebito[contaIndex] != 0 )) &&
+                                                            {((this.state.numeroContas > 1 && this.state.contaCredito[contaIndex] == 0 && this.state.contaDebito[contaIndex] == 0) || (this.state.numeroContas == 1 && !this.state.contaCredito[contaIndex]) || (this.state.numeroContas > 1 && this.state.contaCredito[contaIndex] != 0 && this.state.contaDebito[contaIndex] != 0)) &&
                                                                 <FontAwesomeIcon title={(this.state.numeroContas > 1 && this.state.contaCredito[contaIndex] != 0 && this.state.contaDebito[contaIndex] != 0) ? "Insira apenas uma entre conta débito ou crédito" : `Preencha o campo`} icon={faExclamationTriangle} />
                                                             }
                                                         </div>

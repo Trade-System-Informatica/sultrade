@@ -51,7 +51,7 @@ const estadoInicial = {
     acessosPermissoes: [],
 
     bloqueado: false,
-    alert: {type: "", msg: ""}
+    alert: { type: "", msg: "" }
 }
 
 class AddCentroCusto extends Component {
@@ -77,17 +77,20 @@ class AddCentroCusto extends Component {
                 cliente: this.state.centroCusto.Cliente,
                 conta: this.state.centroCusto.Conta
             })
+        }
 
+        await this.loadAll();
+
+        if (this.state.chave != 0) {
             await this.setState({
                 dadosIniciais: [
-                    {titulo: 'Cliente', valor: this.state.cliente},
-                    {titulo: 'Descricao', valor: this.state.descricao},
-                    {titulo: 'Data', valor: this.state.data},
-                    {titulo: 'Encerrado', valor: this.state.encerrado},
+                    { titulo: 'Cliente', valor: Util.formatForLogs(this.state.cliente, 'options', '', '', this.state.pessoasOptions) },
+                    { titulo: 'Descrição', valor: Util.formatForLogs(this.state.descricao) },
+                    { titulo: 'Data', valor: Util.formatForLogs(this.state.data, 'date') },
+                    { titulo: 'Encerrado', valor: Util.formatForLogs(this.state.encerrado, 'date') },
                 ]
             })
         }
-        await this.loadAll();
 
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "CENTROS_CUSTOS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "CENTROS_CUSTOS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
@@ -111,6 +114,8 @@ class AddCentroCusto extends Component {
     }
 
     salvarCentroCusto = async (validForm) => {
+        this.setState({ ...utils.cleanStates(this.state) });
+
         if (this.state.variavel) {
             this.setState({ variavel: 1 })
         } else {
@@ -120,19 +125,19 @@ class AddCentroCusto extends Component {
 
         await this.setState({
             dadosFinais: [
-                {titulo: 'Cliente', valor: this.state.cliente},
-                {titulo: 'Descricao', valor: this.state.descricao},
-                {titulo: 'Data', valor: this.state.data},
-                {titulo: 'Encerrado', valor: this.state.encerrado},
+                { titulo: 'Cliente', valor: Util.formatForLogs(this.state.cliente, 'options', '', '', this.state.pessoasOptions) },
+                { titulo: 'Descrição', valor: Util.formatForLogs(this.state.descricao) },
+                { titulo: 'Data', valor: Util.formatForLogs(this.state.data, 'date') },
+                { titulo: 'Encerrado', valor: Util.formatForLogs(this.state.encerrado, 'date') },
             ],
             loading: true
         })
 
         if (parseInt(this.state.chave) === 0 && validForm) {
             if (!this.state.codigo) {
-                await this.setState({codigo: await loader.getCodigoCC()});    
+                await this.setState({ codigo: await loader.getCodigoCC() });
             }
-            
+
             await apiEmployee.post(`insertCentroCusto.php`, {
                 token: true,
                 values: `'${this.state.descricao}', '${moment(this.state.data).format('YYYY-MM-DD')}', '${this.state.cliente}', '${this.state.codigo}'`,
@@ -145,7 +150,7 @@ class AddCentroCusto extends Component {
                         loader.salvaLogs('centros_custos', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
                         await this.setState({ loading: false, bloqueado: false })
                     } else if (res.data.error) {
-                        this.setState({alert: {type: "error", msg: res.data.error}})
+                        this.setState({ alert: { type: "error", msg: res.data.error } })
                     } else {
                         console.log(res);
                     }
@@ -216,11 +221,11 @@ class AddCentroCusto extends Component {
                 }
 
                 <section>
-                    <Header voltarCentrosCustos titulo="Centro de Custo" chave={this.state.chave != 0 ? this.state.chave : ''}/>
+                    <Header voltarCentrosCustos titulo="Centro de Custo" chave={this.state.chave != 0 ? this.state.chave : ''} />
                 </section>
                 <Alert alert={this.state.alert} setAlert={(value) => this.setState({ alert: value })} />
 
-                {this.state.chave !=0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                     <div className="logButton">
                         <button onClick={() => this.openLogs()}>Logs</button>
                     </div>
@@ -255,16 +260,16 @@ class AddCentroCusto extends Component {
                                         <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12 ">
 
                                             <div className="row addservicos">
-                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
-                                                        <label>Codigo</label>
-                                                    </div>
-                                                    <div className='col-1'></div>
-                                                    <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10 ">
-                                                        <Field className="form-control" type="text" disabled={this.state.chave != 0} value={this.state.codigo} onChange={(e) => this.state.chave == 0 ? this.setState({codigo: e.currentTarget.value}) : {}}/>
-                                                    </div>
-                                                    <div className="col-xl-4 col-lg-4 col-md-3 col-sm-1 col-1 ">
-                                                    </div>
-                                                
+                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
+                                                    <label>Codigo</label>
+                                                </div>
+                                                <div className='col-1'></div>
+                                                <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10 ">
+                                                    <Field className="form-control" type="text" disabled={this.state.chave != 0} value={this.state.codigo} onChange={(e) => this.state.chave == 0 ? this.setState({ codigo: e.currentTarget.value }) : {}} />
+                                                </div>
+                                                <div className="col-xl-4 col-lg-4 col-md-3 col-sm-1 col-1 ">
+                                                </div>
+
                                                 <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
                                                     <label>Descricao</label>
                                                 </div>
