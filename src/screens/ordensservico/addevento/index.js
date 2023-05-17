@@ -204,23 +204,6 @@ class AddEvento extends Component {
                     valor: this.state.vlrc
                 });
             }
-
-            await this.setState({
-                dadosIniciais: [
-                    { titulo: 'Data', valor: util.formatForLogs(this.state.data, 'date') },
-                    { titulo: 'Fornecedor', valor: util.formatForLogs(this.state.fornecedor, 'options', '', '', this.state.pessoasOptions) },
-                    { titulo: 'Taxa', valor: util.formatForLogs(this.state.taxa, 'options', '', '', this.state.taxasOptions) },
-                    { titulo: 'Moeda', valor: util.formatForLogs(this.state.moeda, 'options', '', '', this.state.moedas, 'Chave', 'Sigla') },
-                    { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, 'money', '0,00') },
-                    { titulo: 'VCP', valor: util.formatForLogs(this.state.vlrc, 'money', '0,00') },
-                    { titulo: 'Repasse', valor: util.formatForLogs(this.state.repasse, 'bool') },
-                    { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
-                    { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tiposSubOptions) },
-                    { titulo: 'Ordem', valor: util.formatForLogs(this.state.ordem) },
-                    { titulo: 'Remarks', valor: util.formatForLogs(this.state.remarks) },
-                    { titulo: 'Fornecedor Custeio', valor: util.formatForLogs(this.state.fornecedorCusteio, 'options', '', '', this.state.fornecedoresOptions) }
-                ]
-            })
         }
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
@@ -240,6 +223,23 @@ class AddEvento extends Component {
             await this.setState({
                 anexosForn: anexos.filter((an) => (anexos.validado == 0 || !anexos.validado))
             });
+
+            await this.setState({
+                dadosIniciais: [
+                    { titulo: 'Data', valor: util.formatForLogs(this.state.data, 'date') },
+                    { titulo: 'Fornecedor', valor: util.formatForLogs(this.state.fornecedor, 'options', '', '', this.state.pessoasOptions) },
+                    { titulo: 'Taxa', valor: util.formatForLogs(this.state.taxa, 'options', '', '', this.state.taxasOptions) },
+                    { titulo: 'Moeda', valor: util.formatForLogs(this.state.moeda, 'options', '', '', this.state.moedas, 'Chave', 'Sigla') },
+                    { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, 'money', '0,00') },
+                    { titulo: 'VCP', valor: util.formatForLogs(this.state.vlrc, 'money', '0,00') },
+                    { titulo: 'Repasse', valor: util.formatForLogs(this.state.repasse, 'bool') },
+                    { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                    { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tiposSubOptions) },
+                    { titulo: 'Ordem', valor: util.formatForLogs(this.state.ordem) },
+                    { titulo: 'Remarks', valor: util.formatForLogs(this.state.remarks) },
+                    { titulo: 'Fornecedor Custeio', valor: util.formatForLogs(this.state.fornecedorCusteio, 'options', '', '', this.state.fornecedoresOptions) }
+                ]
+            })
         }
 
         this.state.acessosPermissoes.map((e) => {

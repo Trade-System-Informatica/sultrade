@@ -277,9 +277,13 @@ export default class Util {
                 return falseReturn ? falseReturn : "Não";
             }
         } else if (type == 'options') {
-            const trueValue = options.find((opt) => opt[optionKeyValue]);
-            
-            return trueValue ? trueValue[optionLabelValue] : falseReturn;
+            if (options && options[0]) {
+                const trueValue = options.find((opt) => opt[optionKeyValue]);
+                
+                return trueValue ? trueValue[optionLabelValue] : falseReturn;
+            } else {
+                return value;
+            }
         } else  {
             return value;
         }
