@@ -50,12 +50,17 @@ if($objData != NULL){
     $os_manual = prepareInput($objData->os_manual);
     $navio_manual = prepareInput($objData->navio_manual);
     $porto_manual = prepareInput($objData->porto_manual);
+    $roe_manual = prepareInput($objData->roe_manual);
+    $government_taxes_manual = prepareInput($objData->government_taxes_manual);
+    $bank_charges_manual = prepareInput($objData->bank_charges_manual);
+    $discount_manual = prepareInput($objData->discount_manual);
+    $received_manual = prepareInput($objData->received_manual);
     
     
     $contas = new Contas();
 
 
-    $result = $contas->updateContaCliente($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $Centro_Custo, $Conta_Bloqueto, $Historico, $Parc_Ini, $Parc_Fim, $RepCodBar, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix, $os_manual, $navio_manual, $porto_manual);
+    $result = $contas->updateContaCliente($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $Centro_Custo, $Conta_Bloqueto, $Historico, $Parc_Ini, $Parc_Fim, $RepCodBar, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix, $os_manual, $navio_manual,$porto_manual, $roe_manual, $government_taxes_manual, $bank_charges_manual, $discount_manual, $received_manual);
 
     } else {
     $result = "false";

@@ -117,8 +117,8 @@ const estadoInicial = {
 
     tiposOptions: [
         { label: '', value: '', },
-        { label: 'Pagar', value: 0 },
-        { label: 'Receber', value: 0 }
+        { label: 'Receber', value: 0 },
+        { label: 'Pagar', value: 1 }
     ],
 
     dadosIniciais: [],
@@ -182,10 +182,12 @@ const estadoInicial = {
 
     roe: 5,
 
-    bankCharges: 0,
+    bankCharges: '0',
     bankChargesChecked: false,
-    governmentTaxes: 0,
+    governmentTaxes: '0',
     governmentTaxesChecked: false,
+    discount: 0,
+    received: 0,
 
     alert: { type: "", msg: "" }
 }
@@ -211,6 +213,7 @@ class AddConta extends Component {
             await this.setState({ conta: this.props.location.state.conta })
             //console.log('Servicos: ' + JSON.stringify(this.state.tiposervico))
             //await this.loadData(this.state.tiposervico)
+            console.log(this.state.conta);
             await this.setState({
                 lancamento: moment(this.state.conta.Lancto).format('YYYY-MM-DD'),
                 tipo: this.state.conta.Tipo,
@@ -224,7 +227,7 @@ class AddConta extends Component {
                 parcelaInicial: this.state.conta.Parc_Ini,
                 parcelaFinal: this.state.conta.Parc_Fim,
                 numBoleto: this.state.conta.LinhaDig,
-                valor: new Intl.NumberFormat('pt-BR').format(this.state.conta.Valor),
+                valor: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.Valor),
                 saldo: parseFloat(this.state.conta.Saldo).toFixed(2).replaceAll('.', ','),
                 valorInicial: parseFloat(this.state.conta.Valor).toFixed(2).replaceAll('.', ','),
                 vencimento: moment(this.state.conta.Vencimento).format('YYYY-MM-DD'),
@@ -236,16 +239,26 @@ class AddConta extends Component {
                 meioPagamento: this.state.conta.meio_pagamento,
                 os: this.state.conta.os_manual,
                 navio: this.state.conta.navio_manual,
-                porto: this.state.conta.porto_manual
+                porto: this.state.conta.porto_manual,
+                roe: this.state.conta.roe_manual,
+                bankCharges: this.state.conta.bank_charges_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.bank_charges_manual) : '0,00',
+                bankChargesChecked: this.state.conta.bank_charges_manual && this.state.conta.bank_charges_manual > 0,
+                governmentTaxes: this.state.conta.government_taxes_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.government_taxes_manual) : '0,00',
+                governmentTaxesChecked: this.state.conta.government_taxes_manual && this.state.conta.government_taxes_manual > 0,
+                discount: this.state.conta.discount_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.discount_manual) : '0,00',
+                received: this.state.conta.received_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.received_manual) : '0,00',
             })
+            
+            this.setState({
+                manual: !!(this.state.os || this.state.navio || this.state.porto || this.state.roe || this.state.bankCharges || this.state.governmentTaxes || this.state.discount || this.state.received),
+            });
 
             if (this.state.contaProvisao != 0) {
                 await this.setState({ provisaoCheck: true })
             }
 
             await this.setState({ ultimaTransacao: await loader.getBody(`getUltimaTransacaoConta.php`, { chave: this.state.chave }) });
-            console.log(this.state.ultimaTransacao);
-            this.getDadosCliente();
+            this.getDadosCliente(true);
         }
         await this.loadAll();
 
@@ -292,10 +305,12 @@ class AddConta extends Component {
 
     }
 
-    getDadosCliente = async () => {
+    getDadosCliente = async (setting = false) => {
         const info = await loader.getBody(`getContatos.php`, { token: true, pessoa: this.state.pessoa })
 
-        this.setState({ bankCharges: 0, governmentTaxes: 0 });
+        if (!setting) {
+            this.setState({ bankCharges: '0', governmentTaxes: '0' });
+        }
 
         for (let i = 0; i < info.length; i++) {
             const e = info[i];
@@ -347,9 +362,9 @@ class AddConta extends Component {
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php')
         })
-        
+
         this.setState({
-            centrosCustosOptions: this.state.centrosCustos.map((c) => ({label: `CC: ${c.Codigo} - ${c.Descricao}`, value: c.chave}))
+            centrosCustosOptions: this.state.centrosCustos.map((c) => ({ label: `CC: ${c.Codigo} - ${c.Descricao}`, value: c.chave }))
         })
 
         if (this.state.chave) {
@@ -443,11 +458,11 @@ class AddConta extends Component {
                         codigoIdentificadorTributo: this.state.contaComplementar.codigo_identificador_tributo,
                         mesCompetNumRef: this.state.contaComplementar.mes_compet_num_ref,
                         dataApuracao: this.state.contaComplementar.data_apuracao,
-                        darfValor: new Intl.NumberFormat('pt-BR').format(this.state.contaComplementar.valor),
-                        darfMulta: new Intl.NumberFormat('pt-BR').format(this.state.contaComplementar.valor_multa),
-                        darfJuros: new Intl.NumberFormat('pt-BR').format(this.state.contaComplementar.valor_juros),
-                        darfOutros: new Intl.NumberFormat('pt-BR').format(this.state.contaComplementar.valor_outros),
-                        darfPagamento: new Intl.NumberFormat('pt-BR').format(this.state.contaComplementar.valor_pagamento),
+                        darfValor: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.contaComplementar.valor),
+                        darfMulta: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.contaComplementar.valor_multa),
+                        darfJuros: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.contaComplementar.valor_juros),
+                        darfOutros: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.contaComplementar.valor_outros),
+                        darfPagamento: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.contaComplementar.valor_pagamento),
                         tipoPix: this.state.contaComplementar.tipo_pix
                     })
 
@@ -477,7 +492,7 @@ class AddConta extends Component {
 
 
     salvarConta = async (validForm) => {
-        this.setState({ ...util.cleanState(this.state) })
+        this.setState({ ...util.cleanStates(this.state) })
 
         this.setState({ bloqueado: true, loading: true });
 
@@ -540,7 +555,7 @@ class AddConta extends Component {
                         values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.centroCusto}', '${this.state.contaDesconto}', '${this.state.historico}', '${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${this.state.numBoleto}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}'`,
                         meioPagamento: this.state.meioPagamentoNome,
                         valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
-                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${this.state.bankCharges}', '${this.state.governmentTaxes}'` : ""
+                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${this.state.bankCharges}', '${this.state.governmentTaxes}', '${this.state.discount}', '${this.state.received}'` : ""
                     }).then(
                         async res => {
                             console.log(res.data);
@@ -563,7 +578,7 @@ class AddConta extends Component {
                         values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.codBarras}', '${this.state.centroCusto}', '${this.state.historico}',  '${this.state.contaDesconto}','${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}', ''`,
                         meioPagamento: this.state.meioPagamentoNome,
                         valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
-                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}'` : ""
+                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${this.state.bankCharges}', '${this.state.governmentTaxes}', '${this.state.discount}', '${this.state.received}'` : ""
                     }).then(
                         async res => {
                             console.log(res.data);
@@ -623,7 +638,12 @@ class AddConta extends Component {
 
                         os_manual: this.state.os,
                         navio_manual: this.state.navio,
-                        porto_manual: this.state.porto
+                        porto_manual: this.state.porto,
+                        roe_manual: this.state.roe,
+                        government_taxes_manual: this.state.governmentTaxes,
+                        bank_charges_manual: this.state.bankCharges,
+                        discount_manual: this.state.discount,
+                        received_manual: this.state.received
                     }).then(
                         async res => {
                             if (res.data === true) {
@@ -682,7 +702,12 @@ class AddConta extends Component {
 
                         os_manual: this.state.os,
                         navio_manual: this.state.navio,
-                        porto_manual: this.state.porto
+                        porto_manual: this.state.porto,
+                        roe_manual: this.state.roe,
+                        government_taxes_manual: this.state.governmentTaxes,
+                        bank_charges_manual: this.state.bankCharges,
+                        discount_manual: this.state.discount,
+                        received_manual: this.state.received
                     }).then(
                         async res => {
                             if (res.data === true) {
@@ -1034,10 +1059,11 @@ class AddConta extends Component {
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.dataApuracao)
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfValor && this.state.darfValor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.')))
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfPagamento && this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.')))
-        validations.push(!this.state.manual || !this.state.governmentTaxesChecked || !isNaN(this.state.governmentTaxes) && this.state.governmentTaxes > 0);
-        validations.push(!this.state.manual || !this.state.bankChargesChecked || !isNaN(this.state.bankCharges) && this.state.bankCharges > 0);
+        validations.push(!this.state.manual || !this.state.governmentTaxesChecked || !isNaN(this.state.governmentTaxes.replaceAll('.', '').replaceAll(',', '.')) && this.state.governmentTaxes.replaceAll('.','').replaceAll(',','.') > 0);
+        validations.push(!this.state.manual || !this.state.bankChargesChecked || !isNaN(this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.')) && this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.') > 0);
         validations.push(!this.state.osExiste)
         validations.push(!this.state.bloqueado)
+        console.log(validations);
 
         const validForm = validations.reduce((t, a) => t && a)
 
@@ -1181,7 +1207,7 @@ class AddConta extends Component {
                                                                 <Select isDisabled className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.descontoConta)[0]} />
                                                             </div>
                                                             <div className='col-4'>
-                                                                <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.desconto} onChange={async e => { this.setState({ desconto: e.currentTarget.value }) }} onBlur={async e => { this.setState({ desconto: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.desconto} onChange={async e => { this.setState({ desconto: e.currentTarget.value }) }} onBlur={async e => { this.setState({ desconto: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                             </div>
                                                             <div className='col-4'>
                                                                 <Field className="form-control nextToSelect" type="text" value={this.state.descontoComplemento} onChange={async e => { this.setState({ descontoComplemento: e.currentTarget.value }) }} />
@@ -1205,7 +1231,7 @@ class AddConta extends Component {
                                                                         <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.retencaoInssConta)[0]} search={true} isDisabled />
                                                                     </div>
                                                                     <div className='col-4'>
-                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoInss} onChange={async e => { this.setState({ retencaoInss: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoInss: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoInss} onChange={async e => { this.setState({ retencaoInss: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoInss: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                                     </div>
                                                                     <div className='col-4'>
                                                                         <Field className="form-control nextToSelect" type="text" value={this.state.retencaoInssComplemento} onChange={async e => { this.setState({ retencaoInssComplemento: e.currentTarget.value }) }} />
@@ -1232,7 +1258,7 @@ class AddConta extends Component {
                                                                         <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.retencaoIrConta)[0]} search={true} isDisabled />
                                                                     </div>
                                                                     <div className='col-4'>
-                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoIr} onChange={async e => { this.setState({ retencaoIr: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoIr: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoIr} onChange={async e => { this.setState({ retencaoIr: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoIr: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                                     </div>
                                                                     <div className='col-4'>
                                                                         <Field className="form-control nextToSelect" type="text" value={this.state.retencaoIrComplemento} onChange={async e => { this.setState({ retencaoIrComplemento: e.currentTarget.value }) }} />
@@ -1259,7 +1285,7 @@ class AddConta extends Component {
                                                                         <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.retencaoIssConta)[0]} search={true} isDisabled />
                                                                     </div>
                                                                     <div className='col-4'>
-                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoIss} onChange={async e => { this.setState({ retencaoIss: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoIss: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoIss} onChange={async e => { this.setState({ retencaoIss: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoIss: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                                     </div>
                                                                     <div className='col-4'>
                                                                         <Field className="form-control nextToSelect" type="text" value={this.state.retencaoIssComplemento} onChange={async e => { this.setState({ retencaoIssComplemento: e.currentTarget.value }) }} />
@@ -1286,7 +1312,7 @@ class AddConta extends Component {
                                                                         <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.retencaoPisConta)[0]} search={true} isDisabled />
                                                                     </div>
                                                                     <div className='col-4'>
-                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoPis} onChange={async e => { this.setState({ retencaoPis: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoPis: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoPis} onChange={async e => { this.setState({ retencaoPis: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoPis: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                                     </div>
                                                                     <div className='col-4'>
                                                                         <Field className="form-control nextToSelect" type="text" value={this.state.retencaoPisComplemento} onChange={async e => { this.setState({ retencaoPisComplemento: e.currentTarget.value }) }} />
@@ -1313,7 +1339,7 @@ class AddConta extends Component {
                                                                         <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.retencaoCofinsConta)[0]} search={true} isDisabled />
                                                                     </div>
                                                                     <div className='col-4'>
-                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoCofins} onChange={async e => { this.setState({ retencaoCofins: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoCofins: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoCofins} onChange={async e => { this.setState({ retencaoCofins: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoCofins: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                                     </div>
                                                                     <div className='col-4'>
                                                                         <Field className="form-control nextToSelect" type="text" value={this.state.retencaoCofinsComplemento} onChange={async e => { this.setState({ retencaoCofinsComplemento: e.currentTarget.value }) }} />
@@ -1340,7 +1366,7 @@ class AddConta extends Component {
                                                                         <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.retencaoCsllConta)[0]} search={true} isDisabled />
                                                                     </div>
                                                                     <div className='col-4'>
-                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoCsll} onChange={async e => { this.setState({ retencaoCsll: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoCsll: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                        <Field className="form-control nextToSelect text-right" type="text" onClick={(e) => e.target.select()} value={this.state.retencaoCsll} onChange={async e => { this.setState({ retencaoCsll: e.currentTarget.value }) }} onBlur={async e => { this.setState({ retencaoCsll: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                                     </div>
                                                                     <div className='col-4'>
                                                                         <Field className="form-control nextToSelect" type="text" value={this.state.retencaoCsllComplemento} onChange={async e => { this.setState({ retencaoCsllComplemento: e.currentTarget.value }) }} />
@@ -1562,7 +1588,7 @@ class AddConta extends Component {
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             {this.state.saldo == this.state.valorInicial &&
-                                                                <Field className="form-control text-right" type="text" value={this.state.valor} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ valor: e.currentTarget.value }) }} onBlur={async e => { this.setState({ valor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                <Field className="form-control text-right" type="text" value={this.state.valor} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ valor: e.currentTarget.value }) }} onBlur={async e => { this.setState({ valor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                             }
                                                             {this.state.saldo != this.state.valorInicial &&
                                                                 <Field className="form-control text-right" disabled type="text" value={this.state.valor} />
@@ -1685,7 +1711,7 @@ class AddConta extends Component {
                                                                         <div className='col-1 errorMessage'>
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control" type="text" value={this.state.bankCharges} disabled={true} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.bankCharges} disabled={true} />
                                                                         </div>
                                                                         <div className="col-1">
                                                                         </div>
@@ -1703,11 +1729,27 @@ class AddConta extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control" type="text" value={this.state.governmentTaxes} onChange={async e => { this.setState({ governmentTaxes: e.currentTarget.value }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.governmentTaxes} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ governmentTaxes: e.currentTarget.value }) }} onBlur={async e => { this.setState({ governmentTaxes: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                                         </div>
                                                                         <div className='col-1'></div>
                                                                     </>
                                                                 }
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Descontos</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control text-right" type="text" value={this.state.discount} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ discount: e.currentTarget.value }) }} onBlur={async e => { this.setState({ discount: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                </div>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Recebimento de Remessa</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control text-right" type="text" value={this.state.received} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ received: e.currentTarget.value }) }} onBlur={async e => { this.setState({ received: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                </div>
                                                             </>
                                                         }
 
@@ -1801,7 +1843,7 @@ class AddConta extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.darfValor} onChange={async e => { this.setState({ darfValor: e.currentTarget.value }) }} onBlur={async e => { this.setState({ darfValor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfValor} onChange={async e => { this.setState({ darfValor: e.currentTarget.value }) }} onBlur={async e => { this.setState({ darfValor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Multa</label>
@@ -1809,7 +1851,7 @@ class AddConta extends Component {
                                                                         <div className='col-1 errorMessage'>
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.darfMulta} onChange={async e => { this.setState({ darfMulta: e.currentTarget.value }) }} onBlur={async e => { this.setState({ darfValor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfMulta} onChange={async e => { this.setState({ darfMulta: e.currentTarget.value }) }} onBlur={async e => { this.setState({ darfValor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Juros</label>
@@ -1817,7 +1859,7 @@ class AddConta extends Component {
                                                                         <div className='col-1 errorMessage'>
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.darfJuros} onChange={async e => { this.setState({ darfJuros: e.currentTarget.value }) }} onBlur={async e => { this.setState({ darfValor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfJuros} onChange={async e => { this.setState({ darfJuros: e.currentTarget.value }) }} onBlur={async e => { this.setState({ darfValor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Valor de Pagamento</label>
@@ -1828,7 +1870,7 @@ class AddConta extends Component {
                                                                             }
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.darfPagamento} onChange={async e => { this.setState({ darfPagamento: e.currentTarget.value }) }} onBlur={async e => { this.setState({ darfPagamento: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfPagamento} onChange={async e => { this.setState({ darfPagamento: e.currentTarget.value }) }} onBlur={async e => { this.setState({ darfPagamento: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                                         </div>
                                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                             <label>Outros Valores</label>
@@ -1836,7 +1878,7 @@ class AddConta extends Component {
                                                                         <div className='col-1 errorMessage'>
                                                                         </div>
                                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.darfOutros} onChange={async e => { this.setState({ darfOutros: e.currentTarget.value }) }} onBlur={async e => { this.setState({ darfValor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
+                                                                            <Field className="form-control text-right" type="text" value={this.state.darfOutros} onChange={async e => { this.setState({ darfOutros: e.currentTarget.value }) }} onBlur={async e => { this.setState({ darfValor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                                         </div>
                                                                     </>
                                                                 }
