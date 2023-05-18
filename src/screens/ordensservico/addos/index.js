@@ -3242,7 +3242,7 @@ class AddOS extends Component {
             ],
             loading: true
         })
-        
+
         if (parseInt(this.state.eventoChave) === 0) {
             await apiEmployee.post(`insertServicoItemBasico.php`, {
                 token: true,
@@ -4749,7 +4749,14 @@ class AddOS extends Component {
                                                                             <th className='text-center'>
                                                                                 <span>
                                                                                     {!this.state.eventos[1] &&
-                                                                                        <FontAwesomeIcon icon={faPlus} onClick={() => this.setItemEdit()} />
+                                                                                        <Link to=
+                                                                                            {{
+                                                                                                pathname: `/ordensservico/addevento/0`,
+                                                                                                state: { evento: {}, os: { ...this.state.os, addOS: true } }
+                                                                                            }}
+                                                                                        >
+                                                                                            <FontAwesomeIcon icon={faPlus} />
+                                                                                        </Link>
                                                                                     }
                                                                                 </span>
                                                                             </th>
