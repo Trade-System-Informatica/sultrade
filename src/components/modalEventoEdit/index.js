@@ -68,7 +68,9 @@ class ModalEventoEdit extends Component {
                 itemEdit.valores.find((e) => e.titulo == "VCP").onChange(value);
             }
         } else if (itemEdit.valores.find((e, i) => i === index)?.titulo == "Taxa" && !itemEdit.valores.find((e) => e.titulo == "Repasse")?.valor) {
-            itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Valor" ? ({ ...e, valor2: itemEdit.valores.find((e, i) => i === index)?.options.find((e) => e.value == value)?.money }) : ({ ...e }))
+            const newValue = itemEdit.valores.find((e, i) => i === index)?.options.find((e) => e.value == value)?.money;
+            
+            itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Valor" ? ({ ...e, valor2: newValue ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(newValue) : '0,00'}) : ({ ...e }))
         } else if (itemEdit.valores.find((e, i) => i === index)?.titulo == "Repasse") {
             if (value) {
                 const VCP = itemEdit.valores.find((e) => e.titulo == "VCP")?.valor;
@@ -157,7 +159,7 @@ class ModalEventoEdit extends Component {
                                                                         value={valor.valor2}
                                                                         disabled={valor.disabled2}
                                                                         onChange={async (e) => this.changeState(index, e.currentTarget.value, 2)}
-                                                                        onBlur={async (e) => { this.changeState(index, Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR').format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00', 2, true); await valor.onBlur2(e.currentTarget.value) }}
+                                                                    onBlur={async (e) => { this.changeState(index, Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00', 2, true); await valor.onBlur2(e.currentTarget.value) }}
                                                                     />
                                                                 </div>
 

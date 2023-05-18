@@ -57,7 +57,7 @@ const estadoInicial = {
 
     deleteSolicitao: false,
 
-    eventoChave: '',
+    eventoChave: 0,
 
     clientes: [],
     clientesOptions: [],
@@ -105,7 +105,7 @@ const estadoInicial = {
     itemPermissao: '',
     itemInfo: [],
     itemNome: '',
-    itemChave: '',
+    eventoChave: '',
     itemAdd: {},
     itemEdit: {},
     itemFinanceiro: {},
@@ -705,10 +705,10 @@ class AddOS extends Component {
                 eventoVlrc: evento.valor1.replace('.', ','),
                 eventoRepasse: evento.repasse,
                 eventoFornecedorCusteio: evento.Fornecedor_Custeio,
+                eventoChave: evento.chave,
 
                 modalItemAberto: true,
                 itemNome: evento.descricao,
-                itemChave: evento.chave,
                 itemPermissao: "SERVICOS_ITENS",
 
                 dadosIniciaisSol: [
@@ -743,7 +743,7 @@ class AddOS extends Component {
 
                 modalItemAberto: true,
                 itemNome: '',
-                itemChave: 0,
+                eventoChave: 0,
                 itemPermissao: "SERVICOS_ITENS",
 
                 dadosIniciaisSol: [],
@@ -3242,7 +3242,7 @@ class AddOS extends Component {
             ],
             loading: true
         })
-
+        
         if (parseInt(this.state.eventoChave) === 0) {
             await apiEmployee.post(`insertServicoItemBasico.php`, {
                 token: true,
