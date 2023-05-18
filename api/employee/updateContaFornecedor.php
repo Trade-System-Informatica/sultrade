@@ -51,14 +51,13 @@ if($objData != NULL){
     $navio_manual = prepareInput($objData->navio_manual);
     $porto_manual = prepareInput($objData->porto_manual);
     $roe_manual = prepareInput($objData->roe_manual);
-    $bank_charges_manual = prepareInput($objData->bank_charges_manual);
     $discount_manual = prepareInput($objData->discount_manual);
     $received_manual = prepareInput($objData->received_manual);
 
     
     $contas = new Contas();
 
-    $result = $contas->updateContaFornecedor($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $RepCodBar, $Centro_Custo, $Historico, $Conta_Desconto, $Parc_Ini, $Parc_Fim, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix, $os_manual, $navio_manual, $porto_manual, $roe_manual, $bank_charges_manual, $discount_manual, $received_manual);
+    $result = $contas->updateContaFornecedor($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $RepCodBar, $Centro_Custo, $Historico, $Conta_Desconto, $Parc_Ini, $Parc_Fim, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix, $os_manual, $navio_manual, $porto_manual, $roe_manual, $discount_manual, $received_manual);
 
 } else {
     $result = "false";

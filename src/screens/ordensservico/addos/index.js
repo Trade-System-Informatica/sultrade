@@ -369,10 +369,18 @@ class AddOS extends Component {
         let eventosTotal = 0;
 
         this.state.eventos.map((evento) => {
-            if (evento.Moeda == 5) {
-                eventosTotal += parseFloat(evento.valor);
-            } else if (evento.Moeda == 6) {
-                eventosTotal += (parseFloat(evento.valor) * (parseFloat(this.state.os.ROE) == 0 ? 5 : parseFloat(this.state.os.ROE)));
+            if (evento.tipo_sub == 0 || evento.tipo_sub == 1) {
+                if (evento.Moeda == 5) {
+                    eventosTotal += parseFloat(evento.valor);
+                } else if (evento.Moeda == 6) {
+                    eventosTotal += (parseFloat(evento.valor) * (parseFloat(this.state.os.ROE) == 0 ? 5 : parseFloat(this.state.os.ROE)));
+                }
+            } else {
+                if (evento.Moeda == 5) {
+                    eventosTotal -= parseFloat(evento.valor);
+                } else if (evento.Moeda == 6) {
+                    eventosTotal -= (parseFloat(evento.valor) * (parseFloat(this.state.os.ROE) == 0 ? 5 : parseFloat(this.state.os.ROE)));
+                }
             }
         })
 

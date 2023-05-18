@@ -670,7 +670,7 @@ class Contas
 
         if ($dadosManuais) {
             $values = $values . ", " . $dadosManuais;
-            $cols .= ", os_manual, navio_manual, porto_manual, roe_manual, bank_charges_manual, sdiscount_manual, received_manual";
+            $cols .= ", os_manual, navio_manual, porto_manual, roe_manual, discount_manual, received_manual";
         }
 
         $result = $database->doInsert('contas_aberto', $cols, $values);
@@ -701,7 +701,7 @@ class Contas
 
         if ($dadosManuais) {
             $values = $values . ", " . $dadosManuais;
-            $cols .= ", os_manual, navio_manual, porto_manual, roe_manual, bank_charges_manual, discount_manual, received_manual";
+            $cols .= ", os_manual, navio_manual, porto_manual, roe_manual, discount_manual, received_manual";
         }
 
         $result = $database->doInsert('contas_aberto', $cols, $values);
@@ -989,7 +989,7 @@ class Contas
         }
     }
 
-    public static function updateContaCliente($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $Centro_Custo, $Conta_Desconto, $Historico, $Parc_Ini, $Parc_Fim, $RepCodBar, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix, $os_manual = null, $navio_manual = null, $porto_manual = null, $roe_manual = null, $bank_charges_manual = null, $discount_manual = null, $received_manual = null)
+    public static function updateContaCliente($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $Centro_Custo, $Conta_Desconto, $Historico, $Parc_Ini, $Parc_Fim, $RepCodBar, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix, $os_manual = null, $navio_manual = null, $porto_manual = null, $roe_manual = null, $discount_manual = null, $received_manual = null)
     {
         $database = new Database();
 
@@ -1006,9 +1006,6 @@ class Contas
         }
         if ($roe_manual) {
             $query = $query . ", roe_manual = '$roe_manual'";
-        }
-        if ($bank_charges_manual) {
-            $query = $query . ", bank_charges_manual = '$bank_charges_manual'";
         }
         if ($discount_manual) {
             $query = $query . ", discount_manual = '$discount_manual'";
@@ -1057,7 +1054,7 @@ class Contas
         }
     }
 
-    public static function updateContaFornecedor($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $RepCodBar, $Centro_Custo, $Historico, $Conta_Desconto, $Parc_Ini, $Parc_Fim, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix, $os_manual = null, $navio_manual = null, $porto_manual = null, $roe_manual = null, $bank_charges_manual = null, $discount_manual = null, $received_manual = null)
+    public static function updateContaFornecedor($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $RepCodBar, $Centro_Custo, $Historico, $Conta_Desconto, $Parc_Ini, $Parc_Fim, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix, $os_manual = null, $navio_manual = null, $porto_manual = null, $roe_manual = null, $discount_manual = null, $received_manual = null)
     {
         $database = new Database();
 
@@ -1074,9 +1071,6 @@ class Contas
         }
         if ($roe_manual) {
             $query = $query . ", roe_manual = '$roe_manual'";
-        }
-        if ($bank_charges_manual) {
-            $query = $query . ", bank_charges_manual = '$bank_charges_manual'";
         }
         if ($discount_manual) {
             $query = $query . ", discount_manual = '$discount_manual'";
@@ -1360,7 +1354,6 @@ class Contas
                                           GROUP_CONCAT((SELECT os_portos.Descricao FROM contas_aberto AS Cont LEFT JOIN os_portos ON Cont.porto_manual = os_portos.chave WHERE Cont.chave = contas_aberto.chave ORDER BY Cont.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto_manual,
                                           GROUP_CONCAT(contas_aberto.os_manual SEPARATOR '@.@') AS os_manual,
                                           GROUP_CONCAT(contas_aberto.roe_manual SEPARATOR '@.@') AS roe_manual,
-                                          GROUP_CONCAT(contas_aberto.bank_charges_manual SEPARATOR '@.@') AS bank_charges_manual,
                                           GROUP_CONCAT(contas_aberto.discount_manual SEPARATOR '@.@') AS discount_manual,
                                           GROUP_CONCAT(contas_aberto.received_manual SEPARATOR '@.@') AS received_manual",                $where . " AND contas_aberto.Tipo = '$tipo'" . $groupBy
             );
@@ -1395,7 +1388,6 @@ class Contas
                                           GROUP_CONCAT((SELECT os_portos.Descricao FROM contas_aberto AS Cont LEFT JOIN os_portos ON Cont.porto_manual = os_portos.chave WHERE Cont.chave = contas_aberto.chave ORDER BY Cont.chave DESC LIMIT 1) SEPARATOR '@.@') AS porto_manual
                                           GROUP_CONCAT(contas_aberto.os_manual SEPARATOR '@.@') AS os_manual,
                                           GROUP_CONCAT(contas_aberto.roe_manual SEPARATOR '@.@') AS roe_manual,
-                                          GROUP_CONCAT(contas_aberto.bank_charges_manual SEPARATOR '@.@') AS bank_charges_manual,
                                           GROUP_CONCAT(contas_aberto.discount_manual SEPARATOR '@.@') AS discount_manual,
                                           GROUP_CONCAT(contas_aberto.received_manual SEPARATOR '@.@') AS received_manual",
                 "contas_aberto.Tipo = '$tipo' " . $groupBy

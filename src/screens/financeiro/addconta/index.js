@@ -182,8 +182,6 @@ const estadoInicial = {
 
     roe: 5,
 
-    bankCharges: '0',
-    bankChargesChecked: false,
     discount: 0,
     received: 0,
 
@@ -239,14 +237,12 @@ class AddConta extends Component {
                 navio: this.state.conta.navio_manual,
                 porto: this.state.conta.porto_manual,
                 roe: this.state.conta.roe_manual,
-                bankCharges: this.state.conta.bank_charges_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.bank_charges_manual) : '0,00',
-                bankChargesChecked: this.state.conta.bank_charges_manual && this.state.conta.bank_charges_manual > 0,
                 discount: this.state.conta.discount_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.discount_manual) : '0,00',
                 received: this.state.conta.received_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.received_manual) : '0,00',
             })
             
             this.setState({
-                manual: !!(this.state.os || this.state.navio || this.state.porto || this.state.roe || this.state.bankCharges || this.state.discount || this.state.received),
+                manual: !!(this.state.os || this.state.navio || this.state.porto || this.state.roe || this.state.discount || this.state.received),
             });
 
             if (this.state.contaProvisao != 0) {
@@ -254,7 +250,6 @@ class AddConta extends Component {
             }
 
             await this.setState({ ultimaTransacao: await loader.getBody(`getUltimaTransacaoConta.php`, { chave: this.state.chave }) });
-            this.getDadosCliente(true);
         }
         await this.loadAll();
 
@@ -299,28 +294,6 @@ class AddConta extends Component {
             }
         })
 
-    }
-
-    getDadosCliente = async (setting = false) => {
-        const info = await loader.getBody(`getContatos.php`, { token: true, pessoa: this.state.pessoa })
-
-        if (!setting) {
-            this.setState({ bankCharges: '0' });
-        }
-
-        for (let i = 0; i < info.length; i++) {
-            const e = info[i];
-
-            if (e.Tipo == "BK" && ["SIM", "S"].includes(e.Campo1.toUpperCase())) {
-                const parametros = await loader.getBody(`getParametros.php`, { token: true, empresa: this.state.usuarioLogado.empresa });
-
-                if (parametros[0].bank_charges) {
-                    this.setState({ bankCharges: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parametros[0].bank_charges) });
-                } else {
-                    this.setState({ bankChargesChecked: false })
-                }
-            }
-        }
     }
 
     componentDidUpdate = async (prevProps, prevState) => {
@@ -548,7 +521,7 @@ class AddConta extends Component {
                         values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.centroCusto}', '${this.state.contaDesconto}', '${this.state.historico}', '${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${this.state.numBoleto}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}'`,
                         meioPagamento: this.state.meioPagamentoNome,
                         valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
-                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${this.state.bankCharges}', '${this.state.discount}', '${this.state.received}'` : ""
+                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${this.state.discount}', '${this.state.received}'` : ""
                     }).then(
                         async res => {
                             console.log(res.data);
@@ -571,7 +544,7 @@ class AddConta extends Component {
                         values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.codBarras}', '${this.state.centroCusto}', '${this.state.historico}',  '${this.state.contaDesconto}','${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}', ''`,
                         meioPagamento: this.state.meioPagamentoNome,
                         valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
-                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${this.state.bankCharges}', '${this.state.discount}', '${this.state.received}'` : ""
+                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${this.state.discount}', '${this.state.received}'` : ""
                     }).then(
                         async res => {
                             console.log(res.data);
@@ -633,7 +606,6 @@ class AddConta extends Component {
                         navio_manual: this.state.navio,
                         porto_manual: this.state.porto,
                         roe_manual: this.state.roe,
-                        bank_charges_manual: this.state.bankCharges,
                         discount_manual: this.state.discount,
                         received_manual: this.state.received
                     }).then(
@@ -696,7 +668,6 @@ class AddConta extends Component {
                         navio_manual: this.state.navio,
                         porto_manual: this.state.porto,
                         roe_manual: this.state.roe,
-                        bank_charges_manual: this.state.bankCharges,
                         discount_manual: this.state.discount,
                         received_manual: this.state.received
                     }).then(
@@ -1050,7 +1021,6 @@ class AddConta extends Component {
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.dataApuracao)
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfValor && this.state.darfValor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.')))
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfPagamento && this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.')))
-        validations.push(!this.state.manual || !this.state.bankChargesChecked || !isNaN(this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.')) && this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.') > 0);
         validations.push(!this.state.osExiste)
         validations.push(!this.state.bloqueado)
         console.log(validations);
@@ -1464,7 +1434,7 @@ class AddConta extends Component {
                                                         {this.state.tipo &&
                                                             <>
                                                                 <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
-                                                                    <Select className='SearchSelect' options={this.state.pessoasOptions.filter(e => this.filterSearch(e, this.state.pessoasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ pessoasOptionsTexto: e }) }} value={this.state.pessoasOptions.filter(option => option.value == this.state.pessoa)[0]} search={true} onChange={async (e) => { await this.setState({ pessoa: e.value, }); if (this.state.tipo == 1 && this.state.provisaoCheck) { await this.setState({ contaProvisao: await loader.getContaPessoa(this.state.pessoa, 'provisao') }) } else if (this.state.tipo == 0) { await this.setState({ contaDesconto: await loader.getContaPessoa(this.state.pessoa) }); this.getDadosCliente(); } }} />
+                                                                    <Select className='SearchSelect' options={this.state.pessoasOptions.filter(e => this.filterSearch(e, this.state.pessoasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ pessoasOptionsTexto: e }) }} value={this.state.pessoasOptions.filter(option => option.value == this.state.pessoa)[0]} search={true} onChange={async (e) => { await this.setState({ pessoa: e.value, }); if (this.state.tipo == 1 && this.state.provisaoCheck) { await this.setState({ contaProvisao: await loader.getContaPessoa(this.state.pessoa, 'provisao') }) } else if (this.state.tipo == 0) { await this.setState({ contaDesconto: await loader.getContaPessoa(this.state.pessoa) }); } }} />
                                                                 </div>
                                                                 <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
                                                                     {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
@@ -1693,21 +1663,7 @@ class AddConta extends Component {
                                                                 </div>
                                                                 <div className='col-1'></div>
 
-                                                                {this.state.bankChargesChecked &&
-                                                                    <>
-                                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                            <label>Bank Charges</label>
-                                                                        </div>
-                                                                        <div className='col-1 errorMessage'>
-                                                                        </div>
-                                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.bankCharges} disabled={true} />
-                                                                        </div>
-                                                                        <div className="col-1">
-                                                                        </div>
-                                                                    </>
-                                                                }
-
+                                                               
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                     <label>Descontos</label>
                                                                 </div>
