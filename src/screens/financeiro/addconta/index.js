@@ -184,8 +184,6 @@ const estadoInicial = {
 
     bankCharges: '0',
     bankChargesChecked: false,
-    governmentTaxes: '0',
-    governmentTaxesChecked: false,
     discount: 0,
     received: 0,
 
@@ -243,14 +241,12 @@ class AddConta extends Component {
                 roe: this.state.conta.roe_manual,
                 bankCharges: this.state.conta.bank_charges_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.bank_charges_manual) : '0,00',
                 bankChargesChecked: this.state.conta.bank_charges_manual && this.state.conta.bank_charges_manual > 0,
-                governmentTaxes: this.state.conta.government_taxes_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.government_taxes_manual) : '0,00',
-                governmentTaxesChecked: this.state.conta.government_taxes_manual && this.state.conta.government_taxes_manual > 0,
                 discount: this.state.conta.discount_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.discount_manual) : '0,00',
                 received: this.state.conta.received_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.received_manual) : '0,00',
             })
             
             this.setState({
-                manual: !!(this.state.os || this.state.navio || this.state.porto || this.state.roe || this.state.bankCharges || this.state.governmentTaxes || this.state.discount || this.state.received),
+                manual: !!(this.state.os || this.state.navio || this.state.porto || this.state.roe || this.state.bankCharges || this.state.discount || this.state.received),
             });
 
             if (this.state.contaProvisao != 0) {
@@ -309,7 +305,7 @@ class AddConta extends Component {
         const info = await loader.getBody(`getContatos.php`, { token: true, pessoa: this.state.pessoa })
 
         if (!setting) {
-            this.setState({ bankCharges: '0', governmentTaxes: '0' });
+            this.setState({ bankCharges: '0' });
         }
 
         for (let i = 0; i < info.length; i++) {
@@ -323,9 +319,6 @@ class AddConta extends Component {
                 } else {
                     this.setState({ bankChargesChecked: false })
                 }
-            }
-            if (e.Tipo == "GT" && ["SIM", "S"].includes(e.Campo1.toUpperCase())) {
-                this.setState({ governmentTaxesChecked: true });
             }
         }
     }
@@ -555,7 +548,7 @@ class AddConta extends Component {
                         values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.centroCusto}', '${this.state.contaDesconto}', '${this.state.historico}', '${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${this.state.numBoleto}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}'`,
                         meioPagamento: this.state.meioPagamentoNome,
                         valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
-                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${this.state.bankCharges}', '${this.state.governmentTaxes}', '${this.state.discount}', '${this.state.received}'` : ""
+                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${this.state.bankCharges}', '${this.state.discount}', '${this.state.received}'` : ""
                     }).then(
                         async res => {
                             console.log(res.data);
@@ -578,7 +571,7 @@ class AddConta extends Component {
                         values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.codBarras}', '${this.state.centroCusto}', '${this.state.historico}',  '${this.state.contaDesconto}','${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}', ''`,
                         meioPagamento: this.state.meioPagamentoNome,
                         valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
-                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${this.state.bankCharges}', '${this.state.governmentTaxes}', '${this.state.discount}', '${this.state.received}'` : ""
+                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${this.state.bankCharges}', '${this.state.discount}', '${this.state.received}'` : ""
                     }).then(
                         async res => {
                             console.log(res.data);
@@ -640,7 +633,6 @@ class AddConta extends Component {
                         navio_manual: this.state.navio,
                         porto_manual: this.state.porto,
                         roe_manual: this.state.roe,
-                        government_taxes_manual: this.state.governmentTaxes,
                         bank_charges_manual: this.state.bankCharges,
                         discount_manual: this.state.discount,
                         received_manual: this.state.received
@@ -704,7 +696,6 @@ class AddConta extends Component {
                         navio_manual: this.state.navio,
                         porto_manual: this.state.porto,
                         roe_manual: this.state.roe,
-                        government_taxes_manual: this.state.governmentTaxes,
                         bank_charges_manual: this.state.bankCharges,
                         discount_manual: this.state.discount,
                         received_manual: this.state.received
@@ -1059,7 +1050,6 @@ class AddConta extends Component {
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.dataApuracao)
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfValor && this.state.darfValor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.')))
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfPagamento && this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.')))
-        validations.push(!this.state.manual || !this.state.governmentTaxesChecked || !isNaN(this.state.governmentTaxes.replaceAll('.', '').replaceAll(',', '.')) && this.state.governmentTaxes.replaceAll('.','').replaceAll(',','.') > 0);
         validations.push(!this.state.manual || !this.state.bankChargesChecked || !isNaN(this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.')) && this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.') > 0);
         validations.push(!this.state.osExiste)
         validations.push(!this.state.bloqueado)
@@ -1718,22 +1708,6 @@ class AddConta extends Component {
                                                                     </>
                                                                 }
 
-                                                                {this.state.governmentTaxesChecked &&
-                                                                    <>
-                                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                            <label>Government Taxes</label>
-                                                                        </div>
-                                                                        <div className='col-1 errorMessage'>
-                                                                            {!this.state.governmentTaxes &&
-                                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                                            }
-                                                                        </div>
-                                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                            <Field className="form-control text-right" type="text" value={this.state.governmentTaxes} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ governmentTaxes: e.currentTarget.value }) }} onBlur={async e => { this.setState({ governmentTaxes: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
-                                                                        </div>
-                                                                        <div className='col-1'></div>
-                                                                    </>
-                                                                }
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                     <label>Descontos</label>
                                                                 </div>
