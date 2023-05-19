@@ -1811,7 +1811,7 @@ class AddOS extends Component {
                                         <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Swift Code:</b> BRASBRRJCTA</td>
                                     </tr>
                                     <tr>
-                                        <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>IBAN:</b> BR640000000002694000161440C1</td>
+                                        <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>IBAN:</b> BR6400000000026940001614410C1</td>
                                     </tr>
                                     <tr>
                                         <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Branch's number:</b> 2694-8</td>
@@ -1835,7 +1835,7 @@ class AddOS extends Component {
                             <div><span className='pdfTitle'>Branch's name:</span> <span>Rio Grande</span></div>
                             <div><span className='pdfTitle'>Address:</span> <span>Benjamin Constant St, 72</span></div>
                             <div><span className='pdfTitle'>Swift Code:</span> <span>BRASBRRJCTA</span></div>
-                            <div><span className='pdfTitle'>IBAN:</span> <span>BR640000000002694000161440C1</span></div>
+                            <div><span className='pdfTitle'>IBAN:</span> <span>BR6400000000026940001614410C1</span></div>
                             <div><span className='pdfTitle'>Branch's number:</span> <span>2694-8</span></div>
                             <div><span className='pdfTitle'>Account number:</span> <span>161441-X</span></div>
                             <div><span className='pdfTitle'>Account name:</span> <span>SUL TRADE AGENCIAMENTOS MARITIMOS LTDA-ME</span></div>
@@ -3109,7 +3109,7 @@ class AddOS extends Component {
                                 <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Swift Code:</b> BRASBRRJCTA</td>
                             </tr>
                             <tr>
-                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>IBAN:</b> BR640000000002694000161440C1</td>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>IBAN:</b> BR6400000000026940001614410C1</td>
                             </tr>
                             <tr>
                                 <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Branch's number:</b> 2694-8</td>

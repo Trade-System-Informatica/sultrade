@@ -9,7 +9,7 @@ import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrashAlt, faPen, faPlus, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
+import { faTrashAlt, faPen, faPlus, faChevronDown, faChevronUp, faCheck } from '@fortawesome/free-solid-svg-icons'
 import { confirmAlert } from 'react-confirm-alert'
 import AddButton from '../../../components/addButton';
 import 'react-confirm-alert/src/react-confirm-alert.css'
@@ -114,6 +114,52 @@ class ContasReceber extends Component {
             },
             response => { this.erroApi(response) }
         )
+    }
+
+    fazerBaixa = async (chave, nome) => {
+        this.setState({ deleteConta: true })
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return (
+                    <div className='custom-ui text-center'>
+                        <h1>{NOME_EMPRESA}</h1>
+                        <p>Deseja fazer baixa da conta de {nome}? </p>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-danger w-25"
+                            onClick={
+                                async () => {
+                                    onClose()
+                                }
+                            }
+                        >
+                            Não
+                        </button>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-success w-25"
+                            onClick={
+                                async () => {
+                                    await apiEmployee.post(`fazerBaixaConta.php`, {
+                                        token: true,
+                                        chave
+                                    }).then(
+                                        res => {
+                                            this.loadAll();
+                                        },
+                                        error => { this.erroApi(error) }
+                                    )
+                                    onClose()
+                                }
+                            }
+
+                        >
+                            Sim
+                        </button>
+                    </div>
+                )
+            }
+        })
     }
 
     erroApi = async (res) => {
@@ -315,6 +361,12 @@ class ContasReceber extends Component {
                                                     <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Valor)}</p>
                                                 </div>
                                                 <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones">
+                                                    {false &&
+                                                        <div className='iconelixo giveMargin' type='button' >
+                                                            <FontAwesomeIcon icon={faCheck} title={"Fazer baixa"} onClick={async () => await this.fazerBaixa(feed.Chave,)} />
+                                                        </div>
+                                                    }
+
                                                     <div className='iconelixo giveMargin' type='button' >
                                                         <Link to=
                                                             {{

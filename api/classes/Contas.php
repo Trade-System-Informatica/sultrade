@@ -1172,6 +1172,22 @@ class Contas
         }
     }
 
+    public static function fazerBaixaConta($chave)
+    {
+        $database = new Database();
+
+        $query = "saldo = '0'";
+
+        $result = $database->doUpdate('contas_aberto', $query, 'chave = ' . $chave . "");
+
+        $database->closeConection();
+        if ($result == NULL) {
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+
     public static function updateTransacao($chave, $id_transacao, $lote, $status)
     {
         $database = new Database();
