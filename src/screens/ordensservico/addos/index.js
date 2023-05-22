@@ -297,8 +297,8 @@ class AddOS extends Component {
             }
         }
         await this.loadAll()
-        await this.calculaTotal();
         await this.getDadosCliente();
+        await this.calculaTotal();
 
         if (this.state.chave != 0) {
 
@@ -383,6 +383,13 @@ class AddOS extends Component {
                 }
             }
         })
+
+        if (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".","").replaceAll(",",".")) != 0) {
+            eventosTotal += parseFloat(this.state.bankCharges.replaceAll(".","").replaceAll(",","."));
+        }
+        if (this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".","").replaceAll(",",".")) != 0) {
+            eventosTotal += parseFloat(this.state.governmentTaxes.replaceAll(".", "").replaceAll(",", "."));
+        }
 
         this.setState({ eventosTotal });
         return eventosTotal;
@@ -1253,8 +1260,13 @@ class AddOS extends Component {
             }
         });
 
-        valor += parseFloat(this.state.bankCharges.toString().replaceAll(".", "").replaceAll(",", "."));
-        valor += parseFloat(this.state.governmentTaxes.toString().replaceAll(".", "").replaceAll(",", "."));
+        if (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", ".")) != 0) {
+            valor += parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", "."));
+        }
+
+        if (this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".","").replaceAll(",",".")) != 0) {
+            valor += parseFloat(this.state.governmentTaxes.replaceAll(".", "").replaceAll(",", "."));
+        }
 
         let valuesRet = "";
 
@@ -4909,34 +4921,94 @@ class AddOS extends Component {
                                                                         )}
                                                                         {this.state.eventos[0] &&
                                                                             <>
-                                                                                {
-                                                                                    window.innerWidth < 500 &&
-                                                                                    <tr className={this.state.eventos.length % 2 == 0 ? "parTr" : "imparTr"}>
-                                                                                        <td className="text-center"></td>
-                                                                                        <td className="text-center">Total</td>
-                                                                                        <td className="text-center">
-                                                                                            <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
-                                                                                        </td>
-                                                                                        <td className="text-center">
-                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal)}</p>
-                                                                                        </td>
-                                                                                        <td></td>
-                                                                                    </tr>
+                                                                                {window.innerWidth < 500 &&
+                                                                                    <>
+                                                                            {this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", ".")) != 0 &&
+                                                                                            <tr className={this.state.eventos.length % 2 == 0 ? "parTr" : "imparTr"}>
+                                                                                                <td className="text-center"></td>
+                                                                                                <td className="text-center">Bank Charges</td>
+                                                                                                <td className="text-center">
+                                                                                                    <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(this.state.bankCharges.replaceAll('.', ',').replaceAll(',', '.')) / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                                </td>
+                                                                                                <td className="text-center">
+                                                                                                    <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(this.state.bankCharges.replaceAll('.', ',').replaceAll(',', '.')))}</p>
+                                                                                                </td>
+                                                                                                <td></td>
+                                                                                            </tr>
+                                                                                        }
+                                                                                        {this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".","").replaceAll(",",".")) != 0 &&
+                                                                                <tr className={(this.state.eventos.length + (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", ".")) != 0 ? 1 : 0)) % 2 == 0 ? "parTr" : "imparTr"}>
+                                                                                                <td className="text-center"></td>
+                                                                                                <td className="text-center">Government Taxes</td>
+                                                                                                <td className="text-center">
+                                                                                                    <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(this.state.governmentTaxes.replaceAll('.', ',').replaceAll(',', '.')) / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                                </td>
+                                                                                                <td className="text-center">
+                                                                                                    <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(this.state.governmentTaxes.replaceAll('.', ',').replaceAll(',', '.')))}</p>
+                                                                                                </td>
+                                                                                                <td></td>
+                                                                                            </tr>
+                                                                                        }
+                                                                                        <tr className={(this.state.eventos.length + (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".","").replaceAll(",",".")) != 0 ? 1 : 0) + (this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".","").replaceAll(",",".")) != 0 ? 1 : 0)) % 2 == 0 ? "parTr" : "imparTr"}>
+                                                                                            <td className="text-center"></td>
+                                                                                            <td className="text-center">Total</td>
+                                                                                            <td className="text-center">
+                                                                                                <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal)}</p>
+                                                                                            </td>
+                                                                                            <td></td>
+                                                                                        </tr>
+                                                                                    </>
                                                                                 }
                                                                                 {window.innerWidth >= 500 &&
-                                                                                    <tr className={this.state.eventos.length % 2 == 0 ? "parTr" : "imparTr"}>
-                                                                                        <td className="text-center"></td>
-                                                                                        <td className="text-center">Total</td>
-                                                                                        <td className="text-center"></td>
-                                                                                        <td className="text-center"></td>
-                                                                                        <td className="text-center">
-                                                                                            <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
-                                                                                        </td>
-                                                                                        <td className="text-center">
-                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal)}</p>
-                                                                                        </td>
-                                                                                        <td></td>
-                                                                                    </tr>
+                                                                                    <>
+                                                                                        {this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".","").replaceAll(",",".")) != 0 &&
+                                                                                            <tr className={this.state.eventos.length % 2 == 0 ? "parTr" : "imparTr"}>
+                                                                                                <td className="text-center"></td>
+                                                                                                <td className="text-center">Bank Charges</td>
+                                                                                                <td className="text-center"></td>
+                                                                                                <td className="text-center"></td>
+                                                                                                <td className="text-center">
+                                                                                                    <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(this.state.bankCharges.replaceAll('.', ',').replaceAll(',', '.')) / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                                </td>
+                                                                                                <td className="text-center">
+                                                                                                    <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(this.state.bankCharges.replaceAll('.', ',').replaceAll(',', '.')))}</p>
+                                                                                                </td>
+                                                                                                <td></td>
+                                                                                            </tr>
+                                                                                        }
+                                                                                        {this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".","").replaceAll(",",".")) != 0 &&
+                                                                                            <tr className={(this.state.eventos.length + (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".","").replaceAll(",",".")) != 0 ? 1 : 0)) % 2 == 0 ? "parTr" : "imparTr"}>
+                                                                                                {console.log(this.state.governmentTaxes)}
+                                                                                                <td className="text-center"></td>
+                                                                                                <td className="text-center">Government Taxes</td>
+                                                                                                <td className="text-center"></td>
+                                                                                                <td className="text-center"></td>
+                                                                                                <td className="text-center">
+                                                                                                    <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(this.state.governmentTaxes.replaceAll('.', ',').replaceAll(',', '.')) / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                                </td>
+                                                                                                <td className="text-center">
+                                                                                                    <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(this.state.governmentTaxes.replaceAll('.', ',').replaceAll(',', '.')))}</p>
+                                                                                                </td>
+                                                                                                <td></td>
+                                                                                            </tr>
+                                                                                        }
+                                                                                        <tr className={(this.state.eventos.length + (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".","").replaceAll(",",".")) != 0 ? 1 : 0) + (this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".","").replaceAll(",",".")) != 0 ? 1 : 0)) % 2 == 0 ? "parTr" : "imparTr"}>
+                                                                                            <td className="text-center"></td>
+                                                                                            <td className="text-center">Total</td>
+                                                                                            <td className="text-center"></td>
+                                                                                            <td className="text-center"></td>
+                                                                                            <td className="text-center">
+                                                                                                <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.eventosTotal)}</p>
+                                                                                            </td>
+                                                                                            <td></td>
+                                                                                        </tr>
+                                                                                    </>
                                                                                 }
                                                                             </>
                                                                         }
