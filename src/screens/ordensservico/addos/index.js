@@ -298,7 +298,6 @@ class AddOS extends Component {
         }
         await this.loadAll()
         await this.getDadosCliente();
-        await this.calculaTotal();
 
         if (this.state.chave != 0) {
 
@@ -431,6 +430,7 @@ class AddOS extends Component {
 
             }
         }
+        this.calculaTotal()
     }
 
     loadAll = async () => {
