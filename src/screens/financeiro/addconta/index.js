@@ -171,7 +171,9 @@ const estadoInicial = {
     navio: "",
     porto: "",
 
+    navios: [],
     naviosOptions: [],
+    portos: [],
     portosOptions: [],
     optionsTexto: "",
 
@@ -240,7 +242,7 @@ class AddConta extends Component {
                 discount: this.state.conta.discount_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.discount_manual) : '0,00',
                 received: this.state.conta.received_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.received_manual) : '0,00',
             })
-            
+
             this.setState({
                 manual: !!(this.state.os || this.state.navio || this.state.porto || this.state.roe || this.state.discount || this.state.received),
             });
@@ -856,6 +858,32 @@ class AddConta extends Component {
         })
 
     }
+
+    alteraNavio = async (valor) => {
+        await this.setState({ navio: valor });
+        await this.setState({ modalAberto: false });
+        await this.setState({
+            navios: await loader.getBase('getNavios.php'),
+        })
+
+        await this.setState({
+            naviosOptions: this.state.navios.map((c) => ({ label: `${c.nome}`, value: c.chave }))
+        })
+
+    }
+
+    alteraPorto = async (valor) => {
+        await this.setState({ porto: valor });
+        await this.setState({ modalAberto: false });
+        await this.setState({
+            portos: await loader.getBase('getPortos.php'),
+        })
+
+        await this.setState({
+            portosOptions: this.state.portos.map((c) => ({ label: `${c.Descricao}`, value: c.Chave }))
+        })
+
+    }
     procuraOS = async () => {
         const os = await loader.getBody(`getOSConta.php`, {
             token: true,
@@ -1092,6 +1120,8 @@ class AddConta extends Component {
                             alteraModal={this.alteraModal}
                             alteraCliente={this.alteraPessoa}
                             alteraCentroCusto={this.alteraCentroCusto}
+                            alteraNavio={this.alteraNavio}
+                            alteraPorto={this.alteraPorto}
                             modalAberto={this.state.modalAberto}
                             modal={this.state.modal}
                             modalLista={this.state.modalLista}
@@ -1642,7 +1672,18 @@ class AddConta extends Component {
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                     <Select className='SearchSelect' options={this.state.naviosOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ optionsTexto: e }) }} value={this.state.naviosOptions.find(option => option.value == this.state.navio)} search={true} onChange={(e) => { this.setState({ navio: e.value, }) }} />
                                                                 </div>
-                                                                <div className='col-1'></div>
+                                                                <div className='col-1'>
+                                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'NAVIOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                                                        <div className='insideFormButton' onClick={async () => {
+                                                                            if (this.state.navios[0]) { } else {
+                                                                                await this.setState({
+                                                                                    navios: await loader.getBase('getNavios.php')
+                                                                                })
+                                                                            }
+                                                                            await this.setState({ modalAberto: true, modal: 'listarNavios', modalPesquisa: this.state.navio, modalLista: this.state.navios })
+                                                                        }}>...</div>
+                                                                    }
+                                                                </div>
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                     <label>Porto</label>
                                                                 </div>
@@ -1651,7 +1692,18 @@ class AddConta extends Component {
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                     <Select className='SearchSelect' options={this.state.portosOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ optionsTexto: e }) }} value={this.state.portosOptions.find(option => option.value == this.state.porto)} search={true} onChange={(e) => { this.setState({ porto: e.value, }) }} />
                                                                 </div>
-                                                                <div className='col-1'></div>
+                                                                <div className='col-1'>
+                                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PORTOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                                                        <div className='insideFormButton' onClick={async () => {
+                                                                            if (this.state.portos[0]) { } else {
+                                                                                await this.setState({
+                                                                                    portos: await loader.getBase('getPortos.php')
+                                                                                })
+                                                                            }
+                                                                            await this.setState({ modalAberto: true, modal: 'listarPortos', modalPesquisa: this.state.porto, modalLista: this.state.portos })
+                                                                        }}>...</div>
+                                                                    }
+                                                                </div>
 
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                     <label>ROE</label>
@@ -1663,7 +1715,7 @@ class AddConta extends Component {
                                                                 </div>
                                                                 <div className='col-1'></div>
 
-                                                               
+
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                     <label>Descontos</label>
                                                                 </div>
