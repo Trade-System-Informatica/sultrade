@@ -448,7 +448,7 @@ class Relatorio extends Component {
                                 if (e.pessoa.split("@.@")[0] == "NORDIC HAMBURG SHIPMANAGEMENT (HK) LTD.") {
                                     console.log({FDA, discount, received})
                                 }
-                                checkBalance = parseFloat(FDA.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(discount.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(received.replaceAll('.', '').replaceAll(",", "."));
+                                checkBalance += parseFloat(FDA.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(discount.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(received.replaceAll('.', '').replaceAll(",", "."));
                             });
 
                             if (checkBalance <= 0) {
