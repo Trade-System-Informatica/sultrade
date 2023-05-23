@@ -322,9 +322,7 @@ class Relatorio extends Component {
 
     relatorio = async () => {
         this.setState({ loading: true });
-
-
-
+        
         const relatorio = this.state.relatorio;
         console.log(relatorio);
         let map = [];
