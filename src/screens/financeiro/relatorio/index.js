@@ -445,6 +445,9 @@ class Relatorio extends Component {
                                 }
 
                                 FDA = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(FDA);
+                                if (e.pessoa.split("@.@")[0] == "NORDIC HAMBURG SHIPMANAGEMENT (HK) LTD.") {
+                                    console.log({FDA, discount, received})
+                                }
                                 checkBalance = parseFloat(FDA.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(discount.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(received.replaceAll('.', '').replaceAll(",", "."));
                             });
 
