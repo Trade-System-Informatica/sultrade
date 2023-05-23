@@ -449,6 +449,7 @@ class Relatorio extends Component {
                             });
 
                             if (checkBalance <= 0) {
+                                console.log(`FAILED`)
                                 return (<></>)
                             }
 

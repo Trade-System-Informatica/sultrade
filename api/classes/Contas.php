@@ -1371,7 +1371,8 @@ class Contas
                                           GROUP_CONCAT(contas_aberto.os_manual SEPARATOR '@.@') AS os_manual,
                                           GROUP_CONCAT(contas_aberto.roe_manual SEPARATOR '@.@') AS roe_manual,
                                           GROUP_CONCAT(contas_aberto.discount_manual SEPARATOR '@.@') AS discount_manual,
-                                          GROUP_CONCAT(contas_aberto.received_manual SEPARATOR '@.@') AS received_manual",                $where . " AND contas_aberto.Tipo = '$tipo'" . $groupBy
+                                          GROUP_CONCAT(contas_aberto.received_manual SEPARATOR '@.@') AS received_manual",                
+                                          $where . " AND contas_aberto.Tipo = '$tipo'" . $groupBy . " ORDER BY pessoas.nome"
             );
             $database->closeConection();
         } else {
@@ -1406,7 +1407,7 @@ class Contas
                                           GROUP_CONCAT(contas_aberto.roe_manual SEPARATOR '@.@') AS roe_manual,
                                           GROUP_CONCAT(contas_aberto.discount_manual SEPARATOR '@.@') AS discount_manual,
                                           GROUP_CONCAT(contas_aberto.received_manual SEPARATOR '@.@') AS received_manual",
-                "contas_aberto.Tipo = '$tipo' " . $groupBy
+                "contas_aberto.Tipo = '$tipo' " . $groupBy . " ORDER BY pessoas.nome"
             );
         }
         return $result;
