@@ -487,7 +487,6 @@ class Relatorio extends Component {
                                         </tr>
                                         {map.map((el, index) => {
                                             if (!e?.os_manual?.split("@.@")[index]) {
-                                                console.log(e?.os?.split("@.@")[index]);
                                                 return;
                                             }
 
@@ -539,7 +538,6 @@ class Relatorio extends Component {
                                         })}
                                         {map.map((el, index) => {
                                             if (!e?.os?.split("@.@")[index]) {
-                                                console.log(e.os_manual.split("@.@")[index]);
                                                 return;
                                             }
                                             const eventMap = e.evento_valor?.split('@.@');
@@ -563,13 +561,13 @@ class Relatorio extends Component {
                                             }
 
                                             if (this.state.moeda == e.os_moeda.split("@.@")[index]) {
-                                                discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.desconto.split("@.@")[index]) : "0,00";
+                                                discount = e.discount ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.discount.split("@.@")[index]) : "0,00";
                                                 received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.received.split("@.@")[index]) : "0,00";
                                             } else if (this.state.moeda == 5) {
-                                                discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.desconto.split("@.@")[index]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
+                                                discount = e.discount ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.discount.split("@.@")[index]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
                                                 received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.received.split("@.@")[index]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
                                             } else if (this.state.moeda == 6) {
-                                                discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.desconto.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
+                                                discount = e.discount ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.discount.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
                                                 received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.received.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
                                             }
 
