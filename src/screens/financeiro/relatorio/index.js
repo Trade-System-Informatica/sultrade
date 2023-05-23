@@ -251,13 +251,13 @@ class Relatorio extends Component {
 
         let por = this.state.por;
         if (por == 'porCliente') {
-            por = 'GROUP BY contas_aberto.pessoa';
+            por = 'GROUP BY contas_aberto.pessoa ORDER BY contas_aberto.pessoa';
         } else if (por == 'porVencimento') {
-            por = 'GROUP BY contas_aberto.vencimento';
+            por = 'GROUP BY contas_aberto.vencimento ORDER BY contas_aberto.vencimento';
         } else if (por == 'porLancamento') {
-            por = 'GROUP BY contas_aberto.Lancto';
+            por = 'GROUP BY contas_aberto.Lancto ORDER BY contas_aberto.Lancto';
         } else if (por == 'porData') {
-            por = 'GROUP BY contas_aberto.data_pagto';
+            por = 'GROUP BY contas_aberto.data_pagto ORDER BY contas_aberto.data_pagto';
         }
 
         let where = [empresa, abertas, conta, centroCusto, pessoa, periodoInicial, periodoFinal, lancamentoInicial, lancamentoFinal, tiposDocumento];
@@ -322,6 +322,9 @@ class Relatorio extends Component {
 
     relatorio = async () => {
         this.setState({ loading: true });
+
+
+
         const relatorio = this.state.relatorio;
         console.log(relatorio);
         let map = [];
