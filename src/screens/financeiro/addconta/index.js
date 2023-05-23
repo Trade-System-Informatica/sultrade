@@ -332,7 +332,7 @@ class AddConta extends Component {
         })
 
         this.setState({
-            centrosCustosOptions: this.state.centrosCustos.map((c) => ({ label: `CC: ${c.Codigo} - ${c.Descricao}`, value: c.chave }))
+            centrosCustosOptions: this.state.centrosCustos.map((c) => ({ label: `CC: ${c.Codigo} - ${c.Descricao}`, value: c.Chave }))
         })
 
         if (this.state.chave) {
@@ -1504,7 +1504,7 @@ class AddConta extends Component {
                                                         <div className='col-1 errorMessage'>
                                                         </div>
                                                         <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.centrosCustosOptions.filter(e => this.filterSearch(e, this.state.centrosCustosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ centrosCustosOptionsTexto: e }) }} value={this.state.centrosCustosOptions.filter(option => option.value == this.state.centroCusto)[0]} search={true} onChange={(e) => { this.setState({ centroCusto: e.value, }) }} />
+                                                            <Select className='SearchSelect' options={this.state.centrosCustosOptions.filter(e => this.filterSearch(e, this.state.centrosCustosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ centrosCustosOptionsTexto: e }) }} value={this.state.centrosCustosOptions.filter(option => option.value == this.state.centroCusto)[0]} search={true} onChange={(e) => { this.setState({ centroCusto: e.value }) }} />
                                                         </div>
                                                         <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
                                                             {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CENTROS_CUSTOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
