@@ -449,10 +449,7 @@ class Relatorio extends Component {
                             });
 
                             if (checkBalance <= 0) {
-                                console.log(`FAILED ${e.pessoa.split("@.@")[0]} - ${checkBalance}
-                                FDA: ${FDA}
-                                discount: ${discount}
-                                received: ${received}`)
+                                console.log(`FAILED ${e.pessoa.split("@.@")[0]} - ${checkBalance}`)
                                 return (<></>)
                             }
 
