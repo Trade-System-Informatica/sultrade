@@ -538,7 +538,7 @@ class Relatorio extends Component {
                                             }
                                         })}
                                         {map.map((el, index) => {
-                                            if (e.os_manual.split("@.@")[index]) {
+                                            if (e?.os_manual?.split("@.@")[index]) {
                                                 console.log(e.os_manual.split("@.@")[index]);
                                                 return;
                                             }
