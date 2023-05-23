@@ -4941,10 +4941,10 @@ class AddOS extends Component {
                                                                                                 <td className="text-center"></td>
                                                                                                 <td className="text-center">Government Taxes</td>
                                                                                                 <td className="text-center">
-                                                                                                    <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(this.state.governmentTaxes.replaceAll('.', ',').replaceAll(',', '.')) / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                                    <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(this.state.governmentTaxes.replaceAll('.', '').replaceAll(',', '.')) / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
                                                                                                 </td>
                                                                                                 <td className="text-center">
-                                                                                                    <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(this.state.governmentTaxes.replaceAll('.', ',').replaceAll(',', '.')))}</p>
+                                                                                                    <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(this.state.governmentTaxes.replaceAll('.', '').replaceAll(',', '.')))}</p>
                                                                                                 </td>
                                                                                                 <td></td>
                                                                                             </tr>
