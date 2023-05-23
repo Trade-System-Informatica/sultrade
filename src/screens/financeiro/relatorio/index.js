@@ -325,7 +325,6 @@ class Relatorio extends Component {
 
         const relatorio = this.state.relatorio;
         console.log(relatorio);
-        let mapBase = [];
         let map = [];
         let titulo = 'contas ';
 
@@ -390,7 +389,7 @@ class Relatorio extends Component {
                             if (this.state.por == 'porData' && !e.dataPagamento) {
                                 e.dataPagamento = '';
                             }
-                            mapBase = this.state.por == "porCliente" ? e.pessoa.split('@.@') : this.state.por == "porVencimento" ? e.vencimento.split('@.@') : e.dataPagamento.split('@.@');
+                            map = this.state.por == "porCliente" ? e.pessoa.split('@.@') : this.state.por == "porVencimento" ? e.vencimento.split('@.@') : e.dataPagamento.split('@.@');
 
                             map.map((el, index) => {
                                 const eventMap = e.evento_valor?.split('@.@');
