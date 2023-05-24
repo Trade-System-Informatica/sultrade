@@ -392,7 +392,33 @@ class Relatorio extends Component {
                             map = this.state.por == "porCliente" ? e.pessoa.split('@.@') : this.state.por == "porVencimento" ? e.vencimento.split('@.@') : e.dataPagamento.split('@.@');
 
                             map.map((el, index) => {
+                                if (!e?.os_manual?.split("@.@")[index]) {
+                                    return;
+                                }
+
+                                let FDA = 0;
+                                let discount = 0;
+                                let received = 0;
+
+                                if (this.state.moeda == 5) {
+                                    FDA += e.valor.split("@.@")[index];
+                                    discount = e.discount_manual ? util.toFixed(parseFloat(e.discount_manual?.split("@.@")[index]), 2) : "0,00";
+                                    received = e.received_manual ? util.toFixed(parseFloat(e.received_manual?.split("@.@")[index]), 2) : "0,00";
+                                } else if (this.state.moeda == 6) {
+                                    FDA += e.valor.split("@.@")[index] ? util.toFixed(parseFloat(e.valor.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
+                                    discount += e.discount_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.discount_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
+                                    received += e.received_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.received_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
+                                }
+
+                                checkBalance += parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
+                            })
+                            map.map((el, index) => {
+                                if (!e?.os?.split("@.@")[index]) {
+                                    return;
+                                }
                                 const eventMap = e.evento_valor?.split('@.@');
+                                const eventMapReceived = e.evento_valor_received?.split('@.@');
+                                const eventMapDiscount = e.evento_valor_discount?.split('@.@');
 
                                 let FDA = 0;
                                 let discount = 0;
@@ -411,47 +437,43 @@ class Relatorio extends Component {
                                         }
                                     });
                                 }
-
-                                if (e.os_manual?.split("@.@")[index]) {
-                                    if (this.state.moeda == 5) {
-                                        FDA += e.valor.split("@.@")[index];
-                                        discount = e.discount_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.discount_manual?.split("@.@")[index]) : "0,00";
-                                        received = e.received_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.received_manual?.split("@.@")[index]) : "0,00";
-                                    } else if (this.state.moeda == 6) {
-                                        FDA += e.valor.split("@.@")[index] ? util.toFixed(parseFloat(e.valor.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
-                                        discount += e.discount_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.discount_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
-                                        received += e.received_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.received_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
-                                    }
-
-                                    discount = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(discount);
-                                    received = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(received);
-                                } else {
-                                    if (this.state.moeda == e.os_moeda.split("@.@")[index]) {
-                                        discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.desconto.split("@.@")[index]) : "0,00";
-                                        received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.received.split("@.@")[index]) : "0,00";
-                                    } else if (this.state.moeda == 5) {
-                                        discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.desconto.split("@.@")[index]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
-                                        received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.received.split("@.@")[index]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
-                                    } else if (this.state.moeda == 6) {
-                                        discount = e.desconto ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.desconto.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
-                                        received = e.received ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(util.toFixed(parseFloat(e.received.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 3)) : "0,00";
-                                    }
-
-                                    if (this.state.moeda == 5) {
-                                        FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? parseFloat(e.bankCharges.split("@.@")[index]) : 0;
-                                        FDA += e.governmentTaxes.split("@.@")[index] && e.governmentTaxes.split("@.@")[index] > 0 ? parseFloat(e.governmentTaxes.split("@.@")[index]) : 0;
-                                    } else if (this.state.moeda == 6) {
-                                        FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? util.toFixed(parseFloat(e.bankCharges.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
-                                        FDA += e.governmentTaxes.split("@.@")[index] && e.governmentTaxes.split("@.@")[index] > 0 ? util.toFixed(parseFloat(e.governmentTaxes.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
-                                    }
+                                if (eventMapReceived) {
+                                    eventMap.map((elem, eventIndex) => {
+                                        if (e.evento_os_received.split("@.@")[eventIndex] == e.os.split("@.@")[index]) {
+                                            if (this.state.moeda == e.evento_moeda_received.split("@.@")[eventIndex]) {
+                                                received += e.evento_valor_received.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor_received.split("@.@")[eventIndex]), 2) : 0;
+                                            } else if (this.state.moeda == 5) {
+                                                received += e.evento_valor_received.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor_received.split("@.@")[eventIndex]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
+                                            } else if (this.state.moeda == 6) {
+                                                received += e.evento_valor_received.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor_received.split("@.@")[eventIndex]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
+                                            }
+                                        }
+                                    });
+                                }
+                                if (eventMapDiscount) {
+                                    eventMap.map((elem, eventIndex) => {
+                                        if (e.evento_os_discount.split("@.@")[eventIndex] == e.os.split("@.@")[index]) {
+                                            if (this.state.moeda == e.evento_moeda_discount.split("@.@")[eventIndex]) {
+                                                discount += e.evento_valor_discount.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor_discount.split("@.@")[eventIndex]), 2) : 0;
+                                            } else if (this.state.moeda == 5) {
+                                                discount += e.evento_valor_discount.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor_discount.split("@.@")[eventIndex]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
+                                            } else if (this.state.moeda == 6) {
+                                                discount += e.evento_valor_discount.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor_discount.split("@.@")[eventIndex]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
+                                            }
+                                        }
+                                    });
                                 }
 
-                                FDA = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(FDA);
-                                if (e.pessoa.split("@.@")[0] == "NORDIC HAMBURG SHIPMANAGEMENT (HK) LTD.") {
-                                    console.log({ FDA, discount, received })
+                                if (this.state.moeda == 5) {
+                                    FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? parseFloat(e.bankCharges.split("@.@")[index]) : 0;
+                                    FDA += e.governmentTaxes.split("@.@")[index] && e.governmentTaxes.split("@.@")[index] > 0 ? parseFloat(e.governmentTaxes.split("@.@")[index]) : 0;
+                                } else if (this.state.moeda == 6) {
+                                    FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? util.toFixed(parseFloat(e.bankCharges.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
+                                    FDA += e.governmentTaxes.split("@.@")[index] && e.governmentTaxes.split("@.@")[index] > 0 ? util.toFixed(parseFloat(e.governmentTaxes.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
                                 }
-                                checkBalance += parseFloat(FDA.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(discount.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(received.replaceAll('.', '').replaceAll(",", "."));
-                            });
+
+                                checkBalance += parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
+                            })
 
                             if (checkBalance <= 0) {
                                 console.log(`FAILED ${e.pessoa.split("@.@")[0]} - ${checkBalance}`)
@@ -474,7 +496,7 @@ class Relatorio extends Component {
                                                         : e.dataPagamento ? moment(e.dataPagamento.split('@.@')[0]).format('DD/MM/YYYY') : ''}</span>
                                             </th>
                                         </tr>
-                                        <tr style={{fontSize: 13}}>
+                                        <tr style={{ fontSize: 13 }}>
                                             <th>SHIP'S NAME</th>
                                             <th>PO</th>
                                             <th>PORT OF CALL</th>
@@ -504,9 +526,9 @@ class Relatorio extends Component {
                                                 received += e.received_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.received_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
                                             }
 
+                                            
                                             discount = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(discount);
                                             received = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(received);
-
                                             FDA = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(FDA);
                                             let balance = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(FDA.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(discount.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(received.replaceAll('.', '').replaceAll(",", ".")));
 
