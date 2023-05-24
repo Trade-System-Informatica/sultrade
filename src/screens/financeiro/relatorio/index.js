@@ -380,6 +380,8 @@ class Relatorio extends Component {
                 {this.props.location.state.backTo != 'contasPagas' && this.props.location.state.backTo != 'contasPagar' &&
                     <div className='pdfContent'>
                         {relatorio.map((e) => {
+                            checkBalance = 0;
+
                             if (this.state.por == 'porCliente' && !e.pessoa) {
                                 e.pessoa = '';
                             }
