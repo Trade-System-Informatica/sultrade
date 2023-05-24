@@ -525,7 +525,7 @@ class AddConta extends Component {
                         values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.centroCusto}', '${this.state.contaDesconto}', '${this.state.historico}', '${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${this.state.numBoleto}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}'`,
                         meioPagamento: this.state.meioPagamentoNome,
                         valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
-                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${this.state.discount}', '${this.state.received}', ${moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYY-MM-DD") : ''}` : ""
+                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${parseFloat(this.state.discount.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.received.replaceAll('.', '').replaceAll(',', '.'))}', ${moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYY-MM-DD") : ''}` : ""
                     }).then(
                         async res => {
                             console.log(res.data);
@@ -548,7 +548,7 @@ class AddConta extends Component {
                         values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.codBarras}', '${this.state.centroCusto}', '${this.state.historico}',  '${this.state.contaDesconto}','${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}', ''`,
                         meioPagamento: this.state.meioPagamentoNome,
                         valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
-                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${this.state.discount}', '${this.state.received}', ${moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYY-MM-DD") : ''}` : ""
+                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${parseFloat(this.state.discount.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.received.replaceAll('.', '').replaceAll(',', '.'))}', ${moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYY-MM-DD") : ''}` : ""
                     }).then(
                         async res => {
                             console.log(res.data);
@@ -610,9 +610,9 @@ class AddConta extends Component {
                         navio_manual: this.state.navio,
                         porto_manual: this.state.porto,
                         roe_manual: this.state.roe,
-                        discount_manual: this.state.discount,
-                        received_manual: this.state.received,
-                        sailed_manual: this.state.sailed,
+                        discount_manual: parseFloat(this.state.discount.replaceAll('.', '').replaceAll(',', '.')),
+                        received_manual: parseFloat(this.state.received.replaceAll('.','').replaceAll(',','.')),
+                        sailed_manual: moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYYY-MM-DD") : '',
                     }).then(
                         async res => {
                             if (res.data === true) {
@@ -673,9 +673,9 @@ class AddConta extends Component {
                         navio_manual: this.state.navio,
                         porto_manual: this.state.porto,
                         roe_manual: this.state.roe,
-                        discount_manual: this.state.discount,
-                        received_manual: this.state.received,
-                        sailed_manual: this.state.sailed,
+                        discount_manual: parseFloat(this.state.discount.replaceAll('.', '').replaceAll(',', '.')),
+                        received_manual: parseFloat(this.state.received.replaceAll('.', '').replaceAll(',', '.')),
+                        sailed_manual: moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYYY-MM-DD") : ''
                     }).then(
                         async res => {
                             if (res.data === true) {
