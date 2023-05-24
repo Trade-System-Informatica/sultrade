@@ -526,7 +526,7 @@ class Relatorio extends Component {
                                                 received += e.received_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.received_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
                                             }
 
-                                            
+
                                             discount = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(discount);
                                             received = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(received);
                                             FDA = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(FDA);
@@ -673,276 +673,277 @@ class Relatorio extends Component {
                             )
                         })}
                         <table className='totalTablePDF'>
+                            <tr style={{fontSize: 13}}>
+                            <th></th>
+                            <th style={{ borderBottom: "1px solid black" }}>FDA</th>
+                            <th style={{ borderBottom: "1px solid black" }}>DISCOUNT</th>
+                            <th style={{ borderBottom: "1px solid black" }}>RECEIVED</th>
+                            <th style={{ borderBottom: "1px solid black" }}>BALANCE</th>
+                        </tr>
+                        <tr style={{ fontSize: 12 }}>
+                            <th>{"Total ->"}</th>
+                            <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDA)}</td>
+                            <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalDiscount)}</td>
+                            <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalReceived)}</td>
+                            <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalBalance)}</td>
+                        </tr>
+                    </table>
+                    </div>
+    }
+                {
+    this.props.location.state.backTo == 'contasPagas' || this.props.location.state.backTo == 'contasPagar' &&
+        <div className='pdfContent'>
+            {relatorio.map((e) => {
+                console.log(e);
+                totalValorPorGrupo = 0;
+                totalSaldoPorGrupo = 0;
+
+                if (this.state.por == 'porCliente' && !e.pessoa) {
+                    e.pessoa = '';
+                }
+                if (this.state.por == 'porVencimento' && !e.vencimento) {
+                    e.vencimento = '';
+                }
+                if (this.state.por == 'porData' && !e.dataPagamento) {
+                    e.dataPagamento = '';
+                }
+                map = this.state.por == "porCliente" ? e.pessoa.split('@.@') : this.state.por == "porVencimento" ? e.vencimento.split('@.@') : e.dataPagamento.split('@.@');
+                return (
+                    <div>
+
+                        <table className='pdfTable'>
                             <tr>
-                                <th></th>
-                                <th style={{ borderBottom: "1px solid black" }}>FDA</th>
-                                <th style={{ borderBottom: "1px solid black" }}>DISCOUNT</th>
-                                <th style={{ borderBottom: "1px solid black" }}>RECEIVED</th>
-                                <th style={{ borderBottom: "1px solid black" }}>BALANCE</th>
+                                <th style={{ minWidth: 100 }}>Nº DOCTO</th>
+                                <th style={{ minWidth: 75 }}>PO</th>
+                                <th style={{ minWidth: 100 }}>PESSOA</th>
+                                <th style={{ minWidth: 150 }}>HISTORICO</th>
+                                <th style={{ minWidth: 100 }}>SALDO</th>
+                                <th style={{ minWidth: 100 }}>VALOR</th>
                             </tr>
+                            <tr style={{ backgroundColor: "#999999", border: "1px solid black" }}>
+                                <th colSpan={6}>
+                                    <span style={{ fontSize: "1.2em" }}>{this.state.por == "porCliente" && e.pessoa ? e.pessoa.split('@.@')[0]
+                                        : this.state.por == "porVencimento" && e.vencimento ? moment(e.vencimento.split('@.@')[0]).format('DD/MM/YYYY')
+                                            : e.dataPagamento ? moment(e.dataPagamento.split('@.@')[0]).format('DD/MM/YYYY') : ''}</span>
+                                </th>
+                            </tr>
+                            {map.map((el, index) => {
+                                let valor = 0;
+                                let saldo = 0;
+
+                                if (e.os_moeda && this.state.moeda == e.os_moeda.split("@.@")[index] || !e.os_moeda) {
+                                    valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.valor.split("@.@")[index] /* - e.valorDescontos*/) : '0,00';
+                                    saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.saldo.split("@.@")[index] /* - e.valorDescontos*/) : "0,00";
+                                } else if (this.state.moeda == 5) {
+                                    valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.valor.split("@.@")[index] /* - e.valorDescontos*/)) : "0,00";
+                                    saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.saldo.split("@.@")[index] /* - e.valorDescontos*/)) : "0,00";
+                                } else {
+                                    valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.valor.split("@.@")[index] /* - e.valorDescontos*/) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
+                                    saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.saldo.split("@.@")[index] /* - e.valorDescontos*/) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
+                                }
+
+
+                                totalValor += parseFloat(valor.replaceAll('.', '').replaceAll(',', '.'));
+                                totalValorPorGrupo += parseFloat(valor.replaceAll('.', '').replaceAll(',', '.'));
+
+                                totalSaldo += parseFloat(saldo.replaceAll('.', '').replaceAll(',', '.'));
+                                totalSaldoPorGrupo += parseFloat(saldo.replaceAll('.', '').replaceAll(',', '.'));
+
+
+                                if (parseFloat(valor.replaceAll('.', '').replaceAll(",", ".")) > 0) {
+                                    return (
+                                        <tr style={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#999999" }}>
+                                            <td style={{ minWidth: 100, backgroundColor: "inherit" }}>{e.documento ? util.removeAcentos(e.documento.split('@.@')[index]) : ''}</td>
+                                            <td style={{ minWidth: 75, backgroundColor: "inherit" }}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
+                                            <td style={{ minWidth: 100, backgroundColor: "inherit" }}>{e.pessoa ? util.removeAcentos(e.pessoa.split('@.@')[index]) : ''}</td>
+                                            <td style={{ minWidth: 150, backgroundColor: "inherit" }}>{e.historico ? util.removeAcentos(e.historico.split('@.@')[index]) : ''}</td>
+                                            <td style={{ minWidth: 100, backgroundColor: "inherit", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {valor}</td>
+                                            <td style={{ minWidth: 100, backgroundColor: "inherit", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {saldo}</td>
+                                        </tr>
+                                    )
+                                }
+                            })}
                             <tr>
-                                <th>{"Total ->"}</th>
-                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDA)}</td>
-                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalDiscount)}</td>
-                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalReceived)}</td>
-                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalBalance)}</td>
+                                <th colSpan='4'>{"Total ->"}</th>
+                                <td style={{ borderTop: "1px solid black", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalValorPorGrupo)}</td>
+                                <td style={{ borderTop: "1px solid black", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalSaldoPorGrupo)}</td>
                             </tr>
                         </table>
+                        <hr />
                     </div>
-                }
-                {this.props.location.state.backTo == 'contasPagas' || this.props.location.state.backTo == 'contasPagar' &&
-                    <div className='pdfContent'>
-                        {relatorio.map((e) => {
-                            console.log(e);
-                            totalValorPorGrupo = 0;
-                            totalSaldoPorGrupo = 0;
-
-                            if (this.state.por == 'porCliente' && !e.pessoa) {
-                                e.pessoa = '';
-                            }
-                            if (this.state.por == 'porVencimento' && !e.vencimento) {
-                                e.vencimento = '';
-                            }
-                            if (this.state.por == 'porData' && !e.dataPagamento) {
-                                e.dataPagamento = '';
-                            }
-                            map = this.state.por == "porCliente" ? e.pessoa.split('@.@') : this.state.por == "porVencimento" ? e.vencimento.split('@.@') : e.dataPagamento.split('@.@');
-                            return (
-                                <div>
-
-                                    <table className='pdfTable'>
-                                        <tr>
-                                            <th style={{ minWidth: 100 }}>Nº DOCTO</th>
-                                            <th style={{ minWidth: 75 }}>PO</th>
-                                            <th style={{ minWidth: 100 }}>PESSOA</th>
-                                            <th style={{ minWidth: 150 }}>HISTORICO</th>
-                                            <th style={{ minWidth: 100 }}>SALDO</th>
-                                            <th style={{ minWidth: 100 }}>VALOR</th>
-                                        </tr>
-                                        <tr style={{ backgroundColor: "#999999", border: "1px solid black" }}>
-                                            <th colSpan={6}>
-                                                <span style={{ fontSize: "1.2em" }}>{this.state.por == "porCliente" && e.pessoa ? e.pessoa.split('@.@')[0]
-                                                    : this.state.por == "porVencimento" && e.vencimento ? moment(e.vencimento.split('@.@')[0]).format('DD/MM/YYYY')
-                                                        : e.dataPagamento ? moment(e.dataPagamento.split('@.@')[0]).format('DD/MM/YYYY') : ''}</span>
-                                            </th>
-                                        </tr>
-                                        {map.map((el, index) => {
-                                            let valor = 0;
-                                            let saldo = 0;
-
-                                            if (e.os_moeda && this.state.moeda == e.os_moeda.split("@.@")[index] || !e.os_moeda) {
-                                                valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.valor.split("@.@")[index] /* - e.valorDescontos*/) : '0,00';
-                                                saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.saldo.split("@.@")[index] /* - e.valorDescontos*/) : "0,00";
-                                            } else if (this.state.moeda == 5) {
-                                                valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.valor.split("@.@")[index] /* - e.valorDescontos*/)) : "0,00";
-                                                saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5) * parseFloat(e.saldo.split("@.@")[index] /* - e.valorDescontos*/)) : "0,00";
-                                            } else {
-                                                valor = e.valor ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.valor.split("@.@")[index] /* - e.valorDescontos*/) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
-                                                saldo = e.saldo ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(e.saldo.split("@.@")[index] /* - e.valorDescontos*/) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5)) : "0,00";
-                                            }
-
-
-                                            totalValor += parseFloat(valor.replaceAll('.', '').replaceAll(',', '.'));
-                                            totalValorPorGrupo += parseFloat(valor.replaceAll('.', '').replaceAll(',', '.'));
-
-                                            totalSaldo += parseFloat(saldo.replaceAll('.', '').replaceAll(',', '.'));
-                                            totalSaldoPorGrupo += parseFloat(saldo.replaceAll('.', '').replaceAll(',', '.'));
-
-
-                                            if (parseFloat(valor.replaceAll('.', '').replaceAll(",", ".")) > 0) {
-                                                return (
-                                                    <tr style={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#999999" }}>
-                                                        <td style={{ minWidth: 100, backgroundColor: "inherit" }}>{e.documento ? util.removeAcentos(e.documento.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ minWidth: 75, backgroundColor: "inherit" }}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ minWidth: 100, backgroundColor: "inherit" }}>{e.pessoa ? util.removeAcentos(e.pessoa.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ minWidth: 150, backgroundColor: "inherit" }}>{e.historico ? util.removeAcentos(e.historico.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ minWidth: 100, backgroundColor: "inherit", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {valor}</td>
-                                                        <td style={{ minWidth: 100, backgroundColor: "inherit", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {saldo}</td>
-                                                    </tr>
-                                                )
-                                            }
-                                        })}
-                                        <tr>
-                                            <th colSpan='4'>{"Total ->"}</th>
-                                            <td style={{ borderTop: "1px solid black", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalValorPorGrupo)}</td>
-                                            <td style={{ borderTop: "1px solid black", paddingLeft: 3, paddingRight: 3 }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalSaldoPorGrupo)}</td>
-                                        </tr>
-                                    </table>
-                                    <hr />
-                                </div>
-                            )
-                        })}
-                        <table className='totalTablePDF'>
-                            <tr>
-                                <th></th>
-                                <th style={{ borderBottom: "1px solid black" }}>VALOR</th>
-                                <th style={{ borderBottom: "1px solid black" }}>SALDO</th>
-                            </tr>
-                            <tr>
-                                <th>{"Total ->"}</th>
-                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalValor)}</td>
-                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalSaldo)}</td>
-                            </tr>
-                        </table>
-                    </div>
-                }
+                )
+            })}
+            <table className='totalTablePDF'>
+                <tr>
+                    <th></th>
+                    <th style={{ borderBottom: "1px solid black" }}>VALOR</th>
+                    <th style={{ borderBottom: "1px solid black" }}>SALDO</th>
+                </tr>
+                <tr>
+                    <th>{"Total ->"}</th>
+                    <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalValor)}</td>
+                    <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalSaldo)}</td>
+                </tr>
+            </table>
+        </div>
+}
             </div >
 
-        await this.setState({ pdfgerado: pdf, pdfView: true, loading: false, pdfEmail: ReactDOMServer.renderToString(pdf) })
-        this.handleExportWithComponent()
+    await this.setState({ pdfgerado: pdf, pdfView: true, loading: false, pdfEmail: ReactDOMServer.renderToString(pdf) })
+this.handleExportWithComponent()
     }
 
-    handleExportWithComponent = event => {
-        this.setState({ loading: false })
-    };
+handleExportWithComponent = event => {
+    this.setState({ loading: false })
+};
 
-    getPessoaContatos = async (pessoa) => {
-        await apiEmployee.post(`getContatos.php`, {
-            token: true,
-            pessoa: pessoa
-        }).then(
-            async response => {
-                await this.setState({ contatos: response.data, fornecedorEmail: response.data.find((e) => e.Tipo == "EM") ? response.data.find((e) => e.Tipo == "EM").Campo1 : "" })
-                await this.setState({ emails: this.state.fornecedorEmail.split("; ") })
-                await this.setState({ loading: false })
-            },
-            response => { this.erroApi(response) }
+getPessoaContatos = async (pessoa) => {
+    await apiEmployee.post(`getContatos.php`, {
+        token: true,
+        pessoa: pessoa
+    }).then(
+        async response => {
+            await this.setState({ contatos: response.data, fornecedorEmail: response.data.find((e) => e.Tipo == "EM") ? response.data.find((e) => e.Tipo == "EM").Campo1 : "" })
+            await this.setState({ emails: this.state.fornecedorEmail.split("; ") })
+            await this.setState({ loading: false })
+        },
+        response => { this.erroApi(response) }
 
-        )
-    }
+    )
+}
 
-    render() {
+render() {
 
-        const validations = []
-        validations.push(this.state.por)
-        validations.push(!this.state.bloqueado)
+    const validations = []
+    validations.push(this.state.por)
+    validations.push(!this.state.bloqueado)
 
-        const validForm = validations.reduce((t, a) => t && a)
-
-
-        const validationsEmail = [];
-        validationsEmail.push(this.state.emails[0] || this.state.failures[0])
-        validationsEmail.push(!this.state.emailBloqueado)
-
-        const validFormEmail = validationsEmail.reduce((t, a) => t && a)
+    const validForm = validations.reduce((t, a) => t && a)
 
 
-        return (
-            <div className='allContent'>
-                {this.state.loading &&
-                    <Skeleton />
-                }
-                {!this.state.loading &&
+    const validationsEmail = [];
+    validationsEmail.push(this.state.emails[0] || this.state.failures[0])
+    validationsEmail.push(!this.state.emailBloqueado)
+
+    const validFormEmail = validationsEmail.reduce((t, a) => t && a)
+
+
+    return (
+        <div className='allContent'>
+            {this.state.loading &&
+                <Skeleton />
+            }
+            {!this.state.loading &&
+                <div
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        display: this.state.pdfView ? "flex" : "none",
+                        width: "100%",
+                        minWidth: 830,
+                        minHeight: "100vh",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        backgroundColor: "white",
+                        zIndex: 20
+                    }}>
                     <div
                         style={{
-                            position: "absolute",
-                            top: 0,
-                            display: this.state.pdfView ? "flex" : "none",
-                            width: "100%",
-                            minWidth: 830,
-                            minHeight: "100vh",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            backgroundColor: "white",
-                            zIndex: 20
-                        }}>
-                        <div
-                            style={{
-                                width: 830
-                            }}
+                            width: 830
+                        }}
 
 
-                        >
-                            <PDFExport
-                                scale={0.6}
-                                portrait={true}
+                    >
+                        <PDFExport
+                            scale={0.6}
+                            portrait={true}
 
-                                paperSize="A4"
-                                margin="0.5cm"
-                                ref={this.pdfExportComponent}>
-                                {this.state.pdfgerado}
-                            </PDFExport>
+                            paperSize="A4"
+                            margin="0.5cm"
+                            ref={this.pdfExportComponent}>
+                            {this.state.pdfgerado}
+                        </PDFExport>
 
-                            <div style={{ display: "flex", flexDirection: "row", width: "100%", justifyContent: "center" }}>
-                                <button className="btn btn-danger" style={{ margin: 20 }} onClick={() => this.pdfExportComponent.current.save()}>Exportar PDF</button>
-                                {this.state.pessoa &&
-                                    <button className="btn btn-info" style={{ margin: 20 }} onClick={() => this.setState({ emailModal: true })}>Enviar para clientes</button>
-                                }
-                            </div>
-                            <button
-                                style={{
-                                    position: "absolute",
-                                    top: 10,
-                                    left: 10,
-                                    zIndex: 30,
-                                    backgroundColor: "inherit",
-                                    border: "none"
-                                }}
-                                onClick={() => this.setState({ pdfView: false })}>
-                                <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
-                            </button>
+                        <div style={{ display: "flex", flexDirection: "row", width: "100%", justifyContent: "center" }}>
+                            <button className="btn btn-danger" style={{ margin: 20 }} onClick={() => this.pdfExportComponent.current.save()}>Exportar PDF</button>
+                            {this.state.pessoa &&
+                                <button className="btn btn-info" style={{ margin: 20 }} onClick={() => this.setState({ emailModal: true })}>Enviar para clientes</button>
+                            }
                         </div>
+                        <button
+                            style={{
+                                position: "absolute",
+                                top: 10,
+                                left: 10,
+                                zIndex: 30,
+                                backgroundColor: "inherit",
+                                border: "none"
+                            }}
+                            onClick={() => this.setState({ pdfView: false })}>
+                            <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
+                        </button>
                     </div>
-                }
-                {!this.state.pdfView && !this.state.loading &&
-                    <>
+                </div>
+            }
+            {!this.state.pdfView && !this.state.loading &&
+                <>
 
-                        {this.state.redirect &&
-                            <Redirect to={'/'} />
+                    {this.state.redirect &&
+                        <Redirect to={'/'} />
+                    }
+
+                    <section>
+                        {this.props.location.state.backTo == 'contasPagar' &&
+                            <Header voltarContasPagar relatorio titulo="Contas a Pagar" />
+                        }
+                        {this.props.location.state.backTo == 'contasPagas' &&
+                            <Header voltarContasPagas relatorio titulo="Contas Pagas" />
+                        }
+                        {this.props.location.state.backTo == 'contasReceber' &&
+                            <Header voltarContasReceber relatorio titulo="Contas a Receber" />
+                        }
+                        {this.props.location.state.backTo == 'contasRecebidas' &&
+                            <Header voltarContasRecebidas relatorio titulo="Contas Recebidas" />
                         }
 
-                        <section>
-                            {this.props.location.state.backTo == 'contasPagar' &&
-                                <Header voltarContasPagar relatorio titulo="Contas a Pagar" />
-                            }
-                            {this.props.location.state.backTo == 'contasPagas' &&
-                                <Header voltarContasPagas relatorio titulo="Contas Pagas" />
-                            }
-                            {this.props.location.state.backTo == 'contasReceber' &&
-                                <Header voltarContasReceber relatorio titulo="Contas a Receber" />
-                            }
-                            {this.props.location.state.backTo == 'contasRecebidas' &&
-                                <Header voltarContasRecebidas relatorio titulo="Contas Recebidas" />
-                            }
+                    </section>
+                    <div style={{ width: '100%', textAlign: 'center', marginTop: '-20px', marginBottom: '2%' }}>
+                        <h6 style={{ color: 'red' }}>{this.state.erro}</h6>
+                    </div>
 
-                        </section>
-                        <div style={{ width: '100%', textAlign: 'center', marginTop: '-20px', marginBottom: '2%' }}>
-                            <h6 style={{ color: 'red' }}>{this.state.erro}</h6>
-                        </div>
+                    <div className="contact-section">
 
-                        <div className="contact-section">
+                        <div className="row">
+                            <div className="col-lg-12">
+                                <Formik
+                                    initialValues={{
+                                        name: '',
+                                    }}
+                                    onSubmit={async values => {
+                                        await new Promise(r => setTimeout(r, 1000))
+                                        this.gerarRelatorio(validForm)
+                                    }}
+                                >
+                                    <Form className="contact-form">
 
-                            <div className="row">
-                                <div className="col-lg-12">
-                                    <Formik
-                                        initialValues={{
-                                            name: '',
-                                        }}
-                                        onSubmit={async values => {
-                                            await new Promise(r => setTimeout(r, 1000))
-                                            this.gerarRelatorio(validForm)
-                                        }}
-                                    >
-                                        <Form className="contact-form">
+                                        <div className="row">
+                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"></div>
 
-                                            <div className="row">
-                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"></div>
+                                            <div className="col-xl-8 col-lg-8 col-md-8 col-sm-8 col-12 ">
 
-                                                <div className="col-xl-8 col-lg-8 col-md-8 col-sm-8 col-12 ">
-
-                                                    <div className="row addservicos">
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
-                                                            <label>Ordenar:</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                            {!this.state.por &&
-                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                            }
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.porOptions} value={this.state.porOptions.filter(option => option.value == this.state.por)[0]} search={true} onChange={(e) => { this.setState({ por: e.value, }) }} />
-                                                        </div>
-                                                        {/* <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                <div className="row addservicos">
+                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
+                                                        <label>Ordenar:</label>
+                                                    </div>
+                                                    <div className='col-1 errorMessage'>
+                                                        {!this.state.por &&
+                                                            <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                        }
+                                                    </div>
+                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                        <Select className='SearchSelect' options={this.state.porOptions} value={this.state.porOptions.filter(option => option.value == this.state.por)[0]} search={true} onChange={(e) => { this.setState({ por: e.value, }) }} />
+                                                    </div>
+                                                    {/* <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Conta</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
@@ -950,32 +951,32 @@ class Relatorio extends Component {
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.conta)[0]} search={true} onChange={(e) => { this.setState({ conta: e.value, }) }} />
                                                         </div> */}
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Centro de Custo</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.centrosCustosOptions.filter(e => this.filterSearch(e, this.state.centrosCustosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ centrosCustosOptionsTexto: e }) }} value={this.state.centrosCustosOptions.filter(option => option.value == this.state.centroCusto)[0]} search={true} onChange={(e) => { this.setState({ centroCusto: e.value, }) }} />
-                                                        </div>
+                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                        <label>Centro de Custo</label>
+                                                    </div>
+                                                    <div className='col-1 errorMessage'>
+                                                    </div>
+                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                        <Select className='SearchSelect' options={this.state.centrosCustosOptions.filter(e => this.filterSearch(e, this.state.centrosCustosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ centrosCustosOptionsTexto: e }) }} value={this.state.centrosCustosOptions.filter(option => option.value == this.state.centroCusto)[0]} search={true} onChange={(e) => { this.setState({ centroCusto: e.value, }) }} />
+                                                    </div>
 
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Pessoa</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.pessoasOptions.filter(e => this.filterSearch(e, this.state.pessoasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ pessoasOptionsTexto: e }) }} value={this.state.pessoasOptions.filter(option => option.value == this.state.pessoa)[0]} search={true} onChange={(e) => { this.setState({ pessoa: e.value, }) }} />
-                                                        </div>
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Moeda</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.moedasOptions.filter(e => this.filterSearch(e, this.state.moedasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ moedasOptionsTexto: e }) }} value={this.state.moedasOptions.filter(option => option.value == this.state.moeda)[0]} search={true} onChange={(e) => { this.setState({ moeda: e.value, }) }} />
-                                                        </div>
-                                                        {/* <div className="col-12">
+                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                        <label>Pessoa</label>
+                                                    </div>
+                                                    <div className='col-1 errorMessage'>
+                                                    </div>
+                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                        <Select className='SearchSelect' options={this.state.pessoasOptions.filter(e => this.filterSearch(e, this.state.pessoasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ pessoasOptionsTexto: e }) }} value={this.state.pessoasOptions.filter(option => option.value == this.state.pessoa)[0]} search={true} onChange={(e) => { this.setState({ pessoa: e.value, }) }} />
+                                                    </div>
+                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                        <label>Moeda</label>
+                                                    </div>
+                                                    <div className='col-1 errorMessage'>
+                                                    </div>
+                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                        <Select className='SearchSelect' options={this.state.moedasOptions.filter(e => this.filterSearch(e, this.state.moedasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ moedasOptionsTexto: e }) }} value={this.state.moedasOptions.filter(option => option.value == this.state.moeda)[0]} search={true} onChange={(e) => { this.setState({ moeda: e.value, }) }} />
+                                                    </div>
+                                                    {/* <div className="col-12">
                                                             <label className="center relatorioLabelTitulo">Período</label>
                                                         </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -1038,149 +1039,149 @@ class Relatorio extends Component {
                                                                 </div>
                                                             ))}
                                                         </div> */}
-                                                    </div>
-
-
                                                 </div>
-                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
-                                            </div>
 
-                                            <div className="row">
-                                                <div className="col-2"></div>
-                                                <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                    <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Gerar</button>
-                                                </div>
-                                                <div className="col-2"></div>
-                                            </div>
 
-                                        </Form>
-                                    </Formik>
-                                </div>
+                                            </div>
+                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                                        </div>
+
+                                        <div className="row">
+                                            <div className="col-2"></div>
+                                            <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Gerar</button>
+                                            </div>
+                                            <div className="col-2"></div>
+                                        </div>
+
+                                    </Form>
+                                </Formik>
                             </div>
-
                         </div>
-                        <Rodape />
-                    </>}
-                <Modal
-                    aria-labelledby="transition-modal-title"
-                    aria-describedby="transition-modal-description"
-                    style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
-                    open={this.state.emailModal}
-                    onClose={async () => await this.setState({ emailModal: false })}
-                >
-                    <div className='modalContainer'>
-                        <div className='modalCriar'>
-                            <div className='containersairlistprodmodal'>
-                                <div className='botaoSairModal' onClick={async () => await this.setState({ email: false, emailModal: false })}>
-                                    <span>X</span>
-                                </div>
+
+                    </div>
+                    <Rodape />
+                </>}
+            <Modal
+                aria-labelledby="transition-modal-title"
+                aria-describedby="transition-modal-description"
+                style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
+                open={this.state.emailModal}
+                onClose={async () => await this.setState({ emailModal: false })}
+            >
+                <div className='modalContainer'>
+                    <div className='modalCriar'>
+                        <div className='containersairlistprodmodal'>
+                            <div className='botaoSairModal' onClick={async () => await this.setState({ email: false, emailModal: false })}>
+                                <span>X</span>
                             </div>
-                            <div className='modalContent'>
-                                <div className='tituloModal'>
-                                    <span>Enviar email:</span>
-                                </div>
+                        </div>
+                        <div className='modalContent'>
+                            <div className='tituloModal'>
+                                <span>Enviar email:</span>
+                            </div>
 
 
-                                <div className='modalForm'>
-                                    <Formik
-                                        initialValues={{
-                                            name: '',
-                                        }}
-                                        onSubmit={async values => {
-                                            await new Promise(r => setTimeout(r, 1000))
-                                            this.enviarEmail(validFormEmail)
-                                        }}
-                                    >
-                                        <Form className="contact-form" >
+                            <div className='modalForm'>
+                                <Formik
+                                    initialValues={{
+                                        name: '',
+                                    }}
+                                    onSubmit={async values => {
+                                        await new Promise(r => setTimeout(r, 1000))
+                                        this.enviarEmail(validFormEmail)
+                                    }}
+                                >
+                                    <Form className="contact-form" >
 
-                                            <div className="row">
+                                        <div className="row">
 
-                                                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
+                                            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
 
-                                                    <div className="row addservicos">
-                                                        {this.state.successes[0] &&
-                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                <label>Emails enviados:</label>
-                                                            </div>
-                                                        }
-                                                        {this.state.successes[0] &&
-                                                            <div className="col-1 errorMessage">
-                                                            </div>
-                                                        }
-                                                        {this.state.successes[0] &&
-                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                <label>
-                                                                    {this.state.successes.map((e, i) => (
-                                                                        <span className='listaEmail successEmail'>{e}{this.state.successes[i + 1] ? ", " : ""}</span>
-                                                                    ))}
-                                                                </label>
-                                                            </div>
-                                                        }
-                                                        {this.state.successes[0] &&
-                                                            <div className="col-1"></div>
-                                                        }
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstlabel">
-                                                            <label>Destinatário(s)</label>
+                                                <div className="row addservicos">
+                                                    {this.state.successes[0] &&
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Emails enviados:</label>
                                                         </div>
+                                                    }
+                                                    {this.state.successes[0] &&
                                                         <div className="col-1 errorMessage">
-
                                                         </div>
+                                                    }
+                                                    {this.state.successes[0] &&
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Field className="form-control" type="text" value={this.state.emails.join('; ')} onChange={async e => { this.setState({ emails: e.currentTarget.value.split('; ') }) }} />
+                                                            <label>
+                                                                {this.state.successes.map((e, i) => (
+                                                                    <span className='listaEmail successEmail'>{e}{this.state.successes[i + 1] ? ", " : ""}</span>
+                                                                ))}
+                                                            </label>
                                                         </div>
+                                                    }
+                                                    {this.state.successes[0] &&
                                                         <div className="col-1"></div>
-                                                        {this.state.failures[0] &&
-                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                <label>Emails inválidos:</label>
-                                                            </div>
-                                                        }
-                                                        {this.state.failures[0] &&
-                                                            <div className="col-1 errorMessage">
-                                                            </div>
-                                                        }
-                                                        {this.state.failures[0] &&
-                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                <label>
-                                                                    {this.state.failures.map((e, i) => (
-                                                                        <span className='listaEmail failureEmail' title='Email inválido' onClick={async () => await this.removeEmail(e)}>{e}{this.state.failures[i + 1] || this.state.emails[0] ? ", " : ""}</span>
-                                                                    ))}
-                                                                </label>
-                                                            </div>
-                                                        }
-                                                        {this.state.failures[0] &&
-                                                            <div className="col-1"></div>
-                                                        }
+                                                    }
+                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstlabel">
+                                                        <label>Destinatário(s)</label>
                                                     </div>
+                                                    <div className="col-1 errorMessage">
+
+                                                    </div>
+                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                        <Field className="form-control" type="text" value={this.state.emails.join('; ')} onChange={async e => { this.setState({ emails: e.currentTarget.value.split('; ') }) }} />
+                                                    </div>
+                                                    <div className="col-1"></div>
+                                                    {this.state.failures[0] &&
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Emails inválidos:</label>
+                                                        </div>
+                                                    }
+                                                    {this.state.failures[0] &&
+                                                        <div className="col-1 errorMessage">
+                                                        </div>
+                                                    }
+                                                    {this.state.failures[0] &&
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <label>
+                                                                {this.state.failures.map((e, i) => (
+                                                                    <span className='listaEmail failureEmail' title='Email inválido' onClick={async () => await this.removeEmail(e)}>{e}{this.state.failures[i + 1] || this.state.emails[0] ? ", " : ""}</span>
+                                                                ))}
+                                                            </label>
+                                                        </div>
+                                                    }
+                                                    {this.state.failures[0] &&
+                                                        <div className="col-1"></div>
+                                                    }
                                                 </div>
-                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
                                             </div>
+                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                                        </div>
 
-                                            <div className="row">
-                                                <div className="col-2"></div>
-                                                <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                    <button disabled={!validFormEmail} type="submit" style={validFormEmail ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Enviar</button>
-                                                </div>
-                                                <div className="col-2"></div>
+                                        <div className="row">
+                                            <div className="col-2"></div>
+                                            <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                <button disabled={!validFormEmail} type="submit" style={validFormEmail ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Enviar</button>
                                             </div>
+                                            <div className="col-2"></div>
+                                        </div>
 
-                                        </Form>
-                                    </Formik>
+                                    </Form>
+                                </Formik>
 
-                                </div>
                             </div>
+                        </div>
 
 
 
 
-
-                        </div >
 
                     </div >
-                </Modal >
-            </div>
-        )
 
-    }
+                </div >
+            </Modal >
+        </div>
+    )
+
+}
 }
 
 const mapStateToProps = ({ user, servidor }) => {
