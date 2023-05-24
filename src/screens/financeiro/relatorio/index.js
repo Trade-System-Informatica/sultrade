@@ -469,12 +469,12 @@ class Relatorio extends Component {
                                     <table className='pdfTable'>
                                         <tr>
                                             <th colSpan={9}>
-                                                <span style={{ fontSize: "1.1em" }}>{this.state.por == "porCliente" && e.pessoa ? e.pessoa.split('@.@')[0]
+                                                <span style={{ fontSize: 15 }}>{this.state.por == "porCliente" && e.pessoa ? e.pessoa.split('@.@')[0]
                                                     : this.state.por == "porVencimento" && e.vencimento ? moment(e.vencimento.split('@.@')[0]).format('DD/MM/YYYY')
                                                         : e.dataPagamento ? moment(e.dataPagamento.split('@.@')[0]).format('DD/MM/YYYY') : ''}</span>
                                             </th>
                                         </tr>
-                                        <tr>
+                                        <tr style={{fontSize: 13}}>
                                             <th>SHIP'S NAME</th>
                                             <th>PO</th>
                                             <th>PORT OF CALL</th>
@@ -522,7 +522,7 @@ class Relatorio extends Component {
 
                                             if (parseFloat(balance.replaceAll('.', '').replaceAll(",", ".")) > 0) {
                                                 return (
-                                                    <tr style={{ fontSize: 14 }} className="SOA_row">
+                                                    <tr style={{ fontSize: 11 }} className="SOA_row">
                                                         <td style={{ backgroundColor: "inherit" }}>{e.navio_manual ? util.removeAcentos(e.navio_manual?.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.os_manual ? util.removeAcentos(e.os_manual?.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.porto_manual ? util.removeAcentos(e.porto_manual?.split('@.@')[index]) : ''}</td>
@@ -624,7 +624,7 @@ class Relatorio extends Component {
 
                                             if (parseFloat(balance.replaceAll('.', '').replaceAll(",", ".")) > 0) {
                                                 return (
-                                                    <tr style={{ fontSize: 14 }} className="SOA_row">
+                                                    <tr style={{ fontSize: 11 }} className="SOA_row">
                                                         <td style={{ backgroundColor: "inherit" }}>{e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.porto ? util.removeAcentos(e.porto.split('@.@')[index]) : ''}</td>
