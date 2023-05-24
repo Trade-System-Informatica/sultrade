@@ -739,7 +739,7 @@ class Contas
     {
         $database = new Database();
 
-        $cols = 'Lancto, Tipo, Pessoa, Conta_Contabil, RepCodBar, Centro_Custo, Historico, Conta_Desconto, Parc_Ini, Parc_Fim, Valor, Saldo, Vencimento, Vencimento_Original, Conta_Provisao, Operador, Empresa, Docto, tipodocto, meio_pagamento, docto_origem';
+        $cols = 'os_origem, Lancto, Tipo, Pessoa, Conta_Contabil, RepCodBar, Centro_Custo, Historico, Conta_Desconto, Parc_Ini, Parc_Fim, Valor, Saldo, Vencimento, Vencimento_Original, Conta_Provisao, Operador, Empresa, Docto, tipodocto, meio_pagamento, docto_origem';
 
         $result = $database->doInsert('contas_aberto', $cols, $values);
 
@@ -1120,22 +1120,22 @@ class Contas
         }
     }
 
-    public static function updateContaOS($old_centro_custo, $Lancto, $Pessoa, $Centro_Custo, $Valor, $Saldo, $Empresa, $valuesRet)
+    public static function updateContaOS($os_origem, $Lancto, $Pessoa, $Centro_Custo, $Valor, $Saldo, $Empresa, $valuesRet)
     {
         $database = new Database();
 
         $query = "Lancto = '" . $Lancto . "', Pessoa = '" . $Pessoa . "', Centro_Custo = '" . $Centro_Custo . "', Valor = '" . $Valor . "', Saldo = '" . $Saldo . "', Empresa = '" . $Empresa . "'";
 
-        $conta = $database->doSelect('contas_aberto LEFT JOIN contas_aberto_cc ON contas_aberto_cc.chave_conta_aberto = contas_aberto.chave LEFT JOIN os ON contas_aberto.Centro_Custo = os.centro_custo', 'contas_aberto.chave AS chave, os.codigo AS codigo, contas_aberto_cc.chave as chave_cc', 'contas_aberto.Centro_Custo = ' . $old_centro_custo . ' AND contas_aberto_cc.tipo = "DESCONTO"');
+        $conta = $database->doSelect('contas_aberto LEFT JOIN contas_aberto_cc ON contas_aberto_cc.chave_conta_aberto = contas_aberto.chave LEFT JOIN os ON contas_aberto.Centro_Custo = os.centro_custo', 'contas_aberto.chave AS chave, os.codigo AS codigo, contas_aberto_cc.chave as chave_cc', 'contas_aberto.os_origem = ' . $os_origem . ' AND contas_aberto_cc.tipo = "DESCONTO"');
 
-        $contaBase = $database->doSelect('contas_aberto LEFT JOIN os ON contas_aberto.Centro_Custo = os.centro_custo', 'contas_aberto.chave AS chave, os.codigo AS codigo', "contas_aberto.Centro_Custo = '" . $old_centro_custo . "'");
+        $contaBase = $database->doSelect('contas_aberto LEFT JOIN os ON contas_aberto.os_origem = os.chave', 'contas_aberto.chave AS chave, os.codigo AS codigo', "contas_aberto.os_origem = '" . $os_origem . "'");
         if (!$contaBase[0] || !$contaBase[0]["chave"]) {
             $cols = 'Lancto, Tipo, Pessoa, Conta_Contabil, RepCodBar, Centro_Custo, Historico, Conta_Desconto, Parc_Ini, Parc_Fim, Valor, Saldo, Vencimento, Vencimento_Original, Conta_Provisao, Operador, Empresa, Docto, tipodocto, meio_pagamento, docto_origem';
 
             $database->doInsert('contas_aberto', $cols, "'$Lancto', 0, '$Pessoa', 0, 0, '$Centro_Custo', '', 0,1,1, '$Valor', '$Valor', '', '', 0, 0, 0, $Empresa, 0, 0, 0, ''");
-            $conta = $database->doSelect('contas_aberto LEFT JOIN contas_aberto_cc ON contas_aberto_cc.chave_conta_aberto = contas_aberto.chave LEFT JOIN os ON contas_aberto.Centro_Custo = os.centro_custo', 'contas_aberto.chave AS chave, os.codigo AS codigo, contas_aberto_cc.chave as chave_cc', 'contas_aberto.Centro_Custo = ' . $old_centro_custo . ' AND contas_aberto_cc.tipo = "DESCONTO"');
+            $conta = $database->doSelect('contas_aberto LEFT JOIN contas_aberto_cc ON contas_aberto_cc.chave_conta_aberto = contas_aberto.chave LEFT JOIN os ON contas_aberto.Centro_Custo = os.centro_custo', 'contas_aberto.chave AS chave, os.codigo AS codigo, contas_aberto_cc.chave as chave_cc', 'contas_aberto.os_origem = ' . $os_origem . ' AND contas_aberto_cc.tipo = "DESCONTO"');
         } else {
-            $database->doUpdate('contas_aberto', $query, 'Centro_Custo = ' . $old_centro_custo);
+            $database->doUpdate('contas_aberto', $query, 'os_origem = ' . $os_origem);
         }
 
         if ($conta[0] && $conta[0]["chave"]) {
@@ -1339,7 +1339,7 @@ class Contas
                 'contas_aberto 
             LEFT JOIN pessoas ON pessoas.chave = contas_aberto.pessoa
             LEFT JOIN os_tp_docto ON os_tp_docto.chave = contas_aberto.tipodocto
-            LEFT JOIN os ON os.centro_custo = contas_aberto.centro_custo AND os.centro_custo != "" AND os.centro_custo != 0',
+            LEFT JOIN os ON os.chave = contas_aberto.os_origem',
                 "GROUP_CONCAT(contas_aberto.Docto SEPARATOR '@.@') AS documento, 
                                           GROUP_CONCAT(pessoas.nome SEPARATOR '@.@') AS pessoa, 
                                           GROUP_CONCAT(contas_aberto.vencimento SEPARATOR '@.@') AS vencimento,
@@ -1379,7 +1379,8 @@ class Contas
             $result = $database->doSelect(
                 'contas_aberto 
             LEFT JOIN pessoas ON pessoas.chave = contas_aberto.pessoa
-            LEFT JOIN os_tp_docto ON os_tp_docto.chave = contas_aberto.tipodocto',
+            LEFT JOIN os_tp_docto ON os_tp_docto.chave = contas_aberto.tipodocto
+            LEFT JOIN os ON os.chave = contas_aberto.os_origem',
                 "GROUP_CONCAT(contas_aberto.Docto SEPARATOR '@.@') AS documento, 
                                           GROUP_CONCAT(pessoas.nome SEPARATOR '@.@') AS pessoa, 
                                           GROUP_CONCAT(contas_aberto.vencimento SEPARATOR '@.@') AS vencimento,

@@ -1498,7 +1498,7 @@ class AddConta extends Component {
                                                                 </div>
                                                             </>}
 
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                        {/* <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Centro de Custo</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
@@ -1517,7 +1517,7 @@ class AddConta extends Component {
                                                                     await this.setState({ modalAberto: true, modal: 'listarCentrosCustos', modalPesquisa: this.state.centroCusto, modalLista: this.state.centrosCustos })
                                                                 }}>...</div>
                                                             }
-                                                        </div>
+                                                        </div> */}
                                                         {this.state.tipo == 1 &&
                                                             <>
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">

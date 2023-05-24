@@ -383,10 +383,10 @@ class AddOS extends Component {
             }
         })
 
-        if (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".","").replaceAll(",",".")) != 0) {
-            eventosTotal += parseFloat(this.state.bankCharges.replaceAll(".","").replaceAll(",","."));
+        if (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", ".")) != 0) {
+            eventosTotal += parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", "."));
         }
-        if (this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".","").replaceAll(",",".")) != 0) {
+        if (this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".", "").replaceAll(",", ".")) != 0) {
             eventosTotal += parseFloat(this.state.governmentTaxes.replaceAll(".", "").replaceAll(",", "."));
         }
 
@@ -1183,7 +1183,7 @@ class AddOS extends Component {
             )
 
         } else if (validForm) {
-            if (this.state.faturamento && moment(this.state.faturamento).isValid() && this.state.centroCusto != 0 && this.state.centroCusto != "") {
+            if (this.state.faturamento && moment(this.state.faturamento).isValid()) {
                 // console.log(this.state.os.Data_Faturamento);
                 // console.log(this.state.os.centro_custo);
                 // console.log(this.state.faturamento);
@@ -1264,7 +1264,7 @@ class AddOS extends Component {
             valor += parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", "."));
         }
 
-        if (this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".","").replaceAll(",",".")) != 0) {
+        if (this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".", "").replaceAll(",", ".")) != 0) {
             valor += parseFloat(this.state.governmentTaxes.replaceAll(".", "").replaceAll(",", "."));
         }
 
@@ -1277,7 +1277,7 @@ class AddOS extends Component {
 
             await apiEmployee.post(`insertContaOS.php`, {
                 token: true,
-                values: `'${moment(this.state.faturamento).format("YYYY-MM-DD")}', '0', '${this.state.cliente}', '0', '0', '${this.state.centroCusto}', '',  0,0, 0, '${parseFloat(`${valor}`)}', '${parseFloat(`${valor}`)}', '0', '0', '${0}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', 0, 0, 0, ''`,
+                values: `'${this.state.chave}', '${moment(this.state.faturamento).format("YYYY-MM-DD")}', '0', '${this.state.cliente}', '0', '0', '${this.state.centroCusto}', '',  0,0, 0, '${parseFloat(`${valor}`)}', '${parseFloat(`${valor}`)}', '0', '0', '${0}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', 0, 0, 0, ''`,
                 valuesRet
             }).then(
                 async res => {
@@ -1288,7 +1288,7 @@ class AddOS extends Component {
         } else {
             await apiEmployee.post(`updateContaOS.php`, {
                 token: true,
-                old_Centro_Custo: this.state.os.centro_custo,
+                os_origem: this.state.chave,
                 Lancto: moment(this.state.faturamento).format("YYYY-MM-DD"),
                 Pessoa: this.state.cliente,
                 Centro_Custo: this.state.centroCusto,
@@ -1318,15 +1318,13 @@ class AddOS extends Component {
             valorTotal += parseFloat(this.state.pdfContent[0].bankCharges);
         }
 
-        {
-            values.map((e, index) => {
-                if (e.moeda == 5) {
-                    valorTotal += parseFloat(e.valor);
-                } else {
-                    valorTotal += Util.toFixed(parseFloat(e.valor * this.state.roe), 2);
-                }
-            })
-        }
+        values.map((e, index) => {
+            if (e.moeda == 5) {
+                valorTotal += parseFloat(e.valor);
+            } else {
+                valorTotal += Util.toFixed(parseFloat(e.valor * this.state.roe), 2);
+            }
+        })
 
         return valorTotal;
     }
@@ -4923,7 +4921,7 @@ class AddOS extends Component {
                                                                             <>
                                                                                 {window.innerWidth < 500 &&
                                                                                     <>
-                                                                            {this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", ".")) != 0 &&
+                                                                                        {this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", ".")) != 0 &&
                                                                                             <tr className={this.state.eventos.length % 2 == 0 ? "parTr" : "imparTr"}>
                                                                                                 <td className="text-center"></td>
                                                                                                 <td className="text-center">Bank Charges</td>
@@ -4936,8 +4934,8 @@ class AddOS extends Component {
                                                                                                 <td></td>
                                                                                             </tr>
                                                                                         }
-                                                                                        {this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".","").replaceAll(",",".")) != 0 &&
-                                                                                <tr className={(this.state.eventos.length + (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", ".")) != 0 ? 1 : 0)) % 2 == 0 ? "parTr" : "imparTr"}>
+                                                                                        {this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".", "").replaceAll(",", ".")) != 0 &&
+                                                                                            <tr className={(this.state.eventos.length + (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", ".")) != 0 ? 1 : 0)) % 2 == 0 ? "parTr" : "imparTr"}>
                                                                                                 <td className="text-center"></td>
                                                                                                 <td className="text-center">Government Taxes</td>
                                                                                                 <td className="text-center">
@@ -4949,7 +4947,7 @@ class AddOS extends Component {
                                                                                                 <td></td>
                                                                                             </tr>
                                                                                         }
-                                                                                        <tr className={(this.state.eventos.length + (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".","").replaceAll(",",".")) != 0 ? 1 : 0) + (this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".","").replaceAll(",",".")) != 0 ? 1 : 0)) % 2 == 0 ? "parTr" : "imparTr"}>
+                                                                                        <tr className={(this.state.eventos.length + (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", ".")) != 0 ? 1 : 0) + (this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".", "").replaceAll(",", ".")) != 0 ? 1 : 0)) % 2 == 0 ? "parTr" : "imparTr"}>
                                                                                             <td className="text-center"></td>
                                                                                             <td className="text-center">Total</td>
                                                                                             <td className="text-center">
@@ -4964,7 +4962,7 @@ class AddOS extends Component {
                                                                                 }
                                                                                 {window.innerWidth >= 500 &&
                                                                                     <>
-                                                                                        {this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".","").replaceAll(",",".")) != 0 &&
+                                                                                        {this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", ".")) != 0 &&
                                                                                             <tr className={this.state.eventos.length % 2 == 0 ? "parTr" : "imparTr"}>
                                                                                                 <td className="text-center"></td>
                                                                                                 <td className="text-center">Bank Charges</td>
@@ -4979,9 +4977,8 @@ class AddOS extends Component {
                                                                                                 <td></td>
                                                                                             </tr>
                                                                                         }
-                                                                                        {this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".","").replaceAll(",",".")) != 0 &&
-                                                                                            <tr className={(this.state.eventos.length + (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".","").replaceAll(",",".")) != 0 ? 1 : 0)) % 2 == 0 ? "parTr" : "imparTr"}>
-                                                                                                {console.log(this.state.governmentTaxes)}
+                                                                                        {this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".", "").replaceAll(",", ".")) != 0 &&
+                                                                                            <tr className={(this.state.eventos.length + (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", ".")) != 0 ? 1 : 0)) % 2 == 0 ? "parTr" : "imparTr"}>
                                                                                                 <td className="text-center"></td>
                                                                                                 <td className="text-center">Government Taxes</td>
                                                                                                 <td className="text-center"></td>
@@ -4995,7 +4992,7 @@ class AddOS extends Component {
                                                                                                 <td></td>
                                                                                             </tr>
                                                                                         }
-                                                                                        <tr className={(this.state.eventos.length + (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".","").replaceAll(",",".")) != 0 ? 1 : 0) + (this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".","").replaceAll(",",".")) != 0 ? 1 : 0)) % 2 == 0 ? "parTr" : "imparTr"}>
+                                                                                        <tr className={(this.state.eventos.length + (this.state.bankCharges && parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", ".")) != 0 ? 1 : 0) + (this.state.governmentTaxes && parseFloat(this.state.governmentTaxes.replaceAll(".", "").replaceAll(",", ".")) != 0 ? 1 : 0)) % 2 == 0 ? "parTr" : "imparTr"}>
                                                                                             <td className="text-center"></td>
                                                                                             <td className="text-center">Total</td>
                                                                                             <td className="text-center"></td>
