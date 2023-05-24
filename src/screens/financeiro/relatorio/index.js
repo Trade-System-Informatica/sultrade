@@ -624,7 +624,7 @@ class Relatorio extends Component {
 
                                             if (parseFloat(balance.replaceAll('.', '').replaceAll(",", ".")) > 0) {
                                                 return (
-                                                    <tr style={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#999999", fontSize: 14 }}>
+                                                    <tr style={{ fontSize: 14 }} className="SOA_row">
                                                         <td style={{ backgroundColor: "inherit" }}>{e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.porto ? util.removeAcentos(e.porto.split('@.@')[index]) : ''}</td>
