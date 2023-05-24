@@ -468,6 +468,13 @@ class Relatorio extends Component {
 
                                     <table className='pdfTable'>
                                         <tr>
+                                            <th colSpan={9}>
+                                                <span style={{ fontSize: "1.1em" }}>{this.state.por == "porCliente" && e.pessoa ? e.pessoa.split('@.@')[0]
+                                                    : this.state.por == "porVencimento" && e.vencimento ? moment(e.vencimento.split('@.@')[0]).format('DD/MM/YYYY')
+                                                        : e.dataPagamento ? moment(e.dataPagamento.split('@.@')[0]).format('DD/MM/YYYY') : ''}</span>
+                                            </th>
+                                        </tr>
+                                        <tr>
                                             <th>SHIP'S NAME</th>
                                             <th>PO</th>
                                             <th>PORT OF CALL</th>
@@ -477,13 +484,6 @@ class Relatorio extends Component {
                                             <th>DISCOUNT</th>
                                             <th>RECEIVED</th>
                                             <th>BALANCE</th>
-                                        </tr>
-                                        <tr style={{ backgroundColor: "#999999", border: "1px solid black" }}>
-                                            <th colSpan={9}>
-                                                <span style={{ fontSize: "1.2em" }}>{this.state.por == "porCliente" && e.pessoa ? e.pessoa.split('@.@')[0]
-                                                    : this.state.por == "porVencimento" && e.vencimento ? moment(e.vencimento.split('@.@')[0]).format('DD/MM/YYYY')
-                                                        : e.dataPagamento ? moment(e.dataPagamento.split('@.@')[0]).format('DD/MM/YYYY') : ''}</span>
-                                            </th>
                                         </tr>
                                         {map.map((el, index) => {
                                             if (!e?.os_manual?.split("@.@")[index]) {
@@ -522,7 +522,7 @@ class Relatorio extends Component {
 
                                             if (parseFloat(balance.replaceAll('.', '').replaceAll(",", ".")) > 0) {
                                                 return (
-                                                    <tr style={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#999999", fontSize: 14 }}>
+                                                    <tr style={{ fontSize: 14 }} className="SOA_row">
                                                         <td style={{ backgroundColor: "inherit" }}>{e.navio_manual ? util.removeAcentos(e.navio_manual?.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.os_manual ? util.removeAcentos(e.os_manual?.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.porto_manual ? util.removeAcentos(e.porto_manual?.split('@.@')[index]) : ''}</td>

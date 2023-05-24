@@ -28,6 +28,13 @@
     width: 60%;
 }
 
+.SOA_row:nth-child(even) {
+    background-color: rgb(170, 185, 250);
+}
+.SOA_row:nth-child(odd) {
+    background-color: white;
+}
+
 @media (max-width: 767px) {
     .relatorioLabelTitulo {
         margin-top: 50px;
