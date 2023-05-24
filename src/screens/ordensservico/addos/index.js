@@ -906,7 +906,7 @@ class AddOS extends Component {
         if (!this.state.anexosForn[0]) {
             await this.setState({
                 faturamento: valor,
-                faturadoPor: this.state.faturamento == '' ? '' : this.state.usuarioLogado.codigo
+                faturadoPor: this.state.faturamento == '' || !moment(this.state.faturamento).isValid() ? '' : this.state.usuarioLogado.codigo
             })
         } else {
             await this.setState({ error: { type: "error", msg: "Há Faturas Pendentes!" } });
