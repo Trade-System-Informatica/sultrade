@@ -30,7 +30,7 @@ const estadoInicial = {
     lancamentoFinal: moment('2100-12-31').format('YYYY-MM-DD'),
     excluirTipos: false,
     tiposDocumentos: [],
-    moeda: 6,
+    moeda: 5,
 
     moedasOptions: [],
     moedasOptionsTexto: "",
@@ -654,10 +654,10 @@ class Relatorio extends Component {
                                         })}
                                         <tr style={{ fontSize: 13 }}>
                                             <th colSpan='5'>{"Total ->"}</th>
-                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDAPorGrupo)}</td>
-                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalDiscountPorGrupo)}</td>
-                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalReceivedPorGrupo)}</td>
-                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalBalancePorGrupo)}</td>
+                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDAPorGrupo)}</td>
+                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalDiscountPorGrupo)}</td>
+                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalReceivedPorGrupo)}</td>
+                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalBalancePorGrupo)}</td>
                                         </tr>
                                     </table>
                                     <hr />
@@ -674,10 +674,10 @@ class Relatorio extends Component {
                             </tr>
                             <tr style={{ fontSize: 12 }}>
                                 <th>{"Total ->"}</th>
-                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDA)}</td>
-                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalDiscount)}</td>
-                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalReceived)}</td>
-                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalBalance)}</td>
+                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDA)}</td>
+                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalDiscount)}</td>
+                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalReceived)}</td>
+                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalBalance)}</td>
                             </tr>
                         </table>
 
