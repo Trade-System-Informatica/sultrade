@@ -251,7 +251,7 @@ class Relatorio extends Component {
 
         let por = this.state.por;
         if (por == 'porCliente') {
-            por = 'GROUP BY contas_aberto.pessoa ORDER BY contas_aberto.pessoa';
+            por = 'GROUP BY contas_aberto.pessoa ORDER BY pessoas.nome';
         } else if (por == 'porVencimento') {
             por = 'GROUP BY contas_aberto.vencimento ORDER BY contas_aberto.vencimento';
         } else if (por == 'porLancamento') {

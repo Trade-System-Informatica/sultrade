@@ -495,7 +495,7 @@ class OS
         return $result;
     }
 
-    public static function insertOS($values, $codigo, $tipo, $navio = null, $tipoServico = null, $cliente = null, $porto = null)
+    public static function insertOS($values, $codigo, $tipo, $navio = null, $tipoServico = null, $cliente = null, $porto = null, $chaveCliente)
     {
         $database = new Database();
         
@@ -504,8 +504,8 @@ class OS
             $centroCusto = $database->doSelect('centros_custos', 'Chave', "Codigo = '$codigo'");
             
             if (!$centroCusto[0]) {
-                $valuesCentroCusto = "'$codigo', '$codigo', 'ST$codigo $navio - $tipoServico - $cliente - $porto'";
-                $centroCusto = $database->doInsert('centros_custos', 'Chave, Codigo, Descricao', $valuesCentroCusto);
+                $valuesCentroCusto = "'$codigo', '$codigo', 'ST$codigo $navio - $tipoServico - $cliente - $porto', '$chaveCliente'";
+                $centroCusto = $database->doInsert('centros_custos', 'Chave, Codigo, Descricao, Cliente', $valuesCentroCusto);
 
                 $database->doUpdate('codigos',"Proximo = '".($codigo+1)."'", "Tipo = 'CC'");
             }    

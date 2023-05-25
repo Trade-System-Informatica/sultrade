@@ -1165,6 +1165,7 @@ class AddOS extends Component {
                 navio: this.state.naviosOptions.find((navio) => navio.value == this.state.navio)?.label,
                 tipoServico: this.state.tiposServicosOptions.find((tipo) => tipo.value == this.state.tipoServico)?.label,
                 cliente: clienteEncurtado,
+                clienteChave: this.state.cliente,
                 porto: this.state.portosOptions.find((porto) => porto.value == this.state.porto)?.label,
             }).then(
                 async res => {
