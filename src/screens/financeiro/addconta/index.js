@@ -22,6 +22,7 @@ const estadoInicial = {
     conta: '',
     chave: 0,
     lancamento: moment().format('YYYY-MM-DD'),
+    envio: '',
     pessoa: '',
     tipo: '',
     contaContabil: '',
@@ -215,6 +216,7 @@ class AddConta extends Component {
             console.log(this.state.conta);
             await this.setState({
                 lancamento: moment(this.state.conta.Lancto).format('YYYY-MM-DD'),
+                envio: moment(this.state.conta.envio).format('YYYY-MM-DD'),
                 tipo: this.state.conta.Tipo,
                 pessoa: this.state.conta.Pessoa,
                 contaContabil: this.state.conta.Conta_Contabil,
@@ -262,6 +264,7 @@ class AddConta extends Component {
                 dadosIniciais: [
                     { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tiposOptions) },
                     { titulo: 'Lançamento', valor: util.formatForLogs(this.state.lancamento, 'date') },
+                    { titulo: 'Envio', valor: util.formatForLogs(this.state.envio, 'date') },
                     { titulo: 'Documento', valor: util.formatForLogs(this.state.documento) },
                     { titulo: 'Parcela Inicial', valor: util.formatForLogs(this.state.parcelaInicial) },
                     { titulo: 'Parcela Final', valor: util.formatForLogs(this.state.parcelaFinal) },
@@ -495,6 +498,7 @@ class AddConta extends Component {
             dadosFinais: [
                 { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tiposOptions) },
                 { titulo: 'Lançamento', valor: util.formatForLogs(this.state.lancamento, 'date') },
+                { titulo: 'Envio', valor: util.formatForLogs(this.state.envio, 'date') },
                 { titulo: 'Documento', valor: util.formatForLogs(this.state.documento) },
                 { titulo: 'Parcela Inicial', valor: util.formatForLogs(this.state.parcelaInicial) },
                 { titulo: 'Parcela Final', valor: util.formatForLogs(this.state.parcelaFinal) },
@@ -522,7 +526,7 @@ class AddConta extends Component {
                 if (this.state.tipo == 0) {
                     await apiEmployee.post(`insertContaCliente.php`, {
                         token: true,
-                        values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.centroCusto}', '${this.state.contaDesconto}', '${this.state.historico}', '${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${this.state.numBoleto}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}'`,
+                        values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.centroCusto}', '${this.state.contaDesconto}', '${this.state.historico}', '${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${this.state.numBoleto}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}', '${this.state.envio}'`,
                         meioPagamento: this.state.meioPagamentoNome,
                         valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
                         dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${parseFloat(this.state.discount.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.received.replaceAll('.', '').replaceAll(',', '.'))}', ${moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYY-MM-DD") : ''}` : ""
@@ -545,7 +549,7 @@ class AddConta extends Component {
                 } else {
                     await apiEmployee.post(`insertContaFornecedor.php`, {
                         token: true,
-                        values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.codBarras}', '${this.state.centroCusto}', '${this.state.historico}',  '${this.state.contaDesconto}','${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}', ''`,
+                        values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.codBarras}', '${this.state.centroCusto}', '${this.state.historico}',  '${this.state.contaDesconto}','${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}', '', '${this.state.envio}'`,
                         meioPagamento: this.state.meioPagamentoNome,
                         valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
                         dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${parseFloat(this.state.discount.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.received.replaceAll('.', '').replaceAll(',', '.'))}', ${moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYY-MM-DD") : ''}` : ""
@@ -591,6 +595,7 @@ class AddConta extends Component {
                         Docto: this.state.documento,
                         tipodocto: this.state.tipoDocumento,
                         meioPagamento: this.state.meioPagamento,
+                        envio: this.state.envio,
 
                         meioPagamentoNome: this.state.meioPagamentoNome,
 
@@ -654,6 +659,7 @@ class AddConta extends Component {
                         Docto: this.state.documento,
                         tipodocto: this.state.tipoDocumento,
                         meioPagamento: this.state.meioPagamento,
+                        envio: this.state.envio,
 
                         meioPagamentoNome: this.state.meioPagamentoNome,
 
@@ -1447,7 +1453,15 @@ class AddConta extends Component {
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Field className="form-control" type="date" value={this.state.lancamento} onChange={async e => { this.setState({ lancamento: e.currentTarget.value }) }} />
-                                                        </div>
+                                                    </div>
+                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                        <label>Data de envio</label>
+                                                    </div>
+                                                    <div className='col-1 errorMessage'>
+                                                    </div>
+                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                        <Field className="form-control" type="date" value={this.state.envio} onChange={async e => { this.setState({ envio: e.currentTarget.value }) }} />
+                                                    </div>
                                                         {this.state.tipo &&
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 {this.state.tipo === '0' &&
