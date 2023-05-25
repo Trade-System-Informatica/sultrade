@@ -518,11 +518,11 @@ class Relatorio extends Component {
                                             let received = 0;
 
                                             if (this.state.moeda == 5) {
-                                                FDA += e.valor_manual.split("@.@")[index];
+                                                FDA += e?.valor_manual?.split("@.@")[index];
                                                 discount = e.discount_manual ? util.toFixed(parseFloat(e.discount_manual?.split("@.@")[index]), 2) : "0,00";
                                                 received = e.received_manual ? util.toFixed(parseFloat(e.received_manual?.split("@.@")[index]), 2) : "0,00";
                                             } else if (this.state.moeda == 6) {
-                                                FDA += e.valor_manual.split("@.@")[index] ? util.toFixed(parseFloat(e.valor_manual.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
+                                                FDA += e?.valor_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.valor_manual.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
                                                 discount += e.discount_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.discount_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
                                                 received += e.received_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.received_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
                                             }
