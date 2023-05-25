@@ -958,7 +958,7 @@ render() {
                                                     <div className='col-1 errorMessage'>
                                                     </div>
                                                     <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                        <Select className='SearchSelect' options={this.state.pessoasOptions.filter(e => this.filterSearch(e, this.state.pessoasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ pessoasOptionsTexto: e }) }} search={true} onChange={(e) => { this.setState({ clientes: [...this.state.clientes, e.value], }) }} />
+                                                        <Select className='SearchSelect' options={this.state.pessoasOptions.filter(e => this.filterSearch(e, this.state.pessoasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ pessoasOptionsTexto: e }) }} search={true} onChange={(e) => { if (!this.state.clientes.find((c) => c == e.value)) this.setState({ clientes: [...this.state.clientes, e.value], }) }} />
                                                         <div style={{marginBottom: 20, color: 'white', fontSize: 13}}>
                                                         {this.state.clientes.map((e,i) => (
                                                             <span class="click_to_erase" onClick={() => this.setState({clientes: this.state.clientes.filter((c) => c != e)})}>{`${this.state.pessoas.find((p) => p.Chave == e)?.Nome}${i != this.state.clientes.length-1 ? ', ' : ' '}`}</span>
