@@ -1356,7 +1356,7 @@ class Contas
                                           GROUP_CONCAT(contas_aberto.lancto SEPARATOR '@.@') AS lancamento,
                                           GROUP_CONCAT(contas_aberto.centro_custo SEPARATOR '@.@') AS CC,
                                           GROUP_CONCAT(contas_aberto.saldo SEPARATOR '@.@') AS saldo,
-                                          GROUP_CONCAT(contas_aberto.valor SEPARATOR '@.@') AS valor,
+                                          GROUP_CONCAT(CASE WHEN os.codigo IS NOT NULL THEN 0 ELSE contas_aberto.valor SEPARATOR '@.@') AS valor,
                                           GROUP_CONCAT((SELECT contas_aberto_cc.valor FROM contas_aberto_cc WHERE contas_aberto_cc.tipo = 'DESCONTO' AND contas_aberto_cc.chave_conta_aberto = contas_aberto.chave LIMIT 1) SEPARATOR '@.@') AS desconto,
                                           GROUP_CONCAT(os.codigo SEPARATOR '@.@') AS os,
                                           GROUP_CONCAT(os.governmentTaxes SEPARATOR '@.@') AS governmentTaxes,
