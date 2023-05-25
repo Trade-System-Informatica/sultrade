@@ -242,7 +242,7 @@ class Relatorio extends Component {
             }).then(
                 async res => {
                     if (res.data[0]) {
-                        const email = res.data.find((e) => e.Tipo == "EM").Campo1;
+                        const email = res.data.find((e) => e.Tipo == "EM")?.Campo1;
 
                         await this.setState({ emails: [email] });
                     }
@@ -834,7 +834,7 @@ class Relatorio extends Component {
             pessoa: pessoa
         }).then(
             async response => {
-                await this.setState({ contatos: response.data, fornecedorEmail: response.data.find((e) => e.Tipo == "EM") ? response.data.find((e) => e.Tipo == "EM").Campo1 : "" })
+                await this.setState({ contatos: response.data, fornecedorEmail: response.data.find((e) => e.Tipo == "EM") ? response.data.find((e) => e.Tipo == "EM")?.Campo1 : "" })
                 await this.setState({ emails: this.state.fornecedorEmail.split("; ") })
                 await this.setState({ loading: false })
             },
