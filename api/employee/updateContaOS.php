@@ -16,6 +16,7 @@ if($objData != NULL){
     $Lancto = prepareInput($objData->Lancto);
     $Pessoa = prepareInput($objData->Pessoa);
     $Centro_Custo = prepareInput($objData->Centro_Custo);
+    $Operador = prepareInput($objData->Operador);
     $Valor = prepareInput($objData->Valor);
     $Saldo = prepareInput($objData->Saldo);
     $Empresa = prepareInput($objData->Empresa);
@@ -24,7 +25,7 @@ if($objData != NULL){
     
     $contas = new Contas();
 
-    $result = $contas->updateContaOS($os_origem, $Lancto, $Pessoa, $Centro_Custo, $Valor, $Saldo, $Empresa, $valuesRet);
+    $result = $contas->updateContaOS($os_origem, $Lancto, $Pessoa, $Centro_Custo, $Valor, $Saldo, $Empresa, $Operador, $valuesRet);
 
 } else {
     $result = "false";

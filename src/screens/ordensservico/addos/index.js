@@ -906,7 +906,7 @@ class AddOS extends Component {
         if (!this.state.anexosForn[0]) {
             await this.setState({
                 faturamento: valor,
-                faturadoPor: this.state.faturamento == '' || !moment(this.state.faturamento).isValid() ? '' : this.state.usuarioLogado.codigo
+                faturadoPor: valor == '' || !moment(valor).isValid() ? '' : this.state.usuarioLogado.codigo
             })
         } else {
             await this.setState({ error: { type: "error", msg: "Há Faturas Pendentes!" } });
@@ -1175,7 +1175,7 @@ class AddOS extends Component {
                         await loader.salvaLogs('os', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
 
                         await this.setState({ loading: false, bloqueado: false });
-                        this.setState({ recarregaPagina: reload });
+                        //this.setState({ recarregaPagina: reload });
                     } else {
                         console.log(res.data)
                     }
@@ -1226,7 +1226,7 @@ class AddOS extends Component {
                         await loader.salvaLogs('os', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `OS: ${this.state.codigo}`);
                         await this.setState({ loading: false, bloqueado: false })
                         if (reload) {
-                            window.location.reload();
+                           // window.location.reload();
                         }
                     } else {
                         await alert(`Erro ${JSON.stringify(res)}`)
@@ -1271,14 +1271,14 @@ class AddOS extends Component {
 
         let valuesRet = "";
 
-        if (this.state.faturadoPor == 0) {
+        if (this.state.os.faturadoPor == 0) {
             if (valorDesconto != 0) {
                 valuesRet = `'0', '${parseFloat(valorDesconto)}', 'Desconto de ${this.state.codigo}', 'DESCONTO'`;
             }
 
             await apiEmployee.post(`insertContaOS.php`, {
                 token: true,
-                values: `'${this.state.chave}', '${moment(this.state.faturamento).format("YYYY-MM-DD")}', '0', '${this.state.cliente}', '0', '0', '${this.state.centroCusto}', '',  0,0, 0, '${parseFloat(`${valor}`)}', '${parseFloat(`${valor}`)}', '0', '0', '${0}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', 0, 0, 0, ''`,
+                values: `'${this.state.chave}', '${moment(this.state.faturamento).format("YYYY-MM-DD")}', '0', '${this.state.cliente}', '0', '0', '${this.state.centroCusto}', '',  0,1, 1, '${parseFloat(`${valor}`)}', '${parseFloat(`${valor}`)}', '', '', '${0}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', 0, 0, 0, ''`,
                 valuesRet
             }).then(
                 async res => {
