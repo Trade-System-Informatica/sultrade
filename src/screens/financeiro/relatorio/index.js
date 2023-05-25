@@ -610,7 +610,7 @@ class Relatorio extends Component {
                                                         }
                                                     }
                                                 });
-                                            }x  
+                                            }
 
                                             if (this.state.moeda == 5) {
                                                 FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? parseFloat(e.bankCharges.split("@.@")[index]) : 0;
