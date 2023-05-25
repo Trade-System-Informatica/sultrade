@@ -23,6 +23,7 @@ const estadoInicial = {
     conta: '',
     centroCusto: '',
     pessoa: '',
+    clientes: [],
     periodoInicial: moment().startOf('month').format('YYYY-MM-DD'),
     periodoFinal: moment().endOf('month').format('YYYY-MM-DD'),
     lancamentoInicial: moment('1900-1-1').format('YYYY-MM-DD'),
@@ -215,7 +216,7 @@ class Relatorio extends Component {
         const abertas = this.state.tipo == 'aberto' ? `contas_aberto.Saldo > 0` : `contas_aberto.Saldo = 0`;
         const conta = this.state.conta ? `contas_aberto.Conta_Contabil = '${this.state.conta}'` : '';
         const centroCusto = this.state.centroCusto ? `contas_aberto.Centro_Custo = '${this.state.centroCusto}'` : '';
-        const pessoa = this.state.pessoa ? `contas_aberto.pessoa = '${this.state.pessoa}'` : '';
+        const pessoa = this.state.clientes[0] ? `contas_aberto.pessoa IN ('${this.state.clientes.join("','")}')` : '';
         let periodoInicial = "1=1"//this.state.periodoInicial ? this.state.tipo == 'aberto' ? `contas_aberto.vencimento >= '${moment(this.state.periodoInicial).format('YYYY-MM-DD')}'` : `contas_aberto.data_pagto >= '${moment(this.state.periodoInicial).format('YYYY-MM-DD')}'` : '';
         let periodoFinal = "1=1"//this.state.periodoFinal ? this.state.tipo == 'aberto' ? `contas_aberto.vencimento <= '${moment(this.state.periodoFinal).format('YYYY-MM-DD')}'` : `contas_aberto.data_pagto <= '${moment(this.state.periodoFinal).format('YYYY-MM-DD')}'` : '';
         const lancamentoInicial = "1=1"//this.state.lancamentoInicial ? `contas_aberto.lancto >= '${moment(this.state.lancamentoInicial).format('YYYY-MM-DD')}'` : '';
@@ -234,10 +235,10 @@ class Relatorio extends Component {
             }
         }
 
-        if (this.state.pessoa) {
+        if (this.state.clientes[0] && !this.state.clientes[1]) {
             await apiEmployee.post(`getContatos.php`, {
                 token: true,
-                pessoa: this.state.pessoa
+                pessoa: this.state.clientes[0]
             }).then(
                 async res => {
                     if (res.data[0]) {
@@ -262,6 +263,7 @@ class Relatorio extends Component {
 
         let where = [empresa, abertas, conta, centroCusto, pessoa, periodoInicial, periodoFinal, lancamentoInicial, lancamentoFinal, tiposDocumento];
         where = where.filter((e) => e.trim() != "");
+        console.log(where.join(' AND '));
 
         await apiEmployee.post(`gerarRelatorioContas.php`, {
             token: true,
@@ -527,7 +529,6 @@ class Relatorio extends Component {
                                                 received += e.received_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.received_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
                                             }
 
-                                            console.log({FDA, discount, received, os: e.os_manual.split("@.@")[index]});
 
                                             discount = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(discount);
                                             received = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(received);
@@ -952,12 +953,17 @@ render() {
                                                     </div>
 
                                                     <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                        <label>Pessoa</label>
+                                                        <label>Pessoas</label>
                                                     </div>
                                                     <div className='col-1 errorMessage'>
                                                     </div>
                                                     <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                        <Select className='SearchSelect' options={this.state.pessoasOptions.filter(e => this.filterSearch(e, this.state.pessoasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ pessoasOptionsTexto: e }) }} value={this.state.pessoasOptions.filter(option => option.value == this.state.pessoa)[0]} search={true} onChange={(e) => { this.setState({ pessoa: e.value, }) }} />
+                                                        <Select className='SearchSelect' options={this.state.pessoasOptions.filter(e => this.filterSearch(e, this.state.pessoasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ pessoasOptionsTexto: e }) }} search={true} onChange={(e) => { this.setState({ clientes: [...this.state.clientes, e.value], }) }} />
+                                                        <div style={{marginBottom: 20, color: 'white', fontSize: 13}}>
+                                                        {this.state.clientes.map((e,i) => (
+                                                            <span class="click_to_erase" onClick={() => this.setState({clientes: this.state.clientes.filter((c) => c != e)})}>{`${this.state.pessoas.find((p) => p.Chave == e)?.Nome}${i != this.state.clientes.length-1 ? ', ' : ' '}`}</span>
+                                                        ))}                                                            
+                                                        </div>
                                                     </div>
                                                     <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                         <label>Moeda</label>

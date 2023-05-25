@@ -35,6 +35,15 @@
     background-color: white;
 }
 
+.click_to_erase {
+    cursor: pointer;
+}
+
+.click_to_erase:hover {
+    text-decoration: underline;
+    user-select: none;
+}
+
 @media (max-width: 767px) {
     .relatorioLabelTitulo {
         margin-top: 50px;
