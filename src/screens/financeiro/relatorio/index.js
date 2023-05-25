@@ -548,14 +548,14 @@ class Relatorio extends Component {
                                                 return (
                                                     <tr style={{ fontSize: 12 }} className="SOA_row">
                                                         <td style={{ backgroundColor: "inherit", width: 140 }}>{e.navio_manual ? util.removeAcentos(e.navio_manual?.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ backgroundColor: "inherit", width: 50 }}>{e.os_manual ? util.removeAcentos(e.os_manual?.split('@.@')[index]) : ''}</td>
+                                                        <td style={{ backgroundColor: "inherit", width: 60 }}>{e.os_manual ? util.removeAcentos(e.os_manual?.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit", width: 120 }}>{e.porto_manual ? util.removeAcentos(e.porto_manual?.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ backgroundColor: "inherit", width: 100 }}>{e.sailed_manual ? moment(e.sailed_manual.split('@.@')[index]).isValid() ? this.state.por == 'porCliente' ? moment(e.sailed_manual.split("@.@")[index]).format("MMMDo YYYY") : moment(e.sailed_manual.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
+                                                        <td style={{ backgroundColor: "inherit", width: 110 }}>{e.sailed_manual ? moment(e.sailed_manual.split('@.@')[index]).isValid() ? this.state.por == 'porCliente' ? moment(e.sailed_manual.split("@.@")[index]).format("MMM Do YYYY") : moment(e.sailed_manual.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
                                                         <td style={{ backgroundColor: "inherit", width: 100 }}>{e.roe_manual ? e.roe_manual?.split("@.@")[index] : ""}</td>
-                                                        <td style={{ backgroundColor: "inherit", width: 120 }}>{this.state.moeda == 5 ? "R$" : "USD"} {FDA}</td>
-                                                        <td style={{ backgroundColor: "inherit", width: 120 }}>{this.state.moeda == 5 ? "R$" : "USD"} {discount}</td>
-                                                        <td style={{ backgroundColor: "inherit", width: 120 }}>{this.state.moeda == 5 ? "R$" : "USD"} {received}</td>
-                                                        <td style={{ backgroundColor: "inherit", width: 120 }}>{this.state.moeda == 5 ? "R$" : "USD"} {balance}</td>
+                                                        <td style={{ backgroundColor: "inherit", width: 115 }}>{this.state.moeda == 5 ? "R$" : "USD"} {FDA}</td>
+                                                        <td style={{ backgroundColor: "inherit", width: 115 }}>{this.state.moeda == 5 ? "R$" : "USD"} {discount}</td>
+                                                        <td style={{ backgroundColor: "inherit", width: 115 }}>{this.state.moeda == 5 ? "R$" : "USD"} {received}</td>
+                                                        <td style={{ backgroundColor: "inherit", width: 115 }}>{this.state.moeda == 5 ? "R$" : "USD"} {balance}</td>
                                                     </tr>
                                                 )
                                             }
@@ -639,14 +639,14 @@ class Relatorio extends Component {
                                                 return (
                                                     <tr style={{ fontSize: 12 }} className="SOA_row">
                                                         <td style={{ backgroundColor: "inherit", width: 140 }}>{e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ backgroundColor: "inherit", width: 50}}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
+                                                        <td style={{ backgroundColor: "inherit", width: 60}}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit", width: 120}}>{e.porto ? util.removeAcentos(e.porto.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ backgroundColor: "inherit", width: 100}}>{e.sailed ? moment(e.sailed.split('@.@')[index]).isValid() ? this.state.por == 'porCliente' ? moment(e.sailed.split("@.@")[index]).format("MMMDo YYYY") : moment(e.sailed.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
+                                                        <td style={{ backgroundColor: "inherit", width: 110}}>{e.sailed ? moment(e.sailed.split('@.@')[index]).isValid() ? this.state.por == 'porCliente' ? moment(e.sailed.split("@.@")[index]).format("MMM Do YYYY") : moment(e.sailed.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
                                                         <td style={{ backgroundColor: "inherit", width: 100}}>{e.ROE ? e.ROE.split("@.@")[index] : ""}</td>
-                                                        <td style={{ backgroundColor: "inherit", width: 120}}>{this.state.moeda == 5 ? "R$" : "USD"} {FDA}</td>
-                                                        <td style={{ backgroundColor: "inherit", width: 120}}>{this.state.moeda == 5 ? "R$" : "USD"} {discount}</td>
-                                                        <td style={{ backgroundColor: "inherit", width: 120}}>{this.state.moeda == 5 ? "R$" : "USD"} {received}</td>
-                                                        <td style={{ backgroundColor: "inherit", width: 120}}>{this.state.moeda == 5 ? "R$" : "USD"} {balance}</td>
+                                                        <td style={{ backgroundColor: "inherit", width: 115}}>{this.state.moeda == 5 ? "R$" : "USD"} {FDA}</td>
+                                                        <td style={{ backgroundColor: "inherit", width: 115}}>{this.state.moeda == 5 ? "R$" : "USD"} {discount}</td>
+                                                        <td style={{ backgroundColor: "inherit", width: 115}}>{this.state.moeda == 5 ? "R$" : "USD"} {received}</td>
+                                                        <td style={{ backgroundColor: "inherit", width: 115}}>{this.state.moeda == 5 ? "R$" : "USD"} {balance}</td>
                                                     </tr>
                                                 )
                                             }
