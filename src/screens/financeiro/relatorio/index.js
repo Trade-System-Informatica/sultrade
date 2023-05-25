@@ -639,15 +639,15 @@ class Relatorio extends Component {
                                             if (parseFloat(balance.replaceAll('.', '').replaceAll(",", ".")) > 0) {
                                                 return (
                                                     <tr style={{ fontSize: 12 }} className="SOA_row">
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 160, minWidth: 160 }}>{e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : ''}</td>
+                                                        <td style={{ backgroundColor: "inherit", maxWidth: 140, minWidth: 140 }}>{e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit", maxWidth: 65, minWidth: 65 }}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit", maxWidth: 115, minWidth: 115 }}>{e.porto ? util.removeAcentos(e.porto.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit", maxWidth: 120, minWidth: 120 }}>{e.sailed ? moment(e.sailed.split('@.@')[index]).isValid() ? this.state.por == 'porCliente' ? moment(e.sailed.split("@.@")[index]).format("MMM Do YYYY") : moment(e.sailed.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
                                                         <td style={{ backgroundColor: "inherit", maxWidth: 70, minWidth: 70 }}>{e.ROE ? e.ROE.split("@.@")[index] : ""}</td>
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 115, minWidth: 115 }}>{this.state.moeda == 5 ? "R$" : "USD"} {FDA}</td>
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 115, minWidth: 115 }}>{this.state.moeda == 5 ? "R$" : "USD"} {discount}</td>
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 115, minWidth: 115 }}>{this.state.moeda == 5 ? "R$" : "USD"} {received}</td>
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 115, minWidth: 115 }}>{this.state.moeda == 5 ? "R$" : "USD"} {balance}</td>
+                                                        <td style={{ backgroundColor: "inherit", maxWidth: 110, minWidth: 110 }}>{this.state.moeda == 5 ? "R$" : "USD"} {FDA}</td>
+                                                        <td style={{ backgroundColor: "inherit", maxWidth: 110, minWidth: 110 }}>{this.state.moeda == 5 ? "R$" : "USD"} {discount}</td>
+                                                        <td style={{ backgroundColor: "inherit", maxWidth: 110, minWidth: 110 }}>{this.state.moeda == 5 ? "R$" : "USD"} {received}</td>
+                                                        <td style={{ backgroundColor: "inherit", maxWidth: 110, minWidth: 110 }}>{this.state.moeda == 5 ? "R$" : "USD"} {balance}</td>
                                                     </tr>
                                                 )
                                             }
