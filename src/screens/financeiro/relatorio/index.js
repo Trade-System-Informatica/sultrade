@@ -403,11 +403,11 @@ class Relatorio extends Component {
                                 let received = 0;
 
                                 if (this.state.moeda == 5) {
-                                    FDA += e.valor.split("@.@")[index];
+                                    FDA += e?.valor_manual?.split("@.@")[index];
                                     discount = e.discount_manual ? util.toFixed(parseFloat(e.discount_manual?.split("@.@")[index]), 2) : "0,00";
                                     received = e.received_manual ? util.toFixed(parseFloat(e.received_manual?.split("@.@")[index]), 2) : "0,00";
                                 } else if (this.state.moeda == 6) {
-                                    FDA += e.valor.split("@.@")[index] ? util.toFixed(parseFloat(e.valor.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
+                                    FDA += e?.valor_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.valor.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
                                     discount += e.discount_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.discount_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
                                     received += e.received_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.received_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
                                 }
@@ -550,7 +550,7 @@ class Relatorio extends Component {
                                                         <td style={{ backgroundColor: "inherit" }}>{e.navio_manual ? util.removeAcentos(e.navio_manual?.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.os_manual ? util.removeAcentos(e.os_manual?.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.porto_manual ? util.removeAcentos(e.porto_manual?.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ backgroundColor: "inherit" }}>{e.sailed ? moment(e.sailed.split('@.@')[index]).isValid() ? moment(e.sailed.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
+                                                        <td style={{ backgroundColor: "inherit" }}>{e.sailed_manual ? moment(e.sailed_manual.split('@.@')[index]).isValid() ? this.state.por == 'porCliente' ? moment(e.sailed_manual.split("@.@")[index]).format("MMMM Do YYYY") : moment(e.sailed_manual.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.roe_manual ? e.roe_manual?.split("@.@")[index] : ""}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {FDA}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {discount}</td>
@@ -641,7 +641,7 @@ class Relatorio extends Component {
                                                         <td style={{ backgroundColor: "inherit" }}>{e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.porto ? util.removeAcentos(e.porto.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ backgroundColor: "inherit" }}>{e.sailed ? moment(e.sailed.split('@.@')[index]).isValid() ? moment(e.sailed.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
+                                                        <td style={{ backgroundColor: "inherit" }}>{e.sailed ? moment(e.sailed.split('@.@')[index]).isValid() ? this.state.por == 'porCliente' ? moment(e.sailed.split("@.@")[index]).format("MMMM Do YYYY") : moment(e.sailed.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{e.ROE ? e.ROE.split("@.@")[index] : ""}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {FDA}</td>
                                                         <td style={{ backgroundColor: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {discount}</td>
