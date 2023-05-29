@@ -409,7 +409,7 @@ class Relatorio extends Component {
                                     discount = e.discount_manual ? util.toFixed(parseFloat(e.discount_manual?.split("@.@")[index]), 2) : "0,00";
                                     received = e.received_manual ? util.toFixed(parseFloat(e.received_manual?.split("@.@")[index]), 2) : "0,00";
                                 } else if (this.state.moeda == 6) {
-                                    FDA += e?.valor_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.valor.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
+                                    FDA += e?.valor_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.valor_manual.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
                                     discount += e.discount_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.discount_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
                                     received += e.received_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.received_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
                                 }
@@ -546,7 +546,7 @@ class Relatorio extends Component {
                                                 totalDiscountPorGrupo += parseFloat(discount.replaceAll('.', '').replaceAll(',', '.'));
                                                 totalReceivedPorGrupo += parseFloat(received.replaceAll('.', '').replaceAll(',', '.'));
                                                 totalBalancePorGrupo += parseFloat(balance.replaceAll('.', '').replaceAll(',', '.'));
-                                                
+
                                                 return (
                                                     <tr style={{ fontSize: 12 }} className="SOA_row">
                                                         <td style={{ backgroundColor: "inherit", maxWidth: 135, minWidth: 135 }}>{e.navio_manual ? util.removeAcentos(e.navio_manual?.split('@.@')[index]) : ''}</td>
