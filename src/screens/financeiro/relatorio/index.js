@@ -479,8 +479,7 @@ class Relatorio extends Component {
                                 checkBalance += parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
                             })
 
-                            console.log({ checkBalance, pessoa: e.pessoa.split('@.@')[0] })
-                            if (checkBalance <= 0) {
+                            if (!checkBalance || checkBalance <= 0 || parseFloat(checkBalance?.toFixed(2)) <= 0) {
                                 return (<></>)
                             }
 
