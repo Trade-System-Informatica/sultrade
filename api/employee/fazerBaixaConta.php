@@ -12,12 +12,14 @@ $objData = json_decode($data);
 if($objData != NULL){
     $token = prepareInput($objData->token);
     $chave = prepareInput($objData->chave);
+    $saldo = prepareInput($objData->saldo);
+    $recebimento = prepareInput($objData->recebimento);
 
     $contas = new Contas();
 
     //$operadores = $operadores->checkToken($token);
     //if($result == 'true'){
-        $result = $contas->fazerBaixaConta($chave);
+        $result = $contas->fazerBaixaConta($chave, $saldo, $recebimento);
 		//$result = 'Entrou aqui';
         //}
     } else {

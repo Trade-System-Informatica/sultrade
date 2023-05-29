@@ -665,18 +665,19 @@ class Contas
     public static function insertContaCliente($values, $meioPagamento, $valuesDarf, $dadosManuais = null)
     {
         $database = new Database();
-
+        
         $cols = 'Lancto, Tipo, Pessoa, Conta_Contabil, Centro_Custo, Conta_Desconto, Historico, Parc_Ini, Parc_Fim, RepCodBar, Valor, Vencimento, Vencimento_Original, Conta_Provisao, Saldo, Operador, Empresa, Docto, tipodocto, meio_pagamento, envio';
 
         if ($dadosManuais) {
             $values = $values . ", " . $dadosManuais;
             $cols .= ", os_manual, navio_manual, porto_manual, roe_manual, discount_manual, received_manual, sailed_manual";
         }
-
+        
         $result = $database->doInsert('contas_aberto', $cols, $values);
+        $conta = $result[0];
 
         if ($result && ($meioPagamento == 'DARF' || $meioPagamento == 'GPS' || $meioPagamento == 'GRU' || $meioPagamento == "PIX")) {
-            $chave = $database->doSelect('contas_aberto', 'contas_aberto.*', '1=1 ORDER BY chave DESC');
+            $chave = $conta;
 
             $values2 = $valuesDarf . ", '" . $chave[0]['Chave'] . "'";
             $cols = "codigo_receita, contribuinte, codigo_identificador_tributo, mes_compet_num_ref, data_apuracao, valor, valor_multa, valor_juros, valor_outros, valor_pagamento, chave_contas_aberto";
@@ -687,6 +688,20 @@ class Contas
             }
 
             $result2 = $database->doInsert('contas_aberto_complementar', $cols, $values2);
+        }
+
+        if ($conta["os_manual"]) {
+            $saldoNovo = $conta["Saldo"];
+            if ($conta["received_manual"]) {
+                $saldoNovo -= $conta['received_manual'];
+            }
+            if ($conta["discount_manual"]) {
+                $saldoNovo -= $conta['discount_manual'];
+            }
+            
+            if ($conta["received_manual"] || $conta["discount_manual"]) {
+                $database->doUpdate('contas_aberto', "Saldo = '$saldoNovo'", "Chave = ".$conta["Chave"]);
+            }
         }
 
         $database->closeConection();
@@ -705,9 +720,10 @@ class Contas
         }
 
         $result = $database->doInsert('contas_aberto', $cols, $values);
+        $conta = $result[0];
 
         if ($result && ($meioPagamento == 'DARF' || $meioPagamento == 'GPS' || $meioPagamento == 'GRU' || $meioPagamento == "PIX")) {
-            $chave = $database->doSelect('contas_aberto', 'contas_aberto.*', '1=1 ORDER BY chave DESC');
+            $chave = $conta;
 
             $values2 = $valuesDarf . ", '" . $chave[0]['Chave'] . "'";
             $cols = "codigo_receita, contribuinte, codigo_identificador_tributo, mes_compet_num_ref, data_apuracao, valor, valor_multa, valor_juros, valor_outros, valor_pagamento, chave_contas_aberto";
@@ -728,6 +744,20 @@ class Contas
                 $cols = "chave_conta_aberto, chave_conta, valor, complemento, tipo";
 
                 $database->doInsert('contas_aberto_cc', $cols, $values3);
+            }
+        }
+
+        if ($conta["os_manual"]) {
+            $saldoNovo = $conta["Saldo"];
+            if ($conta["received_manual"]) {
+                $saldoNovo -= $conta['received_manual'];
+            }
+            if ($conta["discount_manual"]) {
+                $saldoNovo -= $conta['discount_manual'];
+            }
+
+            if ($conta["received_manual"] || $conta["discount_manual"]) {
+                $database->doUpdate('contas_aberto', "Saldo = '$saldoNovo'", "Chave = " . $conta["Chave"]);
             }
         }
 
@@ -993,6 +1023,16 @@ class Contas
     {
         $database = new Database();
 
+        if ($Saldo != 0) {
+            $Saldo = $Valor;
+            if ($received_manual) {
+                $Saldo = $Saldo - $received_manual;
+            }
+            if ($discount_manual) {
+                $Saldo = $Saldo - $discount_manual;
+            }
+        }
+
         $query = "Lancto = '" . $Lancto . "', Tipo = '" . $Tipo . "', Pessoa = '" . $Pessoa . "', Conta_Contabil = '" . $Conta_Contabil . "', Centro_Custo = '" . $Centro_Custo . "', Conta_Desconto = '" . $Conta_Desconto . "', Historico = '" . $Historico . "', Parc_Ini = '" . $Parc_Ini . "', Parc_Fim = '" . $Parc_Fim . "', RepCodBar = '" . $RepCodBar . "', Valor = '" . $Valor . "', Saldo = '" . $Saldo . "', Vencimento = '" . $Vencimento . "', Vencimento_Original =  '" . $Vencimento_Original . "', Conta_Provisao = '" . $Conta_Provisao . "', Empresa = '" . $Empresa . "', Docto = '" . $Docto . "', tipodocto = '" . $tipodocto . "', meio_pagamento = '" . $meioPagamento . "', envio = '".$envio."'";
 
         if ($os_manual) {
@@ -1060,6 +1100,16 @@ class Contas
     public static function updateContaFornecedor($Chave, $Lancto, $Tipo, $Pessoa, $Conta_Contabil, $RepCodBar, $Centro_Custo, $Historico, $Conta_Desconto, $Parc_Ini, $Parc_Fim, $Valor, $Saldo, $Vencimento, $Vencimento_Original, $Conta_Provisao, $Empresa, $Docto, $tipodocto, $meioPagamento, $meioPagamentoNome, $codigo_receita, $contribuinte, $codigo_identificador_tributo, $mes_compet_num_ref, $data_apuracao, $darfValor, $darfMulta, $darfJuros, $darfOutros, $darfPagamento, $tipo_pix, $envio, $os_manual = null, $navio_manual = null, $porto_manual = null, $roe_manual = null, $discount_manual = null, $received_manual = null, $sailed_manual = null)
     {
         $database = new Database();
+
+        if ($Saldo != 0) {
+            $Saldo = $Valor;
+            if ($received_manual) {
+                $Saldo = $Saldo - $received_manual;
+            }
+            if ($discount_manual) {
+                $Saldo = $Saldo - $discount_manual;
+            }
+        }
 
         $query = "Lancto = '" . $Lancto . "', Tipo = '" . $Tipo . "', Pessoa = '" . $Pessoa . "', Conta_Contabil = '" . $Conta_Contabil . "', RepCodBar = '" . $RepCodBar . "', Centro_Custo = '" . $Centro_Custo . "', Historico = '" . $Historico . "', Conta_Desconto = '" . $Conta_Desconto . "', Parc_Ini = '" . $Parc_Ini . "', Parc_Fim = '" . $Parc_Fim . "', Valor = '" . $Valor . "', Saldo = '" . $Saldo . "', Vencimento = '" . $Vencimento . "', Vencimento_Original =  '" . $Vencimento_Original . "', Conta_Provisao = '" . $Conta_Provisao . "', Empresa = '" . $Empresa . "', Docto = '" . $Docto . "', tipodocto = '" . $tipodocto . "', meio_pagamento = '" . $meioPagamento . "', envio = '" . $envio . "'";
 
@@ -1178,11 +1228,11 @@ class Contas
         }
     }
 
-    public static function fazerBaixaConta($chave)
+    public static function fazerBaixaConta($chave, $saldo, $recebimento)
     {
         $database = new Database();
 
-        $query = "saldo = '0'";
+        $query = "saldo = '$saldo', received_manual = '$recebimento'";
 
         $result = $database->doUpdate('contas_aberto', $query, 'chave = ' . $chave . "");
 

@@ -14,6 +14,7 @@ import { confirmAlert } from 'react-confirm-alert'
 import AddButton from '../../../components/addButton';
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import moment from 'moment'
+import ModalEdit from '../../../components/modalEdit'
 
 
 const estadoInicial = {
@@ -34,6 +35,15 @@ const estadoInicial = {
     acessosPermissoes: [],
     direcaoTabela: faChevronDown,
 
+    editValor: '0',
+    editChave: '0',
+    editSaldo: '0',
+    itemNome: '',
+    modalItemAberto: false,
+    itemPermissao: 'CONTAS_ABERTAS',
+    itemEdit: {
+    },
+
     load: 100
 }
 
@@ -46,7 +56,6 @@ class ContasReceber extends Component {
 
     componentDidMount = async () => {
         await this.loadAll();
-
         if (this.state.chaveFocus) {
             if (this.refs.focusMe) {
                 await this.refs.focusMe.focus();
@@ -114,6 +123,55 @@ class ContasReceber extends Component {
             },
             response => { this.erroApi(response) }
         )
+    }
+
+    salvarRecebimento = async () => {
+        const saldo = this.state.editSaldo - parseFloat(this.state.editValor.replaceAll('.', '').replaceAll(',', '.'))
+        
+        this.setState({
+            loading: true,
+            modalItemAberto: false,
+        })
+        await apiEmployee.post(`fazerBaixaConta.php`, {
+            token: true,
+            chave: this.state.editChave,
+            saldo: saldo >= 0 ? saldo : 0,
+            recebimento: this.state.editValor.replaceAll('.', '').replaceAll(',', '.'), 
+        }).then(
+            res => {
+                this.setState({loading: false});
+                this.loadAll();
+            },
+            error => { this.erroApi(error) }
+        )
+    }
+
+    setEditModal = async (conta) => {
+        const recebimento = parseFloat(conta.received_manual ? conta.received_manual : '0');
+        const saldo = parseFloat(conta.Saldo)
+        
+        await this.setState({
+            editChave: conta.Chave,
+            editValor: recebimento,
+            editSaldo: saldo,
+        });
+
+        await this.setState({
+            itemNome: `${conta.os_manual} - saldo atual: R$ ${new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(saldo) }`,
+            itemEdit: {
+                onSubmit: async () => await this.salvarRecebimento(),
+                valores: [
+                    {
+                        titulo: 'Valor Recebido',
+                        valor: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(recebimento),
+                        tipo: 'money',
+                        onChange: async (valor) => { await this.setState({ editValor: valor }); },
+                        onBlur: async (valor) => { await this.setState({ editValor: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); },
+                    }
+                ]
+            },
+            modalItemAberto: true
+        })
     }
 
     fazerBaixa = async (chave, nome) => {
@@ -246,8 +304,6 @@ class ContasReceber extends Component {
 
     }
 
-
-
     render() {
 
         return (
@@ -271,6 +327,17 @@ class ContasReceber extends Component {
 
                                 <br />
                             </section>
+
+                            <ModalEdit
+                                closeModal={() => { this.setState({ modalItemAberto: false }) }}
+                                nome={this.state.itemNome}
+                                modalAberto={this.state.modalItemAberto}
+                                itemPermissao={this.state.itemPermissao}
+                                acessosPermissoes={this.state.acessosPermissoes}
+                                itemEdit={this.state.itemEdit}
+                                onSubmit={this.salvarRecebimento}
+                                valid={true}
+                            />
 
                             <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-left">
                                 <div className="row mobileajuster3">
@@ -363,7 +430,7 @@ class ContasReceber extends Component {
                                                 <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones">
                                                     {feed.os_manual &&
                                                         <div className='iconelixo giveMargin' type='button' >
-                                                            <FontAwesomeIcon icon={faCheck} title={"Fazer baixa"} onClick={async () => await this.fazerBaixa(feed.Chave,)} />
+                                                            <FontAwesomeIcon icon={faCheck} title={"Fazer baixa"} onClick={async () => await this.setEditModal(feed)} />
                                                         </div>
                                                     }
 

@@ -186,8 +186,8 @@ const estadoInicial = {
 
     roe: 5,
 
-    discount: 0,
-    received: 0,
+    discount: '0',
+    received: '0',
 
     alert: { type: "", msg: "" }
 }
@@ -213,7 +213,6 @@ class AddConta extends Component {
             await this.setState({ conta: this.props.location.state.conta })
             //console.log('Servicos: ' + JSON.stringify(this.state.tiposervico))
             //await this.loadData(this.state.tiposervico)
-            console.log(this.state.conta);
             await this.setState({
                 lancamento: moment(this.state.conta.Lancto).format('YYYY-MM-DD'),
                 envio: moment(this.state.conta.envio).format('YYYY-MM-DD'),
@@ -532,7 +531,7 @@ class AddConta extends Component {
                         dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${parseFloat(this.state.discount.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.received.replaceAll('.', '').replaceAll(',', '.'))}', ${moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYY-MM-DD") : ''}` : ""
                     }).then(
                         async res => {
-                            console.log(res.data);
+                            // console.log(res.data);
                             if (res.data[0].Chave) {
                                 await this.setState({ chave: res.data[0].Chave })
                                 await loader.salvaLogs('contas_aberto', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
@@ -555,7 +554,7 @@ class AddConta extends Component {
                         dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${parseFloat(this.state.discount.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.received.replaceAll('.', '').replaceAll(',', '.'))}', ${moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYY-MM-DD") : ''}` : ""
                     }).then(
                         async res => {
-                            console.log(res.data);
+                            // console.log(res.data);
                             if (res.data[0].Chave) {
                                 await this.setState({ chave: res.data[0].Chave })
                                 await loader.salvaLogs('contas_aberto', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
@@ -1061,7 +1060,6 @@ class AddConta extends Component {
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfPagamento && this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.')))
         validations.push(!this.state.osExiste)
         validations.push(!this.state.bloqueado)
-        console.log(validations);
 
         const validForm = validations.reduce((t, a) => t && a)
 
