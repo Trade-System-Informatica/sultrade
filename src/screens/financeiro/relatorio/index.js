@@ -897,7 +897,7 @@ class Relatorio extends Component {
 
                             <div style={{ display: "flex", flexDirection: "row", width: "100%", justifyContent: "center" }}>
                                 <button className="btn btn-danger" style={{ margin: 20 }} onClick={() => this.pdfExportComponent.current.save()}>Exportar PDF</button>
-                                {this.state.pessoa &&
+                                {this.state.clientes[0] && !this.state.clientes[1] &&
                                     <button className="btn btn-info" style={{ margin: 20 }} onClick={() => this.setState({ emailModal: true })}>Enviar para clientes</button>
                                 }
                             </div>
