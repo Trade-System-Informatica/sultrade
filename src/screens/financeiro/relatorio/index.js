@@ -535,17 +535,17 @@ class Relatorio extends Component {
                                             FDA = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(FDA);
                                             let balance = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(FDA.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(discount.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(received.replaceAll('.', '').replaceAll(",", ".")));
 
-                                            totalFDA += parseFloat(FDA.replaceAll('.', '').replaceAll(',', '.'));
-                                            totalDiscount += parseFloat(discount.replaceAll('.', '').replaceAll(',', '.'));
-                                            totalReceived += parseFloat(received.replaceAll('.', '').replaceAll(',', '.'));
-                                            totalBalance += parseFloat(balance.replaceAll('.', '').replaceAll(',', '.'));
-
-                                            totalFDAPorGrupo += parseFloat(FDA.replaceAll('.', '').replaceAll(',', '.'));
-                                            totalDiscountPorGrupo += parseFloat(discount.replaceAll('.', '').replaceAll(',', '.'));
-                                            totalReceivedPorGrupo += parseFloat(received.replaceAll('.', '').replaceAll(',', '.'));
-                                            totalBalancePorGrupo += parseFloat(balance.replaceAll('.', '').replaceAll(',', '.'));
-
                                             if (parseFloat(balance.replaceAll('.', '').replaceAll(",", ".")) > 0) {
+                                                totalFDA += parseFloat(FDA.replaceAll('.', '').replaceAll(',', '.'));
+                                                totalDiscount += parseFloat(discount.replaceAll('.', '').replaceAll(',', '.'));
+                                                totalReceived += parseFloat(received.replaceAll('.', '').replaceAll(',', '.'));
+                                                totalBalance += parseFloat(balance.replaceAll('.', '').replaceAll(',', '.'));
+
+                                                totalFDAPorGrupo += parseFloat(FDA.replaceAll('.', '').replaceAll(',', '.'));
+                                                totalDiscountPorGrupo += parseFloat(discount.replaceAll('.', '').replaceAll(',', '.'));
+                                                totalReceivedPorGrupo += parseFloat(received.replaceAll('.', '').replaceAll(',', '.'));
+                                                totalBalancePorGrupo += parseFloat(balance.replaceAll('.', '').replaceAll(',', '.'));
+                                                
                                                 return (
                                                     <tr style={{ fontSize: 12 }} className="SOA_row">
                                                         <td style={{ backgroundColor: "inherit", maxWidth: 135, minWidth: 135 }}>{e.navio_manual ? util.removeAcentos(e.navio_manual?.split('@.@')[index]) : ''}</td>
@@ -626,17 +626,17 @@ class Relatorio extends Component {
                                             discount = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(discount);
                                             let balance = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(FDA.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(discount.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(received.replaceAll('.', '').replaceAll(",", ".")));
 
-                                            totalFDA += parseFloat(FDA.replaceAll('.', '').replaceAll(',', '.'));
-                                            totalDiscount += parseFloat(discount.replaceAll('.', '').replaceAll(',', '.'));
-                                            totalReceived += parseFloat(received.replaceAll('.', '').replaceAll(',', '.'));
-                                            totalBalance += parseFloat(balance.replaceAll('.', '').replaceAll(',', '.'));
-
-                                            totalFDAPorGrupo += parseFloat(FDA.replaceAll('.', '').replaceAll(',', '.'));
-                                            totalDiscountPorGrupo += parseFloat(discount.replaceAll('.', '').replaceAll(',', '.'));
-                                            totalReceivedPorGrupo += parseFloat(received.replaceAll('.', '').replaceAll(',', '.'));
-                                            totalBalancePorGrupo += parseFloat(balance.replaceAll('.', '').replaceAll(',', '.'));
-
                                             if (parseFloat(balance.replaceAll('.', '').replaceAll(",", ".")) > 0) {
+                                                totalFDA += parseFloat(FDA.replaceAll('.', '').replaceAll(',', '.'));
+                                                totalDiscount += parseFloat(discount.replaceAll('.', '').replaceAll(',', '.'));
+                                                totalReceived += parseFloat(received.replaceAll('.', '').replaceAll(',', '.'));
+                                                totalBalance += parseFloat(balance.replaceAll('.', '').replaceAll(',', '.'));
+
+                                                totalFDAPorGrupo += parseFloat(FDA.replaceAll('.', '').replaceAll(',', '.'));
+                                                totalDiscountPorGrupo += parseFloat(discount.replaceAll('.', '').replaceAll(',', '.'));
+                                                totalReceivedPorGrupo += parseFloat(received.replaceAll('.', '').replaceAll(',', '.'));
+                                                totalBalancePorGrupo += parseFloat(balance.replaceAll('.', '').replaceAll(',', '.'));
+
                                                 return (
                                                     <tr style={{ fontSize: 12 }} className="SOA_row">
                                                         <td style={{ backgroundColor: "inherit", maxWidth: 135, minWidth: 135 }}>{e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : ''}</td>
