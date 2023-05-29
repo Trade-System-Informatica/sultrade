@@ -361,7 +361,7 @@ class ContasReceber extends Component {
                                                     <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Valor)}</p>
                                                 </div>
                                                 <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones">
-                                                    {false &&
+                                                    {feed.os_manual != '' &&
                                                         <div className='iconelixo giveMargin' type='button' >
                                                             <FontAwesomeIcon icon={faCheck} title={"Fazer baixa"} onClick={async () => await this.fazerBaixa(feed.Chave,)} />
                                                         </div>
