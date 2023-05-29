@@ -299,7 +299,11 @@ class ContasReceber extends Component {
         } else if (conta.Chave && this.state.tipoPesquisa == 3) {
             return conta.Chave.toLowerCase().includes(this.state.pesquisa.toLowerCase())
         } else if (this.state.tipoPesquisa == 4) {
-            return moment(conta.Lancto).format('DD/MM/YYYY').includes(this.state.pesquisa.toLowerCase())
+            if (conta.osCodigo) {
+                return conta.osCodigo.includes(this.state.pesquisa.toLowerCase())
+            } else {
+                return conta.os_manual.includes(this.state.pesquisa.toLowerCase())
+            }
         }
 
     }
@@ -349,7 +353,7 @@ class ContasReceber extends Component {
                                             <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
                                                 <option value={1}>Pessoa</option>
                                                 <option value={2}>Valor</option>
-                                                <option value={4}>Lançamento</option>
+                                                <option value={4}>OS</option>
                                                 <option value={3}>Chave</option>
                                             </select>
                                             <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
@@ -389,7 +393,7 @@ class ContasReceber extends Component {
                                                 <span className="subtituloships">Pessoa</span>
                                             </div>
                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-left">
-                                                <span className="subtituloships">Lançamento</span>
+                                                <span className="subtituloships">OS</span>
                                             </div>
                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
                                                 <span className="subtituloships">Valor</span>
@@ -422,7 +426,7 @@ class ContasReceber extends Component {
                                                     <p>{feed.pessoaNome}</p>
                                                 </div>
                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-left">
-                                                    <p>{moment(feed.Lancto).format('DD/MM/YYYY')}</p>
+                                                    <p>{feed.osCodigo ? feed.osCodigo : feed.os_manual}</p>
                                                 </div>
                                                 <div style={{ overflowWrap: 'anywhere' }} className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
                                                     <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Valor)}</p>
