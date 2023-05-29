@@ -116,7 +116,7 @@ class Contas
             $result = $database->doSelect(
                 'contas_aberto LEFT JOIN os ON os.chave = contas_aberto.os_origem',
                 'contas_aberto.*, os.codigo AS osCodigo',
-                "contas_aberto.Saldo > 0 AND contas_aberto.Tipo = 0 AND empresa = '" . $empresa . "'"
+                "contas_aberto.Saldo > 0 AND contas_aberto.Tipo = 0 AND contas_aberto.empresa = '" . $empresa . "'"
             );
         }
 
