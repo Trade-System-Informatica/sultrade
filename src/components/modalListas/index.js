@@ -233,8 +233,11 @@ class ModalListas extends Component {
             let numberPattern = /\d+/g;
             var cpflimpo = ''
             if (this.state.clienteCpf != '___.___.___-__' && this.state.clienteCpf != '') {
-                let cpflimpo2 = this.state.clienteCpf.match(numberPattern)
-                var cpflimpo = cpflimpo2.join('')
+                let cpflimpo2 = this.state.cnpj_cpf.match(numberPattern)
+                var cpflimpo = '';
+                if (cpflimpo2 && cpflimpo2[0]) {
+                    cpflimpo = cpflimpo2.join('');
+                }
             }
             if (this.state.clienteCpf.length > 10) {
                 this.setState({ clienteCpfLimpo: cpflimpo })

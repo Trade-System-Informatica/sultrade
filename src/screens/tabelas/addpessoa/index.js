@@ -208,7 +208,10 @@ class AddPessoa extends Component {
             if (this.state.cnpj_cpf) {
                 if (this.state.cnpj_cpf != '___.___.___-__' && this.state.cnpj_cpf != '') {
                     let cpflimpo2 = this.state.cnpj_cpf.match(numberPattern)
-                    var cpflimpo = cpflimpo2.join('')
+                    var cpflimpo = '';
+                    if (cpflimpo2 && cpflimpo2[0]) {
+                        cpflimpo = cpflimpo2.join('');
+                    }
                 }
                 if (this.state.cnpj_cpf.length > 10) {
                     this.setState({ cnpj_cpfLimpo: cpflimpo })
