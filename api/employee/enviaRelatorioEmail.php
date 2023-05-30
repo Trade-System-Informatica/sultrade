@@ -16,6 +16,7 @@ require_once '../libraries/utils.php';
 
 $data = file_get_contents("php://input");
 $objData = json_decode($data);
+
 $emails = $objData->emails;
 $mensagem = $objData->mensagem;
 
@@ -25,7 +26,7 @@ $return = ['successes' => [], 'failures' => [], 'warnings' => []];
 $mail = new PHPMailer;
 $mail->CharSet = "UTF-8";
 
-if ($email[0]) {
+if ($emails[0]) {
     try {
         //Server settings
         //$mail->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
@@ -57,16 +58,20 @@ if ($email[0]) {
                 array_push($return['successes'], $email);
             }
         }
-        //$mail->addAddress('disbursements@sultradeagency.com');
+        $mail->addAddress('disbursements@sultradeagency.com');
         $mail->addCC('no-reply@tradesystem.com.br');
         $mail->addBCC('no-reply@tradesystem.com.br');
 
         //Content
         $mail->isHTML(true);                                  //Set email format to HTML
         $mail->Subject = 'SOA - Statement of Account';
-        $mail->Body    = $mensagem;
+        $mail->Body    = ' ';
 
-        
+        $anexo = explode(",", $mensagem)[1];
+        $type = str_replace("data:", "", explode(";", $mensagem)[0]);
+
+        $mail->AddStringAttachment(base64_decode($anexo), "SOA.pdf", "base64", $type);
+        $mail->send();
     } catch (Exception $e) {
         array_push($return['warnings'], "Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
     }

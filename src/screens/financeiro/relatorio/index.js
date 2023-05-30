@@ -10,6 +10,7 @@ import { Redirect } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { PDFExport } from "@progress/kendo-react-pdf";
+import { drawDOM, exportPDF } from "@progress/kendo-drawing";
 import { apiEmployee } from '../../../services/apiamrg'
 import loader from '../../../classes/loader'
 import moment from 'moment'
@@ -285,11 +286,25 @@ class Relatorio extends Component {
         if (!validFormEmail) {
             return;
         }
+        let gridElement = document.getElementById("pdfDiv");
+        
+        const base64 = await drawDOM(gridElement, {
+            paperSize: "A4",
+            margin: '0.5cm',
+            scale: 0.6,
+            portrait: true,
+        })
+            .then((group) => {
+                return exportPDF(group);
+            }).then((dataUri) => {
+                return dataUri;
+            });
+
         await this.setState({ emailBloqueado: true, loading: true });
         await apiEmployee.post(`enviaRelatorioEmail.php`, {
             token: true,
             emails: this.state.emails,
-            mensagem: this.state.pdfEmail
+            mensagem: base64
         }).then(
             async res => {
                 console.log(res);
@@ -365,7 +380,7 @@ class Relatorio extends Component {
         let totalSaldoPorGrupo = 0;
 
         let pdf =
-            <div style={{ zoom: 1 }} key={546546554654}>
+            <div style={{ zoom: 1 }} id='pdfDiv' key={546546554654}>
 
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                     <img className="img-fluid" src="https://i.ibb.co/vmKJkx4/logo.png" alt="logo-Strade" border="0" style={{ width: '30%', height: '150px', maxWidth: "100%" }} />

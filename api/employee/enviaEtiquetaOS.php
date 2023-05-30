@@ -30,7 +30,7 @@ $data_saida = prepareInput($objData->data_saida);
 if ($os) {
 
     $pdf = new FPDF();
-    $pdf->AddPage();
+    $pdf->AddPage('P', 'A5');
     $pdf->SetFont('arial', '', 16);
     $pdf->Cell(40, 10, "NAVIO: ".iconv('UTF-8', 'windows-1252', $navio));
     $pdf->Ln(10);
