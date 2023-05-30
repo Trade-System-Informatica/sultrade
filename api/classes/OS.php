@@ -896,6 +896,21 @@ class OS
         }
     }
 
+    public static function updateCentroCustoFromOS($Descricao, $Cliente, $OSCodigo)
+    {
+        $database = new Database();
+
+        $query = "Descricao = '" . $Descricao . "', Cliente = '" . $Cliente . "'";
+
+        $result = $database->doUpdate('centros_custos', $query, 'Codigo = ' . $OSCodigo);
+        $database->closeConection();
+        if ($result == NULL) {
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+
     public static function updateDocumento($chave, $descricao, $tipo)
     {
         $database = new Database();

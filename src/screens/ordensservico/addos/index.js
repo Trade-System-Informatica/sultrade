@@ -1184,6 +1184,12 @@ class AddOS extends Component {
             )
 
         } else if (validForm) {
+            const codigoNumero = parseInt(this.state.codigo.slice(2));
+            
+            if (codigoNumero >= 5850 && (this.state.navio != this.state.os.chave_navio || this.state.porto != this.state.os.porto || this.state.cliente != this.state.os.Chave_Cliente || this.state.tipoServico != this.state.os.tipo_servico)) {
+                await this.mudarCentroCusto();
+            }
+
             if (this.state.faturamento && moment(this.state.faturamento).isValid()) {
                 // console.log(this.state.os.Data_Faturamento);
                 // console.log(this.state.os.centro_custo);
@@ -1226,7 +1232,7 @@ class AddOS extends Component {
                         await loader.salvaLogs('os', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `OS: ${this.state.codigo}`);
                         await this.setState({ loading: false, bloqueado: false })
                         if (reload) {
-                           // window.location.reload();
+                            // window.location.reload();
                         }
                     } else {
                         await alert(`Erro ${JSON.stringify(res)}`)
@@ -1305,6 +1311,26 @@ class AddOS extends Component {
                 async res => await console.log(`Erro: ${res.data}`)
             )
         }
+    }
+
+    mudarCentroCusto = async () => {
+        let clienteEncurtado = this.state.clientesOptions.find((cliente) => cliente.value == this.state.cliente)?.label;
+        clienteEncurtado = clienteEncurtado.split(" ")[0];
+
+        const codigoNumero = parseInt(this.state.codigo.slice(2));
+
+        await apiEmployee.post(`updateCentroCustoFromOS.php`, {
+            token: true,
+            Chave: this.state.centroCusto,
+            OSCodigo: codigoNumero,
+            Descricao: `${this.state.codigo}, ${this.state.naviosOptions.find((e) => e.value == this.state.navio)?.label} - ${this.state.tiposServicosOptions.find((e) => e.value == this.state.tipoServico)?.label} - ${clienteEncurtado} - ${this.state.portosOptions.find((e) => e.value == this.state.porto)?.label}`,
+            Cliente: this.state.cliente
+        }).then(
+            async res => {
+                console.log(res.data);
+            },
+            async res => await console.log(`Erro: ${res.data}`)
+        )
     }
 
     calculaValorTotal = async () => {
