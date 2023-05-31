@@ -1448,7 +1448,7 @@ class AddOS extends Component {
         this.setState({ ...util.cleanStates(this.state) });
         await this.setState({ loading: true, cabecalhoModal: false });
 
-        const cabecalho = `{"company": "${this.state.company.replaceAll('"', '\\"')}", "address": "${this.state.address.replaceAll('"', '\\"')}"}`
+        const cabecalho = `{"company": "${this.state.company.replaceAll('"', "'")}", "address": "${this.state.address.replaceAll('"', "'")}"}`
 
         await apiEmployee.post(`updateOSCabecalho.php`, {
             token: true,
@@ -3839,7 +3839,9 @@ class AddOS extends Component {
                                                                     <label>Company:</label>
                                                                 </div>
                                                                 <div className="col-1 errorMessage">
-
+                                                                {(this.state.company.indexOf("'") != -1|| this.state.company.indexOf("'") != -1) &&
+                                                                    <FontAwesomeIcon title='Aspas duplas e únicas não são permitidas' icon={faExclamationTriangle} />
+                                                                }
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                     <Field className="form-control" type="text" value={this.state.company} onChange={async e => { this.setState({ company: e.currentTarget.value }) }} />
@@ -3848,7 +3850,10 @@ class AddOS extends Component {
                                                                     <label>Address:</label>
                                                                 </div>
                                                                 <div className="col-1 errorMessage">
-
+                                                                {(this.state.address.indexOf("'") != -1 || this.state.address.indexOf("'") != -1) &&
+                                                                    <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                }
+                                                                
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                     <Field className="form-control" type="text" value={this.state.address} onChange={async e => { this.setState({ address: e.currentTarget.value }) }} />
@@ -3861,7 +3866,7 @@ class AddOS extends Component {
                                                     <div className="row">
                                                         <div className="col-2"></div>
                                                         <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                            <button type="submit" style={{ width: 300 }} >Salvar</button>
+                                                            <button type="submit" disabled={this.state.company.indexOf('"') != -1 || this.state.company.indexOf("'") != -1 || this.state.address.indexOf("'") != -1 || this.state.address.indexOf('"')} style={{ width: 300 }} >Salvar</button>
                                                         </div>
                                                         <div className="col-2"></div>
                                                     </div>
