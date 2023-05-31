@@ -3839,7 +3839,7 @@ class AddOS extends Component {
                                                                     <label>Company:</label>
                                                                 </div>
                                                                 <div className="col-1 errorMessage">
-                                                                {(this.state.company.indexOf("'") != -1|| this.state.company.indexOf("'") != -1) &&
+                                                                {(this.state.company.indexOf('"') != -1|| this.state.company.indexOf("'") != -1) &&
                                                                     <FontAwesomeIcon title='Aspas duplas e únicas não são permitidas' icon={faExclamationTriangle} />
                                                                 }
                                                                 </div>
@@ -3850,7 +3850,7 @@ class AddOS extends Component {
                                                                     <label>Address:</label>
                                                                 </div>
                                                                 <div className="col-1 errorMessage">
-                                                                {(this.state.address.indexOf("'") != -1 || this.state.address.indexOf("'") != -1) &&
+                                                                {(this.state.address.indexOf('"') != -1 || this.state.address.indexOf("'") != -1) &&
                                                                     <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
                                                                 }
                                                                 
