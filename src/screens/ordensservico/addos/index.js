@@ -3866,7 +3866,7 @@ class AddOS extends Component {
                                                     <div className="row">
                                                         <div className="col-2"></div>
                                                         <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                            <button type="submit" disabled={this.state.company.indexOf('"') != -1 || this.state.company.indexOf("'") != -1 || this.state.address.indexOf("'") != -1 || this.state.address.indexOf('"')} style={{ width: 300 }} >Salvar</button>
+                                                            <button type="submit" disabled={this.state.company.indexOf('"') != -1 || this.state.company.indexOf("'") != -1 || this.state.address.indexOf("'") != -1 || this.state.address.indexOf('"') != -1} style={{ width: 300 }} >Salvar</button>
                                                         </div>
                                                         <div className="col-2"></div>
                                                     </div>
