@@ -480,7 +480,7 @@ class Contas
         return $result;
     }
 
-    public static function getContaOs($chave_os)
+    public static function getContaOS($chave_os)
     {
         $database = new Database();
 

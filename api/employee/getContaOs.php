@@ -17,7 +17,7 @@ if($objData != NULL){
 
     //$operadores = $operadores->checkToken($token);
     //if($result == 'true'){
-        $result = $contas->getContaOs($chave_os);
+        $result = $contas->getContaOS($chave_os);
 		//$result = 'Entrou aqui';
         //}
     } else {
