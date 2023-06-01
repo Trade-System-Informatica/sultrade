@@ -232,15 +232,17 @@ class ModalListas extends Component {
         if (prevState.clienteCpf != this.state.clienteCpf) {
             let numberPattern = /\d+/g;
             var cpflimpo = ''
-            if (this.state.clienteCpf != '___.___.___-__' && this.state.clienteCpf != '') {
-                let cpflimpo2 = this.state.cnpj_cpf.match(numberPattern)
-                var cpflimpo = '';
-                if (cpflimpo2 && cpflimpo2[0]) {
-                    cpflimpo = cpflimpo2.join('');
+            if(this.state.clienteCpf) {
+                if (this.state.clienteCpf != '___.___.___-__' && this.state.clienteCpf != '') {
+                    let cpflimpo2 = this.state.cnpj_cpf.match(numberPattern)
+                    var cpflimpo = '';
+                    if (cpflimpo2 && cpflimpo2[0]) {
+                        cpflimpo = cpflimpo2.join('');
+                    }
                 }
-            }
-            if (this.state.clienteCpf.length > 10) {
-                this.setState({ clienteCpfLimpo: cpflimpo })
+                if (this.state.clienteCpf.length > 10) {
+                    this.setState({ clienteCpfLimpo: cpflimpo })
+                }
             }
         }
 
