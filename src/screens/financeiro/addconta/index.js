@@ -240,7 +240,7 @@ class AddConta extends Component {
                 os: this.state.conta.os_manual,
                 navio: this.state.conta.navio_manual,
                 porto: this.state.conta.porto_manual,
-                roe: this.state.conta.roe_manual,
+                roe: this.state.conta.roe_manual?.replaceAll('.',','),
                 discount: this.state.conta.discount_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.discount_manual) : '0,00',
                 received: this.state.conta.received_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.received_manual) : '0,00',
                 sailed: this.state.conta.sailed_manual
