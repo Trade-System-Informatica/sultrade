@@ -258,7 +258,10 @@ class AddOS extends Component {
 
 
         if (parseInt(id) !== 0) {
-            await this.setState({ os: await loader.getOne('getOSUma.php', null, null, { chave_os: this.state.chave }) })
+            await this.setState({ 
+                os: await loader.getOne('getOSUma.php', null, null, { chave_os: this.state.chave }),
+                contaOs: await loader.getOne('getContaOS.php', null, null, { chave_os: this.state.chave })
+            })
 
             await this.setState({
                 descricao: this.state.os.Descricao,
@@ -1232,7 +1235,7 @@ class AddOS extends Component {
                         await loader.salvaLogs('os', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `OS: ${this.state.codigo}`);
                         await this.setState({ loading: false, bloqueado: false })
                         if (reload) {
-                            // window.location.reload();
+                            window.location.reload();
                         }
                     } else {
                         await alert(`Erro ${JSON.stringify(res)}`)
@@ -1277,7 +1280,7 @@ class AddOS extends Component {
 
         let valuesRet = "";
 
-        if (this.state.os.faturadoPor == 0) {
+        if (!this.state.contaOs || !this.state.contaOs[0]) {
             if (valorDesconto != 0) {
                 valuesRet = `'0', '${parseFloat(valorDesconto)}', 'Desconto de ${this.state.codigo}', 'DESCONTO'`;
             }
@@ -1295,7 +1298,7 @@ class AddOS extends Component {
         } else {
             await apiEmployee.post(`updateContaOS.php`, {
                 token: true,
-                os_origem: this.state.chave,
+                chave_conta: this.state.contaOs[0]?.chave,
                 Lancto: moment(this.state.faturamento).format("YYYY-MM-DD"),
                 Pessoa: this.state.cliente,
                 Centro_Custo: this.state.centroCusto,

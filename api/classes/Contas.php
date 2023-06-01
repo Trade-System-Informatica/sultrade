@@ -480,6 +480,19 @@ class Contas
         return $result;
     }
 
+    public static function getContaOs($chave_os)
+    {
+        $database = new Database();
+
+        $result = $database->doSelect(
+            'contas_aberto',
+            'contas_aberto.*',
+            "os_origem = $chave_os"
+        );
+        $database->closeConection();
+        return $result;
+    }
+
     public static function getContaTransacao($chave)
     {
         $database = new Database();
@@ -665,14 +678,14 @@ class Contas
     public static function insertContaCliente($values, $meioPagamento, $valuesDarf, $dadosManuais = null)
     {
         $database = new Database();
-        
+
         $cols = 'Lancto, Tipo, Pessoa, Conta_Contabil, Centro_Custo, Conta_Desconto, Historico, Parc_Ini, Parc_Fim, RepCodBar, Valor, Vencimento, Vencimento_Original, Conta_Provisao, Saldo, Operador, Empresa, Docto, tipodocto, meio_pagamento, envio';
 
         if ($dadosManuais) {
             $values = $values . ", " . $dadosManuais;
             $cols .= ", os_manual, navio_manual, porto_manual, roe_manual, discount_manual, received_manual, sailed_manual";
         }
-        
+
         $result = $database->doInsert('contas_aberto', $cols, $values);
         $conta = $result[0];
 
@@ -698,9 +711,9 @@ class Contas
             if ($conta["discount_manual"]) {
                 $saldoNovo -= $conta['discount_manual'];
             }
-            
+
             if ($conta["received_manual"] || $conta["discount_manual"]) {
-                $database->doUpdate('contas_aberto', "Saldo = '$saldoNovo'", "Chave = ".$conta["Chave"]);
+                $database->doUpdate('contas_aberto', "Saldo = '$saldoNovo'", "Chave = " . $conta["Chave"]);
             }
         }
 
@@ -1033,7 +1046,7 @@ class Contas
             }
         }
 
-        $query = "Lancto = '" . $Lancto . "', Tipo = '" . $Tipo . "', Pessoa = '" . $Pessoa . "', Conta_Contabil = '" . $Conta_Contabil . "', Centro_Custo = '" . $Centro_Custo . "', Conta_Desconto = '" . $Conta_Desconto . "', Historico = '" . $Historico . "', Parc_Ini = '" . $Parc_Ini . "', Parc_Fim = '" . $Parc_Fim . "', RepCodBar = '" . $RepCodBar . "', Valor = '" . $Valor . "', Saldo = '" . $Saldo . "', Vencimento = '" . $Vencimento . "', Vencimento_Original =  '" . $Vencimento_Original . "', Conta_Provisao = '" . $Conta_Provisao . "', Empresa = '" . $Empresa . "', Docto = '" . $Docto . "', tipodocto = '" . $tipodocto . "', meio_pagamento = '" . $meioPagamento . "', envio = '".$envio."'";
+        $query = "Lancto = '" . $Lancto . "', Tipo = '" . $Tipo . "', Pessoa = '" . $Pessoa . "', Conta_Contabil = '" . $Conta_Contabil . "', Centro_Custo = '" . $Centro_Custo . "', Conta_Desconto = '" . $Conta_Desconto . "', Historico = '" . $Historico . "', Parc_Ini = '" . $Parc_Ini . "', Parc_Fim = '" . $Parc_Fim . "', RepCodBar = '" . $RepCodBar . "', Valor = '" . $Valor . "', Saldo = '" . $Saldo . "', Vencimento = '" . $Vencimento . "', Vencimento_Original =  '" . $Vencimento_Original . "', Conta_Provisao = '" . $Conta_Provisao . "', Empresa = '" . $Empresa . "', Docto = '" . $Docto . "', tipodocto = '" . $tipodocto . "', meio_pagamento = '" . $meioPagamento . "', envio = '" . $envio . "'";
 
         if ($os_manual) {
             $query = $query . ", os_manual = '$os_manual'";
@@ -1176,26 +1189,19 @@ class Contas
         }
     }
 
-    public static function updateContaOS($os_origem, $Lancto, $Pessoa, $Centro_Custo, $Valor, $Saldo, $Empresa, $Operador, $valuesRet)
+    public static function updateContaOS($chave_conta, $Lancto, $Pessoa, $Centro_Custo, $Valor, $Saldo, $Empresa, $Operador, $valuesRet)
     {
         $database = new Database();
 
-        $query = "Lancto = '" . $Lancto . "', Pessoa = '" . $Pessoa . "', Centro_Custo = '" . $Centro_Custo . "', Valor = '" . $Valor . "', Saldo = '" . $Saldo . "', Operador = '".$Operador."', Empresa = '" . $Empresa . "'";
+        $query = "Lancto = '" . $Lancto . "', Pessoa = '" . $Pessoa . "', Centro_Custo = '" . $Centro_Custo . "', Valor = '" . $Valor . "', Saldo = '" . $Saldo . "', Operador = '" . $Operador . "', Empresa = '" . $Empresa . "'";
+        
+        $database->doUpdate('contas_aberto', $query, 'chave = ' . $chave_conta);
 
-        $conta = $database->doSelect('contas_aberto LEFT JOIN contas_aberto_cc ON contas_aberto_cc.chave_conta_aberto = contas_aberto.chave LEFT JOIN os ON contas_aberto.os_origem = os.chave', 'contas_aberto.chave AS chave, os.codigo AS codigo, contas_aberto_cc.chave as chave_cc', 'contas_aberto.os_origem = ' . $os_origem . ' AND contas_aberto_cc.tipo = "DESCONTO"');
-
-        $contaBase = $database->doSelect('contas_aberto LEFT JOIN os ON contas_aberto.os_origem = os.chave', 'contas_aberto.chave AS chave, os.codigo AS codigo', "contas_aberto.os_origem = '" . $os_origem . "'");
-        if (!$contaBase[0] || !$contaBase[0]["chave"]) {
-            $cols = 'os_origem, Lancto, Tipo, Pessoa, Conta_Contabil, RepCodBar, Centro_Custo, Historico, Conta_Desconto, Parc_Ini, Parc_Fim, Valor, Saldo, Vencimento, Vencimento_Original, Conta_Provisao, Operador, Empresa, Docto, tipodocto, meio_pagamento, docto_origem';
-
-            $database->doInsert('contas_aberto', $cols, "'$os_origem', '$Lancto', 0, '$Pessoa', 0, 0, '$Centro_Custo', '', 0,1,1, '$Valor', '$Valor', '', '', 0, $Operador, $Empresa, 0, 0, 0, ''");
-            $conta = $database->doSelect('contas_aberto LEFT JOIN contas_aberto_cc ON contas_aberto_cc.chave_conta_aberto = contas_aberto.chave LEFT JOIN os ON contas_aberto.os_origem = os.chave', 'contas_aberto.chave AS chave, os.codigo AS codigo, contas_aberto_cc.chave as chave_cc', 'contas_aberto.os_origem = ' . $os_origem . ' AND contas_aberto_cc.tipo = "DESCONTO"');
-        } else {
-            $database->doUpdate('contas_aberto', $query, 'os_origem = ' . $os_origem);
-        }
+        $conta = $database->doSelect('contas_aberto LEFT JOIN contas_aberto_cc ON contas_aberto_cc.chave_conta_aberto = contas_aberto.chave LEFT JOIN os ON contas_aberto.os_origem = os.chave', 'contas_aberto.chave AS chave, os.codigo AS codigo, contas_aberto_cc.chave as chave_cc', 'contas_aberto.chave = ' . $chave_conta . ' AND contas_aberto_cc.tipo = "DESCONTO"');
+        $contaBase = $database->doSelect('contas_aberto LEFT JOIN os ON contas_aberto.os_origem = os.chave', 'contas_aberto.chave AS chave, os.codigo AS codigo', "contas_aberto.chave = '" . $chave_conta . "'");
 
         if ($conta[0] && $conta[0]["chave"]) {
-            $database->doUpdate("contas_aberto_cc", "valor = '$valuesRet'", "contas_aberto_cc.chave = " . $conta[0]["chave"]);
+            $database->doUpdate("contas_aberto_cc", "valor = '$valuesRet'", "contas_aberto_cc.chave = " . $conta[0]["chave_cc"]);
         } else {
             $database->doInsert("contas_aberto_cc", "chave_conta_aberto, valor, complemento, tipo", "'" . $contaBase[0]["chave"] . "', '$valuesRet', 'Desconto de " . $contaBase[0]["codigo"] . "', 'DESCONTO'");
         }
@@ -1440,8 +1446,8 @@ class Contas
                                           GROUP_CONCAT(contas_aberto.roe_manual SEPARATOR '@.@') AS roe_manual,
                                           GROUP_CONCAT(contas_aberto.sailed_manual SEPARATOR '@.@') AS sailed_manual,
                                           GROUP_CONCAT(contas_aberto.discount_manual SEPARATOR '@.@') AS discount_manual,
-                                          GROUP_CONCAT(contas_aberto.received_manual SEPARATOR '@.@') AS received_manual",                
-                                          $where . " AND contas_aberto.Tipo = '$tipo'" . $groupBy
+                                          GROUP_CONCAT(contas_aberto.received_manual SEPARATOR '@.@') AS received_manual",
+                $where . " AND contas_aberto.Tipo = '$tipo'" . $groupBy
             );
             $database->closeConection();
         } else {

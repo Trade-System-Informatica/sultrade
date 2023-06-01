@@ -12,7 +12,7 @@ $objData = json_decode($data);
 
 if($objData != NULL){
     $token = prepareInput($objData->token);
-    $os_origem = prepareInput($objData->os_origem);
+    $chave_conta = prepareInput($objData->chave_conta);
     $Lancto = prepareInput($objData->Lancto);
     $Pessoa = prepareInput($objData->Pessoa);
     $Centro_Custo = prepareInput($objData->Centro_Custo);
@@ -25,7 +25,7 @@ if($objData != NULL){
     
     $contas = new Contas();
 
-    $result = $contas->updateContaOS($os_origem, $Lancto, $Pessoa, $Centro_Custo, $Valor, $Saldo, $Empresa, $Operador, $valuesRet);
+    $result = $contas->updateContaOS($chave_conta, $Lancto, $Pessoa, $Centro_Custo, $Valor, $Saldo, $Empresa, $Operador, $valuesRet);
 
 } else {
     $result = "false";
