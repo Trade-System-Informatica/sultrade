@@ -528,7 +528,7 @@ class AddConta extends Component {
                         values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.centroCusto}', '${this.state.contaDesconto}', '${this.state.historico}', '${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${this.state.numBoleto}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}', '${this.state.envio}'`,
                         meioPagamento: this.state.meioPagamentoNome,
                         valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
-                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${parseFloat(this.state.discount.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.received.replaceAll('.', '').replaceAll(',', '.'))}', ${moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYY-MM-DD") : ''}` : ""
+                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe.replaceAll(',', '.')}', '${parseFloat(this.state.discount.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.received.replaceAll('.', '').replaceAll(',', '.'))}', ${moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYY-MM-DD") : ''}` : ""
                     }).then(
                         async res => {
                             // console.log(res.data);
@@ -551,7 +551,7 @@ class AddConta extends Component {
                         values: `'${this.state.lancamento}', '${this.state.tipo}', '${this.state.pessoa}', '${this.state.contaContabil}', '${this.state.codBarras}', '${this.state.centroCusto}', '${this.state.historico}',  '${this.state.contaDesconto}','${this.state.parcelaInicial}', '${this.state.parcelaFinal}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.vencimento}', '${this.state.vencimentoOrig}', '${this.state.contaProvisao}', '${parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', '${this.state.documento}', '${this.state.tipoDocumento}', '${this.state.meioPagamento}', '', '${this.state.envio}'`,
                         meioPagamento: this.state.meioPagamentoNome,
                         valuesDarf: this.state.meioPagamentoNome == 'GRU' ? `'${this.state.contribuinte}'` : this.state.meioPagamentoNome === "PIX" ? `'${this.state.tipoPix}'` : `'${this.state.codigoReceita}', '${this.state.contribuinte}', '${this.state.codigoIdentificadorTributo}', '${this.state.mesCompetNumRef}', '${moment(this.state.dataApuracao).format('YYYY-MM-DD')}', '${parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfMulta.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfJuros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfOutros.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.'))}'`,
-                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe}', '${parseFloat(this.state.discount.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.received.replaceAll('.', '').replaceAll(',', '.'))}', ${moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYY-MM-DD") : ''}` : ""
+                        dadosManuais: this.state.manual ? `'${this.state.os}', '${this.state.navio}', '${this.state.porto}', '${this.state.roe.replaceAll(',', '.')}', '${parseFloat(this.state.discount.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.received.replaceAll('.', '').replaceAll(',', '.'))}', ${moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYY-MM-DD") : ''}` : ""
                     }).then(
                         async res => {
                             // console.log(res.data);
@@ -613,9 +613,9 @@ class AddConta extends Component {
                         os_manual: this.state.os,
                         navio_manual: this.state.navio,
                         porto_manual: this.state.porto,
-                        roe_manual: this.state.roe,
+                        roe_manual: this.state.roe.replaceAll(',', '.'),
                         discount_manual: parseFloat(this.state.discount.replaceAll('.', '').replaceAll(',', '.')),
-                        received_manual: parseFloat(this.state.received.replaceAll('.','').replaceAll(',','.')),
+                        received_manual: parseFloat(this.state.received.replaceAll('.', '').replaceAll(',', '.')),
                         sailed_manual: moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYYY-MM-DD") : '',
                     }).then(
                         async res => {
@@ -677,7 +677,7 @@ class AddConta extends Component {
                         os_manual: this.state.os,
                         navio_manual: this.state.navio,
                         porto_manual: this.state.porto,
-                        roe_manual: this.state.roe,
+                        roe_manual: this.state.roe.replaceAll(',', '.'),
                         discount_manual: parseFloat(this.state.discount.replaceAll('.', '').replaceAll(',', '.')),
                         received_manual: parseFloat(this.state.received.replaceAll('.', '').replaceAll(',', '.')),
                         sailed_manual: moment(this.state.sailed).isValid() ? moment(this.state.sailed).format("YYYY-MM-DD") : ''
@@ -1058,6 +1058,7 @@ class AddConta extends Component {
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.dataApuracao)
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfValor && this.state.darfValor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.')))
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfPagamento && this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.')))
+        validations.push(!this.state.os || this.state.roe.indexOf('.') == -1);
         validations.push(!this.state.osExiste)
         validations.push(!this.state.bloqueado)
 
@@ -1451,15 +1452,15 @@ class AddConta extends Component {
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Field className="form-control" type="date" value={this.state.lancamento} onChange={async e => { this.setState({ lancamento: e.currentTarget.value }) }} />
-                                                    </div>
-                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                        <label>Data de envio</label>
-                                                    </div>
-                                                    <div className='col-1 errorMessage'>
-                                                    </div>
-                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                        <Field className="form-control" type="date" value={this.state.envio} onChange={async e => { this.setState({ envio: e.currentTarget.value }) }} />
-                                                    </div>
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Data de envio</label>
+                                                        </div>
+                                                        <div className='col-1 errorMessage'>
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Field className="form-control" type="date" value={this.state.envio} onChange={async e => { this.setState({ envio: e.currentTarget.value }) }} />
+                                                        </div>
                                                         {this.state.tipo &&
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 {this.state.tipo === '0' &&
@@ -1721,20 +1722,23 @@ class AddConta extends Component {
                                                                     }
                                                                 </div>
 
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Sailed</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Field className="form-control" type="date" value={this.state.sailed} onChange={async e => { this.setState({ sailed: e.currentTarget.value }) }} />
-                                                        </div>
-                                                        <div className='col-1'></div>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Sailed</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control" type="date" value={this.state.sailed} onChange={async e => { this.setState({ sailed: e.currentTarget.value }) }} />
+                                                                </div>
+                                                                <div className='col-1'></div>
 
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                     <label>ROE</label>
                                                                 </div>
                                                                 <div className='col-1 errorMessage'>
+                                                                    {this.state.roe.indexof('.') != -1 &&
+                                                                        <FontAwesomeIcon title='ROE deve ser no formato de 0,00' icon={faExclamationTriangle} />
+                                                                    }
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                     <Field className="form-control" type="text" value={this.state.roe} onChange={async e => { this.setState({ roe: e.currentTarget.value }) }} />
