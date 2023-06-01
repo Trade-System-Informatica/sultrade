@@ -1058,7 +1058,7 @@ class AddConta extends Component {
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.dataApuracao)
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfValor && this.state.darfValor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfValor.replaceAll('.', '').replaceAll(',', '.')))
         validations.push(this.state.meioPagamentoNome != 'DARF' && this.state.meioPagamentoNome != 'GPS' || this.state.darfPagamento && this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.darfPagamento.replaceAll('.', '').replaceAll(',', '.')))
-        validations.push(!this.state.os || this.state.roe.indexOf('.') == -1);
+        validations.push(!this.state.os || `${this.state.roe}`?.indexOf('.') == -1);
         validations.push(!this.state.osExiste)
         validations.push(!this.state.bloqueado)
 
@@ -1736,7 +1736,7 @@ class AddConta extends Component {
                                                                     <label>ROE</label>
                                                                 </div>
                                                                 <div className='col-1 errorMessage'>
-                                                                    {this.state.roe.indexOf('.') != -1 &&
+                                                                    {`${this.state.roe}`?.indexOf('.') != -1 &&
                                                                         <FontAwesomeIcon title='ROE deve ser no formato de 0,00' icon={faExclamationTriangle} />
                                                                     }
                                                                 </div>

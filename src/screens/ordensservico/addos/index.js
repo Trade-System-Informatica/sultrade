@@ -1280,7 +1280,7 @@ class AddOS extends Component {
 
         let valuesRet = "";
 
-        if (!this.state.contaOs || !this.state.contaOs[0]) {
+        if (!this.state.contaOs) {
             if (valorDesconto != 0) {
                 valuesRet = `'0', '${parseFloat(valorDesconto)}', 'Desconto de ${this.state.codigo}', 'DESCONTO'`;
             }
