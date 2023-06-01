@@ -1736,7 +1736,7 @@ class AddConta extends Component {
                                                                     <label>ROE</label>
                                                                 </div>
                                                                 <div className='col-1 errorMessage'>
-                                                                    {this.state.roe.indexof('.') != -1 &&
+                                                                    {this.state.roe.indexOf('.') != -1 &&
                                                                         <FontAwesomeIcon title='ROE deve ser no formato de 0,00' icon={faExclamationTriangle} />
                                                                     }
                                                                 </div>
