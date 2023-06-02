@@ -570,9 +570,9 @@ class Relatorio extends Component {
                                                         <td style={{ backgroundColor: "inherit", maxWidth: 55, minWidth: 55 }}>{e.os_manual ? util.removeAcentos(e.os_manual?.split('@.@')[index]) : ''}</td>
                                                         {!this.state.clientes[0] &&
                                                             <>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 95, minWidth: 95 }}>{e.porto_manual ? util.removeAcentos(e.porto_manual?.split('@.@')[index]) : ''}</td>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 55, minWidth: 55 }}>{e.sailed_manual ? moment(e.sailed_manual.split('@.@')[index]).isValid() ? moment(e.sailed_manual.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 50, minWidth: 50 }}>{e.envio_manual ? moment(e.envio_manual.split('@.@')[index]).isValid() ? moment(e.envio_manual.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
+                                                                <td style={{ backgroundColor: "inherit", maxWidth: 85, minWidth: 85 }}>{e.porto_manual ? util.removeAcentos(e.porto_manual?.split('@.@')[index]) : ''}</td>
+                                                                <td style={{ backgroundColor: "inherit", maxWidth: 60, minWidth: 60 }}>{e.sailed_manual ? moment(e.sailed_manual.split('@.@')[index]).isValid() ? moment(e.sailed_manual.split('@.@')[index]).format("DD/MM/YY") : '' : ''}</td>
+                                                                <td style={{ backgroundColor: "inherit", maxWidth: 55, minWidth: 55 }}>{e.envio_manual ? moment(e.envio_manual.split('@.@')[index]).isValid() ? moment(e.envio_manual.split('@.@')[index]).format("DD/MM/YY") : '' : ''}</td>
                                                             </>
                                                         }
                                                         {this.state.clientes[0] &&
@@ -672,9 +672,9 @@ class Relatorio extends Component {
                                                         <td style={{ backgroundColor: "inherit", maxWidth: 55, minWidth: 55 }}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
                                                         {!this.state.clientes[0] &&
                                                             <>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 95, minWidth: 95 }}>{e.porto ? util.removeAcentos(e.porto?.split('@.@')[index]) : ''}</td>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 55, minWidth: 55 }}>{e.sailed ? moment(e.sailed.split('@.@')[index]).isValid() ? moment(e.sailed.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 50, minWidth: 50 }}>{e.envio ? moment(e.envio.split('@.@')[index]).isValid() ? moment(e.envio.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
+                                                                <td style={{ backgroundColor: "inherit", maxWidth: 85, minWidth: 85 }}>{e.porto ? util.removeAcentos(e.porto?.split('@.@')[index]) : ''}</td>
+                                                                <td style={{ backgroundColor: "inherit", maxWidth: 60, minWidth: 60 }}>{e.sailed ? moment(e.sailed.split('@.@')[index]).isValid() ? moment(e.sailed.split('@.@')[index]).format("DD/MM/YY") : '' : ''}</td>
+                                                                <td style={{ backgroundColor: "inherit", maxWidth: 55, minWidth: 55 }}>{e.envio ? moment(e.envio.split('@.@')[index]).isValid() ? moment(e.envio.split('@.@')[index]).format("DD/MM/YY") : '' : ''}</td>
                                                             </>
                                                         }
                                                         {this.state.clientes[0] &&
