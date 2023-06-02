@@ -36,10 +36,11 @@ if($objData != NULL){
     $governmentTaxes = prepareInput($objData->governmentTaxes);
     $bankCharges = prepareInput($objData->bankCharges);
     $operador = prepareInput($objData->operador);
+    $envio = prepareInput($objData->envio);
 
     $os = new OS();
 
-        $result = $os->updateOS($Chave, $Descricao, $Chave_Cliente, $chave_navio, $Data_Abertura, $Data_Chegada, $chave_tipo_servico, $viagem, $porto, $Data_Saida, $Data_Encerramento, $Data_Faturamento, $centro_custo, $ROE, $Comentario_Voucher, $encerradoPor, $faturadoPor, $Empresa, $eta, $atb, $etb, $governmentTaxes, $bankCharges, $operador);
+        $result = $os->updateOS($Chave, $Descricao, $Chave_Cliente, $chave_navio, $Data_Abertura, $Data_Chegada, $chave_tipo_servico, $viagem, $porto, $Data_Saida, $Data_Encerramento, $Data_Faturamento, $centro_custo, $ROE, $Comentario_Voucher, $encerradoPor, $faturadoPor, $Empresa, $eta, $atb, $etb, $governmentTaxes, $bankCharges, $operador, $envio);
 
 } else {
     $result = "false";
@@ -47,5 +48,3 @@ if($objData != NULL){
 
 echo(json_encode($result));
 exit;
-
-?>

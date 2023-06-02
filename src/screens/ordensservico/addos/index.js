@@ -47,6 +47,7 @@ const estadoInicial = {
     data_saida: '',
     encerramento: '',
     faturamento: '',
+    envio: '',
     centroCusto: '',
     roe: 5,
     comentario: '',
@@ -258,7 +259,7 @@ class AddOS extends Component {
 
 
         if (parseInt(id) !== 0) {
-            await this.setState({ 
+            await this.setState({
                 os: await loader.getOne('getOSUma.php', null, null, { chave_os: this.state.chave }),
                 contaOs: await loader.getOne('getContaOS.php', null, null, { chave_os: this.state.chave })
             })
@@ -280,6 +281,7 @@ class AddOS extends Component {
 
                 encerramento: moment(this.state.os.Data_Encerramento).format("YYYY-MM-DD") != "Invalid date" ? moment(this.state.os.Data_Encerramento).format('YYYY-MM-DD') : 'T.B.I.',
                 faturamento: moment(this.state.os.Data_Faturamento).format("YYYY-MM-DD") != "Invalid date" ? moment(this.state.os.Data_Faturamento).format('YYYY-MM-DD') : 'T.B.I.',
+                envio: moment(this.state.os.envio).format("YYYY-MM-DD") != "Invalid date" ? moment(this.state.os.envio).format('YYYY-MM-DD') : 'T.B.I.',
                 centroCusto: this.state.os.centro_custo,
                 roe: parseFloat(this.state.os.ROE) == 0 ? "5.00000" : this.state.os.ROE,
                 comentario: this.state.os.Comentario_Voucher,
@@ -1162,7 +1164,7 @@ class AddOS extends Component {
 
             await apiEmployee.post(`insertOS.php`, {
                 token: true,
-                values: `'${this.state.usuarioLogado.codigo}', '${this.state.descricao}', 'ST${this.state.codigo.Proximo}', '${this.state.cliente}', '${this.state.navio}', '${moment(this.state.abertura).format('YYYY-MM-DD')}', '${moment(this.state.chegada).format('YYYY-MM-DD')}', '${moment(this.state.data_saida).format('YYYY-MM-DD')}', '${this.state.tipoServico}', '${this.state.viagem}', '${this.state.porto}', '${this.state.encerradoPor}', '${this.state.faturadoPor}', '${this.state.empresa}', '${this.state.eta}', '${this.state.atb}', '${this.state.etb}', '${this.state.governmentTaxes ? parseFloat(this.state.governmentTaxes.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.bankCharges ? parseFloat(this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.operador}'`,
+                values: `'${this.state.usuarioLogado.codigo}', '${this.state.descricao}', 'ST${this.state.codigo.Proximo}', '${this.state.cliente}', '${this.state.navio}', '${moment(this.state.abertura).format('YYYY-MM-DD')}', '${moment(this.state.chegada).format('YYYY-MM-DD')}', '${moment(this.state.data_saida).format('YYYY-MM-DD')}', '${this.state.tipoServico}', '${this.state.viagem}', '${this.state.porto}', '${this.state.encerradoPor}', '${this.state.faturadoPor}', '${this.state.empresa}', '${this.state.eta}', '${this.state.atb}', '${this.state.etb}', '${this.state.governmentTaxes ? parseFloat(this.state.governmentTaxes.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.bankCharges ? parseFloat(this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.operador}', ${this.state.envio}`,
                 codigo: this.state.codigo.Proximo,
                 tipo: this.state.codigo.Tipo,
                 navio: this.state.naviosOptions.find((navio) => navio.value == this.state.navio)?.label,
@@ -1188,7 +1190,7 @@ class AddOS extends Component {
 
         } else if (validForm) {
             const codigoNumero = parseInt(this.state.codigo.slice(2));
-            
+
             if (codigoNumero >= 5850 && (this.state.navio != this.state.os.chave_navio || this.state.porto != this.state.os.porto || this.state.cliente != this.state.os.Chave_Cliente || this.state.tipoServico != this.state.os.tipo_servico)) {
                 await this.mudarCentroCusto();
             }
@@ -1227,8 +1229,8 @@ class AddOS extends Component {
                 Empresa: this.state.empresa,
                 governmentTaxes: this.state.governmentTaxes ? parseFloat(this.state.governmentTaxes.replaceAll(".", "").replaceAll(",", ".")) : 0,
                 bankCharges: this.state.bankCharges ? parseFloat(this.state.bankCharges.replaceAll(".", "").replaceAll(",", ".")) : 0,
-                operador: this.state.operador
-
+                operador: this.state.operador,
+                envio: this.state.envio
             }).then(
                 async res => {
                     if (res.data === true) {
@@ -3842,9 +3844,9 @@ class AddOS extends Component {
                                                                     <label>Company:</label>
                                                                 </div>
                                                                 <div className="col-1 errorMessage">
-                                                                {(this.state.company.indexOf('"') != -1|| this.state.company.indexOf("'") != -1) &&
-                                                                    <FontAwesomeIcon title='Aspas duplas e únicas não são permitidas' icon={faExclamationTriangle} />
-                                                                }
+                                                                    {(this.state.company.indexOf('"') != -1 || this.state.company.indexOf("'") != -1) &&
+                                                                        <FontAwesomeIcon title='Aspas duplas e únicas não são permitidas' icon={faExclamationTriangle} />
+                                                                    }
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                     <Field className="form-control" type="text" value={this.state.company} onChange={async e => { this.setState({ company: e.currentTarget.value }) }} />
@@ -3853,10 +3855,10 @@ class AddOS extends Component {
                                                                     <label>Address:</label>
                                                                 </div>
                                                                 <div className="col-1 errorMessage">
-                                                                {(this.state.address.indexOf('"') != -1 || this.state.address.indexOf("'") != -1) &&
-                                                                    <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                                }
-                                                                
+                                                                    {(this.state.address.indexOf('"') != -1 || this.state.address.indexOf("'") != -1) &&
+                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                    }
+
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                     <Field className="form-control" type="text" value={this.state.address} onChange={async e => { this.setState({ address: e.currentTarget.value }) }} />
@@ -4640,6 +4642,15 @@ class AddOS extends Component {
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                                 <Field className="form-control" type="date" value={this.state.faturamento} onChange={async e => { this.faturarData(e.currentTarget.value) }} />
+                                                            </div>
+                                                            <div className="col-1"></div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>Data de Envio</label>
+                                                            </div>
+                                                            <div className="col-1 errorMessage">
+                                                            </div>
+                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                                <Field className="form-control" type="date" value={this.state.envio} onChange={async e => { this.setState({ envio: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
