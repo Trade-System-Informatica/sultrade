@@ -612,9 +612,6 @@ class Relatorio extends Component {
                                                         } else if (this.state.moeda == 6) {
                                                             FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
                                                         }
-                                                        if (e.evento_os.split("@.@")[eventIndex] == 'ST5729') {
-                                                            console.log(FDA);
-                                                        }
                                                     }
                                                 });
                                             }
@@ -676,7 +673,7 @@ class Relatorio extends Component {
                                                         {!this.state.clientes[0] &&
                                                             <>
                                                                 <td style={{ backgroundColor: "inherit", maxWidth: 95, minWidth: 95 }}>{e.porto ? util.removeAcentos(e.porto?.split('@.@')[index]) : ''}</td>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 55, minWidth: 55 }}>{e.sailed ? moment(e.sailed.split('@.@')[index]).isValid() ? this.state.por == 'porCliente' ? moment(e.sailed.split("@.@")[index]).format("MMM Do YYYY") : moment(e.sailed.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
+                                                                <td style={{ backgroundColor: "inherit", maxWidth: 55, minWidth: 55 }}>{e.sailed ? moment(e.sailed.split('@.@')[index]).isValid() ? moment(e.sailed.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
                                                                 <td style={{ backgroundColor: "inherit", maxWidth: 50, minWidth: 50 }}>{e.envio ? moment(e.envio.split('@.@')[index]).isValid() ? moment(e.envio.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
                                                             </>
                                                         }
@@ -696,7 +693,7 @@ class Relatorio extends Component {
                                             }
                                         })}
                                         <tr style={{ fontSize: 13 }}>
-                                            <th colSpan='5'>{"Total ->"}</th>
+                                            <th colSpan={this.state.clientes[0] ? '5' : '6'}>{"Total ->"}</th>
                                             <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDAPorGrupo)}</td>
                                             <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalDiscountPorGrupo)}</td>
                                             <td style={{ paddingRight: '15px', borderTop: "1px solid black" }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalReceivedPorGrupo)}</td>
