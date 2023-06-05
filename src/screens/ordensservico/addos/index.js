@@ -1252,21 +1252,29 @@ class AddOS extends Component {
 
     faturaOS = async () => {
         let valor = 0;
+        let saldo = 0;
         let valorDesconto = 0;
+        let valorRecebido = 0;
 
         this.state.eventos.map((evento) => {
             if (evento.tipo_sub == 3 && evento.cancelada == 0) {
                 if (evento.Moeda == 5) {
                     valorDesconto += parseFloat(evento.valor);
                 } else if (evento.Moeda == 6) {
-                    valorDesconto += (parseFloat(evento.valor) * (parseFloat(this.state.roe) == 0 ? 5 : parseFloat(this.state.roe)));
+                    valorDesconto += (parseFloat(evento.valor) * (parseFloat(this.state.roe.replace(",", ".")) == 0 ? 5 : parseFloat(this.state.roe.replace(",", "."))));
+                }
+            } else if (evento.tipo_sub == 2) {
+                if (evento.Moeda == 5) {
+                    valorRecebido += parseFloat(evento.valor);
+                } else if (evento.Moeda == 6) {
+                    valorRecebido += (parseFloat(evento.valor) * (parseFloat(this.state.roe.replace(",", ".")) == 0 ? 5 : parseFloat(this.state.roe.replace(",", "."))));
                 }
             } else if (![3, 2].includes(evento.tipo_sub) && evento.cancelada == 0) {
                 if (evento.repasse != 0 || evento.Fornecedor_Custeio != 0) {
                     if (evento.Moeda == 5) {
                         valor += parseFloat(evento.valor);
                     } else if (evento.Moeda == 6) {
-                        valor += (parseFloat(evento.valor) * (parseFloat(this.state.roe) == 0 ? 5 : parseFloat(this.state.roe)));
+                        valor += (parseFloat(evento.valor) * (parseFloat(this.state.roe.replace(",", ".")) == 0 ? 5 : parseFloat(this.state.roe.replace(",", "."))));
                     }
                 }
             }
@@ -1281,6 +1289,7 @@ class AddOS extends Component {
         }
 
         let valuesRet = "";
+        saldo = valor - (valorDesconto + valorRecebido);
 
         if (!this.state.contaOs) {
             if (valorDesconto != 0) {
@@ -1289,7 +1298,7 @@ class AddOS extends Component {
 
             await apiEmployee.post(`insertContaOS.php`, {
                 token: true,
-                values: `'${this.state.chave}', '${moment(this.state.faturamento).format("YYYY-MM-DD")}', '0', '${this.state.cliente}', '0', '0', '${this.state.centroCusto}', '',  0,1, 1, '${parseFloat(`${valor}`)}', '${parseFloat(`${valor}`)}', '', '', '${0}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', 0, 0, 0, ''`,
+                values: `'${this.state.chave}', '${moment(this.state.faturamento).format("YYYY-MM-DD")}', '0', '${this.state.cliente}', '0', '0', '${this.state.centroCusto}', '',  0,1, 1, '${parseFloat(`${valor}`)}', '${parseFloat(`${saldo}`)}', '', '', '${0}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', 0, 0, 0, ''`,
                 valuesRet
             }).then(
                 async res => {
@@ -1305,7 +1314,7 @@ class AddOS extends Component {
                 Pessoa: this.state.cliente,
                 Centro_Custo: this.state.centroCusto,
                 Valor: parseFloat(valor),
-                Saldo: parseFloat(valor),
+                Saldo: parseFloat(saldo),
                 Operador: this.state.usuarioLogado.codigo,
                 Empresa: this.state.empresa,
                 valuesRet: parseFloat(valorDesconto)

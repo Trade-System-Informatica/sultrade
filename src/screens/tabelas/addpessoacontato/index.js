@@ -38,6 +38,7 @@ const estadoInicial = {
     tipo: '',
     campo1: '',
     campo2: '',
+    pessoa: {},
 
     tipos: [],
     tiposOptions: [],
@@ -62,6 +63,7 @@ class AddPessoaContato extends Component {
         window.scrollTo(0, 0)
         var ed = await this.props.match.params.ed
         await this.setState({ chave: ed })
+        this.setState({ chave_pessoa: this.props.match.params.id })
         if (parseInt(ed) !== 0) {
             await this.setState({ contato: this.props.location.state.contato })
             //console.log('Servicos: ' + JSON.stringify(this.state.tiposervico))
@@ -72,8 +74,11 @@ class AddPessoaContato extends Component {
                 campo1: this.state.contato.Campo1,
                 campo2: this.state.contato.Campo2,
             })
+
         }
-        this.setState({ chave_pessoa: this.props.match.params.id })
+        this.setState({
+            pessoa: await loader.getOne(`getPessoa.php`, this.state.chave_pessoa)
+        })
         this.carregaTipos();
 
 
@@ -264,7 +269,7 @@ class AddPessoaContato extends Component {
                         <Header voltarAddPessoa pessoa={this.state.chave_pessoa} titulo="Contatos" />
                     }
                     {this.props.location.state.backTo == 'contatos' &&
-                        <Header voltarPessoaContatos pessoa={this.state.chave_pessoa} chave={this.state.chave != 0 ? this.state.chave : ''} titulo="Contatos" />
+                        <Header voltarPessoaContatos pessoa={this.state.pessoa} chave={this.state.chave != 0 ? this.state.chave : ''} titulo="Contatos" />
                     }
                 </section>
 

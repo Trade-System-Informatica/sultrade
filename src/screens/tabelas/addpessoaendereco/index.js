@@ -37,6 +37,7 @@ const estadoInicial = {
 
     chave: '',
     chave_pessoa: '',
+    pessoa: {},
     tipo: '',
     endereco: '',
     numero: '',
@@ -102,8 +103,7 @@ class AddPessoaEndereco extends Component {
         await this.setState({ chave: ed, chave_pessoa: this.props.match.params.id })
         if (parseInt(ed) != 0) {
             await this.setState({ endereco: this.props.location.state.endereco })
-            //console.log('Servicos: ' + JSON.stringify(this.state.tiposervico))
-            //await this.loadData(this.state.tiposervico)
+            
             await this.setState({
                 tipo: this.state.endereco.Tipo,
                 endereco: this.state.endereco.Endereco,
@@ -128,6 +128,10 @@ class AddPessoaEndereco extends Component {
         } else {
             this.getCPF();
         }
+        this.setState({
+            pessoa: await loader.getOne(`getPessoa.php`, this.state.chave_pessoa)
+        })
+
         this.getLugares();
 
         await this.carregaTiposAcessos()
