@@ -1180,7 +1180,7 @@ class AddOS extends Component {
                         await loader.salvaLogs('os', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
 
                         await this.setState({ loading: false, bloqueado: false });
-                        //this.setState({ recarregaPagina: reload });
+                        this.setState({ recarregaPagina: reload });
                     } else {
                         console.log(res.data)
                     }
@@ -1196,10 +1196,6 @@ class AddOS extends Component {
             }
 
             if (this.state.faturamento && moment(this.state.faturamento).isValid()) {
-                // console.log(this.state.os.Data_Faturamento);
-                // console.log(this.state.os.centro_custo);
-                // console.log(this.state.faturamento);
-                // console.log(this.state.centroCusto);
                 await this.faturaOS();
             }
             await apiEmployee.post(`updateOS.php`, {
@@ -1309,7 +1305,7 @@ class AddOS extends Component {
         } else {
             await apiEmployee.post(`updateContaOS.php`, {
                 token: true,
-                chave_conta: this.state.contaOs[0]?.chave,
+                chave_conta: this.state.contaOs?.Chave,
                 Lancto: moment(this.state.faturamento).format("YYYY-MM-DD"),
                 Pessoa: this.state.cliente,
                 Centro_Custo: this.state.centroCusto,
