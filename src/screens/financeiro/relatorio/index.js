@@ -563,7 +563,7 @@ class Relatorio extends Component {
                                             <th>RECEIVED</th>
                                             <th>BALANCE</th>
                                         </tr>
-                                        {rows.toSorted((a, b) => moment(b.sailed, 'DD/MM/YY').diff(moment(a.sailed, 'DD/MM/YY'))).map((row, index) => {
+                                        {rows.toSorted((a, b) => moment(a.sailed, 'DD/MM/YY').diff(moment(b.sailed, 'DD/MM/YY'))).map((row, index) => {
                                             if (parseFloat(row.balance) > 0) {
                                                 totalFDA += parseFloat(row.fda);
                                                 totalDiscount += parseFloat(row.discount);
