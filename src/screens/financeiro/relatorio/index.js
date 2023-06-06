@@ -306,7 +306,7 @@ class Relatorio extends Component {
             token: true,
             emails: this.state.emails,
             mensagem: base64,
-            clienteNome: this.state.clientes[0],
+            nomeCliente: this.state.pessoas.find((p) => p.Chave == this.state.clientes[0])?.Nome,
             balance: `${this.state.moeda == 5 ? "R$" : "USD" }${new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.totalBalance)}`,
         }).then(
             async res => {

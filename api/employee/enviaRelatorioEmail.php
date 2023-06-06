@@ -19,7 +19,7 @@ $objData = json_decode($data);
 
 $emails = $objData->emails;
 $mensagem = $objData->mensagem;
-$nomeCliente = prepareInput($objData-> nomeCliente);
+$nomeCliente = prepareInput($objData->nomeCliente);
 $balance = prepareInput($objData->balance);
 
 $currentDate = date('M jS\, Y');
@@ -68,7 +68,7 @@ if ($emails[0]) {
 
         //Content
         $mail->isHTML(true);                                  //Set email format to HTML
-        $mail->Subject = "SOA - (".strtoupper($nomeCliente).") - UPDATED (".$currentDate.") - ($balance)";
+        $mail->Subject = "SOA - ".strtoupper($nomeCliente)." - UPDATED ".$currentDate." - $balance";
         $mail->Body    = "
         <span>TO: <b>".strtoupper($nomeCliente)."</b></span><br/>
         <span>FROM: <b>SULTRADE SHIPPING AGENCY</b></span><br/><br/>
