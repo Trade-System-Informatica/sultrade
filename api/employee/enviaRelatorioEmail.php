@@ -45,13 +45,13 @@ if ($emails[0]) {
 
         $mail->Host       = 'smtp.tradesystem.com.br';                     //Set the SMTP server to send through
         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-        $mail->Username   = 'no-reply@tradesystem.com.br';                     //SMTP username
-        $mail->Password   = 'Trade@6760@no-reply';                               //SMTP password
+        $mail->Username   = 'suporte6@tradesystem.com.br';                     //SMTP username
+        $mail->Password   = 'Trade@6760@Suporte';                               //SMTP password
         //$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
         $mail->Port  = 587;
 
         //Recipients
-        $mail->setFrom('no-reply@tradesystem.com.br', 'Sultrade');
+        $mail->setFrom('soa@sultradeagency.com', 'Sultrade Agency');
 
         foreach ($emails as $email) {
             $mail->addAddress($email);     //Add a recipient
@@ -63,8 +63,8 @@ if ($emails[0]) {
             }
         }
         $mail->addAddress('disbursements@sultradeagency.com');
-        $mail->addCC('no-reply@tradesystem.com.br');
-        $mail->addBCC('no-reply@tradesystem.com.br');
+        $mail->addCC('soa@sultradeagency.com');
+        $mail->addBCC('soa@sultradeagency.com');
 
         //Content
         $mail->isHTML(true);                                  //Set email format to HTML
