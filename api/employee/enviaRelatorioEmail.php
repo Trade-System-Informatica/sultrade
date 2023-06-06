@@ -45,8 +45,8 @@ if ($emails[0]) {
 
         $mail->Host       = 'smtp.tradesystem.com.br';                     //Set the SMTP server to send through
         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-        $mail->Username   = 'suporte6@tradesystem.com.br';                     //SMTP username
-        $mail->Password   = 'Trade@6760@Suporte';                               //SMTP password
+        $mail->Username   = 'soa@sultradeagency.com';                     //SMTP username
+        $mail->Password   = 'senha123@';                               //SMTP password
         //$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
         $mail->Port  = 587;
 
