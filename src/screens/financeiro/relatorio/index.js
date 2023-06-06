@@ -32,6 +32,7 @@ const estadoInicial = {
     excluirTipos: false,
     tiposDocumentos: [],
     moeda: 5,
+    totalBalance: 0,
 
     moedasOptions: [],
     moedasOptionsTexto: "",
@@ -304,7 +305,9 @@ class Relatorio extends Component {
         await apiEmployee.post(`enviaRelatorioEmail.php`, {
             token: true,
             emails: this.state.emails,
-            mensagem: base64
+            mensagem: base64,
+            clienteNome: this.state.clientes[0],
+            balance: `${this.state.moeda == 5 ? "R$" : "USD" }${new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.totalBalance)}`,
         }).then(
             async res => {
                 console.log(res);
@@ -364,7 +367,7 @@ class Relatorio extends Component {
         let totalFDA = 0;
         let totalDiscount = 0;
         let totalReceived = 0;
-        let totalBalance = 0;
+        this.setState({totalBalance: 0});
 
         let checkBalance = 0;
 
@@ -398,6 +401,7 @@ class Relatorio extends Component {
                     <div className='pdfContent'>
                         {relatorio.map((e) => {
                             checkBalance = 0;
+                            const rows = [];
 
                             if (this.state.por == 'porCliente' && !e.pessoa) {
                                 e.pessoa = '';
@@ -429,7 +433,22 @@ class Relatorio extends Component {
                                     received += e.received_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.received_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
                                 }
 
-                                checkBalance += parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
+                                const balance = parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
+                                if (balance > 0) {
+                                    rows.push({
+                                        ship: e.navio_manual ? util.removeAcentos(e.navio_manual.split('@.@')[index]) : '',
+                                        os: e.os_manual ? util.removeAcentos(e.os_manual.split('@.@')[index]) : '',
+                                        port: e.porto_manual ? util.removeAcentos(e.porto_manual.split('@.@')[index]) : '',
+                                        sailed: e.sailed_manual ? moment(e.sailed_manual.split('@.@')[index]).isValid() ? this.state.por == 'porCliente' && this.state.clientes[0] ? moment(e.sailed_manual.split("@.@")[index]).format("MMM Do YYYY") : moment(e.sailed_manual.split('@.@')[index]).format("DD/MM/YYYY") : '' : '',
+                                        billing: e.envio_manual ? moment(e.envio_manual.split('@.@')[index]).isValid() ? moment(e.envio_manual.split('@.@')[index]).format("DD/MM/YY") : '' : '',
+                                        roe: e.roe_manual ? e.roe_manual.split("@.@")[index] : "",
+                                        fda: FDA,
+                                        discount,
+                                        received,
+                                        balance
+                                    })
+                                }
+                                checkBalance += balance;
                             })
                             map.map((el, index) => {
                                 if (!e?.os?.split("@.@")[index]) {
@@ -491,7 +510,23 @@ class Relatorio extends Component {
                                     FDA += e.governmentTaxes.split("@.@")[index] && e.governmentTaxes.split("@.@")[index] > 0 ? util.toFixed(parseFloat(e.governmentTaxes.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
                                 }
 
-                                checkBalance += parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
+                                const balance = parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
+                                if (balance > 0) {
+                                    rows.push({
+                                        ship: e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : '',
+                                        os: e.os ? util.removeAcentos(e.os.split('@.@')[index]) : '',
+                                        port: e.porto ? util.removeAcentos(e.porto.split('@.@')[index]) : '',
+                                        sailed: e.sailed ? moment(e.sailed.split('@.@')[index]).isValid() ? this.state.por == 'porCliente' && this.state.clientes[0] ? moment(e.sailed.split("@.@")[index]).format("MMM Do YYYY") : moment(e.sailed.split('@.@')[index]).format("DD/MM/YYYY") : '' : '',
+                                        billing: e.envio ? moment(e.envio.split('@.@')[index]).isValid() ? moment(e.envio.split('@.@')[index]).format("DD/MM/YY") : '' : '',
+                                        roe: e.ROE ? e.ROE.split("@.@")[index] : "",
+                                        fda: FDA,
+                                        discount,
+                                        received,
+                                        balance
+                                    })
+                                }
+                                
+                                checkBalance += balance;
                             })
 
                             if (!checkBalance || checkBalance <= 0 || parseFloat(checkBalance?.toFixed(2)) <= 0) {
@@ -528,166 +563,40 @@ class Relatorio extends Component {
                                             <th>RECEIVED</th>
                                             <th>BALANCE</th>
                                         </tr>
-                                        {map.map((el, index) => {
-                                            if (!e?.os_manual?.split("@.@")[index]) {
-                                                return;
-                                            }
+                                        {rows.toSorted((a, b) => moment(a.sailed).diff(b.sailed)).map((row, index) => {
+                                            if (parseFloat(row.balance) > 0) {
+                                                totalFDA += parseFloat(row.fda);
+                                                totalDiscount += parseFloat(row.discount);
+                                                totalReceived += parseFloat(row.received);
+                                                this.setState({totalBalance: this.state.totalBalance + parseFloat(row.balance)});
 
-                                            let FDA = 0;
-                                            let discount = 0;
-                                            let received = 0;
-
-                                            if (this.state.moeda == 5) {
-                                                FDA += e?.valor_manual?.split("@.@")[index];
-                                                discount = e.discount_manual ? util.toFixed(parseFloat(e.discount_manual?.split("@.@")[index]), 2) : "0,00";
-                                                received = e.received_manual ? util.toFixed(parseFloat(e.received_manual?.split("@.@")[index]), 2) : "0,00";
-                                            } else if (this.state.moeda == 6) {
-                                                FDA += e?.valor_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.valor_manual.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
-                                                discount += e.discount_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.discount_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
-                                                received += e.received_manual?.split("@.@")[index] ? util.toFixed(parseFloat(e.received_manual?.split("@.@")[index]) / parseFloat(e.roe_manual && !!e.roe_manual?.split("@.@")[index] && e.roe_manual?.split("@.@")[index] != 0 ? e.roe_manual?.split("@.@")[index] : 5), 2) : 0;
-                                            }
-
-
-                                            discount = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(discount);
-                                            received = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(received);
-                                            FDA = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(FDA);
-                                            let balance = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(FDA.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(discount.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(received.replaceAll('.', '').replaceAll(",", ".")));
-
-                                            if (parseFloat(balance.replaceAll('.', '').replaceAll(",", ".")) > 0) {
-                                                totalFDA += parseFloat(FDA.replaceAll('.', '').replaceAll(',', '.'));
-                                                totalDiscount += parseFloat(discount.replaceAll('.', '').replaceAll(',', '.'));
-                                                totalReceived += parseFloat(received.replaceAll('.', '').replaceAll(',', '.'));
-                                                totalBalance += parseFloat(balance.replaceAll('.', '').replaceAll(',', '.'));
-
-                                                totalFDAPorGrupo += parseFloat(FDA.replaceAll('.', '').replaceAll(',', '.'));
-                                                totalDiscountPorGrupo += parseFloat(discount.replaceAll('.', '').replaceAll(',', '.'));
-                                                totalReceivedPorGrupo += parseFloat(received.replaceAll('.', '').replaceAll(',', '.'));
-                                                totalBalancePorGrupo += parseFloat(balance.replaceAll('.', '').replaceAll(',', '.'));
+                                                totalFDAPorGrupo += parseFloat(row.fda);
+                                                totalDiscountPorGrupo += parseFloat(row.discount);
+                                                totalReceivedPorGrupo += parseFloat(row.received);
+                                                totalBalancePorGrupo += parseFloat(row.balance);
 
                                                 return (
                                                     <tr style={{ fontSize: 12 }} className="SOA_row">
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 135, minWidth: 135 }}>{e.navio_manual ? util.removeAcentos(e.navio_manual?.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 55, minWidth: 55 }}>{e.os_manual ? util.removeAcentos(e.os_manual?.split('@.@')[index]) : ''}</td>
+                                                        <td style={{ backgroundColor: "inherit", maxWidth: 135, minWidth: 135 }}>{row.ship}</td>
+                                                        <td style={{ backgroundColor: "inherit", maxWidth: 55, minWidth: 55 }}>{row.os}</td>
                                                         {!this.state.clientes[0] &&
                                                             <>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 85, minWidth: 85 }}>{e.porto_manual ? util.removeAcentos(e.porto_manual?.split('@.@')[index]) : ''}</td>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 60, minWidth: 60 }}>{e.sailed_manual ? moment(e.sailed_manual.split('@.@')[index]).isValid() ? moment(e.sailed_manual.split('@.@')[index]).format("DD/MM/YY") : '' : ''}</td>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 55, minWidth: 55 }}>{e.envio_manual ? moment(e.envio_manual.split('@.@')[index]).isValid() ? moment(e.envio_manual.split('@.@')[index]).format("DD/MM/YY") : '' : ''}</td>
+                                                                <td style={{ backgroundColor: "inherit", maxWidth: 85, minWidth: 85 }}>{row.port}</td>
+                                                                <td style={{ backgroundColor: "inherit", maxWidth: 60, minWidth: 60 }}>{row.sailed}</td>
+                                                                <td style={{ backgroundColor: "inherit", maxWidth: 55, minWidth: 55 }}>{row.billing}</td>
                                                             </>
                                                         }
                                                         {this.state.clientes[0] &&
                                                             <>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 105, minWidth: 105 }}>{e.porto_manual ? util.removeAcentos(e.porto_manual?.split('@.@')[index]) : ''}</td>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 95, minWidth: 95 }}>{e.sailed_manual ? moment(e.sailed_manual.split('@.@')[index]).isValid() ? this.state.por == 'porCliente' ? moment(e.sailed_manual.split("@.@")[index]).format("MMM Do YYYY") : moment(e.sailed_manual.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
+                                                                <td style={{ backgroundColor: "inherit", maxWidth: 105, minWidth: 105 }}>{row.port}</td>
+                                                                <td style={{ backgroundColor: "inherit", maxWidth: 95, minWidth: 95 }}>{row.sailed}</td>
                                                             </>
                                                         }
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 65, minWidth: 65 }}>{e.roe_manual ? e.roe_manual?.split("@.@")[index] : ""}</td>
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 95, minWidth: 95 }}>{this.state.moeda == 5 ? "R$" : "USD"}{FDA}</td>
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 95, minWidth: 95 }}>{this.state.moeda == 5 ? "R$" : "USD"}{discount}</td>
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 95, minWidth: 95 }}>{this.state.moeda == 5 ? "R$" : "USD"}{received}</td>
-                                                        <td style={{ backgroundColor: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"}{balance}</td>
-                                                    </tr>
-                                                )
-                                            }
-                                        })}
-                                        {map.map((el, index) => {
-                                            if (!e?.os?.split("@.@")[index]) {
-                                                return;
-                                            }
-                                            const eventMap = e.evento_valor?.split('@.@');
-                                            const eventMapReceived = e.evento_valor_received?.split('@.@');
-                                            const eventMapDiscount = e.evento_valor_discount?.split('@.@');
-
-                                            let FDA = 0;
-                                            let discount = 0;
-                                            let received = 0;
-
-                                            if (eventMap) {
-                                                eventMap.map((elem, eventIndex) => {
-                                                    if (e.evento_os.split("@.@")[eventIndex] == e.os.split("@.@")[index]) {
-                                                        if (this.state.moeda == e.evento_moeda.split("@.@")[eventIndex]) {
-                                                            FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]), 2) : 0;
-                                                        } else if (this.state.moeda == 5) {
-                                                            FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
-                                                        } else if (this.state.moeda == 6) {
-                                                            FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                            if (eventMapReceived) {
-                                                eventMap.map((elem, eventIndex) => {
-                                                    if (e.evento_os_received.split("@.@")[eventIndex] == e.os.split("@.@")[index]) {
-                                                        if (this.state.moeda == e.evento_moeda_received.split("@.@")[eventIndex]) {
-                                                            received += e.evento_valor_received.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor_received.split("@.@")[eventIndex]), 2) : 0;
-                                                        } else if (this.state.moeda == 5) {
-                                                            received += e.evento_valor_received.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor_received.split("@.@")[eventIndex]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
-                                                        } else if (this.state.moeda == 6) {
-                                                            received += e.evento_valor_received.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor_received.split("@.@")[eventIndex]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                            if (eventMapDiscount) {
-                                                eventMap.map((elem, eventIndex) => {
-                                                    if (e.evento_os_discount.split("@.@")[eventIndex] == e.os.split("@.@")[index]) {
-                                                        if (this.state.moeda == e.evento_moeda_discount.split("@.@")[eventIndex]) {
-                                                            discount += e.evento_valor_discount.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor_discount.split("@.@")[eventIndex]), 2) : 0;
-                                                        } else if (this.state.moeda == 5) {
-                                                            discount += e.evento_valor_discount.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor_discount.split("@.@")[eventIndex]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
-                                                        } else if (this.state.moeda == 6) {
-                                                            discount += e.evento_valor_discount.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor_discount.split("@.@")[eventIndex]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
-                                                        }
-                                                    }
-                                                });
-                                            }
-
-                                            if (this.state.moeda == 5) {
-                                                FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? parseFloat(e.bankCharges.split("@.@")[index]) : 0;
-                                                FDA += e.governmentTaxes.split("@.@")[index] && e.governmentTaxes.split("@.@")[index] > 0 ? parseFloat(e.governmentTaxes.split("@.@")[index]) : 0;
-                                            } else if (this.state.moeda == 6) {
-                                                FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? util.toFixed(parseFloat(e.bankCharges.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
-                                                FDA += e.governmentTaxes.split("@.@")[index] && e.governmentTaxes.split("@.@")[index] > 0 ? util.toFixed(parseFloat(e.governmentTaxes.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
-                                            }
-
-                                            FDA = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(FDA);
-                                            received = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(received);
-                                            discount = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(discount);
-                                            let balance = new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(FDA.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(discount.replaceAll('.', '').replaceAll(",", ".")) - parseFloat(received.replaceAll('.', '').replaceAll(",", ".")));
-
-                                            if (parseFloat(balance.replaceAll('.', '').replaceAll(",", ".")) > 0) {
-                                                totalFDA += parseFloat(FDA.replaceAll('.', '').replaceAll(',', '.'));
-                                                totalDiscount += parseFloat(discount.replaceAll('.', '').replaceAll(',', '.'));
-                                                totalReceived += parseFloat(received.replaceAll('.', '').replaceAll(',', '.'));
-                                                totalBalance += parseFloat(balance.replaceAll('.', '').replaceAll(',', '.'));
-
-                                                totalFDAPorGrupo += parseFloat(FDA.replaceAll('.', '').replaceAll(',', '.'));
-                                                totalDiscountPorGrupo += parseFloat(discount.replaceAll('.', '').replaceAll(',', '.'));
-                                                totalReceivedPorGrupo += parseFloat(received.replaceAll('.', '').replaceAll(',', '.'));
-                                                totalBalancePorGrupo += parseFloat(balance.replaceAll('.', '').replaceAll(',', '.'));
-
-                                                return (
-                                                    <tr style={{ fontSize: 12 }} className="SOA_row">
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 135, minWidth: 135 }}>{e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : ''}</td>
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 55, minWidth: 55 }}>{e.os ? util.removeAcentos(e.os.split('@.@')[index]) : ''}</td>
-                                                        {!this.state.clientes[0] &&
-                                                            <>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 85, minWidth: 85 }}>{e.porto ? util.removeAcentos(e.porto?.split('@.@')[index]) : ''}</td>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 60, minWidth: 60 }}>{e.sailed ? moment(e.sailed.split('@.@')[index]).isValid() ? moment(e.sailed.split('@.@')[index]).format("DD/MM/YY") : '' : ''}</td>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 55, minWidth: 55 }}>{e.envio ? moment(e.envio.split('@.@')[index]).isValid() ? moment(e.envio.split('@.@')[index]).format("DD/MM/YY") : '' : ''}</td>
-                                                            </>
-                                                        }
-                                                        {this.state.clientes[0] &&
-                                                            <>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 105, minWidth: 105 }}>{e.porto ? util.removeAcentos(e.porto?.split('@.@')[index]) : ''}</td>
-                                                                <td style={{ backgroundColor: "inherit", maxWidth: 95, minWidth: 95 }}>{e.sailed ? moment(e.sailed.split('@.@')[index]).isValid() ? this.state.por == 'porCliente' ? moment(e.sailed.split("@.@")[index]).format("MMM Do YYYY") : moment(e.sailed.split('@.@')[index]).format("DD/MM/YYYY") : '' : ''}</td>
-                                                            </>
-                                                        }
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 65, minWidth: 65 }}>{e.ROE ? e.ROE.split("@.@")[index] : ""}</td>
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 95, minWidth: 95 }}>{this.state.moeda == 5 ? "R$" : "USD"}{FDA}</td>
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 95, minWidth: 95 }}>{this.state.moeda == 5 ? "R$" : "USD"}{discount}</td>
-                                                        <td style={{ backgroundColor: "inherit", maxWidth: 95, minWidth: 95 }}>{this.state.moeda == 5 ? "R$" : "USD"}{received}</td>
-                                                        <td style={{ backgroundColor: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"}{balance}</td>
+                                                        <td style={{ backgroundColor: "inherit", maxWidth: 65, minWidth: 65 }}>{row.roe}</td>
+                                                        <td style={{ backgroundColor: "inherit", maxWidth: 95, minWidth: 95 }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.fda)}</td>
+                                                        <td style={{ backgroundColor: "inherit", maxWidth: 95, minWidth: 95 }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.discount)}</td>
+                                                        <td style={{ backgroundColor: "inherit", maxWidth: 95, minWidth: 95 }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.received)}</td>
+                                                        <td style={{ backgroundColor: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.balance)}</td>
                                                     </tr>
                                                 )
                                             }
@@ -717,7 +626,7 @@ class Relatorio extends Component {
                                 <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDA)}</td>
                                 <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalDiscount)}</td>
                                 <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalReceived)}</td>
-                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalBalance)}</td>
+                                <td style={{ paddingRight: '15px' }}>{this.state.moeda == 5 ? "R$" : "USD"}{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.totalBalance)}</td>
                             </tr>
                         </table>
 

@@ -19,6 +19,10 @@ $objData = json_decode($data);
 
 $emails = $objData->emails;
 $mensagem = $objData->mensagem;
+$nomeCliente = prepareInput($objData-> nomeCliente);
+$balance = prepareInput($objData->balance);
+
+$currentDate = date('M jS\, Y');
 
 $return = ['successes' => [], 'failures' => [], 'warnings' => []];
 
@@ -64,13 +68,34 @@ if ($emails[0]) {
 
         //Content
         $mail->isHTML(true);                                  //Set email format to HTML
-        $mail->Subject = 'SOA - Statement of Account';
-        $mail->Body    = ' ';
+        $mail->Subject = "SOA - (".strtoupper($nomeCliente).") - UPDATED (".$currentDate.") - ($balance)";
+        $mail->Body    = "
+        <span>TO: <b>".strtoupper($nomeCliente)."</b></span><br/>
+        <span>FROM: <b>SULTRADE SHIPPING AGENCY</b></span><br/><br/>
+
+        <span>Dear ladies and Gentlemen,</span><br/><br/>
+
+        <span>Good Day!</span><br/><br/>
+
+        <span>We would like to present an attached SOA (Statement of Account) regarding vessels sailed and FDAs already submitted to your company referent to services provided by Sultrade.</span><br/><br/>
+        
+        <span>Be so kind to inform by return the remittance prospects in order to schedule it internally.</span><br/><br/>
+
+        <span>Remaining at your orders in case of any discrepancy on the attached file</span><br/><br/>
+
+        <span>Looking forward to your kindly and soonest reply.</span><br/><br/>
+
+        <span>Our kind regards,<span><br/>
+        <span>Sultrade Shipping Agency</span><br/>
+        <span>Accounting Dept.</span><br/>
+        <span>Phone: +55 53 32353500</span><br/>
+        <span>E-mail: soa@sultrade-ag.com.br</span>
+        ";
 
         $anexo = explode(",", $mensagem)[1];
         $type = str_replace("data:", "", explode(";", $mensagem)[0]);
 
-        $mail->AddStringAttachment(base64_decode($anexo), "SOA.pdf", "base64", $type);
+        $mail->AddStringAttachment(base64_decode($anexo), "SOA - ".strtoupper($nomeCliente).".pdf", "base64", $type);
         $mail->send();
     } catch (Exception $e) {
         array_push($return['warnings'], "Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
