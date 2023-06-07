@@ -1231,7 +1231,7 @@ class AddOS extends Component {
                 async res => {
                     if (res.data === true) {
                         await loader.salvaLogs('os', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `OS: ${this.state.codigo}`);
-                        await this.setState({ loading: false, bloqueado: false })
+                        await this.setState({ loading: false, bloqueado: false, governmentTaxes: this.state.governmentTaxes ? this.state.governmentTaxes : false, bankCharges: this.state.bankCharges ? this.state.bankCharges : false })
                         if (reload) {
                             window.location.reload();
                         }
