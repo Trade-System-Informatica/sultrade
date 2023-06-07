@@ -79,7 +79,7 @@ class Navios
             paises.nome AS pais,
             pessoas_enderecos.complemento AS complemento',
 
-            "os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND ((os_servicos_itens.tipo_sub = 0 OR os_servicos_itens.tipo_sub = 1) AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.fornecedor_custeio != 0)) OR (os_servicos_itens.tipo_sub = 2 OR os_servicos_itens.tipo_sub = 3)
+            "os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND (((os_servicos_itens.tipo_sub = 0 OR os_servicos_itens.tipo_sub = 1) AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.fornecedor_custeio != 0)) OR (os_servicos_itens.tipo_sub = 2 OR os_servicos_itens.tipo_sub = 3))
             ORDER BY os_servicos_itens.ordem ASC"
 /*            "(os_taxas.tipo='R' OR os_servicos_itens.repasse= 1 OR (os_servicos_itens.fornecedor_custeio != '0' AND os_servicos_itens.fornecedor_custeio != '')) AND os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0
             ORDER BY os_servicos_itens.ordem ASC"*/
