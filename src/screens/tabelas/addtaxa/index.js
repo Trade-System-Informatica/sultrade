@@ -476,7 +476,7 @@ class AddTaxa extends Component {
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                     <select className='form-control' value={this.state.tipo} onChange={(e) => { this.setState({ tipo: e.currentTarget.value }) }}>
                                                         {this.state.tiposOptions.map((t) => (
-                                                            <optin value={t.value}>{t.label}</optin>
+                                                            <option value={t.value}>{t.label}</option>
                                                         ))}
                                                     </select>
                                                 </div>
