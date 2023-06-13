@@ -305,7 +305,7 @@ class Relatorio extends Component {
         await this.setState({ emailBloqueado: true, loading: true });
         await apiEmployee.post(`enviaRelatorioEmail.php`, {
             token: true,
-            emails: this.state.emails,
+            emails: this.state.emails.map((e) => e.trim()),
             mensagem: base64,
             nomeCliente: this.state.pessoas.find((p) => p.Chave == this.state.clientes[0])?.Nome.replaceAll(".",""),
             balance: `${this.state.moeda == 5 ? "R$" : "USD" }${new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.totalBalance)}`,
@@ -958,10 +958,10 @@ class Relatorio extends Component {
                                                         <div className='col-1 errorMessage'>
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.pessoasOptions.filter(e => this.filterSearch(e, this.state.pessoasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ pessoasOptionsTexto: e }) }} search={true} onChange={(e) => { if (!this.state.clientes.find((c) => c == e.value)) this.setState({ clientes: [...this.state.clientes, e.value], }) }} />
+                                                            <Select className='SearchSelect' options={this.state.pessoasOptions.filter(e => this.filterSearch(e, this.state.pessoasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ pessoasOptionsTexto: e }) }} search={true} onChange={(e) => { if (!this.state.clientes.find((c) => c == e.value)) this.setState({ clientes: [...this.state.clientes, e.value], emails: [], failures: [], successes: [] }) }} />
                                                             <div style={{ marginBottom: 20, color: 'white', fontSize: 13 }}>
                                                                 {this.state.clientes.map((e, i) => (
-                                                                    <span class="click_to_erase" onClick={() => this.setState({ clientes: this.state.clientes.filter((c) => c != e) })}>{`${this.state.pessoas.find((p) => p.Chave == e)?.Nome}${i != this.state.clientes.length - 1 ? ', ' : ' '}`}</span>
+                                                                    <span class="click_to_erase" onClick={() => this.setState({ clientes: this.state.clientes.filter((c) => c != e), emails: [], failures: [], successes: [] })}>{`${this.state.pessoas.find((p) => p.Chave == e)?.Nome}${i != this.state.clientes.length - 1 ? ', ' : ' '}`}</span>
                                                                 ))}
                                                             </div>
                                                         </div>

@@ -72,15 +72,15 @@ if ($os) {
             ]
         ];
 
-        $mail->Host       = 'smtp.tradesystem.com.br';                     //Set the SMTP server to send through
+        $mail->Host       = '177.52.181.15';                     //Set the SMTP server to send through
         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-        $mail->Username   = 'no-reply@tradesystem.com.br';                     //SMTP username
-        $mail->Password   = 'Trade@6760@no-reply';                               //SMTP password
+        $mail->Username   = 'soa@sultradeagency.com';                     //SMTP username
+        $mail->Password   = 'senha123@';                               //SMTP password
         //$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
-        $mail->Port       = 587;
+        $mail->Port  = 587;
 
         //Recipients
-        $mail->setFrom('no-reply@tradesystem.com.br', 'Sultrade');
+        $mail->setFrom('soa@sultradeagency.com', 'Sultrade Agency');
 
         //$mail->addAddress('dev2@tradesystem.com.br');     //Add a recipient
         
