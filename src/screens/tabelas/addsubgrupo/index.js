@@ -39,6 +39,12 @@ const estadoInicial = {
     grupos: [],
     gruposOptions: [],
 
+    campos: [],
+    tiposOptions: [
+        { label: "texto", value: "TEXTO" },
+        { label: "lista", value: "LISTA" }
+    ],
+
     acessos: [],
     permissoes: [],
     acessosPermissoes: [],
@@ -274,9 +280,9 @@ class AddSubgrupo extends Component {
                                 <Form className="contact-form">
 
                                     <div className="row">
-                                        <div className="col-xl-4 col-lg-2 col-md-2 col-sm-2 col-2"></div>
+                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"></div>
 
-                                        <div className="col-xl-4 col-lg-8 col-md-8 col-sm-8 col-12 ">
+                                        <div className="col-xl-8 col-lg-8 col-md-8 col-sm-8 col-12 ">
 
                                             <div className="row addservicos">
                                                 {this.state.chave != 0 &&

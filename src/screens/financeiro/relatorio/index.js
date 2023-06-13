@@ -434,7 +434,7 @@ class Relatorio extends Component {
                                 }
 
                                 const balance = parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
-                                if (balance > 0) {
+                                if (parseFloat(balance.toFixed(2)) > 0) {
                                     rows.push({
                                         ship: e.navio_manual ? util.removeAcentos(e.navio_manual.split('@.@')[index]) : '',
                                         os: e.os_manual ? util.removeAcentos(e.os_manual.split('@.@')[index]) : '',
@@ -448,7 +448,7 @@ class Relatorio extends Component {
                                         balance
                                     })
                                 }
-                                checkBalance += balance;
+                                checkBalance += parseFloat(balance.toFixed(2));
                             })
                             map.map((el, index) => {
                                 if (!e?.os?.split("@.@")[index]) {
@@ -511,7 +511,7 @@ class Relatorio extends Component {
                                 }
 
                                 const balance = parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
-                                if (balance > 0) {
+                                if (parseFloat(balance.toFixed(2)) > 0) {
                                     rows.push({
                                         ship: e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : '',
                                         os: e.os ? util.removeAcentos(e.os.split('@.@')[index]) : '',
@@ -526,7 +526,7 @@ class Relatorio extends Component {
                                     })
                                 }
                                 
-                                checkBalance += balance;
+                                checkBalance += parseFloat(balance.toFixed(2));
                             })
 
                             if (!checkBalance || checkBalance <= 0 || parseFloat(checkBalance?.toFixed(2)) <= 0) {
