@@ -464,6 +464,15 @@ class Relatorio extends Component {
 
                                 if (eventMap) {
                                     eventMap.map((elem, eventIndex) => {
+                                        if (["ST5701", "ST5729", "ST5858"].includes(e.os.split("@.@")[index])) {
+                                            if (this.state.moeda == e.evento_moeda.split("@.@")[eventIndex]) {
+                                                console.log({os: e.os.split("@.@")[index], valor: e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]), 2) : 0})
+                                            } else if (this.state.moeda == 5) {
+                                                console.log({os: e.os.split("@.@")[index], valor: e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0})
+                                            } else if (this.state.moeda == 6) {
+                                                console.log({ os: e.os.split("@.@")[index], valor: e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0})
+                                            }
+                                        }
                                         if (e.evento_os.split("@.@")[eventIndex] == e.os.split("@.@")[index]) {
                                             if (this.state.moeda == e.evento_moeda.split("@.@")[eventIndex]) {
                                                 FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]), 2) : 0;

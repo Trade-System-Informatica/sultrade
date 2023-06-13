@@ -450,7 +450,7 @@ class AddLancamento extends Component {
                                                     </div>
                                                 }
                                                 {this.state.lote != 0 &&
-                                                    <div className="col-xl-4 col-lg-4 col-md-3 col-sm-1 col-1 " s>
+                                                    <div className="col-xl-4 col-lg-4 col-md-3 col-sm-1 col-1 ">
                                                     </div>
                                                 }
                                                 <div className="col-12 spaceBetween">
