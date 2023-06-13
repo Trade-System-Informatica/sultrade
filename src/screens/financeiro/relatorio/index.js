@@ -403,7 +403,7 @@ class Relatorio extends Component {
                     }
                     {this.props.location.state.backTo != 'contasPagas' && this.props.location.state.backTo != 'contasPagar' &&
                         <h4>
-                            SOA - Statement of Account
+                            SOA - Statement of Accounts
                         </h4>
                     }
                 </div>
@@ -574,7 +574,7 @@ class Relatorio extends Component {
                                             <th>RECEIVED</th>
                                             <th>BALANCE</th>
                                         </tr>
-                                        {rows.toSorted((a, b) => moment(a.sailed, 'DD/MM/YY').diff(moment(b.sailed, 'DD/MM/YY'))).map((row, index) => {
+                                        {rows.toSorted((a, b) => moment(a.sailed, !this.state.clientes[0] || ? 'DD/MM/YY' : "MMM Do YYYY").diff(moment(b.sailed, 'DD/MM/YY'))).map((row, index) => {
                                             if (parseFloat(row.balance) > 0) {
                                                 totalFDA += parseFloat(row.fda);
                                                 totalDiscount += parseFloat(row.discount);
