@@ -56,6 +56,7 @@ const estadoInicial = {
     relatorio: [],
     pdfgerado: [],
     pdfContent: [],
+    pdfNome: "",
 
     pdfEmail: "",
     emails: [],
@@ -382,6 +383,16 @@ class Relatorio extends Component {
         let totalValorPorGrupo = 0;
         let totalSaldoPorGrupo = 0;
 
+        if (this.props.location.state.backTo != 'contasPagas' && this.props.location.state.backTo != 'contasPagar') {
+            this.setState({pdfNome: `SOA (${moment().format("DD/MM/YYYY")})${this.state.clientes[0] && !this.state.clientes[1] ? ` - ${this.state.pessoas.find((e) => e.Chave == this.state.clientes[0])?.Nome}` : ""}`})
+        } else {
+            if (this.props.location.state.backTo == 'contasPagas') {
+                this.setState({ pdfNome: `Relatório de contas pagas (${moment().format("DD/MM/YYYY")})` });
+            } else if (this.props.location.state.backTo == 'contasPagar') {
+                this.setState({ pdfNome: `Relatório de contas à pagar (${moment().format("DD/MM/YYYY")})` });
+            }
+        }
+        
         let pdf =
             <div style={{ zoom: 1 }} id='pdfDiv' key={546546554654}>
 
@@ -465,16 +476,6 @@ class Relatorio extends Component {
                                 if (eventMap) {
                                     eventMap.map((elem, eventIndex) => {
                                         if (e.evento_os.split("@.@")[eventIndex] == e.os.split("@.@")[index]) {
-                                            if (["ST5701", "ST5729", "ST5858"].includes(e.os.split("@.@")[index])) {
-                                                if (this.state.moeda == e.evento_moeda.split("@.@")[eventIndex]) {
-                                                    console.log({ os: e.os.split("@.@")[index], valor: e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]), 2) : 0 })
-                                                } else if (this.state.moeda == 5) {
-                                                    console.log({ os: e.os.split("@.@")[index], valor: e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) * parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0 })
-                                                } else if (this.state.moeda == 6) {
-                                                    console.log({ os: e.os.split("@.@")[index], valor: e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0 })
-                                                }
-                                            }
-
                                             if (this.state.moeda == e.evento_moeda.split("@.@")[eventIndex]) {
                                                 FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]), 2) : 0;
                                             } else if (this.state.moeda == 5) {
@@ -521,9 +522,6 @@ class Relatorio extends Component {
                                 }
 
                                 const balance = parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
-                                if (["ST5701", "ST5729", "ST5858"].includes(e.os.split("@.@")[index])) {
-                                    console.log({os: e.os.split("@.@")[index], FDA, discount, received, balance});
-                                }
                                 if (parseFloat(balance.toFixed(2)) > 0) {
                                     rows.push({
                                         ship: e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : '',
@@ -848,6 +846,7 @@ class Relatorio extends Component {
 
                         >
                             <PDFExport
+                                fileName={this.state.pdfNome}   
                                 scale={0.6}
                                 portrait={true}
 

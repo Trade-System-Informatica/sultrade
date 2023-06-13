@@ -1560,7 +1560,7 @@ class AddOS extends Component {
 
             await this.salvarOS(validForm, false)
 
-            this.setState({ pdfNome: "Capa" })
+            this.setState({ pdfNome: `Capa${this.state.codigo ? ` - ${this.state.codigo}` : ""}` })
 
 
             await this.setState({ loading: true })
@@ -1914,7 +1914,7 @@ class AddOS extends Component {
 
             await this.salvarOS(validForm, false)
 
-            this.setState({ pdfNome: "Relatorio_liquidos" })
+            this.setState({ pdfNome: `Relatorio Líquidos${this.state.codigo ? ` - ${this.state.codigo}` : ""}` })
 
 
             await this.setState({
@@ -2813,7 +2813,7 @@ class AddOS extends Component {
 
             await this.salvarOS(validForm, false)
 
-            this.setState({ pdfNome: "Vouchers" })
+            this.setState({ pdfNome: `Vouchers${this.state.codigo ? ` - ${this.state.codigo}` : ""}` })
 
 
             await this.setState({
@@ -3009,7 +3009,7 @@ class AddOS extends Component {
 
             await this.salvarOS(validForm, false)
 
-            this.setState({ pdfNome: "Close_to_Real" })
+            this.setState({ pdfNome: `Close to Real${this.state.codigo ? ` - ${this.state.codigo}` : ""}` })
 
             await this.setState({ loading: true })
             await apiEmployee.post(`getCloseToReal.php`, {
