@@ -588,36 +588,36 @@ class Relatorio extends Component {
 
                                                 return (
                                                     <tr style={{ fontSize: 12 }} className="SOA_row">
-                                                        <td style={{ backgroundColor: "inherit", display: "inline-table", maxWidth: 135, minWidth: 135 }}>{row.ship}</td>
-                                                        <td style={{ backgroundColor: "inherit", display: "inline-table", maxWidth: 55, minWidth: 55 }}>{row.os}</td>
+                                                        <td style={{ backgroundColor: "inherit", display: "inherit", maxWidth: 135, minWidth: 135 }}>{row.ship}</td>
+                                                        <td style={{ backgroundColor: "inherit", display: "inherit", maxWidth: 55, minWidth: 55 }}>{row.os}</td>
                                                         {!this.state.clientes[0] &&
                                                             <>
-                                                                <td style={{ backgroundColor: "inherit", display: "inline-table", maxWidth: 85, minWidth: 85 }}>{row.port}</td>
-                                                                <td style={{ backgroundColor: "inherit", display: "inline-table", maxWidth: 60, minWidth: 60 }}>{row.sailed}</td>
-                                                                <td style={{ backgroundColor: "inherit", display: "inline-table", maxWidth: 55, minWidth: 55 }}>{row.billing}</td>
+                                                                <td style={{ backgroundColor: "inherit", display: "inherit", maxWidth: 85, minWidth: 85 }}>{row.port}</td>
+                                                                <td style={{ backgroundColor: "inherit", display: "inherit", maxWidth: 60, minWidth: 60 }}>{row.sailed}</td>
+                                                                <td style={{ backgroundColor: "inherit", display: "inherit", maxWidth: 55, minWidth: 55 }}>{row.billing}</td>
                                                             </>
                                                         }
                                                         {this.state.clientes[0] &&
                                                             <>
-                                                                <td style={{ backgroundColor: "inherit", display: "inline-table", maxWidth: 105, minWidth: 105 }}>{row.port}</td>
-                                                                <td style={{ backgroundColor: "inherit", display: "inline-table", maxWidth: 95, minWidth: 95 }}>{row.sailed}</td>
+                                                                <td style={{ backgroundColor: "inherit", display: "inherit", maxWidth: 105, minWidth: 105 }}>{row.port}</td>
+                                                                <td style={{ backgroundColor: "inherit", display: "inherit", maxWidth: 95, minWidth: 95 }}>{row.sailed}</td>
                                                             </>
                                                         }
-                                                        <td style={{ backgroundColor: "inherit", display: "inline-table", maxWidth: 65, minWidth: 65 }}>{row.roe}</td>
-                                                        <td style={{ backgroundColor: "inherit", display: "inline-table", maxWidth: 95, minWidth: 95 }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.fda)}</td>
-                                                        <td style={{ backgroundColor: "inherit", display: "inline-table", maxWidth: 95, minWidth: 95 }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.discount)}</td>
-                                                        <td style={{ backgroundColor: "inherit", display: "inline-table", maxWidth: 95, minWidth: 95 }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.received)}</td>
-                                                        <td style={{ backgroundColor: "inherit", display: "inline-table" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.balance)}</td>
+                                                        <td style={{ backgroundColor: "inherit", display: "inherit", maxWidth: 65, minWidth: 65 }}>{row.roe}</td>
+                                                        <td style={{ backgroundColor: "inherit", display: "inherit", maxWidth: 95, minWidth: 95 }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.fda)}</td>
+                                                        <td style={{ backgroundColor: "inherit", display: "inherit", maxWidth: 95, minWidth: 95 }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.discount)}</td>
+                                                        <td style={{ backgroundColor: "inherit", display: "inherit", maxWidth: 95, minWidth: 95 }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.received)}</td>
+                                                        <td style={{ backgroundColor: "inherit", display: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.balance)}</td>
                                                     </tr>
                                                 )
                                             }
                                         })}
                                         <tr style={{ fontSize: 13 }}>
                                             <th colSpan={this.state.clientes[0] ? '5' : '6'}>{"Total ->"}</th>
-                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black", display: "inline-table" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDAPorGrupo)}</td>
-                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black", display: "inline-table" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalDiscountPorGrupo)}</td>
-                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black", display: "inline-table" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalReceivedPorGrupo)}</td>
-                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black", display: "inline-table" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalBalancePorGrupo)}</td>
+                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black", display: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDAPorGrupo)}</td>
+                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black", display: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalDiscountPorGrupo)}</td>
+                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black", display: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalReceivedPorGrupo)}</td>
+                                            <td style={{ paddingRight: '15px', borderTop: "1px solid black", display: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalBalancePorGrupo)}</td>
                                         </tr>
                                     </table>
                                     <hr />
@@ -634,10 +634,10 @@ class Relatorio extends Component {
                             </tr>
                             <tr style={{ fontSize: 12 }}>
                                 <th>{"Total ->"}</th>
-                                <td style={{ paddingRight: '15px', display: "inline-table" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDA)}</td>
-                                <td style={{ paddingRight: '15px', display: "inline-table" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalDiscount)}</td>
-                                <td style={{ paddingRight: '15px', display: "inline-table" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalReceived)}</td>
-                                <td style={{ paddingRight: '15px', display: "inline-table" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.totalBalance)}</td>
+                                <td style={{ paddingRight: '15px', display: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalFDA)}</td>
+                                <td style={{ paddingRight: '15px', display: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalDiscount)}</td>
+                                <td style={{ paddingRight: '15px', display: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalReceived)}</td>
+                                <td style={{ paddingRight: '15px', display: "inherit" }}>{this.state.moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.totalBalance)}</td>
                             </tr>
                         </table>
 
