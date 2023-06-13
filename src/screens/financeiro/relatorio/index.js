@@ -474,7 +474,7 @@ class Relatorio extends Component {
                                                     console.log({ os: e.os.split("@.@")[index], valor: e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0 })
                                                 }
                                             }
-                                            
+
                                             if (this.state.moeda == e.evento_moeda.split("@.@")[eventIndex]) {
                                                 FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]), 2) : 0;
                                             } else if (this.state.moeda == 5) {
@@ -521,6 +521,9 @@ class Relatorio extends Component {
                                 }
 
                                 const balance = parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
+                                if (["ST5701", "ST5729", "ST5858"].includes(e.os.split("@.@")[index])) {
+                                    console.log({os: e.os.split("@.@")[index], FDA, discount, received, balance});
+                                }
                                 if (parseFloat(balance.toFixed(2)) > 0) {
                                     rows.push({
                                         ship: e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : '',
