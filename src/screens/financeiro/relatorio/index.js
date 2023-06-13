@@ -305,7 +305,7 @@ class Relatorio extends Component {
         await this.setState({ emailBloqueado: true, loading: true });
         await apiEmployee.post(`enviaRelatorioEmail.php`, {
             token: true,
-            emails: this.state.emails.map((e) => e.trim()),
+            emails: this.state.emails.map((e) => e?.trim()),
             mensagem: base64,
             nomeCliente: this.state.pessoas.find((p) => p.Chave == this.state.clientes[0])?.Nome.replaceAll(".",""),
             balance: `${this.state.moeda == 5 ? "R$" : "USD" } ${new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.totalBalance)}`,
