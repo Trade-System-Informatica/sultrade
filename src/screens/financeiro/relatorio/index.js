@@ -1140,7 +1140,7 @@ class Relatorio extends Component {
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                 <label>
                                                                     {this.state.failures.map((e, i) => (
-                                                                        <span className='listaEmail failureEmail' title='Email inválido' onClick={async () => await this.removeEmail(e)}>{e}{this.state.failures[i + 1] || this.state.emails[0] ? ", " : ""}</span>
+                                                                        <span className='listaEmail failureEmail' title='Email inválido' onClick={async () => await this.removeEmail(e)}>{e}{this.state.failures[i + 1] ? ", " : ""}</span>
                                                                     ))}
                                                                 </label>
                                                             </div>
