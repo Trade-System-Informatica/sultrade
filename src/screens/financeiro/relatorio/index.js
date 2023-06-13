@@ -384,7 +384,7 @@ class Relatorio extends Component {
         let totalSaldoPorGrupo = 0;
 
         if (this.props.location.state.backTo != 'contasPagas' && this.props.location.state.backTo != 'contasPagar') {
-            this.setState({pdfNome: `SOA (${moment().format("DD-MM-YYYY")})${this.state.clientes[0] && !this.state.clientes[1] ? ` - ${this.state.pessoas.find((e) => e.Chave == this.state.clientes[0])?.Nome}` : ""}`})
+            this.setState({pdfNome: `SOA (${moment().format("DD-MM-YYYY")})${this.state.clientes[0] && !this.state.clientes[1] ? ` - ${this.state.pessoas.find((e) => e.Chave == this.state.clientes[0])?.Nome?.replaceAll('.', ' ')}` : ""}`})
         } else {
             if (this.props.location.state.backTo == 'contasPagas') {
                 this.setState({ pdfNome: `Relatório de contas pagas (${moment().format("DD-MM-YYYY")})` });
