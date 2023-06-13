@@ -450,7 +450,7 @@ class Relatorio extends Component {
                                         ship: e.navio_manual ? util.removeAcentos(e.navio_manual.split('@.@')[index]) : '',
                                         os: e.os_manual ? util.removeAcentos(e.os_manual.split('@.@')[index]) : '',
                                         port: e.porto_manual ? util.removeAcentos(e.porto_manual.split('@.@')[index]) : '',
-                                        sailed: e.sailed_manual ? moment(e.sailed_manual.split('@.@')[index]).isValid() ? this.state.por == 'porCliente' && this.state.clientes[0] ? moment(e.sailed_manual.split("@.@")[index]).format("MMM Do YYYY") : moment(e.sailed_manual.split('@.@')[index]).format("DD/MM/YY") : '' : '',
+                                        sailed: e.sailed_manual ? e.sailed_manual : '',
                                         billing: e.envio_manual ? moment(e.envio_manual.split('@.@')[index]).isValid() ? moment(e.envio_manual.split('@.@')[index]).format("DD/MM/YY") : '' : '',
                                         roe: e.roe_manual ? e.roe_manual.split("@.@")[index] : "",
                                         fda: FDA,
@@ -527,7 +527,7 @@ class Relatorio extends Component {
                                         ship: e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : '',
                                         os: e.os ? util.removeAcentos(e.os.split('@.@')[index]) : '',
                                         port: e.porto ? util.removeAcentos(e.porto.split('@.@')[index]) : '',
-                                        sailed: e.sailed ? moment(e.sailed.split('@.@')[index]).isValid() ? this.state.por == 'porCliente' && this.state.clientes[0] ? moment(e.sailed.split("@.@")[index]).format("MMM Do YYYY") : moment(e.sailed.split('@.@')[index]).format("DD/MM/YY") : '' : '',
+                                        sailed: e.sailed ? e.sailed : '',
                                         billing: e.envio ? moment(e.envio.split('@.@')[index]).isValid() ? moment(e.envio.split('@.@')[index]).format("DD/MM/YY") : '' : '',
                                         roe: e.ROE ? e.ROE.split("@.@")[index] : "",
                                         fda: FDA,
@@ -574,7 +574,7 @@ class Relatorio extends Component {
                                             <th>RECEIVED</th>
                                             <th>BALANCE</th>
                                         </tr>
-                                        {rows.toSorted((a, b) => moment(a.sailed, !this.state.clientes[0] ? 'DD/MM/YY' : "MMM Do YYYY").diff(moment(b.sailed, 'DD/MM/YY'))).map((row, index) => {
+                                        {rows.toSorted((a, b) => moment(a.sailed).diff(moment(b.sailed))).map((row, index) => {
                                             if (parseFloat(row.balance) > 0) {
                                                 totalFDA += parseFloat(row.fda);
                                                 totalDiscount += parseFloat(row.discount);
@@ -593,14 +593,14 @@ class Relatorio extends Component {
                                                         {!this.state.clientes[0] &&
                                                             <>
                                                                 <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 85, minWidth: 85 }}>{row.port}</td>
-                                                                <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 60, minWidth: 60 }}>{row.sailed}</td>
+                                                                <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 60, minWidth: 60 }}>{moment(row.sailed).format("DD/MM/YY")}</td>
                                                                 <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 55, minWidth: 55 }}>{row.billing}</td>
                                                             </>
                                                         }
                                                         {this.state.clientes[0] &&
                                                             <>
                                                                 <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 105, minWidth: 105 }}>{row.port}</td>
-                                                                <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 95, minWidth: 95 }}>{row.sailed}</td>
+                                                                <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 95, minWidth: 95 }}>{moment(row.sailed).format("MMM Do YYYY")}</td>
                                                             </>
                                                         }
                                                         <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 65, minWidth: 65 }}>{row.roe}</td>
