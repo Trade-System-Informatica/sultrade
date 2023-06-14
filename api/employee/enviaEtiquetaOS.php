@@ -86,8 +86,8 @@ if ($os) {
         
         $mail->addAddress('operations@sultradeagency.com');     //Add a recipient
         $mail->addAddress('accounts@sultradeagency.com');     //Add a recipient
-        $mail->addCC('no-reply@tradesystem.com.br');
-        $mail->addBCC('no-reply@tradesystem.com.br');
+        $mail->addCC('soa@sultradeagency.com');
+        $mail->addBCC('soa@sultradeagency.com');
 
         //Content
         $mail->isHTML(true);                                  //Set email format to HTML

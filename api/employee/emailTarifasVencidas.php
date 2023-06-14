@@ -67,8 +67,8 @@ foreach ($chaves as $chave) {
         //$mail->addAddress($item["email"]);     //Add a recipient
         $mail->addAddress('dev2@tradesystem.com.br');     //Add a recipient
         //$mail->addAddress("sultrade@sultradeagency.com");     //Add a recipient
-        $mail->addCC('no-reply@tradesystem.com.br');
-        $mail->addBCC('no-reply@tradesystem.com.br');
+        $mail->addCC('soa@sultradeagency.com');
+        $mail->addBCC('soa@sultradeagency.com');
 
         //Content
         $mail->isHTML(true);                                  //Set email format to HTML
