@@ -53,7 +53,7 @@ try {
     $mail->setFrom('soa@sultradeagency.com', 'Sultrade Agency');
 
     $mail->addAddress($email);     //Add a recipient
-    //$mail->addAddress("sultrade@sultradeagency.com");     //Add a recipient
+    $mail->addAddress("sultrade@sultradeagency.com");     //Add a recipient
     $mail->addCC('soa@sultradeagency.com');
     $mail->addBCC('soa@sultradeagency.com');
 

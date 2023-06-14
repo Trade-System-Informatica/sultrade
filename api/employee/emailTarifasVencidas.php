@@ -64,9 +64,8 @@ foreach ($chaves as $chave) {
         //Recipients
         $mail->setFrom('soa@sultradeagency.com', 'Sultrade Agency');
 
-        //$mail->addAddress($item["email"]);     //Add a recipient
-        $mail->addAddress('dev2@tradesystem.com.br');     //Add a recipient
-        //$mail->addAddress("sultrade@sultradeagency.com");     //Add a recipient
+        $mail->addAddress($item["email"]);     //Add a recipient
+        $mail->addAddress("sultrade@sultradeagency.com");     //Add a recipient
         $mail->addCC('soa@sultradeagency.com');
         $mail->addBCC('soa@sultradeagency.com');
 
