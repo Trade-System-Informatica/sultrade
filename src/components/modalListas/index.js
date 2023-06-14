@@ -234,7 +234,7 @@ class ModalListas extends Component {
             var cpflimpo = ''
             if(this.state.clienteCpf) {
                 if (this.state.clienteCpf != '___.___.___-__' && this.state.clienteCpf != '') {
-                    let cpflimpo2 = this.state.cnpj_cpf.match(numberPattern)
+                    let cpflimpo2 = this.state.clienteCpf.match(numberPattern)
                     var cpflimpo = '';
                     if (cpflimpo2 && cpflimpo2[0]) {
                         cpflimpo = cpflimpo2.join('');

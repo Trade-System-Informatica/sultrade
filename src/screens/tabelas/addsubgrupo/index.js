@@ -326,7 +326,7 @@ class AddSubgrupo extends Component {
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                     <Select className='SearchSelect' options={this.state.gruposOptions} value={this.state.gruposOptions.filter(option => option.value == this.state.grupo)} search={true} onChange={(e) => { this.setState({ grupo: e.value }) }} />
                                                 </div>
-                                                <div>
+                                                {/* <div>
                                                     <hr style={{ color: "#cfcfcf" }} />
                                                 </div>
                                                 <div className="col-12 text-center labelForm">
@@ -335,7 +335,7 @@ class AddSubgrupo extends Component {
                                                 <div className="col-12 spaceBetween">
                                                     <button type="button" className={`addRemoveButton ${this.state.quantidadeCampos == 0 ? "addRemoveButtonDisabled" : ""}`} disabled={this.state.quantidadeCampos == 0} onClick={() => this.state.quantidadeCampos != 0 ? this.setState({ quantidadeCampos: this.state.quantidadeCampos - 1 }) : {}}>-</button>
                                                     <button type="button" className="addRemoveButton" onClick={() => this.setState({ quantidadeCampos: this.state.quantidadeCampos + 1 })}>+</button>
-                                                </div>
+                                                </div> */}
                                             </div>
 
 
