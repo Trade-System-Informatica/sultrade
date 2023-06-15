@@ -45,6 +45,9 @@ const estadoInicial = {
     remarks: '',
     contatos: [],
 
+    campos: [],
+    eventoComplementar: [],
+
     moedas: [],
 
     logs: [],
@@ -175,7 +178,6 @@ class AddEvento extends Component {
             } else {
                 await this.setState({ evento: this.props.location.state.evento });
             }
-            console.log(this.state.evento);
 
             await this.getOSUma();
             await this.getOrdem();
@@ -204,6 +206,9 @@ class AddEvento extends Component {
                     valor: this.state.vlrc
                 });
             }
+
+            this.changeTaxa(this.state.taxa);
+            this.getdadosComplementares();
         }
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
@@ -342,6 +347,28 @@ class AddEvento extends Component {
                 await this.setState({ taxas: res.data })
 
                 await this.getTaxasOptions();
+            },
+            async err => { this.erroApi(err) }
+        )
+    }
+
+    getdadosComplementares = async () => {
+        await apiEmployee.post(`getEventoComplementar.php`, {
+            token: true,
+            chave: this.state.chave
+        }).then(
+            async res => {
+                if (res.data[0]) {
+                    await this.setState({ eventoComplementar: res.data })
+
+                    res.data.forEach((res) => {
+                        const idx = this.state.campos.findIndex((campo) => (res.subgrupo_campo == campo.chave));
+
+                        if (idx !== -1) {
+                            this.setState({ campos: this.state.campos.map((c, i) => i === idx ? ({ ...c, valor: res.valor }) : ({ ...c })) });
+                        }
+                    });
+                }
             },
             async err => { this.erroApi(err) }
         )
@@ -816,7 +843,7 @@ class AddEvento extends Component {
 
     salvarEvento = async (validForm) => {
         this.setState({ ...util.cleanStates(this.state) })
-        
+
         this.setState({ bloqueado: true });
 
 
@@ -852,7 +879,6 @@ class AddEvento extends Component {
                 ordem: this.state.ordem.replaceAll(',', '.')
             }).then(
                 async res => {
-                    console.log(res.data);
                     await this.setState({
                         evento: res.data[0],
 
@@ -875,9 +901,23 @@ class AddEvento extends Component {
                         await this.setState({ bloqueado: false, emailModal: true })
                         this.finalizaSalvamento()
                     }
+
                 },
                 async res => await console.log(`Erro: ${res.data}`)
             )
+
+            if (this.state.campos[0]) {
+                await apiEmployee.post(`insertEventoCampos.php`, {
+                    token: true,
+                    values: this.state.campos,
+                    evento: this.state.chave
+                }).then(
+                    async res => {
+                        this.getdadosComplementares();
+                    },
+                    async err => await console.log(`Erro: ${err.data}`)
+                );
+            }
         } else if (validForm) {
             await apiEmployee.post(`updateServicoItem.php`, {
                 token: true,
@@ -920,6 +960,31 @@ class AddEvento extends Component {
                 },
                 async res => await console.log(`Erro: ${res}`)
             )
+
+            if (this.state.eventoComplementar[0]) {
+                await apiEmployee.post(`updateEventoCampos.php`, {
+                    token: true,
+                    values: this.state.eventoComplementar.map((e) => ({ ...e, valor: this.state.campos.find((c) => e.subgrupo_campo == c.chave)?.valor})),
+                    evento: this.state.chave
+                }).then(
+                    async res => {
+                        this.getdadosComplementares();
+                    },
+                    async err => await console.log(`Erro: ${err.data}`)
+                );
+            }
+            if (this.state.campos.find((c) => !this.state.eventoComplementar.find((e) => e.subgrupo_campo == c.chave))) {
+                await apiEmployee.post(`insertEventoCampos.php`, {
+                    token: true,
+                    values: this.state.campos,
+                    evento: this.state.chave
+                }).then(
+                    async res => {
+                        this.getdadosComplementares();
+                    },
+                    async err => await console.log(`Erro: ${err.data}`)
+                );
+            }
         }
 
     }
@@ -962,6 +1027,22 @@ class AddEvento extends Component {
                     await this.setState({ hasEmail: true, loading: false, bloqueado: false, savedRedirect: true })
                 } else {
                     //alert(`Erro: ${res.data}`)
+                }
+            },
+            async res => await console.log(`Erro: ${res.data}`)
+        )
+    }
+
+    changeTaxa = async (taxa) => {
+        await apiEmployee.post(`getCamposFromTaxa.php`, {
+            token: true,
+            taxa
+        }).then(
+            async res => {
+                if (res.data[0]) {
+                    await this.setState({ campos: res.data.map((c) => ({ ...c, valor: "" })) });
+                } else {
+                    await this.setState({ campos: [] });
                 }
             },
             async res => await console.log(`Erro: ${res.data}`)
@@ -1034,17 +1115,18 @@ class AddEvento extends Component {
 
     render() {
         const validations = []
-        validations.push(this.state.chave_os)
-        validations.push(this.state.data)
-        validations.push(this.state.taxa || this.state.tipo == 2 || this.state.tipo == 3)
-        validations.push(this.state.fornecedor || this.state.tipo == 1 || this.state.tipo == 2 || this.state.tipo == 3)
-        validations.push(this.state.fornecedorCusteio || this.state.tipo != 1)
-        validations.push(this.state.valor && this.state.valor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')))
-        validations.push((!this.state.repasse && !this.state.vlrc) || this.state.vlrc.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.vlrc.replaceAll('.', '').replaceAll(',', '.')) && (!this.state.repasse || this.state.vlrc == this.state.valor))
-        validations.push(this.state.descricao)
-        validations.push(this.state.ordem && this.state.ordem.replaceAll(',', '.') == parseFloat(this.state.ordem.replaceAll(',', '.')))
+        validations.push(this.state.chave_os);
+        validations.push(this.state.data);
+        validations.push(this.state.taxa || this.state.tipo == 2 || this.state.tipo == 3);
+        validations.push(this.state.fornecedor || this.state.tipo == 1 || this.state.tipo == 2 || this.state.tipo == 3);
+        validations.push(this.state.fornecedorCusteio || this.state.tipo != 1);
+        validations.push(this.state.valor && this.state.valor.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')));
+        validations.push((!this.state.repasse && !this.state.vlrc) || this.state.vlrc.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.vlrc.replaceAll('.', '').replaceAll(',', '.')) && (!this.state.repasse || this.state.vlrc == this.state.valor));
+        validations.push(this.state.descricao);
+        validations.push(!this.state.campos[0] || !this.state.campos.find((c) => c.valor == "" && c.obrigatorio == 1));
+        validations.push(this.state.ordem && this.state.ordem.replaceAll(',', '.') == parseFloat(this.state.ordem.replaceAll(',', '.')));
 
-        validations.push(!this.state.bloqueado)
+        validations.push(!this.state.bloqueado);
 
         const validForm = validations.reduce((t, a) => t && a)
 
@@ -1564,13 +1646,30 @@ class AddEvento extends Component {
                                                         </div>
 
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.taxasOptions.filter(e => this.filterSearch(e, this.state.taxasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ taxasOptionsTexto: e }) }} value={this.state.taxasOptions.filter(option => option.value == this.state.taxa)[0]} search={true} onChange={(e) => { if (!this.state.valor || parseFloat(this.state.valor.replaceAll('.', "").replaceAll(",", ".")) == 0) { this.setState({ taxa: e.value, valor: e.money.replaceAll(",", "").replaceAll(".", ",") }) } else { this.setState({ taxa: e.value }) } }} />
+                                                            <Select className='SearchSelect' options={this.state.taxasOptions.filter(e => this.filterSearch(e, this.state.taxasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ taxasOptionsTexto: e }) }} value={this.state.taxasOptions.filter(option => option.value == this.state.taxa)[0]} search={true} onChange={(e) => { this.changeTaxa(e.value); if (!this.state.valor || parseFloat(this.state.valor.replaceAll('.', "").replaceAll(",", ".")) == 0) { this.setState({ taxa: e.value, valor: e.money.replaceAll(",", "").replaceAll(".", ",") }) } else { this.setState({ taxa: e.value }) } }} />
                                                         </div>
                                                         <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
                                                             {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'TAXAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                                                 <div className='insideFormButton' onClick={() => { this.setState({ modalAberto: true, modal: 'listarTaxas', modalPesquisa: this.state.taxa, modalLista: this.state.tipo == 0 ? this.state.taxas.filter((taxa) => taxa.Tipo == "P") : this.state.tipo == 1 ? this.state.taxas.filter((taxa) => taxa.Tipo == "R") : this.state.taxas }) }}>...</div>
                                                             }
                                                         </div>
+                                                        {this.state.campos.map((campo, idx) => (
+                                                            <>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>{campo.nome}</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                    {campo.obrigatorio == 1 && !campo.valor &&
+                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                    }
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control" type="text" rows="2" component="textarea" value={campo.valor} onChange={async e => { this.setState({ campos: this.state.campos.map((c, i) => i === idx ? ({ ...c, valor: e.currentTarget.value }) : ({ ...c })) }) }} />
+                                                                </div>
+                                                                <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
+                                                                </div>
+                                                            </>
+                                                        ))}
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Fornecedor</label>
                                                         </div>

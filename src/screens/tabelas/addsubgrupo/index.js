@@ -41,9 +41,10 @@ const estadoInicial = {
 
     quantidadeCampos: 0,
     campos: [],
+    camposOriginal: [],
     tiposOptions: [
-        { label: "texto", value: "TEXTO" },
-        { label: "lista", value: "LISTA" }
+        { label: "Texto", value: "TEXTO" },
+        { label: "Lista", value: "LISTA" }
     ],
 
     acessos: [],
@@ -72,6 +73,7 @@ class AddSubgrupo extends Component {
                 descricao: this.state.subgrupo.descricao,
                 grupo: this.state.subgrupo.chave_grupo
             })
+            await this.carregaCampos()
         }
         await this.carregaGrupos()
         await this.carregaTiposAcessos()
@@ -159,6 +161,19 @@ class AddSubgrupo extends Component {
         )
     }
 
+    carregaCampos = async () => {
+        await apiEmployee.post('getCamposSubgrupos.php', {
+            token: true,
+            subgrupo: this.state.chave
+        }).then(
+            async res => {
+                await this.setState({ campos: res.data.map((e) => ({ ...e, obrigatorio: e?.obrigatorio == 1 ? true : false })) });
+                this.setState({ camposOriginal: this.state.campos });
+            },
+            async err => console.log(`erro: ` + err)
+        )
+    }
+
     salvarSubgrupo = async (validForm) => {
         this.setState({ ...util.cleanStates(this.state) })
         this.setState({ bloqueado: true })
@@ -188,6 +203,21 @@ class AddSubgrupo extends Component {
                 },
                 async res => await console.log(`Erro: ${res.data}`)
             )
+
+            if (this.state.campos[0]) {
+                await apiEmployee.post(`insertSubgrupoCampos.php`, {
+                    token: true,
+                    values: this.state.campos,
+                    subgrupo: this.state.chave
+                }).then(
+                    async res => {
+                        if (res.data) {
+                            await this.setState({ loading: false, bloqueado: false })
+                        }
+                    },
+                    async err => await console.log(`Erro: ${err.data}`)
+                )
+            }
         } else if (validForm) {
             await apiEmployee.post(`updateSubgrupo.php`, {
                 token: true,
@@ -206,8 +236,39 @@ class AddSubgrupo extends Component {
                 async res => await console.log(`Erro: ${res.data}`)
             )
 
-        }
+            if (this.state.campos.find((c) => c?.chave != 0) || this.state.camposOriginal[0]) {
+                await apiEmployee.post(`updateSubgrupoCampos.php`, {
+                    token: true,
+                    values: this.state.campos.filter((campo) => campo?.chave != 0),
+                    subgrupo: this.state.chave
+                }).then(
+                    async res => {
+                        if (res.data) {
+                            await this.setState({ loading: false, bloqueado: false })
+                        }
+                    },
+                    async err => await console.log(`Erro: ${err.data}`)
+                )
+            }
 
+            if (this.state.campos[0]) {
+                if (this.state.campos.find((c) => c?.chave == 0)) {
+                    await apiEmployee.post(`insertSubgrupoCampos.php`, {
+                        token: true,
+                        values: this.state.campos.filter((campo) => campo?.chave == 0),
+                        subgrupo: this.state.chave
+                    }).then(
+                        async res => {
+                            if (res.data) {
+                                await this.carregaCampos();
+                                await this.setState({ loading: false, bloqueado: false })
+                            }
+                        },
+                        async err => await console.log(`Erro: ${err.data}`)
+                    )
+                }
+            }
+        }
     }
 
     erroApi = async (res) => {
@@ -234,11 +295,12 @@ class AddSubgrupo extends Component {
     render() {
 
         const validations = []
-        validations.push(this.state.descricao)
-        validations.push(this.state.grupo)
-        validations.push(!this.state.bloqueado)
+        validations.push(this.state.descricao);
+        validations.push(this.state.grupo);
+        validations.push(!this.state.campos[0] || !this.state.campos((c, i) => c.nome == "" || c.tipo == ""));
+        validations.push(!this.state.bloqueado);
 
-        const validForm = validations.reduce((t, a) => t && a)
+        const validForm = validations.reduce((t, a) => t && a);
 
         return (
             <div className='allContent'>
@@ -326,16 +388,60 @@ class AddSubgrupo extends Component {
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                     <Select className='SearchSelect' options={this.state.gruposOptions} value={this.state.gruposOptions.filter(option => option.value == this.state.grupo)} search={true} onChange={(e) => { this.setState({ grupo: e.value }) }} />
                                                 </div>
-                                                {/* <div>
+                                                <div>
                                                     <hr style={{ color: "#cfcfcf" }} />
                                                 </div>
                                                 <div className="col-12 text-center labelForm">
                                                     <label>Campos</label>
                                                 </div>
-                                                <div className="col-12 spaceBetween">
-                                                    <button type="button" className={`addRemoveButton ${this.state.quantidadeCampos == 0 ? "addRemoveButtonDisabled" : ""}`} disabled={this.state.quantidadeCampos == 0} onClick={() => this.state.quantidadeCampos != 0 ? this.setState({ quantidadeCampos: this.state.quantidadeCampos - 1 }) : {}}>-</button>
-                                                    <button type="button" className="addRemoveButton" onClick={() => this.setState({ quantidadeCampos: this.state.quantidadeCampos + 1 })}>+</button>
-                                                </div> */}
+                                                {this.state.campos.map((campo, idx) => (
+                                                    <>
+                                                        <div className='col-12' style={{ color: "white", display: "flex", justifyContent: "flex-end" }}>
+                                                            <div
+                                                                style={{ border: "1px solid white", borderRadius: 100, minHeight: 30, minWidth: 30, display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer" }}
+                                                                onClick={() => this.setState({ campos: this.state.campos.filter((c, i) => i !== idx) })}
+                                                            >
+                                                                X
+                                                            </div>
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Nome</label>
+                                                        </div>
+                                                        <div className='col-1 errorMessage'>
+                                                            {!this.state.campos[idx]?.nome &&
+                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                            }
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                            <Field className="form-control" type="text" value={this.state.campos[idx]?.nome} onChange={async e => { this.setState({ campos: this.state.campos.map((c, i) => i === idx ? ({ ...c, nome: e.currentTarget.value }) : ({ ...c })) }) }} />
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Tipo</label>
+                                                        </div>
+                                                        <div className='col-1 errorMessage'>
+                                                            {!this.state.campos[idx]?.tipo &&
+                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                            }
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                            <Select className='SearchSelect' options={this.state.tiposOptions} value={this.state.tiposOptions.filter(option => option.value == this.state.campos[idx]?.tipo)} search={true} onChange={(e) => { this.setState({ campos: this.state.campos.map((c, i) => i === idx ? ({ ...c, tipo: e.value }) : ({ ...c })) }) }} />
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Obrigatório?</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <input className='form_control' checked={this.state.campos[idx]?.obrigatorio} onChange={(e) => { this.setState({ campos: this.state.campos.map((c, i) => i === idx ? ({ ...c, obrigatorio: e.target.checked }) : ({ ...c })) }) }} type="checkbox" />
+                                                        </div>
+                                                        <div>
+                                                            <hr style={{ color: "#cfcfcf" }} />
+                                                        </div>
+                                                    </>
+                                                ))}
+                                                <div className="col-12 text-center">
+                                                    <span onClick={() => this.setState({ campos: [...this.state.campos, { chave: 0, nome: "", tipo: "", obrigatorio: false }] })} style={{ color: "#00CCFF", textDecoration: "underline", cursor: "pointer" }}>Adicionar um campo</span>
+                                                </div>
+
                                             </div>
 
 

@@ -279,6 +279,17 @@ class OS
         return $result;
     }
 
+    public static function getEventoComplementar($chave)
+    {
+        $database = new Database();
+
+        $result = $database->doSelect('os_servicos_itens_complementar', 'os_servicos_itens_complementar.*',
+            'os_servicos_itens_complementar.evento = ' . $chave
+        );
+        $database->closeConection();
+        return $result;
+    }
+
     public static function testEventoFornecedor($chave, $fornecedor)
     {
         $database = new Database();
@@ -563,6 +574,22 @@ class OS
         }
         $database->closeConection();
         return $result;
+    }
+
+    public static function insertEventoCampos($values, $evento)
+    {
+        $database = new Database();
+
+        $cols = 'subgrupo_campo, valor, evento';
+
+        foreach($values as $key => $value) {
+            $insert = "'".$value->{"chave"}."', '".$value->{"valor"}."', '$evento'";
+            
+            $database->doInsert('os_servicos_itens_complementar', $cols, $insert);
+        }
+
+        $database->closeConection();
+        return;
     }
 
     public static function insertCentroCusto($values, $codigo)
@@ -879,6 +906,28 @@ class OS
         } else {
             return $result;
         }
+    }
+
+    public static function updateEventoCampos($values, $evento)
+    {
+        $database = new Database();
+        $usedKeys = [];
+        
+        foreach ($values as $key => $value) {
+            array_push($usedKeys, $value->{"chave"});
+
+            $query = "valor = '" . $value->{"valor"}."'";
+            $database->doUpdate('os_servicos_itens_complementar', $query, 'chave = ' . $value->{"chave"});
+        }
+
+        if ($usedKeys[0]) {
+            $database->doDelete("os_servicos_itens_complementar", "chave NOT IN (" . join(",", $usedKeys) . ") AND evento = '$evento'");
+        } else {
+            $database->doDelete("os_servicos_itens_complementar", "evento = '$evento'");
+        }
+
+        $database->closeConection();
+        return true;
     }
 
     public static function updateCentroCusto($Chave, $Descricao, $Data, $Encerrado, $Cliente, $Codigo)
