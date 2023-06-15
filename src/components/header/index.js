@@ -240,7 +240,7 @@ class Header extends Component {
 
 
 
-                    {window.innerWidth >= 500 && this.state.anexosNaoValidados.filter((anexo) => 48 - (moment().diff(moment(anexo?.data), 'hour')) > 0).filter((e, index) => index <= 5).map((anexo, index) => {
+                    {/*window.innerWidth >= 500 && this.state.anexosNaoValidados.filter((anexo) => 48 - (moment().diff(moment(anexo?.data), 'hour')) > 0).filter((e, index) => index <= 5).map((anexo, index) => {
                         const link = anexo.anexo ? util.completarDocuments(`fornDocs/${anexo.anexo}`) : false;
                         const editAnexo = anexo.validado == 0 ? { pathname: `/ordensservico/addanexo/${anexo.chave}`, state: { anexo } } : { pathname: `/ordensservico/addevento/${anexo.evento}` };
                         const hoursRemaining = 48 - (moment().diff(moment(anexo?.data), 'hour'));
@@ -254,7 +254,7 @@ class Header extends Component {
                                 index={index}
                             />
                         )
-                    })}
+                    })*/}
 
                     <div className="headerSimbolos">
                         <div className="setaAcima">
