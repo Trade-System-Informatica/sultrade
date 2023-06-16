@@ -3130,13 +3130,16 @@ class AddOS extends Component {
                                             descontoTotalDolar += parseFloat(e.valor)
                                         }
                                     }
+
+                                    if (e.tipo == 0 || e.tipo == 1) {
                                         return (
-                                        <tr style={{ background: index % 2 == 0 ? "white" : "#dddddd" }}>
-                                            <td colSpan='7' className='pdf_large_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.descos}</td>
-                                            <td className='pdf_money_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.moeda == 5 ? util.formataDinheiroBrasileiro(parseFloat(e.valor / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5))) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
-                                            <td className='pdf_money_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.moeda == 6 ? util.formataDinheiroBrasileiro(parseFloat(e.valor * (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5))) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
-                                        </tr>
-                                    )
+                                            <tr style={{ background: index % 2 == 0 ? "white" : "#dddddd" }}>
+                                                <td colSpan='7' className='pdf_large_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.descos}</td>
+                                                <td className='pdf_money_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.moeda == 5 ? util.formataDinheiroBrasileiro(parseFloat(e.valor / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5))) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
+                                                <td className='pdf_money_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.moeda == 6 ? util.formataDinheiroBrasileiro(parseFloat(e.valor * (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5))) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
+                                            </tr>
+                                        )
+                                    }
                                 })}
                                 {this.state.pdfContent[0].governmentTaxes > 0 &&
                                     <tr>
@@ -3172,7 +3175,7 @@ class AddOS extends Component {
                                     <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotalDolar) - (parseFloat(recebimentoTotalDolar) + parseFloat(descontoTotalDolar)))}</b></td>
                                     <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotal) - (parseFloat(recebimentoTotal) + parseFloat(descontoTotal)))}</b></td>
                                 </tr>
-                                
+
                             </table>
                         </div>
                         <br />
