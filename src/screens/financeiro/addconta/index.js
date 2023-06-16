@@ -240,7 +240,7 @@ class AddConta extends Component {
                 os: this.state.conta.os_manual,
                 navio: this.state.conta.navio_manual,
                 porto: this.state.conta.porto_manual,
-                roe: this.state.conta.roe_manual?.replaceAll('.',','),
+                roe: this.state.conta.roe_manual?.replaceAll('.', ','),
                 discount: this.state.conta.discount_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.discount_manual) : '0,00',
                 received: this.state.conta.received_manual ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.conta.received_manual) : '0,00',
                 sailed: this.state.conta.sailed_manual
@@ -571,6 +571,10 @@ class AddConta extends Component {
                     )
                 }
             } else {
+                const valorDiff = parseFloat(this.state.valor.replaceAll(".", "").replaceAll(",", ".")) - parseFloat(this.state.conta.Valor)
+                const saldo = parseFloat(this.state.saldo.replaceAll(".", "").replaceAll(",", ".")) + valorDiff;
+
+
                 if (this.state.tipo == 0) {
                     await apiEmployee.post(`updateContaCliente.php`, {
                         token: true,
@@ -586,7 +590,7 @@ class AddConta extends Component {
                         Parc_Fim: this.state.parcelaFinal,
                         RepCodBar: this.state.numBoleto,
                         Valor: parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')),
-                        Saldo: this.state.valorInicial == this.state.saldo ? parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')) : parseFloat(this.state.saldo.replaceAll('.', '').replaceAll(',', '.')),
+                        Saldo: saldo,
                         Vencimento: moment(this.state.vencimento).format('YYYY-MM-DD'),
                         Vencimento_Original: moment(this.state.vencimentoOrig).format('YYYY-MM-DD'),
                         Conta_Provisao: this.state.contaProvisao,
@@ -650,7 +654,7 @@ class AddConta extends Component {
                         Parc_Ini: this.state.parcelaInicial,
                         Parc_Fim: this.state.parcelaFinal,
                         Valor: parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')),
-                        Saldo: this.state.valorInicial == this.state.saldo ? parseFloat(this.state.valor.replaceAll('.', '').replaceAll(',', '.')) : parseFloat(this.state.saldo.replaceAll('.', '').replaceAll(',', '.')),
+                        Saldo: saldo,
                         Vencimento: moment(this.state.vencimento).format('YYYY-MM-DD'),
                         Vencimento_Original: moment(this.state.vencimentoOrig).format('YYYY-MM-DD'),
                         Conta_Provisao: this.state.contaProvisao,
@@ -1594,10 +1598,10 @@ class AddConta extends Component {
                                                             }
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            {this.state.saldo > 0 &&
+                                                            {parseFloat(this.state.saldo.replace(",", ".")) > 0 &&
                                                                 <Field className="form-control text-right" type="text" value={this.state.valor} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ valor: e.currentTarget.value }) }} onBlur={async e => { this.setState({ valor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                             }
-                                                            {this.state.saldo == 0 &&
+                                                            {parseFloat(this.state.saldo.replace(",", ".")) <= 0 &&
                                                                 <Field className="form-control text-right" disabled type="text" value={this.state.valor} />
                                                             }
                                                         </div>
