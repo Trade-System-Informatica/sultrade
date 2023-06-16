@@ -1594,10 +1594,10 @@ class AddConta extends Component {
                                                             }
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            {this.state.saldo == this.state.valorInicial &&
+                                                            {this.state.saldo > 0 &&
                                                                 <Field className="form-control text-right" type="text" value={this.state.valor} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ valor: e.currentTarget.value }) }} onBlur={async e => { this.setState({ valor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '' }) }} />
                                                             }
-                                                            {this.state.saldo != this.state.valorInicial &&
+                                                            {this.state.saldo == 0 &&
                                                                 <Field className="form-control text-right" disabled type="text" value={this.state.valor} />
                                                             }
                                                         </div>
