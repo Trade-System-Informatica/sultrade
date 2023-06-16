@@ -151,6 +151,10 @@ class Operadores extends Component {
     }
 
     filtrarPesquisa = (operadores) => {
+        if (operadores.ativo == 0) {
+            return false;
+        }
+        
         if (this.state.tipoPesquisa == 1) {
             return operadores.Nome.toLowerCase().includes(this.state.pesquisa.toLowerCase())
         } else {

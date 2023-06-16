@@ -354,7 +354,7 @@ class Operadores {
     public static function deleteOperador($chave){
         $database = new Database();
     
-        $result = $database->doDelete('operadores', 'Codigo = '.$chave);
+        $result = $database->doUpdate('operadores', "ativo = 0",'Codigo = '.$chave);
         $database->closeConection();
         return $result;
     }
