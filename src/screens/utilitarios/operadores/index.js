@@ -272,7 +272,7 @@ class Operadores extends Component {
                                 {this.state.operadores[0] != undefined && this.state.operadores.filter(this.filtrarPesquisa).map((feed, index) => (
                                     <div key={feed.Codigo} className="row row-list">
                                         <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
-                                        <div ref={feed.Codigo == this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-8 col-md-8 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.Codigo == this.state.chaveFocus ? "par focusLight" : "par " : feed.Codigo == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
+                                        <div ref={feed.Codigo == this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-8 col-md-8 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.Codigo == this.state.chaveFocus ? "par focusLight" : "par " : feed.Codigo == this.state.chaveFocus ? "impar focusDark" : "impar"} ${feed.ativo == 0 ? "cancelada" : ""}`}>
                                             <div className="row deleteMargin alignCenter">
                                                 <div className="col-2 text-left">
                                                     <p>{feed.Codigo}</p>
