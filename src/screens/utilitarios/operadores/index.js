@@ -10,7 +10,7 @@ import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { PRECISA_LOGAR, NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrashAlt, faPen, faPlus, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
+import { faTrashAlt, faPen, faPlus, faChevronDown, faChevronUp, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 
@@ -92,7 +92,7 @@ class Operadores extends Component {
                 return (
                     <div className='custom-ui text-center'>
                         <h1>{NOME_EMPRESA}</h1>
-                        <p>Deseja remover este Operador? ({nome}) </p>
+                        <p>Deseja deixar este Operador inativo? ({nome}) </p>
                         <button
                             style={{ marginRight: 5 }}
                             className="btn btn-danger w-25"
@@ -281,7 +281,7 @@ class Operadores extends Component {
                                                     {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OPERADORES') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
 
                                                         <div type='button' className='iconelixo' onClick={(a) => this.deleteOperador(feed.Codigo, feed.Nome)} >
-                                                            <FontAwesomeIcon icon={faTrashAlt} />
+                                                            <FontAwesomeIcon icon={faTimes} />
                                                         </div>
                                                     }
                                                 </div>
