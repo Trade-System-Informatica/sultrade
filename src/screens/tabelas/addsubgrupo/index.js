@@ -297,7 +297,7 @@ class AddSubgrupo extends Component {
         const validations = []
         validations.push(this.state.descricao);
         validations.push(this.state.grupo);
-        validations.push(!this.state.campos[0] || !this.state.campos((c, i) => c.nome == "" || c.tipo == ""));
+        validations.push(!this.state.campos[0] || !this.state.campos.find((c, i) => c.nome == "" || c.tipo == ""));
         validations.push(!this.state.bloqueado);
 
         const validForm = validations.reduce((t, a) => t && a);
