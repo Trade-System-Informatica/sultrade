@@ -10,7 +10,7 @@ import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { PRECISA_LOGAR, NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrashAlt, faPen, faPlus, faChevronDown, faChevronUp, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faPen, faPlus, faChevronDown, faChevronUp, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 
@@ -22,6 +22,7 @@ const estadoInicial = {
     chaveFocus: '',
     loading: true,
     redirect: false,
+    status: 1,
 
     deleteOperador: false,
 
@@ -151,10 +152,13 @@ class Operadores extends Component {
     }
 
     filtrarPesquisa = (operadores) => {
-        if (operadores.ativo == 0) {
+        
+        if (this.state.status == 1 && operadores.ativo != 1) {
+            return false;
+        } else if (this.state.status == 2 && operadores.ativo != 0) {
             return false;
         }
-        
+
         if (this.state.tipoPesquisa == 1) {
             return operadores.Nome.toLowerCase().includes(this.state.pesquisa.toLowerCase())
         } else {
@@ -189,28 +193,48 @@ class Operadores extends Component {
 
                             </section>
 
+
                             <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-left">
                                 <div className="row mobileajuster3">
                                     <div className="col-1 col-sm-1 col-md-1 col-lg-1 col-xl-1 sumir">
                                     </div>
 
                                     <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
-                                        <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
-                                            <option value={1}>Nome</option>
-                                            <option value={2}>Codigo</option>
-                                        </select>
-                                        <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
+                                        <div className='col-1'></div>
+                                        <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
+                                            <div className='col-2'></div>
+                                            <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
+                                                <option value={1}>Nome</option>
+                                                <option value={2}>Codigo</option>
+                                            </select>
+                                            <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
+                                            <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
+                                                <Link to={{ pathname: `/utilitarios/addoperador/0` }}><button className="btn btn-success">+</button></Link>
+                                            </div>
+                                        </div>
                                         <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
-                                            <Link to={{ pathname: `/utilitarios/addoperador/0` }}><button className="btn btn-success">+</button></Link>
                                         </div>
                                     </div>
-
-                                    <div className="col-0 col-sm-0 col-md-3 col-lg-3 col-xl-3"></div>
+                                    <div className='col-1 col-sm-2 col-md-2 col-lg-4 col-xl-4'>
+                                    </div>
+                                    <div className='col-3 col-sm-3 col-md-2 col-lg-2 col-xl-2'>
+                                        <label style={{ fontSize: '1.1em', marginTop: 3, fontWeight: 'bold' }}>Status: </label>
+                                    </div>  
+                                    <div className='col-5 col-sm-5 col-md-4 col-lg-2 col-xl-2'>
+                                        <select className='form-control' value={this.state.status} onChange={(e) => { this.setState({ status: e.currentTarget.value }) }}>
+                                            <option value={0}>Todos</option>
+                                            <option value={1}>Ativos</option>
+                                            <option value={2}>Inativos</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-0 col-sm-0 col-md-3 col-lg-3 col-xl-3">
+                                    </div>
                                     <div>
                                     </div>
 
                                 </div>
                             </div>
+
 
                             <AddButton addLink={{
                                 pathname: `/utilitarios/addoperador/0`,
@@ -296,7 +320,7 @@ class Operadores extends Component {
                     }
                 </div>
                 <Rodape />
-            </div>
+            </div >
         )
 
     }
