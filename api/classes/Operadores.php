@@ -231,7 +231,7 @@ class Operadores {
 
         $result = $database->doSelect('operadores',
                                       'Codigo',
-                                      "Codigo = '".$Codigo."'AND Senha = '". $Senha. "'");
+                                      "Codigo = '".$Codigo."'AND Senha = '". $Senha. "' AND ativo = 1");
 
         if($result == NULL){
             $database->closeConection();
