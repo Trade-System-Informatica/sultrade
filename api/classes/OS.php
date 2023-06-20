@@ -382,8 +382,8 @@ class OS
         $database = new Database();
 
         $result = $database->doSelect(
-            'os_tp_docto',
-            'os_tp_docto.*'
+            'tipos_docto',
+            'tipos_docto.*'
         );
         $database->closeConection();
         return $result;

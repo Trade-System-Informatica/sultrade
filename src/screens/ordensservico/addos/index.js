@@ -444,7 +444,7 @@ class AddOS extends Component {
             clientesOptions: await loader.getBaseOptionsCustomLabel('getClientes.php', 'Nome', 'Cnpj_Cpf', 'Chave'),
             tiposServicosOptions: await loader.getBaseOptions('getTiposServicos.php', 'descricao', 'chave'),
             portosOptions: await loader.getBaseOptions('getPortos.php', 'Descricao', 'Chave'),
-            tiposDocumentoOptions: await loader.getBaseOptions('getTiposDocumento.php', 'descricao', 'chave'),
+            tiposDocumentoOptions: await loader.getBaseOptions('getTiposDocumento.php', 'Descricao', 'Chave'),
             moedasOptions: await loader.getBaseOptions('getMoedas.php', 'Sigla', 'Chave'),
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php'),
@@ -2962,6 +2962,7 @@ class AddOS extends Component {
                                                 <th>Debit USD</th>
                                             </tr>
                                             {pdfContent.filter((e) => e.codsubgrupo_taxas == chave.codsubgrupo_taxas).map((e, i) => {
+                                                console.log(e);
                                                 valorTotalReais += Util.toFixed(parseFloat(getValorItemReal(e)), 2);
                                                 valorTotalDolares += Util.toFixed(parseFloat(getValorItemDolar(e)), 2);
                                                 return (
