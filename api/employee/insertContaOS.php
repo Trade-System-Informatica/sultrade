@@ -13,11 +13,12 @@ if($objData != NULL){
     $token = prepareInput($objData->token);
     $values = prepareInput($objData->values);
     $valuesRet = prepareInput($objData->valuesRet);
+    $os = prepareInput($objData->os);
 
     $contas = new Contas();
 
 
-    $result = $contas->insertContaOS($values, $valuesRet);
+    $result = $contas->insertContaOS($values, $valuesRet, $os);
 
 } else {
     $result = "false";
