@@ -1296,7 +1296,7 @@ class AddOS extends Component {
                 token: true,
                 values: `'${this.state.chave}', '${moment(this.state.faturamento).format("YYYY-MM-DD")}', '0', '${this.state.cliente}', '0', '0', '${this.state.centroCusto}', '',  0,1, 1, '${parseFloat(`${valor}`)}', '${parseFloat(`${saldo}`)}', '', '', '${0}', '${this.state.usuarioLogado.codigo}', '${this.state.empresa}', 0, 0, 0, ''`,
                 valuesRet,
-                os: this.state.codigo
+                os: this.state.chave
             }).then(
                 async res => {
                     console.log(res.data);
