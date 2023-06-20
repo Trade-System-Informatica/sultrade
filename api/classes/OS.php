@@ -383,7 +383,8 @@ class OS
 
         $result = $database->doSelect(
             'tipos_docto',
-            'tipos_docto.*'
+            'tipos_docto.*',
+            '1 = 1 ORDER BY chave ASC'
         );
         $database->closeConection();
         return $result;
@@ -395,7 +396,8 @@ class OS
 
         $result = $database->doSelect(
             'tipos_docto',
-            'tipos_docto.*'
+            'tipos_docto.*',
+            '1 = 1 ORDER BY chave ASC'
         );
         $database->closeConection();
         return $result;
