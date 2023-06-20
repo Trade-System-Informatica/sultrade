@@ -782,7 +782,7 @@ class Contas
     {
         $database = new Database();
         if ($os) {
-            $database->doDelete('contas_aberto', "os_origem = '$os'");
+            $database->doDelete('contas_aberto', "os_origem = $os");
         }
 
         $cols = 'os_origem, Lancto, Tipo, Pessoa, Conta_Contabil, RepCodBar, Centro_Custo, Historico, Conta_Desconto, Parc_Ini, Parc_Fim, Valor, Saldo, Vencimento, Vencimento_Original, Conta_Provisao, Operador, Empresa, Docto, tipodocto, meio_pagamento, docto_origem';
