@@ -5252,17 +5252,17 @@ class AddOS extends Component {
                                                                         {this.state.documentos[0] != undefined && this.state.documentos.filter((e) => e.chave_os_itens == 0).map((feed, index) => (
                                                                             <tr className={index % 2 == 0 ? "parTr" : "imparTr"}>
                                                                                 <td className="text-center">
-                                                                                    <a href={`${CAMINHO_DOCUMENTOS}${feed.caminho}`} className='nonlink' target='_blank'>
+                                                                                    <a href={`${CAMINHO_DOCUMENTOS}/docs/${feed.caminho}`} className='nonlink' target='_blank'>
                                                                                         <p>{feed.chave}</p>
                                                                                     </a>
                                                                                 </td>
                                                                                 <td className="text-center">
-                                                                                    <a href={`${CAMINHO_DOCUMENTOS}${feed.caminho}`} className='nonlink' target='_blank'>
+                                                                                    <a href={`${CAMINHO_DOCUMENTOS}/docs/${feed.caminho}`} className='nonlink' target='_blank'>
                                                                                         <p>{feed.descricao}</p>
                                                                                     </a>
                                                                                 </td>
                                                                                 <td className="text-center">
-                                                                                    <a href={`${CAMINHO_DOCUMENTOS}${feed.caminho}`} className='nonlink' target='_blank'>
+                                                                                    <a href={`${CAMINHO_DOCUMENTOS}/docs/${feed.caminho}`} className='nonlink' target='_blank'>
                                                                                         <p>{feed.caminho}</p>
                                                                                     </a>
                                                                                 </td>
