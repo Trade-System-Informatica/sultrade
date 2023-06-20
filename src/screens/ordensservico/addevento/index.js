@@ -495,7 +495,7 @@ class AddEvento extends Component {
                 await this.setState({ tiposDocumento: res.data })
 
                 const options = this.state.tiposDocumento.map((e) => {
-                    return { label: e.descricao, value: e.chave }
+                    return { label: e.Descricao, value: e.Chave }
                 })
 
                 await this.setState({ tiposDocumentoOptions: options })
