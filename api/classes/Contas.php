@@ -1345,10 +1345,10 @@ class Contas
     {
         $database = new Database();
 
-        $contaDesconto = $database->doSelect('contas_aberto_cc', 'contas_aberto_cc', "chave_conta_aberto = '$chave_conta_aberto' AND tipo = '$tipo'");
+        $contaDesconto = $database->doSelect('contas_aberto_cc', 'contas_aberto_cc.*', "chave_conta_aberto = '$chave_conta_aberto' AND tipo = '$tipo'");
 
         $result = true;
-        if ($contaDesconto[0]) {
+        if ($contaDesconto[0] && $contaDesconto[0]["chave"]) {
             $result = $database->doDelete('contas_aberto_cc', "chave = '" . $contaDesconto[0]["chave"] . "'");
         }
         $database->closeConection();
