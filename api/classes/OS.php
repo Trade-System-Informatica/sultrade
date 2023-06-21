@@ -703,6 +703,19 @@ class OS
         return true;
     }
 
+    public static function checkAndDeleteContaOS($os)
+    {
+        $database = new Database();
+
+
+        if ($os) {
+            $database->doDelete('contas_aberto', "os_origem = $os");
+        }
+
+        $database->closeConection();
+        return true;
+    }
+
     public static function contabilizaCusteioSubagente($grupos)
     {
         $database = new Database();

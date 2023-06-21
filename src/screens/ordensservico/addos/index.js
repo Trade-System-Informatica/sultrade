@@ -1197,6 +1197,8 @@ class AddOS extends Component {
 
             if (this.state.faturamento && moment(this.state.faturamento).isValid()) {
                 await this.faturaOS();
+            } else if (!this.state.faturamento) {
+                await this.checkAndDeleteContaOS();
             }
             await apiEmployee.post(`updateOS.php`, {
                 token: true,
@@ -1322,6 +1324,18 @@ class AddOS extends Component {
                 async res => await console.log(`Erro: ${res.data}`)
             )
         }
+    }
+
+    checkAndDeleteContaOS = async () => {
+        await apiEmployee.post(`checkAndDeleteContaOS.php`, {
+            token: true,
+            os: this.state.chave
+        }).then(
+            async res => {
+                console.log(res.data);
+            },
+            async res => await console.log(`Erro: ${res.data}`)
+        )
     }
 
     mudarCentroCusto = async () => {
@@ -2976,7 +2990,7 @@ class AddOS extends Component {
                                                     if (!camposTitulos.find((titulo) => titulo.titulo == campo.campo)) {
                                                         camposTitulos.push({ titulo: campo.campo, tipo: campo.tipoCampo });
                                                     }
-                                                    
+
                                                     if (campo.tipoCampo == "LISTA") {
                                                         const complementos = campo.complemento?.split("\n");
 
