@@ -2832,6 +2832,7 @@ class AddOS extends Component {
 
             const pdfContent = this.state.pdfContent.itens;
             const pdfChaves = this.state.pdfContent.chaves;
+            const pdfCampos = this.state.pdfContent.campos;
             //console.log(pdfChaves)
 
 
@@ -2880,6 +2881,8 @@ class AddOS extends Component {
             let valorTotalReais = 0;
             let valorTotalDolares = 0;
             let pdf = '';
+            let campos = [];
+            let camposTitulos = [];
 
             if (pdfContent) {
                 pdf =
@@ -2903,6 +2906,9 @@ class AddOS extends Component {
 
                             valorTotalReais = 0;
                             valorTotalDolares = 0;
+
+                            campos = [];
+                            camposTitulos = [];
                             return (
                                 <>
                                     <br />
@@ -2963,9 +2969,26 @@ class AddOS extends Component {
                                                 <th>Debit USD</th>
                                             </tr>
                                             {pdfContent.filter((e) => e.codsubgrupo_taxas == chave.codsubgrupo_taxas).map((e, i) => {
-                                                console.log(e);
                                                 valorTotalReais += Util.toFixed(parseFloat(getValorItemReal(e)), 2);
                                                 valorTotalDolares += Util.toFixed(parseFloat(getValorItemDolar(e)), 2);
+
+                                                pdfCampos.filter((campo) => campo.chaveEvento == e.chsub).map((campo) => {
+                                                    if (!camposTitulos.find((titulo) => titulo.titulo == campo.campo)) {
+                                                        camposTitulos.push({ titulo: campo.campo, tipo: campo.tipoCampo });
+                                                    }
+                                                    
+                                                    if (campo.tipoCampo == "LISTA") {
+                                                        const complementos = campo.complemento?.split("\n");
+
+                                                        if (complementos[0]) {
+                                                            complementos.forEach((complemento) => {
+                                                                campos.push({ ...campo, complemento });
+                                                            })
+                                                        }
+                                                    } else if (campo.tipoCampo == "TEXTO") {
+                                                        campos.push(campo);
+                                                    }
+                                                })
                                                 return (
                                                     <tr>
                                                         <td className="pdf_large_col reduce-font" colSpan={7}>{getDescricaoItem(e)}</td>
@@ -2986,9 +3009,35 @@ class AddOS extends Component {
                                     </div>
 
                                     <div className='voucherFooter'>Comments: {chave.Comentario_Voucher}</div>
+                                    {camposTitulos.map((titulo) => {
+                                        if (titulo.tipo == "LISTA") {
+                                            return (
+                                                <div className='voucherCamposLista'>
+                                                    <div className='voucherCampoTitulos'>{titulo.titulo}</div>
+                                                    <ul className='voucherLiListaCampos'>
+                                                        {campos.filter((campo) => campo.campo == titulo.titulo).map((campo) => (
+                                                            <li>{campo.complemento}</li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )
+                                        } else if (titulo.tipo == "TEXTO") {
+                                            return (
+                                                <div className='voucherCamposLista'>
+                                                    <div className="voucherCampoTitulos">{titulo.titulo}</div>
+                                                    <div className="voucherComplementosLista">
+                                                        {campos.filter((campo) => campo.campo == titulo.titulo).map((campo) => (
+                                                            <pre>{campo.complemento}</pre>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )
+                                        }
+                                    })}
                                 </>
                             )
                         })}
+
                     </div>
             } else {
                 await this.setState({ erro: 'Sem as informações necessárias para gerar o pdf!', loading: false })

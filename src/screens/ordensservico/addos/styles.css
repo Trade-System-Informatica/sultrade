@@ -70,6 +70,24 @@
     border-collapse: collapse;
 }
 
+.voucherCamposLista {
+    width: 90%;
+    margin-top: 15px;
+    margin-left: 5%;
+}
+
+.voucherCampoTitulos {
+    font-weight: bold;
+}
+
+.voucherLiListaCampos {
+    list-style-type: disc;
+}
+
+.voucherComplementosLista {
+    margin-left: 10px;
+}
+
 .faturamentoCabecalho {
     text-align: left;
     font-size: 0.9em;
@@ -186,7 +204,7 @@
     user-select: none;
 }
 
-.tituloPagesModal > * {
+.tituloPagesModal>* {
     padding: 5px;
 }
 
@@ -200,7 +218,10 @@
     margin-top: 25px;
 }
 
-.relatorio_liquidos_contas, .relatorio_liquidos_contas > tr, .relatorio_liquidos_contas > th, .relatorio_liquidos_contas > td {
+.relatorio_liquidos_contas,
+.relatorio_liquidos_contas>tr,
+.relatorio_liquidos_contas>th,
+.relatorio_liquidos_contas>td {
     border: 1px solid black;
     border-collapse: collapse;
 }
