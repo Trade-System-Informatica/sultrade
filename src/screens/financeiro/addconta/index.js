@@ -280,7 +280,14 @@ class AddConta extends Component {
                     { titulo: 'Operador', valor: util.formatForLogs(this.state.usuarioLogado.nome) },
                     { titulo: 'Conta Bloqueto', valor: util.formatForLogs(this.state.contaBloqueto, 'options', '', '', this.state.planosContasOptions) },
                     { titulo: 'Tipo de Documento', valor: util.formatForLogs(this.state.tipoDocumento, 'options', '', '', this.state.tiposDocumentosOptions) },
-                    { titulo: 'Meio Pagamento', valor: util.formatForLogs(this.state.meioPagamento, 'options', '', '', this.state.meiosPagamentos) },
+                    { titulo: 'Meio Pagamento', valor: util.formatForLogs(this.state.meioPagamento, 'options', '', '', this.state.meiosPagamentosOptions) },
+                    { titulo: 'OS manual', valor: util.formatForLogs(this.state.os) },
+                    { titulo: 'Navio manual', valor: util.formatForLogs(this.state.navio, 'options', '', '', this.state.naviosOptions) },
+                    { titulo: 'Porto manual', valor: util.formatForLogs(this.state.porto, 'options', '', '', this.state.portosOptions) },
+                    { titulo: 'ROE manual', valor: util.formatForLogs(this.state.roe) },
+                    { titulo: 'Discount manual', valor: util.formatForLogs(this.state.discount) },
+                    { titulo: 'Received manual', valor: util.formatForLogs(this.state.received) },
+                    { titulo: 'Sailed manual', valor: util.formatForLogs(this.state.sailed, 'date') },
                 ]
             });
         }
@@ -514,7 +521,14 @@ class AddConta extends Component {
                 { titulo: 'Operador', valor: util.formatForLogs(this.state.usuarioLogado.nome) },
                 { titulo: 'Conta Bloqueto', valor: util.formatForLogs(this.state.contaBloqueto, 'options', '', '', this.state.planosContasOptions) },
                 { titulo: 'Tipo de Documento', valor: util.formatForLogs(this.state.tipoDocumento, 'options', '', '', this.state.tiposDocumentosOptions) },
-                { titulo: 'Meio Pagamento', valor: util.formatForLogs(this.state.meioPagamento, 'options', '', '', this.state.meiosPagamentos) },
+                { titulo: 'Meio Pagamento', valor: util.formatForLogs(this.state.meioPagamento, 'options', '', '', this.state.meiosPagamentosOptions) },
+                { titulo: 'OS manual', valor: util.formatForLogs(this.state.os) },
+                { titulo: 'Navio manual', valor: util.formatForLogs(this.state.navio, 'options', '', '', this.state.naviosOptions) },
+                { titulo: 'Porto manual', valor: util.formatForLogs(this.state.porto, 'options', '', '', this.state.portosOptions) },
+                { titulo: 'ROE manual', valor: util.formatForLogs(this.state.roe) },
+                { titulo: 'Discount manual', valor: util.formatForLogs(this.state.discount) },
+                { titulo: 'Received manual', valor: util.formatForLogs(this.state.received) },
+                { titulo: 'Sailed manual', valor: util.formatForLogs(this.state.sailed, 'date') },
             ],
             loading: true
         })

@@ -230,6 +230,17 @@ class Navios
             "os.codigo='" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND (os_servicos_itens.tipo_sub = 0 OR os_servicos_itens.tipo_sub = 1) AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.Fornecedor_Custeio != '') GROUP BY os_subgrupos_taxas.chave ORDER BY os_servicos_itens.ordem ASC"
         );
 
+        $result['campos'] = $database->doSelect("os
+        left join os_servicos_itens as eventos on os.chave = eventos.chave_os
+        left join os_servicos_itens_complementar as complementos ON eventos.chave = complementos.evento
+        left join os_subgrupos_taxas_campos as campos ON complementos.subgrupo_campo = campos.chave",
+        "eventos.chave as chaveEvento,
+        complementos.valor as complemento,
+        campos.nome as campo,
+        campos.tipo as tipoCampo,
+        campos.subgrupo as chaveSubgrupo",
+            "os.codigo='" . $codigo . "' AND complementos.valor IS NOT NULL AND os.cancelada = 0 AND eventos.cancelada = 0 AND (eventos.tipo_sub = 0 OR eventos.tipo_sub = 1) AND (eventos.repasse = 1 OR eventos.Fornecedor_Custeio != '') ORDER BY eventos.ordem ASC");
+
         $database->closeConection();
         return $result;
     }

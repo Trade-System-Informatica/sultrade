@@ -247,7 +247,9 @@ class Relatorio extends Component {
                     if (res.data[0]) {
                         const email = res.data.find((e) => e.Tipo == "EM")?.Campo1;
 
-                        await this.setState({ emails: email.split("; ") });
+                        if (email) {
+                            await this.setState({ emails: email.split("; ") });
+                        }
                     }
                 }
             )
