@@ -116,108 +116,6 @@ class Logs extends Component {
         await this.setState({ redirect: true })
     }
 
-    deleteLogs = async (dataInicio, dataFim) => {
-        await this.setState({ deleteLog: true, deleteModal: false })
-        confirmAlert({
-            customUI: ({ onClose }) => {
-                return (
-                    <div className='custom-ui text-center'>
-                        <h1>{NOME_EMPRESA}</h1>
-                        <p>Remover logs de {dataInicio} até {dataFim} desta tabela?</p>
-                        <button
-                            style={{ marginRight: 5 }}
-                            className="btn btn-danger w-25"
-                            onClick={
-                                async () => {
-                                    onClose()
-                                }
-                            }
-                        >
-                            Não
-                        </button>
-                        <button
-                            style={{ marginRight: 5 }}
-                            className="btn btn-success w-25"
-                            onClick={
-                                async () => {
-                                    await apiEmployee.post(`deleteLogs.php`, {
-                                        token: true,
-                                        dataInicio: moment(dataInicio).format('YYYY-MM-DD 00:00'),
-                                        dataFim: moment(dataFim).format('YYYY-MM-DD 23:59'),
-                                        tabela: this.state.tabela
-                                    }).then(
-                                        async response => {
-                                            if (response.data == true) {
-                                                document.location.reload()
-                                            }
-                                        },
-                                        async response => {
-                                            this.erroApi(response)
-                                        }
-                                    )
-                                    onClose()
-                                }
-                            }
-
-                        >
-                            Sim
-                        </button>
-                    </div>
-                )
-            }
-        })
-    }
-
-    deleteLog = async (chave) => {
-        this.setState({deleteLog: true})
-        confirmAlert({
-            customUI: ({ onClose }) => {
-                return (
-                    <div className='custom-ui text-center'>
-                        <h1>{NOME_EMPRESA}</h1>
-                        <p>Deseja remover este Log? ({chave}) </p>
-                        <button
-                            style={{ marginRight: 5 }}
-                            className="btn btn-danger w-25"
-                            onClick={
-                                async () => {
-                                    onClose()
-                                }
-                            }
-                        >
-                            Não
-                        </button>
-                        <button
-                            style={{ marginRight: 5 }}
-                            className="btn btn-success w-25"
-                            onClick={
-                                async () => {
-                                    await apiEmployee.post(`deleteLog.php`, {
-                                        token: true,
-                                        chave: chave
-                                    }).then(
-                                        async response => {
-                                            if (response.data == true) {
-                                                document.location.reload()
-                                            }
-                                        },
-                                        async response => {
-                                            this.erroApi(response)
-                                        }
-                                    )
-                                    onClose()
-                                }
-                            }
-
-                        >
-                            Sim
-                        </button>
-                    </div>
-                )
-            }
-        })
-    }
-
     reverterItens = async () => {
         await this.setState({loading: true})
         const logs = this.state.logs.reverse();
@@ -246,12 +144,6 @@ class Logs extends Component {
 
 
     render() {
-
-        const validations = []
-        validations.push(this.state.dataInicio)
-        validations.push(this.state.dataFim)
-
-        const validForm = validations.reduce((t, a) => t && a)
 
         return (
 
@@ -286,90 +178,6 @@ class Logs extends Component {
                                 acessosPermissoes={this.state.acessosPermissoes}
                             />
 
-                            <Modal
-                                aria-labelledby="transition-modal-title"
-                                aria-describedby="transition-modal-description"
-                                style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
-                                open={this.state.deleteModal}
-                                onClose={async () => await this.setState({ deleteModal: false })}
-                            >
-                                <div className='modalContainer'>
-                                    <div className='modalCriar'>
-                                        <div className='containersairlistprodmodal'>
-                                            <div className='botaoSairModal' onClick={async () => await this.setState({ deleteModal: false })}>
-                                                <span>X</span>
-                                            </div>
-                                        </div>
-                                        <div className='modalContent'>
-                                            <div className='tituloModal'>
-                                                <span>Apagar Logs:</span>
-                                            </div>
-
-
-                                            <div className='modalForm'>
-                                                <Formik
-                                                    initialValues={{
-                                                        name: '',
-                                                    }}
-                                                    onSubmit={async values => {
-                                                        await new Promise(r => setTimeout(r, 1000))
-                                                        await this.deleteLogs(this.state.dataInicio, this.state.dataFim);
-                                                    }}
-                                                >
-                                                    <Form className="contact-form" >
-
-
-                                                        <div className="row">
-
-                                                            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
-
-                                                                <div className="row addservicos">
-                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                        <label>De:</label>
-                                                                    </div>
-                                                                    <div className="col-1 errorMessage">
-
-                                                                    </div>
-                                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                        <Field className="form-control" type="date" value={this.state.dataInicio} onChange={async e => { this.setState({ dataInicio: e.currentTarget.value }) }} />
-                                                                    </div>
-                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                        <label>Até:</label>
-                                                                    </div>
-                                                                    <div className="col-1 errorMessage">
-
-                                                                    </div>
-                                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                        <Field className="form-control" type="date" value={this.state.dataFim} onChange={async e => { this.setState({ dataFim: e.currentTarget.value }) }} />
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
-                                                        </div>
-
-                                                        <div className="row">
-                                                            <div className="col-2"></div>
-                                                            <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                                <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Apagar</button>
-                                                            </div>
-                                                            <div className="col-2"></div>
-                                                        </div>
-
-                                                    </Form>
-                                                </Formik>
-
-                                            </div>
-                                        </div>
-
-
-
-
-
-                                    </div >
-
-                                </div >
-                            </Modal >
-
                             <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-left">
                                 <div className="row mobileajuster3">
                                     <div className="col-1 col-sm-1 col-md-1 col-lg-1 col-xl-1 sumir">
@@ -383,11 +191,6 @@ class Logs extends Component {
                                             <option value={4}>Chave Auxiliar</option>
                                         </select>
                                         <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
-                                        {this.state.tabela && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-                                            <div>
-                                                <button onClick={async () => { await this.setState({ deleteModal: true }) }} className="btn btn-danger">Apagar por período</button>
-                                            </div>
-                                        }
                                     </div>
                                     <div className="col-1 col-sm-1 col-md-1 col-lg-1 col-xl-1 sumir">
                                     </div>
@@ -489,11 +292,6 @@ class Logs extends Component {
                                                         <p>{feed.ChaveAux}</p>
                                                     </div>
                                                     <div className="col-2 text-left icones mobileajuster4 ">
-                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteLog(feed.Chave)} >
-                                                                <FontAwesomeIcon icon={faTrashAlt} />
-                                                            </div>
-                                                        }
                                                     </div>
                                                 </div>
                                             }
@@ -511,8 +309,7 @@ class Logs extends Component {
                                                             ],
                                                             itemPermissao: 'LOGS',
                                                             itemNome: feed.Data,
-                                                            itemChave: feed.Chave,
-                                                            itemDelete: this.deleteLog
+                                                            itemChave: feed.Chave
                                                         })
                                                     }}
                                                     className="row deleteMargin alignCenter" style={{overflowWrap: 'anywhere'}}>
@@ -526,11 +323,6 @@ class Logs extends Component {
                                                         <p>{feed.ChaveAux}</p>
                                                     </div>
                                                     <div className="col-2 text-left icones mobileajuster4 ">
-                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteLog(feed.Chave)} >
-                                                                <FontAwesomeIcon icon={faTrashAlt} />
-                                                            </div>
-                                                        }
                                                     </div>
 
                                                 </div>
