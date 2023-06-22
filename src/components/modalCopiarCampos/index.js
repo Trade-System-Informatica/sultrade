@@ -14,7 +14,7 @@ const estadoInicial = {
 }
 
 
-class ModalEventoEdit extends Component {
+class ModalCopiarCampos extends Component {
     state = {
         ...estadoInicial,
     }
@@ -55,7 +55,6 @@ class ModalEventoEdit extends Component {
                             </div>
                             <br />
 
-                            {this.props.acessosPermissoes.filter((e) => { if (e.acessoAcao == this.props.itemPermissao) { return e } }).map((e) => e.permissaoEdita)[0] == 1 &&
                                 <Formik
                                     initialValues={{
                                         name: '',
@@ -70,86 +69,20 @@ class ModalEventoEdit extends Component {
 
 
                                         <div className="row edit_modal_wrapper">
-
-                                            {this.state.itemEdit?.valores?.map((valor, index) => (
+                                            <div className="col-12">
+                                                <label className="center">Campos</label>
+                                            </div>
+                                            {this.props.campos?.map((campo, i) => (
                                                 <>
-                                                    {valor.half && !valor.hidden &&
-                                                        <>
-                                                            <>
-                                                                <div className="col-12 labelForm edit_modal_label" >
-                                                                    <label>{valor.titulo}</label>
-                                                                </div>
-                                                                <div className='col-1 errorMessage'>
-                                                                </div>
-                                                                <div className="fieldDividido col-10 edit_modal_input">
-                                                                    <select disabled={valor.disabled1} className='form-control nextToInput fieldDividido_1' value={valor.valor1} onChange={async (e) => { this.changeState(index, e.currentTarget.value, 1); await valor.onChange1(e.currentTarget.value) }}>
-                                                                        {valor.options1.map((e) => (
-                                                                            <option value={e.value}>{e.label}</option>
-                                                                        ))}
-                                                                    </select>
-                                                                    <Field
-                                                                        className="form-control fieldDividido_2 text-right"
-                                                                        type="text"
-                                                                        onClick={(e) => e.target.select()}
-                                                                        value={valor.valor2}
-                                                                        disabled={valor.disabled2}
-                                                                        onChange={async (e) => this.changeState(index, e.currentTarget.value, 2)}
-                                                                    onBlur={async (e) => { this.changeState(index, Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00', 2, true); await valor.onBlur2(e.currentTarget.value) }}
-                                                                    />
-                                                                </div>
-
-                                                            </>
-                                                        </>
-                                                    }
-                                                    {!valor.half && !valor.hidden &&
-                                                        <>
-                                                            <div className="col-12 labelForm edit_modal_label">
-                                                                <label>{valor.titulo}</label>
-                                                            </div>
-                                                            <div className='col-1 errorMessage'>
-                                                            </div>
-                                                            <div className="col-10  edit_modal_input">
-                                                                {valor.tipo == "select" &&
-                                                                    <Select
-                                                                        className='SearchSelect color_black'
-                                                                        options={valor.options.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)}
-                                                                        onInputChange={e => { this.setState({ optionsTexto: e }) }} value={valor.options.filter(option => option.value == valor.valor)}
-                                                                        isDisabled={valor.disabled}
-                                                                        search={true}
-                                                                        onChange={(e) => { this.changeState(index, e.value); valor.onChange(e.value) }} />
-                                                                }
-                                                                {valor.tipo == "money" &&
-                                                                    <Field
-                                                                        className="form-control text-right"
-                                                                        type="text"
-                                                                        onClick={(e) => e.target.select()}
-                                                                        value={valor.valor}
-                                                                        disabled={valor.disabled}
-                                                                        onChange={async (e) => { this.changeState(index, e.currentTarget.value) }}
-                                                                        onBlur={async e => { this.changeState(index, Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00', 0, true); await valor.onBlur(e.currentTarget.value) }} />
-                                                                }
-                                                                {valor.tipo == "check" &&
-                                                                    <input
-                                                                        className='form_control'
-                                                                        disabled={valor.disabled}
-                                                                        checked={valor.valor}
-                                                                        onChange={(e) => { this.changeState(index, e.target.checked); valor.onChange(e.target.checked) }}
-                                                                        type="checkbox" />
-                                                                }
-                                                                {valor.tipo != "select" && valor.tipo != "money" && valor.tipo != "check" &&
-                                                                    <Field
-                                                                        className="form-control"
-                                                                        disabled={valor.disabled}
-                                                                        type={valor.tipo}
-                                                                        value={valor.valor}
-                                                                        onChange={(e) => this.changeState(index, e.currentTarget.value)}
-                                                                        onBlur={async (e) => await valor.onChange(e.currentTarget.value)} />
-                                                                }
-                                                            </div>
-                                                        </>
-                                                    }
+                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                        <label>{campo.nome}</label>
+                                                    </div>
+                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                        <Field type="checkbox" name={campo.nome} checked={campo.checked} onChange={async e => { await campo.onChange(i) } } />
+                                                    </div>
                                                 </>
                                             ))}
+                                            
 
                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
                                         </div>
@@ -164,7 +97,6 @@ class ModalEventoEdit extends Component {
 
                                     </Form>
                                 </Formik>
-                            }
 
                         </div>
 
@@ -178,4 +110,4 @@ class ModalEventoEdit extends Component {
 
 }
 
-export default (ModalEventoEdit)
+export default (ModalCopiarCampos)

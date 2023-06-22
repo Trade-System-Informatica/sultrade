@@ -547,7 +547,7 @@ class AddConta extends Component {
                         async res => {
                             // console.log(res.data);
                             if (res.data[0].Chave) {
-                                await this.setState({ chave: res.data[0].Chave })
+                                await this.setState({ chave: res.data[0].Chave, conta: res.data[0] })
                                 await loader.salvaLogs('contas_aberto', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
                                 if (this.state.meioPagamentoNome == 'DARF' || this.state.meioPagamentoNome == 'GPS' || this.state.meioPagamentoNome == 'GRU') {
                                     await loader.salvaLogs('contas_aberto_complementar', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
@@ -570,7 +570,7 @@ class AddConta extends Component {
                         async res => {
                             // console.log(res.data);
                             if (res.data[0].Chave) {
-                                await this.setState({ chave: res.data[0].Chave })
+                                await this.setState({ chave: res.data[0].Chave, conta: res.data[0] })
                                 await loader.salvaLogs('contas_aberto', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
                                 if (this.state.meioPagamentoNome == 'DARF' || this.state.meioPagamentoNome == 'GPS' || this.state.meioPagamentoNome == 'GRU' || this.state.meioPagamentoNome === "PIX") {
                                     await loader.salvaLogs('contas_aberto_complementar', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
@@ -586,7 +586,16 @@ class AddConta extends Component {
                 }
             } else {
                 const valorDiff = parseFloat(this.state.valor.replaceAll(".", "").replaceAll(",", ".")) - parseFloat(this.state.conta.Valor)
-                const saldo = parseFloat(this.state.saldo.replaceAll(".", "").replaceAll(",", ".")) + (isNaN(valorDiff) ? 0 : valorDiff);
+                let saldo = (isNaN(parseFloat(this.state.saldo?.replaceAll(".", "").replaceAll(",", "."))) ? parseFloat(this.state.conta.Saldo) : parseFloat(this.state.saldo.replaceAll(".", "").replaceAll(",", "."))) + (isNaN(valorDiff) ? 0 : valorDiff);
+                console.log({valor: this.state.valor, valorAnt: this.state.conta.Valor, saldo, valorDiff});
+
+                if (!saldo || isNaN(saldo)) {
+                    if (!isNaN(parseFloat(this.state.saldo?.replaceAll(".","").replaceAll(",",".")))) {
+                        saldo = parseFloat(this.state.saldo?.replaceAll(".", "").replaceAll(",", "."));
+                    } else {
+                        saldo = parseFloat(this.state.conta.Saldo);
+                    }
+                }
 
                 if (this.state.tipo == 0) {
                     await apiEmployee.post(`updateContaCliente.php`, {

@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import Select from 'react-select';
 import ModalLogs from '../../../components/modalLogs'
+import ModalCopiarCampos from '../../../components/modalCopiarCampos'
 
 const estadoInicial = {
     data: '',
@@ -46,6 +47,10 @@ const estadoInicial = {
         { label: "Texto", value: "TEXTO" },
         { label: "Lista", value: "LISTA" }
     ],
+
+    copiarCamposModal: false,
+    camposCopiar: [],
+    subgruposOptions: [],
 
     acessos: [],
     permissoes: [],
@@ -172,6 +177,19 @@ class AddSubgrupo extends Component {
             },
             async err => console.log(`erro: ` + err)
         )
+    }
+
+    setCamposCopiar = async () => {
+        this.setState({
+            camposCopiar: this.state.campos.map((e, i) => ({
+                ...e,
+                checked: false,
+                onChange: (index) => this.setState({ camposCopiar: this.state.camposCopiar.map((e, i) => i === index ? ({ ...e, checked: !e.checked }) : ({ ...e })) })
+            })),
+        })
+        const subgrupos = await loader.getBase(`getSubgrupos.php`);
+        
+        this.setState({ subgruposOptions: subgrupos.filter((grupo) => grupo.chave != this.state.chave)?.map((grupo) => ({label: grupo.descricao, value: grupo.chave}))});
     }
 
     salvarSubgrupo = async (validForm) => {
@@ -327,6 +345,14 @@ class AddSubgrupo extends Component {
                     modalAberto={this.state.modalLog}
                 />
 
+                <ModalCopiarCampos
+                    modalAberto={this.state.copiarCamposModal}
+                    closeModal={() => { this.setState({ copiarCamposModal: false }) }}
+                    campos={this.state.camposCopiar}
+                    subgruposOptions={this.state.subgruposOptions}
+                    nome={this.state.descricao}
+                />
+
                 <div className="contact-section">
 
                     <div className="row">
@@ -441,11 +467,11 @@ class AddSubgrupo extends Component {
                                                 <div className="col-12 text-center">
                                                     <span onClick={() => this.setState({ campos: [...this.state.campos, { chave: 0, nome: "", tipo: "", obrigatorio: false }] })} style={{ color: "#00CCFF", textDecoration: "underline", cursor: "pointer" }}>Adicionar um campo</span>
                                                 </div>
-                                                {/* {this.state.campos.length > 0 &&
+                                                {this.state.campos.length > 0 &&
                                                     <div className="col-12 text-center">
-                                                        <span onClick={() => this.setState({ copiarCampos: true })} style={{ color: "#00CCFF", textDecoration: "underline", cursor: "pointer" }}>Copiar campos</span>
+                                                        <span onClick={() => { this.setCamposCopiar(); this.setState({ copiarCamposModal: true }) }} style={{ color: "#00CCFF", textDecoration: "underline", cursor: "pointer" }}>Copiar campos</span>
                                                     </div>
-                                                } */}
+                                                }
 
                                             </div>
 
