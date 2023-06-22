@@ -300,9 +300,9 @@ class ContasReceber extends Component {
             return conta.Chave.toLowerCase().includes(this.state.pesquisa.toLowerCase())
         } else if (this.state.tipoPesquisa == 4) {
             if (conta.osCodigo) {
-                return conta.osCodigo.includes(this.state.pesquisa.toLowerCase())
-            } else {
-                return conta.os_manual.includes(this.state.pesquisa.toLowerCase())
+                return conta.osCodigo.toLowerCase().includes(this.state.pesquisa.toLowerCase())
+            } else if (conta.os_manual) {
+                return conta.os_manual.toLowerCase().includes(this.state.pesquisa.toLowerCase())
             }
         }
 

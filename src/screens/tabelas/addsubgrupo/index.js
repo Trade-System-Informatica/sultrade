@@ -441,6 +441,9 @@ class AddSubgrupo extends Component {
                                                 <div className="col-12 text-center">
                                                     <span onClick={() => this.setState({ campos: [...this.state.campos, { chave: 0, nome: "", tipo: "", obrigatorio: false }] })} style={{ color: "#00CCFF", textDecoration: "underline", cursor: "pointer" }}>Adicionar um campo</span>
                                                 </div>
+                                                {/* <div className="col-12 text-center">
+                                                    <span onClick={() => this.setState({ copiarCampos: true })} style={{ color: "#00CCFF", textDecoration: "underline", cursor: "pointer" }}>Copiar campos</span>
+                                                </div> */}
 
                                             </div>
 
