@@ -2902,7 +2902,7 @@ class AddOS extends Component {
                 pdf =
                     <div style={{ zoom: 1 }} key={546546554654}>
 
-                        {pdfChaves.map((chave, index) => {
+                        {pdfChaves.toSorted((a, b) => a.codsubgrupo < b.codsubgrupo).map((chave, index) => {
                             let company = chave.company;
                             let address = chave.address;
 
