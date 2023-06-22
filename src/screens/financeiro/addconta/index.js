@@ -587,8 +587,7 @@ class AddConta extends Component {
             } else {
                 const valorDiff = parseFloat(this.state.valor.replaceAll(".", "").replaceAll(",", ".")) - parseFloat(this.state.conta.Valor)
                 let saldo = (isNaN(parseFloat(this.state.saldo?.replaceAll(".", "").replaceAll(",", "."))) ? parseFloat(this.state.conta.Saldo) : parseFloat(this.state.saldo.replaceAll(".", "").replaceAll(",", "."))) + (isNaN(valorDiff) ? 0 : valorDiff);
-                console.log({valor: this.state.valor, valorAnt: this.state.conta.Valor, saldo, valorDiff});
-
+                
                 if (!saldo || isNaN(saldo)) {
                     if (!isNaN(parseFloat(this.state.saldo?.replaceAll(".","").replaceAll(",",".")))) {
                         saldo = parseFloat(this.state.saldo?.replaceAll(".", "").replaceAll(",", "."));

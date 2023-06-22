@@ -289,6 +289,19 @@ class AddSubgrupo extends Component {
         }
     }
 
+    copiarCampos = async (subgrupos) => {
+        await apiEmployee.post(`insertCamposCopiados.php`,{
+            campos: this.state.camposCopiar.filter((campo) => campo.checked)?.map((campo) => ({...campo, onChange: undefined, checked: undefined})),
+            subgrupos,
+        }).then(
+            async res => {
+            },
+            async err => {
+                console.log(err);
+            }
+        )
+    }
+
     erroApi = async (res) => {
         console.log(res)
         await this.setState({ redirect: true })
@@ -351,6 +364,7 @@ class AddSubgrupo extends Component {
                     campos={this.state.camposCopiar}
                     subgruposOptions={this.state.subgruposOptions}
                     nome={this.state.descricao}
+                    onSubmit={async (subgrupos) => await this.copiarCampos(subgrupos)}
                 />
 
                 <div className="contact-section">
@@ -469,7 +483,7 @@ class AddSubgrupo extends Component {
                                                 </div>
                                                 {this.state.campos.length > 0 &&
                                                     <div className="col-12 text-center">
-                                                        <span onClick={() => { this.setCamposCopiar(); this.setState({ copiarCamposModal: true }) }} style={{ color: "#00CCFF", textDecoration: "underline", cursor: "pointer" }}>Copiar campos</span>
+                                                        <span onClick={async () => { await this.setCamposCopiar(); this.setState({ copiarCamposModal: true }) }} style={{ color: "#00CCFF", textDecoration: "underline", cursor: "pointer" }}>Copiar campos</span>
                                                     </div>
                                                 }
 

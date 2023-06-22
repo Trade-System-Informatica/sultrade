@@ -10,6 +10,7 @@ const estadoInicial = {
     tipoPesquisa: 1,
     load: 100,
 
+    gruposEscolhidos: [],
     optionsTexto: "",
 }
 
@@ -33,6 +34,11 @@ class ModalCopiarCampos extends Component {
     }
 
     render() {
+        const validations = [];
+        validations.push(this.props.campos.find((e) => e.checked));
+        validations.push(this.state.gruposEscolhidos[0]);
+        
+        const validForm = validations.reduce((a,b) => a && b);
 
         return (
             <Modal
@@ -61,7 +67,7 @@ class ModalCopiarCampos extends Component {
                                     }}
                                     onSubmit={async values => {
                                         await new Promise(r => setTimeout(r, 1000))
-                                        await this.state.itemEdit?.onSubmit();
+                                        await this.props.onSubmit(this.state.gruposEscolhidos);
 
                                     }}
                                 >
@@ -82,6 +88,18 @@ class ModalCopiarCampos extends Component {
                                                     </div>
                                                 </>
                                             ))}
+                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                            <label>Copiar para</label>
+                                        </div>
+                                        <div className='col-1 errorMessage'>
+                                        </div>
+                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                            <Select className='SearchSelect color_black' options={this.props.subgruposOptions} search={true} onChange={(e) => { this.setState({ gruposEscolhidos: [...this.state.gruposEscolhidos, e.value] }) }} />
+                                            {this.state.gruposEscolhidos.map((e, i) =>{
+                                                return (
+                                                <span class="click_to_erase" onClick={() => this.setState({ gruposEscolhidos: this.state.gruposEscolhidos.filter((c) => c != e) })}>{`${this.props.subgruposOptions.find((p) => p.value == e)?.label}${i != this.state.gruposEscolhidos.length - 1 ? ', ' : ' '}`}</span>
+                                            )})}
+                                        </div>
                                             
 
                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
@@ -90,7 +108,7 @@ class ModalCopiarCampos extends Component {
                                         <div className="row">
                                             <div className="col-2"></div>
                                             <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                <button type="submit" disabled={!this.props.valid} style={this.props.valid ? { width: 300, backgroundColor: "white" } : { width: 300 }} >Salvar</button>
+                                                <button type="submit" disabled={!validForm} style={validForm ? { width: 300, backgroundColor: "white" } : { width: 300 }} >Salvar</button>
                                             </div>
                                             <div className="col-2"></div>
                                         </div>

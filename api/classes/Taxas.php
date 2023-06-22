@@ -214,6 +214,29 @@ class Taxas
         return true;
     }
 
+    public static function insertCamposCopiados($campos, $subgrupos)
+    {
+        $database = new Database();
+        $cols = "nome, tipo, obrigatorio, subgrupo";
+
+        foreach ($subgrupos as $key => $subgrupo) {
+            foreach ($campos as $key => $campo) {
+                $checkCampo = $database->doSelect('os_subgrupos_taxas_campos', 'os_subgrupos_taxas_campos.*', 
+                    "subgrupo = $subgrupo AND nome = '".$campo->{"nome"}."'"
+                );
+                
+                if (!$checkCampo[0]) {
+                    $values = "'".$campo->{"nome"}."', '".$campo->{"tipo"}."', ".$campo->{"obrigatorio"}.", $subgrupo";
+
+                    $database->doInsert('os_subgrupos_taxas_campos', $cols, $values);
+                }
+            }
+        }
+
+        $database->closeConection();
+        return true;
+    }
+
     public static function insertMoeda($values, $values2, $search)
     {
         $database = new Database();
