@@ -291,7 +291,7 @@ class AddSubgrupo extends Component {
 
     copiarCampos = async (subgrupos) => {
         await apiEmployee.post(`insertCamposCopiados.php`,{
-            campos: this.state.camposCopiar.filter((campo) => campo.checked)?.map((campo) => ({...campo, onChange: undefined, checked: undefined})),
+            campos: this.state.camposCopiar.filter((campo) => campo.checked)?.map((campo) => ({...campo, obrigatorio: campo.obrigatorio ? 1 : 0, onChange: undefined, checked: undefined})),
             subgrupos,
         }).then(
             async res => {
