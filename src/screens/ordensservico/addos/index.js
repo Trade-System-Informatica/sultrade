@@ -3609,8 +3609,11 @@ class AddOS extends Component {
                                                                 <div className="col-1 errorMessage">
 
                                                                 </div>
-                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Select className='SearchSelect' options={this.state.tiposDocumentoOptions.filter(e => this.filterSearch(e, this.state.tiposDocumentoOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ tiposDocumentoOptionsTexto: e }) }} value={this.state.tiposDocumentoOptions.filter(option => option.value == this.state.documentoTipo)[0]} search={true} onChange={(e) => { this.setState({ documentoTipo: e.value, }) }} />
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10" style={this.state.tiposDocumentoOptions.length > 75 ? {marginBottom: 10} : {}}>
+                                                                    <Select className='SearchSelect' options={this.state.tiposDocumentoOptions.filter(e => this.filterSearch(e, this.state.tiposDocumentoOptionsTexto)).slice(0, 75)} onInputChange={e => { this.setState({ tiposDocumentoOptionsTexto: e }) }} value={this.state.tiposDocumentoOptions.filter(option => option.value == this.state.documentoTipo)[0]} search={true} onChange={(e) => { this.setState({ documentoTipo: e.value, }) }} />
+                                                                    {this.state.tiposDocumentoOptions.length > 75 &&
+                                                                        <span style={{color: "red", whiteSpace: "nowrap", fontSize: "0.8em"}}>Limite de 75 tipos atingido. Os tipos ocultos devem ser pesquisados</span>
+                                                                    }
                                                                 </div>
                                                                 {this.state.documentoEditar &&
                                                                     <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
