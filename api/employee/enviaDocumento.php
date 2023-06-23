@@ -26,7 +26,7 @@ if($objData != NULL){
     
     $nome = $os->insertDocumento($chave_os, $chave_osi, $descricao, $tipo, $ext);
     
-    savePicture($documento, $nome, $format, $ext);
+    saveDocs($documento, $nome, $format, $ext);
 
     $result = $os->getUltimoDocumento($chave_os);
 

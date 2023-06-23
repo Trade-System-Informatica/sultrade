@@ -58,7 +58,32 @@ function savePicture($picture ,$name, $format, $ext){
         unlink("../../../$link");
     }
     
-    file_put_contents('../'.$link, $data);
+    file_put_contents('../../../'.$link, $data);
+
+    return "../$link";
+}
+
+function saveDocs($picture, $name, $format, $ext)
+{
+    if ($name == null) {
+        $name = date('m-d-Y-H-i-s', time());
+        $name = str_replace("-", "", $name);
+        $name = $name;
+    }
+
+    $link = $name . '.' . $ext;
+    $link = "documents/docs/" . $link;
+
+    $img = $picture;
+    $img = str_replace('data:' . $format . ';base64,', '', $img);
+    $img = str_replace(' ', '+', $img);
+    $data = base64_decode($img);
+
+    if (file_exists("../../../$link")) {
+        unlink("../../../$link");
+    }
+
+    file_put_contents('../../../' . $link, $data);
 
     return "../$link";
 }
