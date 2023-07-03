@@ -20,6 +20,7 @@ import Select from 'react-select';
 import Modal from '@material-ui/core/Modal';
 import ModalLogs from '../../../components/modalLogs'
 import Alert from '../../../components/alert'
+import ModalCopiarCampos from '../../../components/modalCopiarCampos'
 
 const estadoInicial = {
     evento: '',
@@ -47,6 +48,10 @@ const estadoInicial = {
 
     campos: [],
     eventoComplementar: [],
+
+    camposCopiar: [],
+
+    eventosIrmaos: [],
 
     moedas: [],
 
@@ -484,6 +489,57 @@ class AddEvento extends Component {
             },
             response => { alert(response) }
 
+        )
+    }
+
+    setCamposCopiar = async () => {
+        this.setState({
+            camposCopiar: this.state.campos.map((e, i) => ({
+                ...e,
+                checked: false,
+                onChange: (index) => this.setState({ camposCopiar: this.state.camposCopiar.map((e, i) => i === index ? ({ ...e, checked: !e.checked }) : ({ ...e })) })
+            })),
+        })
+        const eventosIrmaos = await loader.getBody(`getEventosIrmaos.php`, {
+            os: this.state.osOptions.find(option => option.value == this.state.chave_os)?.label,
+        });
+        const camposEvento = this.state.campos?.map((c) => c.nome)?.toSorted();
+        console.log(this.state.campos);
+
+        this.setState({
+            eventosIrmaos: eventosIrmaos.filter((e) => {
+                if (e.chave == this.state.chave) {
+                    return false;
+                }
+
+                const campos = e.campos?.split("@.@")?.toSorted();
+                let camposIguais = true;
+
+                if (campos) {
+                    campos.forEach((c, i) => {
+                        if (c != camposEvento[i]) {
+                            camposIguais = false;
+                        }
+                    })
+
+                    return camposIguais;
+                } else {
+                    return false;
+                }
+            })
+        });
+    }
+
+    copiarCampos = async (eventos) => {
+        await apiEmployee.post(`insertEventosCamposCopiados.php`, {
+            valores: this.state.campos.filter((c) => this.state.camposCopiar.find((campo) => campo.checked && c.chave == campo.chave)).map((campo) => ({ valor: campo?.valor, subgrupo_campo: campo.chave })),
+            eventos,
+        }).then(
+            async res => {
+            },
+            async err => {
+                console.log(err);
+            }
         )
     }
 
@@ -964,7 +1020,7 @@ class AddEvento extends Component {
             if (this.state.eventoComplementar[0]) {
                 await apiEmployee.post(`updateEventoCampos.php`, {
                     token: true,
-                    values: this.state.eventoComplementar.map((e) => ({ ...e, valor: this.state.campos.find((c) => e.subgrupo_campo == c.chave)?.valor})),
+                    values: this.state.eventoComplementar.map((e) => ({ ...e, valor: this.state.campos.find((c) => e.subgrupo_campo == c.chave)?.valor })),
                     evento: this.state.chave
                 }).then(
                     async res => {
@@ -1110,8 +1166,6 @@ class AddEvento extends Component {
             }
         })
     }
-
-
 
     render() {
         const validations = []
@@ -1509,6 +1563,16 @@ class AddEvento extends Component {
 
                             </div >
                         </Modal >
+
+                        <ModalCopiarCampos
+                            modalAberto={this.state.duplicarModal}
+                            closeModal={() => { this.setState({ duplicarModal: false }) }}
+                            campos={this.state.camposCopiar}
+                            subgruposOptions={this.state.eventosIrmaos.map((e) => ({ value: e.chave, label: e.descricao }))}
+                            nome={this.state.descricao}
+                            onSubmit={async (eventos) => await this.copiarCampos(eventos)}
+                        />
+
                         <ModalListas
                             pesquisa={this.state.modalPesquisa}
                             alteraModal={this.alteraModal}
@@ -1655,21 +1719,26 @@ class AddEvento extends Component {
                                                         </div>
                                                         {this.state.campos.map((campo, idx) => (
                                                             <>
-                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <div style={{ height: 70 }} className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                     <label>{campo.nome}</label>
                                                                 </div>
-                                                                <div className='col-1 errorMessage'>
+                                                                <div style={{ height: 70 }} className='col-1 errorMessage'>
                                                                     {campo.obrigatorio == 1 && !campo.valor &&
                                                                         <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
                                                                     }
                                                                 </div>
-                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                <div style={{ height: 70 }} className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                     <Field className="form-control" type="text" rows="2" component="textarea" value={campo.valor} onChange={async e => { this.setState({ campos: this.state.campos.map((c, i) => i === idx ? ({ ...c, valor: e.currentTarget.value }) : ({ ...c })) }) }} />
                                                                 </div>
-                                                                <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
+                                                                <div style={{ height: 70 }} className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
                                                                 </div>
                                                             </>
                                                         ))}
+                                                        {this.state.campos[0] &&
+                                                            <div style={{ marginBottom: 20 }} className="col-12 text-center">
+                                                                <span onClick={async () => { await this.setCamposCopiar(); this.setState({ duplicarModal: true }) }} style={{ color: "#00CCFF", textDecoration: "underline", cursor: "pointer" }}>Duplicar valores</span>
+                                                            </div>
+                                                        }
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Fornecedor</label>
                                                         </div>

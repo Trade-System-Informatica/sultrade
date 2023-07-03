@@ -283,7 +283,9 @@ class OS
     {
         $database = new Database();
 
-        $result = $database->doSelect('os_servicos_itens_complementar', 'os_servicos_itens_complementar.*',
+        $result = $database->doSelect(
+            'os_servicos_itens_complementar',
+            'os_servicos_itens_complementar.*',
             'os_servicos_itens_complementar.evento = ' . $chave
         );
         $database->closeConection();
@@ -457,6 +459,22 @@ class OS
         return $result;
     }
 
+    public static function getEventosIrmaos($os)
+    {
+        $database = new Database();
+
+        $result = $database->doSelect("os_servicos_itens AS eventos
+        LEFT JOIN os ON os.chave = eventos.chave_os
+        LEFT JOIN os_taxas AS taxas ON taxas.chave = eventos.taxa 
+        LEFT JOIN os_subgrupos_taxas AS subgrupos ON subgrupos.chave = taxas.sub_grupo 
+        LEFT JOIN os_subgrupos_taxas_campos AS campos ON campos.subgrupo = subgrupos.chave
+        ", "eventos.*, GROUP_CONCAT(campos.nome SEPARATOR '@.@') AS campos", "
+        os.codigo = '$os' GROUP BY eventos.chave");
+
+        $database->closeConection();
+        return $result;
+    }
+
     public static function gerarRelatorioOS($where)
     {
         $database = new Database();
@@ -511,24 +529,24 @@ class OS
     public static function insertOS($values, $codigo, $tipo, $navio = null, $tipoServico = null, $cliente = null, $porto = null, $chaveCliente)
     {
         $database = new Database();
-        
-        
+
+
         if ($codigo >= 5850 && $navio && $tipoServico && $cliente && $porto) {
             $centroCusto = $database->doSelect('centros_custos', 'Chave', "Codigo = '$codigo'");
-            
+
             if (!$centroCusto[0]) {
                 $valuesCentroCusto = "'$codigo', '$codigo', 'ST$codigo $navio - $tipoServico - $cliente - $porto', '$chaveCliente'";
                 $centroCusto = $database->doInsert('centros_custos', 'Chave, Codigo, Descricao, Cliente', $valuesCentroCusto);
 
-                $database->doUpdate('codigos',"Proximo = '".($codigo+1)."'", "Tipo = 'CC'");
-            }    
+                $database->doUpdate('codigos', "Proximo = '" . ($codigo + 1) . "'", "Tipo = 'CC'");
+            }
             $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio, centro_custo';
-            $result = $database->doInsert('os', $cols, $values.", '".$centroCusto[0]["Chave"]."'");
+            $result = $database->doInsert('os', $cols, $values . ", '" . $centroCusto[0]["Chave"] . "'");
         } else {
             $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio';
             $result = $database->doInsert('os', $cols, $values);
         }
-            
+
 
         if ($result) {
             $query = "Proximo = '" . ($codigo + 1) . "'";
@@ -584,9 +602,9 @@ class OS
 
         $cols = 'subgrupo_campo, valor, evento';
 
-        foreach($values as $key => $value) {
-            $insert = "'".$value->{"chave"}."', '".$value->{"valor"}."', '$evento'";
-            
+        foreach ($values as $key => $value) {
+            $insert = "'" . $value->{"chave"} . "', '" . $value->{"valor"} . "', '$evento'";
+
             $database->doInsert('os_servicos_itens_complementar', $cols, $insert);
         }
 
@@ -606,7 +624,7 @@ class OS
             return ["error" => "Repetição de códigos"];
         }
 
-        $result = $database->doInsert('centros_custos', $cols, $values.", '$codigo'");
+        $result = $database->doInsert('centros_custos', $cols, $values . ", '$codigo'");
 
         if ($result) {
             $query = "Proximo = '" . ($codigo + 1) . "'";
@@ -703,6 +721,23 @@ class OS
         return true;
     }
 
+    public static function insertEventosCamposCopiados($campos, $eventos)
+    {
+        $database = new Database();
+        $cols = "subgrupo_campo, valor, evento";
+
+        foreach ($eventos as $key => $evento) {
+            foreach ($campos as $key => $campo) {
+                $values = "'" . $campo->{"subgrupo_campo"} . "', '" . $campo->{"valor"} . "', " . $evento;
+
+                $database->doInsert('os_servicos_itens_complementar', $cols, $values);
+            }
+        }
+
+        $database->closeConection();
+        return true;
+    }
+
     public static function checkAndDeleteContaOS($os)
     {
         $database = new Database();
@@ -729,7 +764,7 @@ class OS
             $colsDarf = "codigo_receita, contribuinte, codigo_identificador_tributo, mes_compet_num_ref, data_apuracao, valor, valor_multa, valor_juros, valor_outros, valor_pagamento, chave_contas_aberto";
             $colsRet = "chave_conta, complemento, tipo, valor, chave_conta_aberto";
 
-            $valuesLancto = $grupo->{"valuesLancto"}.", '$lote'";
+            $valuesLancto = $grupo->{"valuesLancto"} . ", '$lote'";
             $valuesConta = $grupo->{"valuesConta"};
             $valuesDarf = $grupo->{"valuesDarf"};
 
@@ -787,13 +822,13 @@ class OS
             }
             $valorTotal -= ($valorDesconto + $valorINSS + $valorIR + $valorISS + $valorCRF);
 
-            $contaNova = $database->doInsert("contas_aberto", $colsConta, $valuesConta.", '$valorTotal', '$valorTotal', '".$grupo->{"chave"}."'");
+            $contaNova = $database->doInsert("contas_aberto", $colsConta, $valuesConta . ", '$valorTotal', '$valorTotal', '" . $grupo->{"chave"} . "'");
             $contaNova = $contaNova[0]["Chave"];
             if ($valuesDarf) {
                 $valuesDarf .= "'$contaNova'";
                 $database->doInsert("contas_aberto_complementar", $colsDarf, $valuesDarf);
             }
-            
+
             if ($contaDesconto) {
                 $database->doInsert("contas_aberto_cc", $colsRet, "'$contaDesconto', '$cplDesconto', 'DESC', '$valorDesconto', '$contaNova'");
 
@@ -821,7 +856,7 @@ class OS
             }
 
             if ($valorTotal == $grupo->{"vcp"}) {
-                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '".$grupo->{"historico"}."', '$contaNova', '$valorTotal', '".$grupo->{"contaDebito"}."', '".$grupo->{"contaCredito"}."'");
+                $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '" . $grupo->{"historico"} . "', '$contaNova', '$valorTotal', '" . $grupo->{"contaDebito"} . "', '" . $grupo->{"contaCredito"} . "'");
             } else {
                 $database->doInsert("lancamentos", $colsLancto, "$valuesLancto, '" . $grupo->{"historico"} . "', '$contaNova', '" . $grupo->{"vcp"} . "', '" . $grupo->{"contaDebito"} . "', '" . $grupo->{"contaCredito"} . "'");
 
@@ -927,11 +962,11 @@ class OS
     {
         $database = new Database();
         $usedKeys = [];
-        
+
         foreach ($values as $key => $value) {
             array_push($usedKeys, $value->{"chave"});
 
-            $query = "valor = '" . $value->{"valor"}."'";
+            $query = "valor = '" . $value->{"valor"} . "'";
             $database->doUpdate('os_servicos_itens_complementar', $query, 'chave = ' . $value->{"chave"});
         }
 

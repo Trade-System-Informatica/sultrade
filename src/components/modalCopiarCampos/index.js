@@ -20,6 +20,12 @@ class ModalCopiarCampos extends Component {
         ...estadoInicial,
     }
 
+    componentDidUpdate = (prevProps, prevStates) => {
+        if (prevProps.modalAberto != this.props.modalAberto && !this.props.modalAberto) {
+            this.setState({ gruposEscolhidos: []})
+        }
+    }
+
     fecharModal = () => {
         this.props.closeModal();
     }
