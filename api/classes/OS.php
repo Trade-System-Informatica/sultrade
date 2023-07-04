@@ -728,9 +728,26 @@ class OS
 
         foreach ($eventos as $key => $evento) {
             foreach ($campos as $key => $campo) {
-                $values = "'" . $campo->{"subgrupo_campo"} . "', '" . $campo->{"valor"} . "', " . $evento;
-
-                $database->doInsert('os_servicos_itens_complementar', $cols, $values);
+                $campo_titulo = $database->doSelect('os_subgrupos_taxas_campos', 'nome', "chave = ".$campo->{"subgrupo_campo"});
+                if ($campo_titulo[0]) {
+                    $campo_titulo = $campo_titulo[0]["nome"];
+                    
+                    $campo_evento = $database->doSelect('os_servicos_itens 
+                    LEFT JOIN os_taxas ON os_taxas.chave = os_servicos_itens.taxa
+                    LEFT JOIN os_subgrupos_taxas ON os_subgrupos_taxas.chave = os_taxas.sub_grupo
+                    LEFT JOIN os_subgrupos_taxas_campos ON os_subgrupos_taxas_campos.subgrupo_campo = os_subgrupos_taxas.chave',
+                    'os_subgrupos_taxas_campos.subgrupo_campo AS subgrupo_campo', "os_subgrupos_taxas_campos = '$campo_titulo' AND os_servicos_itens.chave = $evento");
+                    
+                    if ($campo_evento[0]) {
+                        $values = "'" . $campo_evento[0]["subgrupo_campo"] . "', '" . $campo->{"valor"} . "', " . $evento;
+                        
+                        $database->doInsert('os_servicos_itens_complementar', $cols, $values);
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
             }
         }
 
