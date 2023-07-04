@@ -293,7 +293,13 @@ class AddOS extends Component {
             })
 
             if (this.state.cabecalho) {
-                const cabecalho = JSON.parse(this.state.cabecalho);
+                let cabecalho;
+                
+                try {
+                    cabecalho = JSON.parse(this.state.cabecalho);
+                } catch (err) {
+                    cabecalho = JSON.parse(this.state.cabecalho.replaceAll("\n","\\n").replaceAll("\t","\\t"));
+                }
 
                 await this.setState({
                     company: cabecalho.company,
