@@ -736,7 +736,7 @@ class OS
                     LEFT JOIN os_taxas ON os_taxas.chave = os_servicos_itens.taxa
                     LEFT JOIN os_subgrupos_taxas ON os_subgrupos_taxas.chave = os_taxas.sub_grupo
                     LEFT JOIN os_subgrupos_taxas_campos ON os_subgrupos_taxas_campos.subgrupo_campo = os_subgrupos_taxas.chave',
-                    'os_subgrupos_taxas_campos.subgrupo_campo AS subgrupo_campo', "os_subgrupos_taxas_campos = '$campo_titulo' AND os_servicos_itens.chave = $evento");
+                    'os_subgrupos_taxas_campos.chave AS subgrupo_campo', "os_subgrupos_taxas_campos = '$campo_titulo' AND os_servicos_itens.chave = $evento");
                     
                     if ($campo_evento[0]) {
                         $values = "'" . $campo_evento[0]["subgrupo_campo"] . "', '" . $campo->{"valor"} . "', " . $evento;
