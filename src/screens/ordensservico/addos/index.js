@@ -1473,7 +1473,7 @@ class AddOS extends Component {
         this.setState({ ...util.cleanStates(this.state) });
         await this.setState({ loading: true, cabecalhoModal: false });
 
-        const cabecalho = `{"company": "${this.state.company.replaceAll('"', "'")}", "address": "${this.state.address.replaceAll('"', "'")}"}`
+        const cabecalho = `{"company": "${this.state.company.replaceAll('"', "'").replaceAll("\t", "\\t").replaceAll('\n', '\\n') }", "address": "${this.state.address.replaceAll('"', "'").replaceAll("\t", "\\t").replaceAll('\n', '\\n') }"}`
 
         await apiEmployee.post(`updateOSCabecalho.php`, {
             token: true,
