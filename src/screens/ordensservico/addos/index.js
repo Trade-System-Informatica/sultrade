@@ -2926,8 +2926,7 @@ class AddOS extends Component {
                                 } catch (err) {
                                     cabecalho = JSON.parse(chave.cabecalho?.replaceAll("\n", "\\n").replaceAll("\t", "\\t"));
                                 }
-                                const cabecalho = JSON.parse(chave.cabecalho);
-
+                                
                                 if (cabecalho.company) {
                                     company = cabecalho.company;
                                 }
