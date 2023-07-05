@@ -294,11 +294,11 @@ class AddOS extends Component {
 
             if (this.state.cabecalho) {
                 let cabecalho;
-                
+
                 try {
                     cabecalho = JSON.parse(this.state.cabecalho);
                 } catch (err) {
-                    cabecalho = JSON.parse(this.state.cabecalho.replaceAll("\n","\\n").replaceAll("\t","\\t"));
+                    cabecalho = JSON.parse(this.state.cabecalho.replaceAll("\n", "\\n").replaceAll("\t", "\\t"));
                 }
 
                 await this.setState({
@@ -1479,7 +1479,7 @@ class AddOS extends Component {
         this.setState({ ...util.cleanStates(this.state) });
         await this.setState({ loading: true, cabecalhoModal: false });
 
-        const cabecalho = `{"company": "${this.state.company.replaceAll('"', "'").replaceAll("\t", "\\t").replaceAll('\n', '\\n') }", "address": "${this.state.address.replaceAll('"', "'").replaceAll("\t", "\\t").replaceAll('\n', '\\n') }"}`
+        const cabecalho = `{"company": "${this.state.company.replaceAll('"', "'").replaceAll("\t", "\\t").replaceAll('\n', '\\n')}", "address": "${this.state.address.replaceAll('"', "'").replaceAll("\t", "\\t").replaceAll('\n', '\\n')}"}`
 
         await apiEmployee.post(`updateOSCabecalho.php`, {
             token: true,
@@ -1627,7 +1627,13 @@ class AddOS extends Component {
             let address = `${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].complemento)} ${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].rua)} ${this.state.pdfContent[0].numero && this.state.pdfContent[0].numero != "0" ? this.state.pdfContent[0].numero : ""} ${this.state.pdfContent[0].cep && this.state.pdfContent[0].cep != "0" ? this.state.pdfContent[0].cep : ""}`;
 
             if (this.state.pdfContent[0].cabecalho) {
-                const cabecalho = JSON.parse(this.state.pdfContent[0].cabecalho);
+                let cabecalho;
+
+                try {
+                    cabecalho = JSON.parse(this.state.pdfContent[0].cabecalho);
+                } catch (err) {
+                    cabecalho = JSON.parse(this.state.pdfContent[0].cabecalho?.replaceAll("\n", "\\n").replaceAll("\t", "\\t"));
+                }
 
                 if (cabecalho.company) {
                     company = cabecalho.company;
@@ -2913,6 +2919,13 @@ class AddOS extends Component {
                             let address = chave.address;
 
                             if (chave.cabecalho) {
+                                let cabecalho;
+
+                                try {
+                                    cabecalho = JSON.parse(chave.cabecalho);
+                                } catch (err) {
+                                    cabecalho = JSON.parse(chave.cabecalho?.replaceAll("\n", "\\n").replaceAll("\t", "\\t"));
+                                }
                                 const cabecalho = JSON.parse(chave.cabecalho);
 
                                 if (cabecalho.company) {
@@ -3615,10 +3628,10 @@ class AddOS extends Component {
                                                                 <div className="col-1 errorMessage">
 
                                                                 </div>
-                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10" style={this.state.tiposDocumentoOptions.length > 75 ? {marginBottom: 10} : {}}>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10" style={this.state.tiposDocumentoOptions.length > 75 ? { marginBottom: 10 } : {}}>
                                                                     <Select className='SearchSelect' options={this.state.tiposDocumentoOptions.filter(e => this.filterSearch(e, this.state.tiposDocumentoOptionsTexto)).slice(0, 75)} onInputChange={e => { this.setState({ tiposDocumentoOptionsTexto: e }) }} value={this.state.tiposDocumentoOptions.filter(option => option.value == this.state.documentoTipo)[0]} search={true} onChange={(e) => { this.setState({ documentoTipo: e.value, }) }} />
                                                                     {this.state.tiposDocumentoOptions.length > 75 &&
-                                                                        <span style={{color: "red", whiteSpace: "nowrap", fontSize: "0.8em"}}>Limite de 75 tipos atingido. Os tipos ocultos devem ser pesquisados</span>
+                                                                        <span style={{ color: "red", whiteSpace: "nowrap", fontSize: "0.8em" }}>Limite de 75 tipos atingido. Os tipos ocultos devem ser pesquisados</span>
                                                                     }
                                                                 </div>
                                                                 {this.state.documentoEditar &&
