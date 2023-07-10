@@ -190,7 +190,7 @@ class Navios
         pessoas_enderecos.endereco as address, 
         os_portos.descricao as name_of_port,
         os_navios.nome as vessel_name",
-            "os.codigo='" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND (os_servicos_itens.tipo_sub = 0 OR os_servicos_itens.tipo_sub = 1) AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.Fornecedor_Custeio != '') ORDER BY os_servicos_itens.ordem ASC"
+            "os.codigo='" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND (os_servicos_itens.tipo_sub = 0 OR os_servicos_itens.tipo_sub = 1) AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.Fornecedor_Custeio != '') GROUP BY os_servicos_itens.chave ORDER BY os_servicos_itens.ordem ASC"
         );
 
         $result['chaves'] = $database->doSelect(
