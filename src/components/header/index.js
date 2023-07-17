@@ -560,6 +560,11 @@ class Header extends Component {
                                                             Tipos de Documentos
                                                         </Link>
                                                     }
+                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CATEGORIAS_TIPOS_DOCUMENTOS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                        <Link className="dropdown-item" to={{ pathname: `/tabelas/categoriasdocumentos` }}>
+                                                            Categorias de Documentos
+                                                        </Link>
+                                                    }
                                                 </ul>
                                             }
                                         </div>

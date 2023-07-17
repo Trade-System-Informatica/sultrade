@@ -475,6 +475,16 @@ class OS
         return $result;
     }
 
+    public static function getCategoriasDocumentos($empresa) 
+    {
+        $database = new Database();
+
+        $result = $database->doSelect("tipos_docto_categorias", "tipos_docto_categorias.*", "empresa = $empresa");
+
+        $database->closeConection();
+        return $result;
+    }
+
     public static function gerarRelatorioOS($where)
     {
         $database = new Database();
@@ -753,6 +763,18 @@ class OS
 
         $database->closeConection();
         return true;
+    }
+
+    public static function insertCategoriaDocumento($values)
+    {
+        $database = new Database();
+
+        $cols = 'descricao';
+
+        $result = $database->doInsert('tipos_docto_categorias', $cols, $values);
+
+        $database->closeConection();
+        return $result;
     }
 
     public static function checkAndDeleteContaOS($os)
@@ -1079,6 +1101,21 @@ class OS
 
         $database->closeConection();
         return true;
+    }
+
+    public static function updateCategoriaDocumento($chave, $descricao)
+    {
+        $database = new Database();
+
+        $query = "descricao = '" . $descricao . "'";
+
+        $result = $database->doUpdate('tipos_docto', $query, 'chave = ' . $chave);
+        $database->closeConection();
+        if ($result == NULL) {
+            return 'false';
+        } else {
+            return $result;
+        }
     }
 
     public static function trocaDocumento($chave, $descricao, $tipo, $ext, $caminho)

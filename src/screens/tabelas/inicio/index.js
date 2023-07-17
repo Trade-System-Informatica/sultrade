@@ -93,31 +93,8 @@ class Tabelas extends Component {
         )
         await this.setState({ loading: false })
     }
-    /*
-   verificaLogado = async () => {
-       if(this.props.online){
-            await api.get(`ships`, {
-                headers: {
-                    "Authorization": `bearer ${this.props.token}`
-                }
-            }).then(
-                async response => {alert('ok')},
-                async response => { this.erroApi(response)}
-            )
-            
-       }else{
-            await apiLocal.get(`ships`, {
-                headers: {
-                    "Authorization": `bearer ${this.props.token}`
-                }
-            }).then(
-                async response => {console.log('ok')},
-                async response => { this.erroApi(response)}
-            )
-       } 
-       await this.setState({loading: false})
-    }
-    */
+   
+    
     erroApi = async (res) => {
         await this.setState({ isLogado: false })
         //alert('Você precisa estar logado para poder acessar esta página!')
@@ -254,6 +231,15 @@ class Tabelas extends Component {
                                                 <Link className="semTextDecoration" to={{ pathname: `/tabelas/tiposdocumentos` }}>
                                                     <FontAwesomeIcon icon={faFileAlt} size="2x" color="tomato" />
                                                     <h4 className="textoMenu">Tipos de Documentos</h4>
+                                                </Link>
+                                            </li>
+                                        }
+
+                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CATEGORIAS_TIPOS_DOCUMENTOS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                            <li className=" text-left itemMenu list-group-item ">
+                                                <Link className="semTextDecoration" to={{ pathname: `/tabelas/categoriasdocumentos` }}>
+                                                    <FontAwesomeIcon icon={faFileAlt} size="2x" color="tomato" />
+                                                    <h4 className="textoMenu">Categorias de Documentos</h4>
                                                 </Link>
                                             </li>
                                         }

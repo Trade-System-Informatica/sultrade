@@ -27,6 +27,7 @@ import HistoricosPadrao from './screens/tabelas/historicospadrao'
 import DescricoesPadrao from './screens/tabelas/descricoespadrao'
 import TiposDocumentos from './screens/tabelas/tiposdocumentos'
 import ContasPortos from './screens/tabelas/contasportos'
+import CategoriasDocumentos from './screens/tabelas/categoriasDocumentos'
 
 import AddShip from './screens/tabelas/addship'
 import AddTipoServico from './screens/tabelas/addtiposervico'
@@ -43,6 +44,7 @@ import AddPlanoConta from './screens/tabelas/addplanoconta'
 import AddHistorico from './screens/tabelas/addhistorico'
 import AddDescricao from './screens/tabelas/adddescricao'
 import AddTipoDocumento from './screens/tabelas/addtipodocumento'
+import AddCategoriaDocumento from './screens/tabelas/addcategoriadocumento'
 
 
 import Operadores from './screens/utilitarios/operadores'
@@ -114,6 +116,7 @@ export default function Routes(){
                 <Route path="/tabelas/descricoespadrao" component={DescricoesPadrao} />
                 <Route path="/tabelas/tiposdocumentos" component={TiposDocumentos} />
                 <Route path="/tabelas/contasportos" component={ContasPortos} />
+                <Route path="/tabelas/categoriasdocumentos" component={CategoriasDocumentos} />
 
                 <Route path="/tabelas/addship/:id" component={AddShip} />
                 <Route path="/tabelas/addtiposervico/:id" component={AddTipoServico} />
@@ -129,7 +132,8 @@ export default function Routes(){
                 <Route path="/tabelas/addplanoconta/:id/" component={AddPlanoConta} />
                 <Route path="/tabelas/addhistorico/:id/" component={AddHistorico} />          
                 <Route path="/tabelas/adddescricao/:id/" component={AddDescricao} />          
-                <Route path="/tabelas/addtipodocumento/:id/" component={AddTipoDocumento} />          
+                <Route path="/tabelas/addtipodocumento/:id/" component={AddTipoDocumento} />
+                <Route path="/tabelas/addcategoriadocumento/:id/" component={AddCategoriaDocumento} />          
 
 
                 <Route path="/utilitarios/operadores" component={Operadores} />
