@@ -2170,6 +2170,13 @@ class AddOS extends Component {
                             origin: -1
                         })
 
+                        XLSX.utils.sheet_add_json(worksheet, emptyLine, {
+                            skipHeader: true,
+                            origin: -1
+                        });
+                        emptyRows.push(rowCount);
+                        rowCount++;
+
                         XLSX.utils.sheet_add_json(worksheet, footer, {
                             skipHeader: true,
                             origin: -1
@@ -2186,6 +2193,10 @@ class AddOS extends Component {
                     }
                 })
 
+                XLSX.utils.sheet_add_json(worksheet, emptyLine, {
+                    skipHeader: true,
+                    origin: -1
+                });
                 XLSX.utils.sheet_add_json(worksheet, [{
                     title: "TOTAL CONSOLIDADO",
                     _1: "",
@@ -2200,9 +2211,10 @@ class AddOS extends Component {
                     skipHeader: true,
                     origin: -1
                 });
-                totalRow.push(rowCount);
-                emptyRows.push(rowCount + 1);
-                rowCount += 2;
+                emptyRows.push(rowCount);
+                totalRow.push(rowCount + 1);
+                emptyRows.push(rowCount + 2);
+                rowCount += 3;
 
                 if (pdfRepasse[0]) {
                     const bigHeader = [
@@ -2268,6 +2280,12 @@ class AddOS extends Component {
                             origin: -1
                         })
                     });
+                    XLSX.utils.sheet_add_json(worksheet, emptyLine, {
+                        skipHeader: true,
+                        origin: -1
+                    });
+                    emptyRows.push(rowCount);
+                    rowCount++;
 
                     XLSX.utils.sheet_add_json(worksheet, footer, {
                         skipHeader: true,
@@ -2520,6 +2538,20 @@ class AddOS extends Component {
                                     totalValor.push(XLSX.utils.encode_cell({ r: row, c: col }));
                                 }
                             }
+
+                            worksheet[cell].s = {
+                                ...worksheet[cell].s,
+                                fill: {
+                                    patternType: "solid",
+                                    fgColor: { rgb: "CCCCCC" },
+                                    bgColor: { rgb: "CCCCCC" }
+                                },
+                                font: {
+                                    ...worksheet[cell].s?.font,
+                                    bold: true
+                                }
+                            }
+
                         }
                         if ([...fieldsRows, ...fieldsRepasseRows].includes(row)) {
                             worksheet[cell].s = {
@@ -2561,8 +2593,16 @@ class AddOS extends Component {
 
                         if (totalRow.includes(row)) {
                             worksheet[cell].s = {
+                                ...worksheet[cell].s,
+                                fill: {
+                                    patternType: "solid",
+                                    fgColor: { rgb: "888888" },
+                                    bgColor: { rgb: "888888" }
+                                },
+                                numFmt: "R$ #,##0.00",
                                 font: {
-                                    bold: true
+                                    ...worksheet[cell].s?.font,
+                                    bold: true,
                                 }
                             }
                             if (col === 4) {
@@ -2571,7 +2611,7 @@ class AddOS extends Component {
                         }
 
                         if (totalCusteioRow.includes(row) && col === 4) {
-                            worksheet[cell].f = totalCusteio.join("+");
+                            worksheet[cell].f = totalCusteio.map((t, i) => { if (i === (totalCusteio.length - 1)) { return t.replace("D", "C") } return t }).join("+");
                             totalFDA.push(XLSX.utils.encode_cell({ r: row, c: col }));
                         }
 
@@ -2926,7 +2966,7 @@ class AddOS extends Component {
                                 } catch (err) {
                                     cabecalho = JSON.parse(chave.cabecalho?.replaceAll("\n", "\\n").replaceAll("\t", "\\t"));
                                 }
-                                
+
                                 if (cabecalho.company) {
                                     company = cabecalho.company;
                                 }
