@@ -124,7 +124,8 @@ class AddCategoriaDocumento extends Component {
 
         await this.setState({
             dadosFinais: [
-                {titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao)}
+                { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                { titulo: 'Empresa', valor: util.formatForLogs(this.state.usuarioLogado.empresa)}
             ],
             loading: true
         })
@@ -133,10 +134,10 @@ class AddCategoriaDocumento extends Component {
             //$cols = 'data, titulo, texto, imagem, link, inativo';
             await apiEmployee.post(`insertCategoriaDocumentos.php`, {
                 token: true,
-                values: `'${this.state.descricao}'`
+                values: `'${this.state.descricao}', ${this.state.usuarioLogado.empresa}`
             }).then(
                 async res => {
-                    if (res.data[0].Chave) {
+                    if (res.data[0].categorias) {
                         await this.setState({ chave: res.data[0].chave })
                         await loader.salvaLogs('tipos_docto_categorias', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
 
@@ -150,9 +151,9 @@ class AddCategoriaDocumento extends Component {
         } else if (validForm) {
             await apiEmployee.post(`updateCategoriaDocumentos.php`, {
                 token: true,
-                Chave: this.state.chave,
-                Codigo: this.state.sigla,
-                Descricao: this.state.descricao
+                chave: this.state.chave,
+                descricao: this.state.descricao,
+                empresa: this.state.usuarioLogado.empresa
             }).then(
                 async res => {
                     if (res.data === true) {

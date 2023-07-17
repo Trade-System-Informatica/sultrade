@@ -292,7 +292,7 @@ class CategoriasDocumentos extends Component {
                             <div className="row" id="product-list">
                                 <div className="col-lg-2 col-md-2 col-sm-0 col-0"></div>
                                 <div className="col-lg-8 col-md-8 col-sm-12 mobileajuste14 ">
-                                    {this.state.categorias[0].descricao != undefined && this.state.categorias.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (
+                                    {this.state.categorias[0]?.descricao != undefined && this.state.categorias.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (
                                         <div ref={feed.chave == this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-12 col-md-12 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.chave == this.state.chaveFocus ? "par focusLight" : "par " : feed.chave == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
 
                                             {window.innerWidth >= 500 &&

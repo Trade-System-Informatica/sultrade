@@ -769,7 +769,7 @@ class OS
     {
         $database = new Database();
 
-        $cols = 'descricao';
+        $cols = 'descricao, empresa';
 
         $result = $database->doInsert('tipos_docto_categorias', $cols, $values);
 
@@ -1103,11 +1103,11 @@ class OS
         return true;
     }
 
-    public static function updateCategoriaDocumento($chave, $descricao)
+    public static function updateCategoriaDocumento($chave, $descricao, $empresa)
     {
         $database = new Database();
 
-        $query = "descricao = '" . $descricao . "'";
+        $query = "descricao = '" . $descricao . "', empresa = $empresa";
 
         $result = $database->doUpdate('tipos_docto', $query, 'chave = ' . $chave);
         $database->closeConection();
