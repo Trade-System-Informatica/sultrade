@@ -301,7 +301,7 @@ class CategoriasDocumentos extends Component {
                                                         <p className="mobileajuster5">{feed.chave}</p>
                                                     </div>
                                                     <div className="col-lg-7 col-md-7 col-sm-7 col-7 text-left">
-                                                        <h6 className="mobileajuster5">{feed.cescricao}</h6>
+                                                        <h6 className="mobileajuster5">{feed.descricao}</h6>
                                                     </div>
                                                     <div className="col-lg-3 col-md-3 col-sm-3 col-3  text-left icones mobileajuster4 ">
                                                         <div className='iconelixo giveMargin' type='button' >

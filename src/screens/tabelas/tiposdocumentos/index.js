@@ -173,6 +173,8 @@ class TiposDocumentos extends Component {
         if (this.state.tipoPesquisa == 1) {
             return item.Descricao.toLowerCase().includes(this.state.pesquisa.toLowerCase())
         } else if (this.state.tipoPesquisa == 2) {
+            return item.categoriaNome.toLowerCase().includes(this.state.pesquisa.toLowerCase())
+        } else if (this.state.tipoPesquisa == 3) {
             return item.Chave.toLowerCase().includes(this.state.pesquisa.toLowerCase())
         }
 
@@ -222,7 +224,8 @@ class TiposDocumentos extends Component {
                                             <div className='col-2'></div>
                                             <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
                                                 <option value={1}>Descricao</option>
-                                                <option value={2}>Chave</option>
+                                                <option value={2}>Categoria</option>
+                                                <option value={3}>Chave</option>
                                             </select>
                                             <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
 
@@ -250,10 +253,13 @@ class TiposDocumentos extends Component {
                                     <div className="single-product-item aasd">
                                         {window.innerWidth >= 500 &&
                                             <div className="row subtitulosTabela">
-                                                <div className="col-lg-3 col-md-3 col-sm-3  col-3 text-left">
+                                                <div className="col-lg-2 col-md-2 col-sm-2  col-2 text-left">
                                                     <span className='subtituloships'>Chave</span>
                                                 </div>
-                                                <div className="col-lg-6 col-md-6 col-sm-6 col-6 text-left">
+                                                <div className="col-lg-4 col-md-4 col-sm-4 col-4 text-left">
+                                                    <span className='subtituloships'>Descrição</span>
+                                                </div>
+                                                <div className="col-lg-3 col-md-3 col-sm-3 col-3 text-left">
                                                     <span className='subtituloships'>Descrição</span>
                                                 </div>
                                                 <div className="col-3 text-right revertItem" onClick={() => this.reverterItens()}>
@@ -284,11 +290,14 @@ class TiposDocumentos extends Component {
 
                                             {window.innerWidth >= 500 &&
                                                 <div className="row ">
-                                                    <div className="col-lg-3 col-md-3 col-sm-3 col-3 text-left">
+                                                    <div className="col-lg-2 col-md-2 col-sm-2 col-2 text-left">
                                                         <p className="mobileajuster5">{feed.Chave}</p>
                                                     </div>
-                                                    <div className="col-lg-6 col-md-6 col-sm-6  col-6 text-left">
+                                                    <div className="col-lg-4 col-md-4 col-sm-4  col-4 text-left">
                                                         <h6 className="mobileajuster5">{feed.Descricao}</h6>
+                                                    </div>
+                                                    <div className="col-lg-3 col-md-3 col-sm-3  col-3 text-left">
+                                                        <h6 className="mobileajuster5">{feed.categoriaNome}</h6>
                                                     </div>
                                                     <div className="col-lg-3 col-md-3 col-sm-3 col-3  text-left icones mobileajuster4 ">
                                                         <div className='iconelixo giveMargin' type='button' >
@@ -332,7 +341,8 @@ class TiposDocumentos extends Component {
                                                             modalItemAberto: true,
                                                             itemInfo: [
                                                                 { titulo: 'Chave', valor: feed.Chave },
-                                                                { titulo: 'Descrição', valor: feed.Descricao }
+                                                                { titulo: 'Descrição', valor: feed.Descricao },
+                                                                { titulo: 'Categoria', valor: feed.categoriaNome }
                                                             ],
                                                             itemPermissao: 'TIPOS_DOCUMENTOS',
                                                             itemNome: feed.Descricao,

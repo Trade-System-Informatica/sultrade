@@ -11,6 +11,7 @@ import { apiEmployee } from '../../../services/apiamrg'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import ModalLogs from '../../../components/modalLogs'
+import Select from 'react-select'
 
 const estadoInicial = {
     data: '',
@@ -34,10 +35,15 @@ const estadoInicial = {
     dadosFinais: '',
 
     descricao: '',
+    categoria: '',
+
+    categoriasOptions: [],
 
     acessos: [],
     permissoes: [],
     acessosPermissoes: [],
+
+    textOptions: '',
 
     bloqueado: false,
 }
@@ -59,6 +65,7 @@ class AddTipoDocumento extends Component {
                 descricao: this.state.tipoDocumento.Descricao,
             })
         }
+        await this.loadAll()
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
         await this.testaAcesso()
@@ -100,6 +107,12 @@ class AddTipoDocumento extends Component {
         )
     }
 
+    loadAll = async () => {
+        this.setState({
+            categoriasOptions: await loader.getBaseOptions(`getCategoriasDocumentos.php`, "descricao", "chave")
+        });
+    }
+
     testaAcesso = async () => {
         let permissao = '';
 
@@ -131,7 +144,8 @@ class AddTipoDocumento extends Component {
 
         await this.setState({
             dadosFinais: [
-                { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) }
+                { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
+                { titulo: 'Categoria', valor: util.formatForLogs(this.state.categoria) }
             ],
             loading: true
         })
@@ -139,7 +153,7 @@ class AddTipoDocumento extends Component {
         if (parseInt(this.state.chave) === 0 && validForm) {
             await apiEmployee.post(`insertTipoDocumento.php`, {
                 token: true,
-                values: `'${this.state.descricao}'`
+                values: `'${this.state.descricao}', ${this.state.categoria}`
             }).then(
                 async res => {
                     if (res.data[0].Chave) {
@@ -158,6 +172,7 @@ class AddTipoDocumento extends Component {
                 token: true,
                 Chave: this.state.chave,
                 Descricao: this.state.descricao,
+                categoria: this.state.categoria,
             }).then(
                 async res => {
                     if (res.data === true) {
@@ -279,6 +294,16 @@ class AddTipoDocumento extends Component {
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                     <Field className="form-control" type="text" value={this.state.descricao} onChange={async e => { this.setState({ descricao: e.currentTarget.value }) }} />
                                                 </div>
+
+                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                    <label>Categoria</label>
+                                                </div>
+                                                <div className="col-1 errorMessage">
+                                                </div>
+                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                    <Select className='SearchSelect' options={this.state.categoriasOptions.filter(e => this.filterSearch(e, this.state.textOptions)).slice(0, 20)} onInputChange={e => { this.setState({ textOptions: e }) }} value={this.state.categoriasOptions.find(option => option.value == this.state.categoria)} search={true} onChange={(e) => { this.setState({ categoria: e.value, }) }} />
+                                                </div>
+                                                <div className="col-1"></div>
                                             </div>
 
 

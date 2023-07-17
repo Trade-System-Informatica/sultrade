@@ -5347,6 +5347,9 @@ class AddOS extends Component {
                                                                                 <span>Nome</span>
                                                                             </th>
                                                                             <th className='text-center'>
+                                                                                <span>Categoria</span>
+                                                                            </th>
+                                                                            <th className='text-center'>
                                                                                 <span>
                                                                                     <Link>
                                                                                         <FontAwesomeIcon icon={faPlus} onClick={() => this.setState({ documentoModal: true })} />
@@ -5369,6 +5372,11 @@ class AddOS extends Component {
                                                                                 <td className="text-center">
                                                                                     <a href={`${CAMINHO_DOCUMENTOS}/docs/${feed.caminho}`} className='nonlink' target='_blank'>
                                                                                         <p>{feed.caminho}</p>
+                                                                                    </a>
+                                                                                </td>
+                                                                                <td className="text-center">
+                                                                                    <a href={`${CAMINHO_DOCUMENTOS}/docs/${feed.caminho}`} className='nonlink' target='_blank'>
+                                                                                        <p>{feed.categoria}</p>
                                                                                     </a>
                                                                                 </td>
                                                                                 <td>

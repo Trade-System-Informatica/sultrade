@@ -230,9 +230,13 @@ class OS
         $database = new Database();
 
         $result = $database->doSelect(
-            'os_documentos LEFT JOIN os ON os_documentos.chave_os = os.chave LEFT JOIN os_servicos_itens ON os_documentos.chave_os_itens = os_servicos_itens.chave',
-            'os_documentos.*',
-            'os_documentos.chave_os = ' . $chave_os
+            'os_documentos 
+                LEFT JOIN tipos_docto ON tipos_docto.chave = os_documentos.tipo_docto 
+                LEFT JOIN tipos_docto_categorias ON tipos_docto_categorias.chave = tipos_docto.categoria 
+                LEFT JOIN os ON os_documentos.chave_os = os.chave 
+                LEFT JOIN os_servicos_itens ON os_documentos.chave_os_itens = os_servicos_itens.chave',
+            'os_documentos.*, tipos_docto_categorias.descricao AS categoria',
+            'os_documentos.chave_os = ' . $chave_os.' ORDER BY tipos_docto_categorias.descricao ASC'
         );
         $database->closeConection();
         return $result;
@@ -384,9 +388,9 @@ class OS
         $database = new Database();
 
         $result = $database->doSelect(
-            'tipos_docto',
-            'tipos_docto.*',
-            '1 = 1 ORDER BY chave ASC'
+            'tipos_docto LEFT JOIN tipos_docto_categorias ON tipos_docto_categorias.chave = tipos_docto.categoria ',
+            'tipos_docto.*, tipos_docto_categorias.descricao AS categoriaNome',
+            '1 = 1 ORDER BY tipos_docto_categorias.descricao ASC'
         );
         $database->closeConection();
         return $result;
@@ -706,7 +710,7 @@ class OS
     {
         $database = new Database();
 
-        $cols = 'Descricao';
+        $cols = 'Descricao, categoria';
 
         $result = $database->doInsert('tipos_docto', $cols, $values);
 
@@ -1064,11 +1068,11 @@ class OS
         }
     }
 
-    public static function updateTipoDocumento($Chave, $Descricao)
+    public static function updateTipoDocumento($Chave, $Descricao, $categoria)
     {
         $database = new Database();
 
-        $query = "Descricao = '" . $Descricao . "'";
+        $query = "Descricao = '" . $Descricao . "', categoria = $categoria";
 
         $result = $database->doUpdate('tipos_docto', $query, 'Chave = ' . $Chave);
         $database->closeConection();
@@ -1198,6 +1202,15 @@ class OS
         $database = new Database();
 
         $result = $database->doDelete('custeios_subagentes', "grupo = '$grupo' AND os = '$os'");
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function deleteCategoriaDocumento($chave)
+    {
+        $database = new Database();
+
+        $result = $database->doDelete('custeios_subagentes', "chave = '$chave'");
         $database->closeConection();
         return $result;
     }
