@@ -579,10 +579,10 @@ class OS
             $os = $database->doSelect("os_servicos_itens", "os_servicos_itens.*", "chave_os = $chave_os");
 
             foreach ($os as $item) {
-                if ($item["ordem"] >= $ordem) {
+                if ($item["ordem"] == $ordem) {
                     $item["ordem"]++;
 
-                    $database->doUpdate("os_servicos_itens", "os_servicos_itens.ordem = '" . $item["ordem"] . "'", "chave = '" . $item["chave"] . "'");
+                    $database->doUpdate("os_servicos_itens", "os_servicos_itens.ordem = (os_servicos_itens.ordem + 1)", "chave_os = '$chave_os' AND os_servicos_itens.ordem >= ".$item["ordem"]);
                 }
             }
         }
