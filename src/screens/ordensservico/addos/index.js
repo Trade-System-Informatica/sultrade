@@ -3080,7 +3080,7 @@ class AddOS extends Component {
                                         </table>
                                     </div>
 
-                                    <div className='voucherFooter'>Comments: {chave.Comentario_Voucher}</div>
+                                    <div className='voucherFooter'>Comments:</div>
                                     {camposTitulos.map((titulo) => {
                                         if (titulo.tipo == "LISTA") {
                                             return (
@@ -4516,17 +4516,8 @@ class AddOS extends Component {
                                                                 <Select className='SearchSelect' options={this.state.operadoresOptions.filter(e => this.filterSearch(e, this.state.operadoresOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ operadoresOptionsTexto: e }) }} value={this.state.operadoresOptions.filter(option => option.value == this.state.operador)[0]} search={true} onChange={(e) => { this.setState({ operador: e.value, }) }} />
                                                             </div>
                                                             <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12"></div>
-                                                            <div className="col-1">
+                                                            <div className="col-1"></div>
 
-                                                            </div>
-                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                <label>Remarks</label>
-                                                            </div>
-                                                            <div className="col-1 errorMessage">
-                                                            </div>
-                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="text" value={this.state.descricao} onChange={async e => { this.setState({ descricao: e.currentTarget.value }) }} />
-                                                            </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 <label>E.T.A.</label>
@@ -4728,17 +4719,6 @@ class AddOS extends Component {
                                                             <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
                                                                 <Select className='SearchSelect' options={this.state.operadoresOptions.filter(e => this.filterSearch(e, this.state.operadoresOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ operadoresOptionsTexto: e }) }} value={this.state.operadoresOptions.filter(option => option.value == this.state.operador)[0]} search={true} onChange={(e) => { this.setState({ operador: e.value, }) }} />
                                                             </div>
-                                                            <div className="col-1">
-
-                                                            </div>
-                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                <label>Remarks</label>
-                                                            </div>
-                                                            <div className="col-1 errorMessage">
-                                                            </div>
-                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="text" value={this.state.descricao} onChange={async e => { this.setState({ descricao: e.currentTarget.value }) }} />
-                                                            </div>
                                                             <div className="col-1"></div>
 
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -4863,7 +4843,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="text" value={this.state.comentario} onChange={async e => { this.setState({ comentario: e.currentTarget.value }) }} />
+                                                                <Field className="form-control" type="text" rows="4" component="textarea" value={this.state.comentario} onChange={async e => { this.setState({ comentario: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
 
