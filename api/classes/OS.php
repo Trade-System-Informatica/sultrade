@@ -1210,7 +1210,7 @@ class OS
     {
         $database = new Database();
 
-        $result = $database->doDelete('custeios_subagentes', "chave = '$chave'");
+        $result = $database->doDelete('tipos_docto_categorias', "chave = '$chave'");
         $database->closeConection();
         return $result;
     }
