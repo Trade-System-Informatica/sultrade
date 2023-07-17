@@ -239,7 +239,7 @@ class Navios
         campos.nome as campo,
         campos.tipo as tipoCampo,
         campos.subgrupo as chaveSubgrupo",
-            "os.codigo='" . $codigo . "' AND complementos.valor IS NOT NULL AND os.cancelada = 0 AND eventos.cancelada = 0 AND (eventos.tipo_sub = 0 OR eventos.tipo_sub = 1) AND (eventos.repasse = 1 OR eventos.Fornecedor_Custeio != '') ORDER BY eventos.ordem ASC");
+            "os.codigo='" . $codigo . "' AND complementos.valor IS NOT NULL AND complementos.valor != '' AND os.cancelada = 0 AND eventos.cancelada = 0 AND (eventos.tipo_sub = 0 OR eventos.tipo_sub = 1) AND (eventos.repasse = 1 OR eventos.Fornecedor_Custeio != '') ORDER BY eventos.ordem ASC");
 
         $database->closeConection();
         return $result;
