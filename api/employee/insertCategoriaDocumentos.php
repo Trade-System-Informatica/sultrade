@@ -18,7 +18,7 @@ if($objData != NULL){
 
     //$result = $employees->checkToken($token);
     //if($result == 'true'){
-    $result = $os->updateCategoriaDocumento($values);
+    $result = $os->insertCategoriaDocumento($values);
     //}
 } else {
     $result = "false";
