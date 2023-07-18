@@ -65,9 +65,6 @@ class OS extends Component {
         if (this.state.chaveFocus) {
             if (this.refs.focusMe) {
                 await this.refs.focusMe.focus();
-            } else {
-                await this.setState({ pesquisa: this.state.chaveFocus, tipoPesquisa: 1, situacao: 1 })
-                await this.pesquisa(this.state.chaveFocus)
             }
         }
 

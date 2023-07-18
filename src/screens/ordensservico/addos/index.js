@@ -23,6 +23,7 @@ import Alert from '../../../components/alert'
 import Util from '../../../classes/util'
 import XLSX from "xlsx-js-style";
 import ModalEventoEdit from '../../../components/modalEventoEdit'
+import EventoEdit from '../../../components/eventoEdit'
 
 const estadoInicial = {
     os: '',
@@ -706,7 +707,7 @@ class AddOS extends Component {
             async res => {
                 if (res.data[0]) {
                     const options = res.data.map((e) => {
-                        return { label: e.descricao, value: e.chave }
+                        return { label: e.descricao, value: e.descricao }
                     })
 
                     await this.setState({ descricoesPadraoOptions: options })
@@ -717,6 +718,14 @@ class AddOS extends Component {
     }
 
     setItemEdit = async (evento = null) => {
+        await this.getTaxasOptions();
+        if (!this.state.fornecedoresOptions[0]) {
+            await this.getFornecedores();
+        }
+        if (!this.state.descricoesPadraoOptions[0]) {
+            await this.getDescricaoPadrao();
+        }
+
         if (evento) {
             await this.setState({
                 eventoData: evento.data,
@@ -751,6 +760,91 @@ class AddOS extends Component {
                     { titulo: 'Remarks', valor: util.formatForLogs(this.state.eventoRemarks) },
                     { titulo: 'Fornecedor Custeio', valor: util.formatForLogs(this.state.eventoFornecedorCusteio, 'options', '', '', this.state.fornecedoresOptions) }
                 ],
+
+                itemEdit: {
+                    onSubmit: async () => await this.salvarEvento(),
+                    valores: [
+                        {
+                            titulo: 'Data',
+                            valor: evento.data,
+                            tipo: 'date',
+                            onChange: async (valor) => { await this.setState({ eventoData: valor }); },
+                        },
+                        {
+                            titulo: 'Ordem',
+                            valor: evento.ordem,
+                            tipo: 'text',
+                            onChange: async (valor) => { await this.setState({ eventoOrdem: valor }); },
+                        },
+                        {
+                            titulo: 'Tipo',
+                            valor: evento.tipo_sub,
+                            tipo: 'select',
+                            options: this.state.tiposSubOptions,
+                            onChange: async (valor) => { await this.setState({ eventoTipo: valor }); },
+                        },
+                        {
+                            titulo: 'Repasse',
+                            valor: evento.repasse == 1 ? true : false,
+                            tipo: 'check',
+                            onChange: async (valor) => await this.setState({ eventoRepasse: valor })
+                        },
+                        {
+                            titulo: 'Taxa',
+                            valor: evento.taxa,
+                            tipo: 'select',
+                            options: this.state.taxasOptions,
+                            onChange: async (valor) => { await this.setState({ eventoTaxa: valor }); },
+                        },
+                        {
+                            titulo: 'Fornecedor',
+                            valor: evento.fornecedor,
+                            tipo: 'select',
+                            options: this.state.fornecedoresOptions,
+                            onChange: async (valor) => { await this.setState({ eventoFornecedor: valor }); },
+                        },
+                        {
+                            titulo: 'Fornecedor Custeio',
+                            valor: evento.Fornecedor_Custeio,
+                            tipo: 'select',
+                            options: this.state.fornecedoresOptions,
+                            onChange: async (valor) => { await this.setState({ eventoFornecedorCusteio: valor }); },
+                        },
+                        {
+                            titulo: 'Descrição Padrão',
+                            valor: evento.descricao,
+                            tipo: 'select',
+                            options: this.state.descricoesPadraoOptions,
+                            onChange: async (valor) => { await this.setState({ eventoDescricao: valor }); },
+                        },
+                        {
+                            titulo: 'Descrição',
+                            valor: evento.descricao,
+                            tipo: 'text',
+                            onChange: async (valor) => {
+                                await this.setState({ eventoDescricao: valor });
+                            },
+                        }, {
+                            half: true,
+                            titulo: "Valor",
+                            valor1: evento.Moeda,
+                            tipo1: "select",
+                            options1: this.state.moedasOptions,
+                            onChange1: async (valor) => { await this.setState({ eventoMoeda: valor }); },
+                            valor2: evento.valor.replace('.', ','),
+                            tipo2: "text",
+                            onChange2: async (valor) => { await this.setState({ eventoValor: valor }); },
+                            onBlur2: async (valor) => { await this.setState({ eventoValor: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); },
+                        },
+                        {
+                            titulo: "VCP",
+                            valor: evento.valor1.replace('.', ','),
+                            tipo: "money",
+                            onChange: async (valor) => { await this.setState({ eventoVlrc: valor }); },
+                            onBlur: async (valor) => { await this.setState({ eventoVlrc: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); },
+                        }
+                    ]
+                }
             })
         } else {
             await this.setState({
@@ -760,7 +854,7 @@ class AddOS extends Component {
                 eventoTaxa: '',
                 eventoDescricao: '',
                 eventoTipo: 0,
-                eventoOrdem: `${Math.floor(Math.max(this.state.eventos.map((e) => parseFloat(e.ordem)))) + 1}`,
+                eventoOrdem: `${Math.floor(Math.max(...this.state.eventos.map((e) => parseFloat(e.ordem)))) + 1}`,
                 eventoRemarks: '',
                 eventoValor: '0,00',
                 eventoVlrc: '0,00',
@@ -773,104 +867,98 @@ class AddOS extends Component {
                 itemPermissao: "SERVICOS_ITENS",
 
                 dadosIniciaisSol: [],
+
+                itemEdit: {
+                    onSubmit: async () => await this.salvarEvento(),
+                    valores: [
+                        {
+                            titulo: 'Data',
+                            valor: moment().format("YYYY-MM-DD"),
+                            tipo: 'date',
+                            onChange: async (valor) => { await this.setState({ eventoData: valor }); },
+                        },
+                        {
+                            titulo: 'Ordem',
+                            valor: `${Math.floor(Math.max(...this.state.eventos.map((e) => parseFloat(e.ordem)))) + 1}`,
+                            tipo: 'text',
+                            onChange: async (valor) => { await this.setState({ eventoOrdem: valor }); },
+                        },
+                        {
+                            titulo: 'Tipo',
+                            valor: 0,
+                            tipo: 'select',
+                            options: this.state.tiposSubOptions,
+                            onChange: async (valor) => { await this.setState({ eventoTipo: valor }); },
+                        },
+                        {
+                            titulo: 'Repasse',
+                            valor: false,
+                            tipo: 'check',
+                            onChange: async (valor) => await this.setState({ eventoRepasse: valor })
+                        },
+                        {
+                            titulo: 'Taxa',
+                            valor: '',
+                            tipo: 'select',
+                            options: this.state.taxasOptions,
+                            onChange: async (valor) => { await this.setState({ eventoTaxa: valor }); },
+                        },
+                        {
+                            titulo: 'Fornecedor',
+                            valor: '',
+                            tipo: 'select',
+                            options: this.state.fornecedoresOptions,
+                            onChange: async (valor) => { await this.setState({ eventoFornecedor: valor }); },
+                        },
+                        {
+                            titulo: 'Fornecedor Custeio',
+                            valor: '',
+                            tipo: 'select',
+                            options: this.state.fornecedoresOptions,
+                            onChange: async (valor) => { await this.setState({ eventoFornecedorCusteio: valor }); },
+                        },
+                        {
+                            titulo: 'Descrição Padrão',
+                            valor: '',
+                            tipo: 'select',
+                            options: this.state.descricoesPadraoOptions,
+                            onChange: async (valor) => { await this.setState({ eventoDescricao: valor }); },
+                        },
+                        {
+                            titulo: 'Descrição',
+                            valor: '',
+                            tipo: 'text',
+                            onChange: async (valor) => {
+                                await this.setState({ eventoDescricao: valor });
+                            },
+                        }, {
+                            half: true,
+                            titulo: "Valor",
+                            valor1: 5,
+                            tipo1: "select",
+                            options1: this.state.moedasOptions,
+                            onChange1: async (valor) => { await this.setState({ eventoMoeda: valor }); },
+                            valor2: '0,00',
+                            tipo2: "text",
+                            onChange2: async (valor) => { await this.setState({ eventoValor: valor }); },
+                            onBlur2: async (valor) => { await this.setState({ eventoValor: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); },
+                        },
+                        {
+                            titulo: "VCP",
+                            valor: '0,00',
+                            tipo: "money",
+                            onChange: async (valor) => { await this.setState({ eventoVlrc: valor }); },
+                            onBlur: async (valor) => { await this.setState({ eventoVlrc: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); },
+                        }
+                    ]
+                }
             })
 
         }
 
-        await this.getTaxasOptions();
-        if (!this.state.fornecedoresOptions[0]) {
-            await this.getFornecedores();
+        if (this.refs.focusMe) {
+            this.refs.focusMe.focus();
         }
-        if (!this.state.descricoesPadraoOptions[0]) {
-            await this.getDescricaoPadrao();
-        }
-
-        await this.setState({
-            itemEdit: {
-                onSubmit: async () => await this.salvarEvento(),
-                valores: [
-                    {
-                        titulo: 'Data',
-                        valor: this.state.eventoData,
-                        tipo: 'date',
-                        onChange: async (valor) => { await this.setState({ eventoData: valor }); },
-                    },
-                    {
-                        titulo: 'Ordem',
-                        valor: this.state.eventoOrdem,
-                        tipo: 'text',
-                        onChange: async (valor) => { await this.setState({ eventoOrdem: valor }); },
-                    },
-                    {
-                        titulo: 'Tipo',
-                        valor: this.state.eventoTipo,
-                        tipo: 'select',
-                        options: this.state.tiposSubOptions,
-                        onChange: async (valor) => { await this.setState({ eventoTipo: valor }); },
-                    },
-                    {
-                        titulo: 'Repasse',
-                        valor: this.state.eventoRepasse == 1 ? true : false,
-                        tipo: 'check',
-                        onChange: async (valor) => await this.setState({ eventoRepasse: valor })
-                    },
-                    {
-                        titulo: 'Taxa',
-                        valor: this.state.eventoTaxa,
-                        tipo: 'select',
-                        options: this.state.taxasOptions,
-                        onChange: async (valor) => { await this.setState({ eventoTaxa: valor }); },
-                    },
-                    {
-                        titulo: 'Fornecedor',
-                        valor: this.state.eventoFornecedor,
-                        tipo: 'select',
-                        options: this.state.fornecedoresOptions,
-                        onChange: async (valor) => { await this.setState({ eventoFornecedor: valor }); },
-                    },
-                    {
-                        titulo: 'Fornecedor Custeio',
-                        valor: this.state.eventoFornecedorCusteio,
-                        tipo: 'select',
-                        options: this.state.fornecedoresOptions,
-                        onChange: async (valor) => { await this.setState({ eventoFornecedorCusteio: valor }); },
-                    },
-                    {
-                        titulo: 'Descrição Padrão',
-                        valor: this.state.eventoDescricao,
-                        tipo: 'select',
-                        options: this.state.descricoesPadraoOptions,
-                        onChange: async (valor) => { await this.setState({ eventoDescricao: valor }); },
-                    },
-                    {
-                        titulo: 'Descrição',
-                        valor: this.state.eventoDescricao,
-                        tipo: 'text',
-                        onChange: async (valor) => {
-                            await this.setState({ eventoDescricao: valor });
-                        },
-                    }, {
-                        half: true,
-                        titulo: "Valor",
-                        valor1: this.state.eventoMoeda,
-                        tipo1: "select",
-                        options1: this.state.moedasOptions,
-                        onChange1: async (valor) => { await this.setState({ eventoMoeda: valor }); },
-                        valor2: this.state.eventoValor,
-                        tipo2: "text",
-                        onChange2: async (valor) => { await this.setState({ eventoValor: valor }); },
-                        onBlur2: async (valor) => { await this.setState({ eventoValor: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); },
-                    },
-                    {
-                        titulo: "VCP",
-                        valor: this.state.eventoVlrc,
-                        tipo: "money",
-                        onChange: async (valor) => { await this.setState({ eventoVlrc: valor }); },
-                        onBlur: async (valor) => { await this.setState({ eventoVlrc: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); },
-                    }
-                ]
-            }
-        })
     }
 
     getServicosItens = async () => {
@@ -3560,18 +3648,17 @@ class AddOS extends Component {
         const validFormContabiliza = true;
 
         const validationsEvento = [];
-        validationsEvento.push(this.state.chave);
         validationsEvento.push(this.state.eventoData);
         validationsEvento.push(this.state.eventoTaxa || this.state.eventoTipo == 2 || this.state.eventoTipo == 3)
         validationsEvento.push(this.state.eventoFornecedor || this.state.eventoTipo == 1 || this.state.eventoTipo == 2 || this.state.eventoTipo == 3)
         validationsEvento.push(this.state.eventoFornecedorCusteio || this.state.eventoTipo != 1)
         validationsEvento.push(this.state.eventoValor && !isNaN(this.state.eventoValor.replaceAll('.', '').replaceAll(',', '.')))
-        validationsEvento.push((!this.state.eventoRepasse && !this.state.eventoVlrc) || !isNaN(this.state.eventoVlrc.replaceAll('.', '').replaceAll(',', '.')) && (!this.state.eventoRepasse || this.state.eventoVlrc == this.state.eventoValor))
+        validationsEvento.push((this.state.eventoRepasse == 0 && !this.state.eventoVlrc) || this.state.eventoVlrc.replaceAll('.', '').replaceAll(',', '.') == parseFloat(this.state.eventoVlrc.replaceAll('.', '').replaceAll(',', '.')) && (this.state.eventoRepasse == 0 || this.state.eventoVlrc == this.state.eventoValor));
         validationsEvento.push(this.state.eventoDescricao)
         validationsEvento.push(this.state.eventoOrdem && this.state.eventoOrdem.replaceAll(',', '.') == parseFloat(this.state.eventoOrdem.replaceAll(',', '.')))
 
-        const validFormEvento = validationsEvento.reduce((a, b) => a && b);
 
+        const validFormEvento = validationsEvento.reduce((a, b) => a && b);
         return (
             <div className='allContent'>
                 <div
@@ -4332,16 +4419,7 @@ class AddOS extends Component {
                             closeModal={() => { this.setState({ modalAberto: false }) }}
                         />
 
-                        <ModalEventoEdit
-                            closeModal={() => { this.setState({ modalItemAberto: false }) }}
-                            nome={this.state.itemNome}
-                            modalAberto={this.state.modalItemAberto}
-                            itemPermissao={this.state.itemPermissao}
-                            acessosPermissoes={this.state.acessosPermissoes}
-                            itemEdit={this.state.itemEdit}
-                            onSubmit={this.salvarEvento}
-                            valid={validFormEvento}
-                        />
+
 
                         <section>
                             <Header voltarOS titulo="OS" chave={this.state.codigo != 0 ? this.state.codigo : ''} />
@@ -4963,18 +5041,10 @@ class AddOS extends Component {
                                                                             <th className='text-center'>
                                                                                 <span>Valor (R$)</span>
                                                                             </th>
-                                                                            <th className='text-center'>
+                                                                        <th className='text-center'>
                                                                                 <span>
-                                                                                    {!this.state.eventos[1] &&
-                                                                                        <Link to=
-                                                                                            {{
-                                                                                                pathname: `/ordensservico/addevento/0`,
-                                                                                                state: { evento: {}, os: { ...this.state.os, addOS: true } }
-                                                                                            }}
-                                                                                        >
-                                                                                            <FontAwesomeIcon icon={faPlus} />
-                                                                                        </Link>
-                                                                                    }
+                                                                                <FontAwesomeIcon icon={faPlus} className='pseudo_link'
+                                                                                        onClick={async () => {await this.setState({modalItemAberto: false}); await this.setItemEdit()}} />
                                                                                 </span>
                                                                             </th>
                                                                         </tr>
@@ -4983,22 +5053,22 @@ class AddOS extends Component {
                                                                                 {window.innerWidth < 500 &&
                                                                                     <tr
                                                                                         onClick={async () => {
-                                                                                            await this.setItemEdit(feed);
-                                                                                            this.setState({
-
+                                                                                            await this.setState({
+                                                                                                modalItemAberto: false
                                                                                             })
+                                                                                            await this.setItemEdit(feed);
                                                                                         }}
                                                                                         className={index % 2 == 0 ? "parTr" : "imparTr"}>
-                                                                                        <td className="text-center">
+                                                                                        <td className="text-center pseudo_link">
                                                                                             <p>{feed.chave}</p>
                                                                                         </td>
-                                                                                        <td className="text-center">
+                                                                                        <td className="text-center pseudo_link">
                                                                                             <p>{feed.ordem.replaceAll(',', '.')}</p>
                                                                                         </td>
-                                                                                        <td className="text-center">
+                                                                                        <td className="text-center pseudo_link">
                                                                                             <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
                                                                                         </td>
-                                                                                        <td className="text-center">
+                                                                                        <td className="text-center pseudo_link">
                                                                                             <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
                                                                                         </td>
                                                                                         <td>
@@ -5048,25 +5118,26 @@ class AddOS extends Component {
                                                                                 {window.innerWidth >= 500 &&
                                                                                     <tr
                                                                                         onClick={async () => {
+                                                                                            await this.setState({ modalItemAberto: false })
                                                                                             await this.setItemEdit(feed);
                                                                                         }}
                                                                                         className={index % 2 == 0 ? "parTr" : "imparTr"}>
-                                                                                        <td className="text-center">
+                                                                                        <td className="text-center pseudo_link">
                                                                                             <p>{feed.chave}</p>
                                                                                         </td>
-                                                                                        <td className="text-center">
+                                                                                        <td className="text-center pseudo_link">
                                                                                             <p>{this.state.tiposServicosItens[feed.tipo_sub]}</p>
                                                                                         </td>
-                                                                                        <td className="text-center">
+                                                                                        <td className="text-center pseudo_link">
                                                                                             <p>{feed.ordem.replaceAll(',', '.')}</p>
                                                                                         </td>
-                                                                                        <td className="text-center">
+                                                                                        <td className="text-center pseudo_link">
                                                                                             <p>{feed.descricao}</p>
                                                                                         </td>
-                                                                                        <td className="text-center">
+                                                                                        <td className="text-center pseudo_link">
                                                                                             <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
                                                                                         </td>
-                                                                                        <td className="text-center">
+                                                                                        <td className="text-center pseudo_link">
                                                                                             <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
                                                                                         </td>
                                                                                         <td>
@@ -5221,6 +5292,19 @@ class AddOS extends Component {
                                         </div>
                                     </div>
                                 }
+                                
+                            <div ref={"focusMe"} tabindex={-1} >
+                                    <EventoEdit
+                                        chave={this.state.eventoChave}
+                                        itemPermissao={this.state.itemPermissao}
+                                        acessosPermissoes={this.state.acessosPermissoes}
+                                        itemEdit={this.state.itemEdit}
+                                        onSubmit={this.salvarEvento}
+                                        valid={validFormEvento}
+                                        aberto={this.state.modalItemAberto}
+                                        />
+                                        </div>
+                                    
                                 {this.props.match.params.id != 0 && this.state.custeios_subagentes[0] && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
 
                                     <div>

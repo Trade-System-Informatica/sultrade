@@ -257,6 +257,14 @@
     font-size: 13px;
 }
 
+.pseudo_link {
+    cursor: pointer;
+}
+
+.pseudo_link:hover {
+    text-decoration: underline;
+}
+
 @media (min-width: 768px) {
     .insideFormButton {
         font-size: 1.4em;
