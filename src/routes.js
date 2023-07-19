@@ -144,8 +144,8 @@ export default function Routes(){
                 <Route path="/utilitarios/parametros" component={Parametros} />
                 <Route path="/utilitarios/eventostemplates" component={EventosTemplates} />
 
-                <Route path="/utilitarios/addoperador/:id/" component={AddOperador} />
-                <Route path="/utilitarios/addeventotemplate" component={AddEventoTemplate} />
+                <Route path="/utilitarios/addoperador/:id" component={AddOperador} />
+                <Route path="/utilitarios/addeventotemplate/:id" component={AddEventoTemplate} />
 
 
                 <Route path="/ordensservico/os" component={OS} />

@@ -854,7 +854,7 @@ class AddOS extends Component {
                 eventoTaxa: '',
                 eventoDescricao: '',
                 eventoTipo: 0,
-                eventoOrdem: `${Math.floor(Math.max(...this.state.eventos.map((e) => parseFloat(e.ordem)))) + 1}`,
+                eventoOrdem: `${Math.floor(Math.max(...this.state.eventos.map((e) => parseFloat(e.ordem)), 0)) + 1}`,
                 eventoRemarks: '',
                 eventoValor: '0,00',
                 eventoVlrc: '0,00',
@@ -879,7 +879,7 @@ class AddOS extends Component {
                         },
                         {
                             titulo: 'Ordem',
-                            valor: `${Math.floor(Math.max(...this.state.eventos.map((e) => parseFloat(e.ordem)))) + 1}`,
+                            valor: `${Math.floor(Math.max(...this.state.eventos.map((e) => parseFloat(e.ordem)), 0)) + 1}`,
                             tipo: 'text',
                             onChange: async (valor) => { await this.setState({ eventoOrdem: valor }); },
                         },
@@ -5041,10 +5041,10 @@ class AddOS extends Component {
                                                                             <th className='text-center'>
                                                                                 <span>Valor (R$)</span>
                                                                             </th>
-                                                                        <th className='text-center'>
+                                                                            <th className='text-center'>
                                                                                 <span>
-                                                                                <FontAwesomeIcon icon={faPlus} className='pseudo_link'
-                                                                                        onClick={async () => {await this.setState({modalItemAberto: false}); await this.setItemEdit()}} />
+                                                                                    <FontAwesomeIcon icon={faPlus} className='pseudo_link'
+                                                                                        onClick={async () => { await this.setState({ modalItemAberto: false }); await this.setItemEdit() }} />
                                                                                 </span>
                                                                             </th>
                                                                         </tr>
@@ -5292,19 +5292,20 @@ class AddOS extends Component {
                                         </div>
                                     </div>
                                 }
-                                
-                            <div ref={"focusMe"} tabindex={-1} >
+
+                                <div ref={"focusMe"} tabindex={-1} >
                                     <EventoEdit
                                         chave={this.state.eventoChave}
                                         itemPermissao={this.state.itemPermissao}
                                         acessosPermissoes={this.state.acessosPermissoes}
+                                        setItemEdit={(itemEdit) => this.setState({ itemEdit })}
                                         itemEdit={this.state.itemEdit}
                                         onSubmit={this.salvarEvento}
                                         valid={validFormEvento}
                                         aberto={this.state.modalItemAberto}
-                                        />
-                                        </div>
-                                    
+                                    />
+                                </div>
+
                                 {this.props.match.params.id != 0 && this.state.custeios_subagentes[0] && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
 
                                     <div>

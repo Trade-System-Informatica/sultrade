@@ -119,8 +119,11 @@ class EventoEdit extends Component {
                                     name: '',
                                 }}
                                 onSubmit={async values => {
+                                    await this.props.setItemEdit(this.state.itemEdit);
                                     await new Promise(r => setTimeout(r, 1000))
-                                    await this.state.itemEdit?.onSubmit();
+                                    await setTimeout(async () => {
+                                        await this.state.itemEdit?.onSubmit();
+                                    }, 1000)
 
                                 }}
                             >

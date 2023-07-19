@@ -235,9 +235,12 @@ class EventosTemplates extends Component {
                                                 <option value={1}>Descrição</option>
                                             </select>
                                             <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
+                                            <div>
+                                                <Link to={{ pathname: `/utilitarios/addeventotemplate/0` }}><button className="btn btn-success">Adicionar Template</button></Link>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className='col-10'></div>
+                                    <div className='col-4'></div>
 
                                     <div className="col-0 col-sm-0 col-md-3 col-lg-3 col-xl-3"></div>
                                     <div>

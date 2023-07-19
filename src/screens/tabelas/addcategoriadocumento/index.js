@@ -196,7 +196,7 @@ class AddCategoriaDocumento extends Component {
                 }
 
                 <section>
-                    <Header voltarCategoriasDocumento titulo="Categorias de Documentos" chave={this.state.chave != 0 ? this.state.chave : ''}/>
+                    <Header voltarCategoriasDocumentos titulo="Categorias de Documentos" chave={this.state.chave != 0 ? this.state.chave : ''}/>
                 </section>
 
                 {this.state.chave !=0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&

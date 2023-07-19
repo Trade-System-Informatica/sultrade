@@ -38,8 +38,8 @@ const estadoInicial = {
     taxa: '',
     repasse: false,
     moeda: 6,
-    valor: '',
-    vlrc: '',
+    valor: '0,00',
+    vlrc: '0,00',
     descricao: '',
     tipo: 0,
     ordem: '',
@@ -162,7 +162,8 @@ class AddEventoTemplate extends Component {
 
     componentDidMount = async () => {
         window.scrollTo(0, 0)
-        var id = await this.props.match.params.id
+        const id = await this.props.match.params.id
+
         await this.setState({ chave: id })
 
 
@@ -184,7 +185,6 @@ class AddEventoTemplate extends Component {
                 tipo: this.state.evento.tipo_sub,
                 ordem: this.state.evento.ordem,
                 remarks: this.state.evento.remarks,
-                valor: this.state.evento.valor,
                 valor: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.evento.valor),
                 vlrc: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.evento.valor1),
                 repasse: this.state.evento.repasse == 1 ? true : false,
@@ -196,9 +196,6 @@ class AddEventoTemplate extends Component {
                     valor: this.state.vlrc
                 });
             }
-
-            this.changeTaxa(this.state.taxa);
-            this.getdadosComplementares();
         }
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
@@ -207,8 +204,6 @@ class AddEventoTemplate extends Component {
         await this.getMoedas();
         await this.getPessoas();
         await this.getDescricaoPadrao();
-        await this.getDocumentos();
-        await this.getTiposDocumento();
 
         if (this.state.chave != 0) {
             await this.setState({
@@ -290,28 +285,6 @@ class AddEventoTemplate extends Component {
                 await this.setState({ taxas: res.data })
 
                 await this.getTaxasOptions();
-            },
-            async err => { this.erroApi(err) }
-        )
-    }
-
-    getdadosComplementares = async () => {
-        await apiEmployee.post(`getEventoComplementar.php`, {
-            token: true,
-            chave: this.state.chave
-        }).then(
-            async res => {
-                if (res.data[0]) {
-                    await this.setState({ eventoComplementar: res.data })
-
-                    res.data.forEach((res) => {
-                        const idx = this.state.campos.findIndex((campo) => (res.subgrupo_campo == campo.chave));
-
-                        if (idx !== -1) {
-                            this.setState({ campos: this.state.campos.map((c, i) => i === idx ? ({ ...c, valor: res.valor }) : ({ ...c })) });
-                        }
-                    });
-                }
             },
             async err => { this.erroApi(err) }
         )
@@ -637,7 +610,7 @@ class AddEventoTemplate extends Component {
                 {!this.state.loading &&
                     <>
                         <section>
-                            <Header voltarEventosTemplates os={this.props.location.state.os} titulo="Template de Eventos" chave={this.state.chave != 0 ? this.state.chave : ''} />
+                            <Header voltarEventosTemplates titulo="Template de Eventos" chave={this.state.chave != 0 ? this.state.chave : ''} />
                             <div className="col-2"></div>
                             <br />
                             <br />
@@ -695,7 +668,7 @@ class AddEventoTemplate extends Component {
                                                 <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12 ">
 
                                                     <div className="row addservicos">
-                                                        {this.state.chave != 0 &&
+                                                        {this.state.chave == 0 &&
                                                             <>
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstlabel">
                                                                     <label>Chave</label>
@@ -712,9 +685,6 @@ class AddEventoTemplate extends Component {
                                                             <label>Data</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
-                                                            {!this.state.data &&
-                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                            }
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Field className='form-control' type='date' value={this.state.data} onChange={(e) => { this.setState({ data: e.currentTarget.value }) }} />
@@ -755,7 +725,7 @@ class AddEventoTemplate extends Component {
                                                         </div>
 
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' options={this.state.taxasOptions.filter(e => this.filterSearch(e, this.state.taxasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ taxasOptionsTexto: e }) }} value={this.state.taxasOptions.filter(option => option.value == this.state.taxa)[0]} search={true} onChange={(e) => { this.changeTaxa(e.value); if (!this.state.valor || parseFloat(this.state.valor.replaceAll('.', "").replaceAll(",", ".")) == 0) { this.setState({ taxa: e.value, valor: e.money.replaceAll(",", "").replaceAll(".", ",") }) } else { this.setState({ taxa: e.value }) } }} />
+                                                            <Select className='SearchSelect' options={this.state.taxasOptions.filter(e => this.filterSearch(e, this.state.taxasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ taxasOptionsTexto: e }) }} value={this.state.taxasOptions.filter(option => option.value == this.state.taxa)[0]} search={true} onChange={(e) => { if (!this.state.valor || parseFloat(this.state.valor.replaceAll('.', "").replaceAll(",", ".")) == 0) { this.setState({ taxa: e.value, valor: e.money.replaceAll(",", "").replaceAll(".", ",") }) } else { this.setState({ taxa: e.value }) } }} />
                                                         </div>
                                                         <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
                                                             {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'TAXAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&

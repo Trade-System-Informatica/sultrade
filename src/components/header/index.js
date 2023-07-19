@@ -365,6 +365,14 @@ class Header extends Component {
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
+                            {this.props.voltarCategoriasDocumentos &&
+                                <Link to={{ pathname: `/tableas/categoriasdocumentos`, state: { chave: this.props.chave } }}>
+                                    <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
+                                </Link>
+                            }
+
+
+
                             {this.props.voltarTarifas &&
                                 <Link to={{ pathname: `/ordensservico/tarifas`, state: { chave: this.props.chave } }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
@@ -379,6 +387,11 @@ class Header extends Component {
 
                             {this.props.voltarOperadores &&
                                 <Link to={{ pathname: `/utilitarios/operadores`, state: { chave: this.props.chave } }}>
+                                    <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
+                                </Link>
+                            }
+                            {this.props.voltarEventosTemplates &&
+                                <Link to={{ pathname: `/utilitarios/eventostemplates`, state: { chave: this.props.chave } }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
@@ -721,7 +734,7 @@ class Header extends Component {
                                                         <Link className="dropdown-item" to={{ pathname: `/utilitarios/operadores` }}>
                                                             Operadores
                                                         </Link>
-                                                    }
+                                                }
                                                     {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OPERADORES') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                                         <Link className="dropdown-item" to={{ pathname: `/utilitarios/permissoes` }}>
                                                             Permissoes
@@ -731,7 +744,12 @@ class Header extends Component {
                                                         <Link className="dropdown-item" to={{ pathname: `/utilitarios/logs` }}>
                                                             Logs
                                                         </Link>
-                                                    }
+                                                }
+                                                {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                    <Link className="dropdown-item" to={{ pathname: `/utilitarios/eventostemplates` }}>
+                                                        Templates de Eventos
+                                                    </Link>
+                                                }
                                                     {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PARAMETROS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                                         <Link className="dropdown-item" to={{ pathname: `/utilitarios/parametros` }}>
                                                             Parametros
