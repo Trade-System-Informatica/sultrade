@@ -7,7 +7,7 @@ import './styles.css'
 import { apiEmployee } from '../../../services/apiamrg'
 import { connect } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBookOpen, faCheckCircle, faAddressCard, faCogs } from '@fortawesome/free-solid-svg-icons'
+import { faBookOpen, faFileContract, faCheckCircle, faAddressCard, faCogs } from '@fortawesome/free-solid-svg-icons'
 
 class Utilitarios extends Component {
 
@@ -151,6 +151,15 @@ class Utilitarios extends Component {
                                                 <Link className="semTextDecoration" to={{ pathname: `/utilitarios/logs` }}>
                                                     <FontAwesomeIcon icon={faBookOpen} size="2x" color="tomato" />
                                                     <h4 className="textoMenu">Logs</h4>
+                                                </Link>
+                                            </li>
+                                        }
+
+                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                            <li className=" text-left itemMenu list-group-item ">
+                                                <Link className="semTextDecoration" to={{ pathname: `/utilitarios/eventostemplates` }}>
+                                                    <FontAwesomeIcon icon={faFileContract} size="2x" color="tomato" />
+                                                    <h4 className="textoMenu">Templates de Eventos</h4>
                                                 </Link>
                                             </li>
                                         }

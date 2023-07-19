@@ -51,8 +51,10 @@ import Operadores from './screens/utilitarios/operadores'
 import Permissoes from './screens/utilitarios/permissoes'
 import Logs from './screens/utilitarios/logs'
 import Parametros from './screens/utilitarios/parametros'
+import EventosTemplates from './screens/utilitarios/eventostemplates'
 
 import AddOperador from './screens/utilitarios/addoperador'
+import AddEventoTemplate from './screens/utilitarios/addeventotemplate'
 
 
 import OS from './screens/ordensservico/os'
@@ -140,8 +142,10 @@ export default function Routes(){
                 <Route path="/utilitarios/permissoes" component={Permissoes} />
                 <Route path="/utilitarios/logs" component={Logs} />
                 <Route path="/utilitarios/parametros" component={Parametros} />
+                <Route path="/utilitarios/eventostemplates" component={EventosTemplates} />
 
                 <Route path="/utilitarios/addoperador/:id/" component={AddOperador} />
+                <Route path="/utilitarios/addeventotemplate" component={AddEventoTemplate} />
 
 
                 <Route path="/ordensservico/os" component={OS} />

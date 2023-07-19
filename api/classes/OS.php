@@ -489,6 +489,34 @@ class OS
         return $result;
     }
 
+    public static function getEventosTemplates($offset, $empresa)
+    {
+        $database = new Database();
+
+        if ($empresa == 0) {
+            $result = $database->doSelect(
+                'os_servicos_itens 
+            LEFT JOIN templates_relacoes ON os_servicos_itens.chave = templates_relacoes.evento 
+            LEFT JOIN templates_grupos ON templates_relacoes.grupo = templates_grupos.chave',
+                'os_servicos_itens.*, 
+                    GROUP_CONCAT(templates_grupos.nome SEPARATOR) AS grupoNome',
+                "template = 1 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 101 OFFSET " . $offset
+            );
+        } else {
+            $result = $database->doSelect(
+                'os_servicos_itens 
+                    LEFT JOIN templates_relacoes ON os_servicos_itens.chave = templates_relacoes.evento 
+                    LEFT JOIN templates_grupos ON templates_relacoes.grupo = templates_grupos.chave',
+                'os_servicos_itens.*, 
+                    GROUP_CONCAT(templates_grupos.nome SEPARATOR) AS grupoNome',
+                "empresa = $empresa AND template = 1 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 101 OFFSET " . $offset
+            );
+        }
+
+        $database->closeConection();
+        return $result;
+    }
+
     public static function gerarRelatorioOS($where)
     {
         $database = new Database();
@@ -777,6 +805,21 @@ class OS
 
         $result = $database->doInsert('tipos_docto_categorias', $cols, $values);
 
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function insertEventoTemplate($values)
+    {
+        $database = new Database();
+
+        $cols = 'data, fornecedor, taxa, descricao, tipo_sub, Fornecedor_Custeio, remarks, Moeda, valor, valor1, repasse, template';
+
+        $result = $database->doInsert('os_servicos_itens', $cols, $values);
+
+        if ($result) {
+            $result = $database->doSelect('os_servicos_itens', 'os_servicos_itens.*', "1=1 ORDER BY chave DESC LIMIT 1");
+        }
         $database->closeConection();
         return $result;
     }
@@ -1114,6 +1157,23 @@ class OS
         $query = "descricao = '" . $descricao . "', empresa = $empresa";
 
         $result = $database->doUpdate('tipos_docto', $query, 'chave = ' . $chave);
+        $database->closeConection();
+        if ($result == NULL) {
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+    
+    public static function updateEventoTemplate($chave, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks, $Moeda, $valor, $valor1, $repasse)
+    {
+        $database = new Database();
+
+        $query = "data = '" . $data . "', fornecedor = '" . $fornecedor . "', taxa = '" . $taxa . "', descricao = '" . $descricao . "', ordem = '" . $ordem . "', tipo_sub = '" . $tipo_sub . "', Fornecedor_Custeio = '" . $Fornecedor_Custeio . "', remarks = '" . $remarks . "', Moeda = '$Moeda', valor = '$valor', valor1 = '$valor1', repasse = '$repasse'";
+
+        $result = $database->doUpdate('os_servicos_itens', $query, 'template = 1 AND chave = ' . $chave);
+
+        $result = $database->doSelect('os_servicos_itens', "os_servicos_itens.*", 'template = 1 AND chave = ' . $chave);
         $database->closeConection();
         if ($result == NULL) {
             return 'false';
