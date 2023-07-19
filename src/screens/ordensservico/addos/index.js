@@ -831,17 +831,17 @@ class AddOS extends Component {
                             tipo1: "select",
                             options1: this.state.moedasOptions,
                             onChange1: async (valor) => { await this.setState({ eventoMoeda: valor }); },
-                            valor2: evento.valor.replace('.', ','),
+                            valor2: Number(evento.valor) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(evento.valor) : '0,00',
                             tipo2: "text",
                             onChange2: async (valor) => { await this.setState({ eventoValor: valor }); },
-                            onBlur2: async (valor) => { await this.setState({ eventoValor: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); },
+                            onBlur2: async (valor) => { await this.setState({ eventoValor: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }); },
                         },
                         {
                             titulo: "VCP",
-                            valor: evento.valor1.replace('.', ','),
+                            valor: Number(evento.valor1) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(evento.valor1) : '0,00',
                             tipo: "money",
                             onChange: async (valor) => { await this.setState({ eventoVlrc: valor }); },
-                            onBlur: async (valor) => { await this.setState({ eventoVlrc: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); },
+                            onBlur: async (valor) => { await this.setState({ eventoVlrc: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }); },
                         }
                     ]
                 }
