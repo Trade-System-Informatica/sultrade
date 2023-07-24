@@ -622,7 +622,6 @@ class OS
 
             foreach ($os as $item) {
                 if ($item["ordem"] == $ordem) {
-                    $item["ordem"]++;
 
                     $database->doUpdate("os_servicos_itens", "os_servicos_itens.ordem = (os_servicos_itens.ordem + 1)", "chave_os = '$chave_os' AND os_servicos_itens.ordem >= ".$item["ordem"]);
                 }
@@ -991,13 +990,11 @@ class OS
 
         $query = "chave_os = '" . $chave_os . "', data = '" . $data . "', fornecedor = '" . $fornecedor . "', taxa = '" . $taxa . "', descricao = '" . $descricao . "', ordem = '" . $ordem . "', tipo_sub = '" . $tipo_sub . "', Fornecedor_Custeio = '" . $Fornecedor_Custeio . "', remarks = '" . $remarks . "', Moeda = '$Moeda', valor = '$valor', valor1 = '$valor1', repasse = '$repasse'";
 
-        $eventos = $database->doSelect("os_servicos_itens", "os_servicos_itens.*", "chave_os = $chave_os");
+        $eventos = $database->doSelect("os_servicos_itens", "os_servicos_itens.*", "chave_os = $chave_os AND chave != $chave");
 
         foreach ($eventos as $evento) {
-            if ($evento["ordem"] >= $ordem) {
-                $evento["ordem"]++;
-
-                $database->doUpdate("os_servicos_itens", "ordem = '" . $evento["ordem"] . "'", "chave = '" . $evento["chave"] . "'");
+            if ($evento["ordem"] == $ordem) {
+                $database->doUpdate("os_servicos_itens", "os_servicos_itens.ordem = (os_servicos_itens.ordem + 1)", "chave_os = '$chave_os' AND os_servicos_itens.ordem >= " . $evento["ordem"]);
             }
         }
 

@@ -659,6 +659,7 @@ class AddOS extends Component {
                 async err => { this.erroApi(err) }
             )
         }
+        this.setState({taxas});
 
         if (this.state.eventoTipo == 0) {
             const options = taxas.filter((taxa) => taxa.Tipo == "P").map((e) => {
@@ -5296,6 +5297,7 @@ class AddOS extends Component {
                                 <div ref={"focusMe"} tabindex={-1} >
                                     <EventoEdit
                                         chave={this.state.eventoChave}
+                                        taxas={this.state.taxas}
                                         itemPermissao={this.state.itemPermissao}
                                         acessosPermissoes={this.state.acessosPermissoes}
                                         setItemEdit={(itemEdit) => this.setState({ itemEdit })}

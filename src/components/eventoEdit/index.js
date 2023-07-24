@@ -27,8 +27,10 @@ class EventoEdit extends Component {
 
             if (itemEdit.valores.find((e) => e.titulo == "Tipo")?.valor == 0) {
                 itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Repasse" || e.titulo == "Fornecedor" || e.titulo == "Taxa" ? ({ ...e, hidden: false }) : ({ ...e }));
+                itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Taxa" ? ({ ...e, options: this.props.taxas.filter((taxa) => taxa.Tipo == "P")?.map((taxa) => ({ label: taxa.descricao, value: taxa.chave, money: taxa.valor })) }) : ({ ...e }))
             } else if (itemEdit.valores.find((e) => e.titulo == "Tipo")?.valor == 1) {
                 itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Repasse" || e.titulo == "Fornecedor" ? ({ ...e, hidden: true }) : e.titulo == "Taxa" ? ({ ...e, hidden: false }) : ({ ...e }));
+                itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Taxa" ? ({ ...e, options: this.props.taxas.filter((taxa) => taxa.Tipo == "R")?.map((taxa) => ({ label: taxa.descricao, value: taxa.chave, money: taxa.valor })) }) : ({ ...e }))
             } else {
                 itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Repasse" || e.titulo == "Taxa" ? ({ ...e, hidden: true }) : e.titulo == "Fornecedor" ? ({ ...e, hidden: false }) : ({ ...e }));
             }
@@ -61,6 +63,15 @@ class EventoEdit extends Component {
             itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Fornecedor Custeio" ? ({ ...e, hidden: true }) : ({ ...e }));
         }
 
+        if (itemEdit.valores.find((e, i) => i === index)?.titulo == "Tipo") {
+            itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Repasse" ? ({...e, valor: false }) : e.titulo == "Taxa" ? ({ ...e, valor: "" }) : ({ ...e }));
+            if (itemEdit.valores.find((e) => e.titulo == "Tipo")?.valor == 0) {
+                itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Taxa" ? ({ ...e, options: this.props.taxas.filter((taxa) => taxa.Tipo == "P")?.map((taxa) => ({ label: taxa.descricao, value: taxa.chave, money: taxa.valor })) }) : ({ ...e }))
+            } else if (itemEdit.valores.find((e) => e.titulo == "Tipo")?.valor == 1) {
+                itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Taxa" ? ({ ...e, options: this.props.taxas.filter((taxa) => taxa.Tipo == "R")?.map((taxa) => ({ label: taxa.descricao, value: taxa.chave, money: taxa.valor })) }) : ({ ...e }))
+            }
+        }
+
         if (itemEdit.valores.find((e, i) => i === index)?.titulo == "VCP" && itemEdit.valores.find((e) => e.titulo == "Repasse")?.valor) {
             itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Valor" ? ({ ...e, valor2: value }) : ({ ...e }));
             if (blur) {
@@ -80,9 +91,9 @@ class EventoEdit extends Component {
                 itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Valor" ? ({ ...e, disabled2: false }) : ({ ...e }))
             }
         }
-        
+
         if (itemEdit.valores.find((e, i) => i === index)?.titulo == "Descrição Padrão") {
-            itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Descrição" ? ({...e, valor: value}) : ({...e}))
+            itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Descrição" ? ({ ...e, valor: value }) : ({ ...e }))
         }
 
         this.setState({ itemEdit })
@@ -134,8 +145,8 @@ class EventoEdit extends Component {
 
                                         <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12 ">
                                             <div className='row addservicos'>
-                                                <div className="col-12 " style={{ marginBottom: 20}} >
-                                                    <h3 style={{textAlign: "center", color: "white"}}>{this.props.chave == 0 ? "Criar" : "Editar"} evento</h3>
+                                                <div className="col-12 " style={{ marginBottom: 20 }} >
+                                                    <h3 style={{ textAlign: "center", color: "white" }}>{this.props.chave == 0 ? "Criar" : "Editar"} evento</h3>
                                                 </div>
                                                 {this.state.itemEdit?.valores?.map((valor, index) => (
                                                     <>
@@ -169,12 +180,12 @@ class EventoEdit extends Component {
                                                         }
                                                         {!valor.half && !valor.hidden &&
                                                             <>
-                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                     <label>{valor.titulo}</label>
                                                                 </div>
                                                                 <div className='col-1 errorMessage'>
                                                                 </div>
-                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                                     {valor.tipo == "select" &&
                                                                         <Select
                                                                             className='SearchSelect color_black'

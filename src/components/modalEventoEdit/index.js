@@ -27,8 +27,10 @@ class ModalEventoEdit extends Component {
 
             if (itemEdit.valores.find((e) => e.titulo == "Tipo")?.valor == 0) {
                 itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Repasse" || e.titulo == "Fornecedor" || e.titulo == "Taxa" ? ({ ...e, hidden: false }) : ({ ...e }));
+                itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Taxa" ? ({ ...e, options: this.props.taxas.filter((taxa) => taxa.Tipo == "P")?.map((taxa) => ({ label: taxa.descricao, value: taxa.chave, money: taxa.valor })) }) : ({ ...e }))
             } else if (itemEdit.valores.find((e) => e.titulo == "Tipo")?.valor == 1) {
                 itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Repasse" || e.titulo == "Fornecedor" ? ({ ...e, hidden: true }) : e.titulo == "Taxa" ? ({ ...e, hidden: false }) : ({ ...e }));
+                itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Taxa" ? ({ ...e, options: this.props.taxas.filter((taxa) => taxa.Tipo == "R")?.map((taxa) => ({ label: taxa.descricao, value: taxa.chave, money: taxa.valor })) }) : ({ ...e }))
             } else {
                 itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Repasse" || e.titulo == "Taxa" ? ({ ...e, hidden: true }) : e.titulo == "Fornecedor" ? ({ ...e, hidden: false }) : ({ ...e }));
             }
@@ -47,10 +49,13 @@ class ModalEventoEdit extends Component {
 
     changeState = (index, value, half = 0, blur = false) => {
         let itemEdit = { valores: this.state.itemEdit.valores.map((e, i) => i === index ? half == 0 ? ({ ...e, valor: value }) : half == 1 ? ({ ...e, valor1: value }) : ({ ...e, valor2: value }) : ({ ...e })), onSubmit: this.state.itemEdit.onSubmit };
+
         if (itemEdit.valores.find((e) => e.titulo == "Tipo")?.valor == 0) {
             itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Repasse" || e.titulo == "Fornecedor" || e.titulo == "Taxa" ? ({ ...e, hidden: false }) : ({ ...e }));
+            itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Taxa" ? ({ ...e, options: this.props.taxas.filter((taxa) => taxa.Tipo == "P")?.map((taxa) => ({ label: taxa.descricao, value: taxa.chave, money: taxa.valor })) }) : ({ ...e }))
         } else if (itemEdit.valores.find((e) => e.titulo == "Tipo")?.valor == 1) {
             itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Repasse" || e.titulo == "Fornecedor" ? ({ ...e, hidden: true }) : e.titulo == "Taxa" ? ({ ...e, hidden: false }) : ({ ...e }));
+            itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Taxa" ? ({ ...e, options: this.props.taxas.filter((taxa) => taxa.Tipo == "R")?.map((taxa) => ({ label: taxa.descricao, value: taxa.chave, money: taxa.valor })) }) : ({ ...e }))
         } else {
             itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Repasse" || e.titulo == "Taxa" ? ({ ...e, hidden: true }) : e.titulo == "Fornecedor" ? ({ ...e, hidden: false }) : ({ ...e }));
         }
@@ -69,8 +74,8 @@ class ModalEventoEdit extends Component {
             }
         } else if (itemEdit.valores.find((e, i) => i === index)?.titulo == "Taxa" && !itemEdit.valores.find((e) => e.titulo == "Repasse")?.valor) {
             const newValue = itemEdit.valores.find((e, i) => i === index)?.options.find((e) => e.value == value)?.money;
-            
-            itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Valor" ? ({ ...e, valor2: newValue ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(newValue) : '0,00'}) : ({ ...e }))
+
+            itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Valor" ? ({ ...e, valor2: newValue ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(newValue) : '0,00' }) : ({ ...e }))
         } else if (itemEdit.valores.find((e, i) => i === index)?.titulo == "Repasse") {
             if (value) {
                 const VCP = itemEdit.valores.find((e) => e.titulo == "VCP")?.valor;
@@ -159,7 +164,7 @@ class ModalEventoEdit extends Component {
                                                                         value={valor.valor2}
                                                                         disabled={valor.disabled2}
                                                                         onChange={async (e) => this.changeState(index, e.currentTarget.value, 2)}
-                                                                    onBlur={async (e) => { this.changeState(index, Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00', 2, true); await valor.onBlur2(e.currentTarget.value) }}
+                                                                        onBlur={async (e) => { this.changeState(index, Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00', 2, true); await valor.onBlur2(e.currentTarget.value) }}
                                                                     />
                                                                 </div>
 
