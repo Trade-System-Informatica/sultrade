@@ -3531,6 +3531,23 @@ class AddOS extends Component {
         }
     }
 
+    revertItemEdit = async (itemEdit) => {
+        this.setState({
+            eventoData: itemEdit.valores.find((e) => e.titulo === "Data")?.valor,
+            eventoFornecedor: itemEdit.valores.find((e) => e.titulo === "Fornecedor")?.valor,
+            eventoTaxa: itemEdit.valores.find((e) => e.titulo === "Taxa")?.valor,
+            eventoMoeda: itemEdit.valores.find((e) => e.titulo === "Valor")?.valor1,
+            eventoValor: itemEdit.valores.find((e) => e.titulo === "Valor")?.valor2,
+            eventoVlrc:itemEdit.valores.find((e) => e.titulo === "VCP")?.valor,
+            eventoRepasse: itemEdit.valores.find((e) => e.titulo === "Repasse")?.valor,
+            eventoDescricao: itemEdit.valores.find((e) => e.titulo === "Descrição")?.valor,
+            eventoTipo: itemEdit.valores.find((e) => e.titulo === "Tipo")?.valor,
+            eventoOrdem: itemEdit.valores.find((e) => e.titulo === "Ordem")?.valor,
+            eventoRemarks: itemEdit.valores.find((e) => e.titulo === "Remarks")?.valor,
+            eventoFornecedorCusteio: itemEdit.valores.find((e) => e.titulo === "Fornecedor Custeio")?.valor,
+        });
+    }
+
     salvarEvento = async () => {
         this.setState({ ...util.cleanStates(this.state) });
 
@@ -3551,11 +3568,12 @@ class AddOS extends Component {
             ],
             loading: true
         })
+        
 
         if (parseInt(this.state.eventoChave) === 0) {
             await apiEmployee.post(`insertServicoItemBasico.php`, {
                 token: true,
-                values: `'${this.state.chave}', '${this.state.eventoData}', '${this.state.eventoFornecedor}', '${this.state.eventoTaxa}', '${this.state.eventoDescricao}', '${this.state.eventoTipo}', '${this.state.eventoFornecedorCusteio}', '${this.state.eventoRemarks}', '${this.state.eventoMoeda}', '${parseFloat(this.state.eventoValor == "" ? 0 : this.state.eventoValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.eventoVlrc == "" ? 0 : this.state.eventoVlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.eventoRepasse ? 1 : 0}'`,
+                values: `'${this.state.chave}', '${this.state.eventoData}', '${this.state.eventoFornecedor}', '${this.state.eventoTaxa}', '${this.state.eventoDescricao}', '${this.state.eventoTipo}', '${this.state.eventoFornecedorCusteio}', '', '${this.state.eventoMoeda}', '${parseFloat(this.state.eventoValor == "" ? 0 : this.state.eventoValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.eventoVlrc == "" ? 0 : this.state.eventoVlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.eventoRepasse && this.state.eventoRepasse != "0" ? 1 : 0}'`,
                 chave_os: this.state.chave,
                 ordem: this.state.eventoOrdem.replaceAll(',', '.')
             }).then(
@@ -3575,7 +3593,7 @@ class AddOS extends Component {
                 Moeda: this.state.eventoMoeda,
                 valor: parseFloat(this.state.eventoValor == "" ? 0 : this.state.eventoValor.replaceAll('.', '').replaceAll(',', '.')),
                 valor1: parseFloat(this.state.eventoVlrc.replaceAll('.', '').replaceAll(',', '.')),
-                repasse: this.state.eventoRepasse ? 1 : 0,
+                repasse: this.state.eventoRepasse && this.state.eventoRepasse != "0" ? 1 : 0,
                 fornecedor: this.state.eventoFornecedor,
                 taxa: this.state.eventoTaxa,
                 descricao: this.state.eventoDescricao,
@@ -5300,7 +5318,7 @@ class AddOS extends Component {
                                         taxas={this.state.taxas}
                                         itemPermissao={this.state.itemPermissao}
                                         acessosPermissoes={this.state.acessosPermissoes}
-                                        setItemEdit={(itemEdit) => this.setState({ itemEdit })}
+                                        setItemEdit={(itemEdit) => this.revertItemEdit(itemEdit )}
                                         itemEdit={this.state.itemEdit}
                                         onSubmit={this.salvarEvento}
                                         valid={validFormEvento}
