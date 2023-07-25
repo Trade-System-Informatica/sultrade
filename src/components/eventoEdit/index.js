@@ -4,6 +4,8 @@ import { Formik, Field, Form } from 'formik'
 import Modal from '@material-ui/core/Modal';
 import Select from 'react-select';
 import 'react-confirm-alert/src/react-confirm-alert.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 
 const estadoInicial = {
     pesquisa: '',
@@ -64,11 +66,13 @@ class EventoEdit extends Component {
         }
 
         if (itemEdit.valores.find((e, i) => i === index)?.titulo == "Tipo") {
-            itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Repasse" ? ({...e, valor: false }) : e.titulo == "Taxa" ? ({ ...e, valor: "" }) : ({ ...e }));
+            itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Repasse" ? ({ ...e, valor: false }) : e.titulo == "Taxa" ? ({ ...e, valor: "" }) : ({ ...e }));
             if (itemEdit.valores.find((e) => e.titulo == "Tipo")?.valor == 0) {
                 itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Taxa" ? ({ ...e, options: this.props.taxas.filter((taxa) => taxa.Tipo == "P")?.map((taxa) => ({ label: taxa.descricao, value: taxa.chave, money: taxa.valor })) }) : ({ ...e }))
+                itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Fornecedor" ? ({ ...e, obrigatorio: true }) : e.titulo == "Fornecedor Custeio" ? ({ ...e, obrigatorio: false }) : ({ ...e }))
             } else if (itemEdit.valores.find((e) => e.titulo == "Tipo")?.valor == 1) {
                 itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Taxa" ? ({ ...e, options: this.props.taxas.filter((taxa) => taxa.Tipo == "R")?.map((taxa) => ({ label: taxa.descricao, value: taxa.chave, money: taxa.valor })) }) : ({ ...e }))
+                itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Fornecedor" ? ({ ...e, obrigatorio: false }) : e.titulo == "Fornecedor Custeio" ? ({ ...e, obrigatorio: true }) : ({ ...e }))
             }
         }
 
@@ -157,6 +161,9 @@ class EventoEdit extends Component {
                                                                         <label>{valor.titulo}</label>
                                                                     </div>
                                                                     <div className='col-1 errorMessage'>
+                                                                        {valor.obrigatorio && (!valor.valor1 && valor.valor != "0" || !valor.valor2 && valor.valor != "0") &&
+                                                                            <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                        }
                                                                     </div>
                                                                     <div className="fieldDividido col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                                         <select disabled={valor.disabled1} className='form-control nextToInput fieldDividido_1' value={valor.valor1} onChange={async (e) => { this.changeState(index, e.currentTarget.value, 1); await valor.onChange1(e.currentTarget.value) }}>
@@ -184,6 +191,9 @@ class EventoEdit extends Component {
                                                                     <label>{valor.titulo}</label>
                                                                 </div>
                                                                 <div className='col-1 errorMessage'>
+                                                                    {valor.obrigatorio && !valor.valor && valor.valor != "0" &&
+                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                    }
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                                     {valor.tipo == "select" &&
@@ -213,7 +223,18 @@ class EventoEdit extends Component {
                                                                             onChange={(e) => { this.changeState(index, e.target.checked); valor.onChange(e.target.checked) }}
                                                                             type="checkbox" />
                                                                     }
-                                                                    {valor.tipo != "select" && valor.tipo != "money" && valor.tipo != "check" &&
+                                                                    {valor.tipo == "textarea" &&
+                                                                        <Field
+                                                                            className="form-control textareaFix"
+                                                                            as={"textarea"}
+                                                                            rows="3" 
+                                                                            type="text"
+                                                                            onClick={(e) => e.target.select()}
+                                                                            value={valor.valor}
+                                                                            disabled={valor.disabled}
+                                                                            onChange={async (e) => { this.changeState(index, e.currentTarget.value) }}/>
+                                                                    }
+                                                                    {valor.tipo != "select" && valor.tipo != "money" && valor.tipo != "check" && valor.tipo != "textarea" &&
                                                                         <Field
                                                                             className="form-control"
                                                                             disabled={valor.disabled}

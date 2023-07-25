@@ -768,18 +768,21 @@ class AddOS extends Component {
                         {
                             titulo: 'Data',
                             valor: evento.data,
+                            obrigatorio: true,
                             tipo: 'date',
                             onChange: async (valor) => { await this.setState({ eventoData: valor }); },
                         },
                         {
                             titulo: 'Ordem',
                             valor: evento.ordem,
+                            obrigatorio: true,
                             tipo: 'text',
                             onChange: async (valor) => { await this.setState({ eventoOrdem: valor }); },
                         },
                         {
                             titulo: 'Tipo',
                             valor: evento.tipo_sub,
+                            obrigatorio: true,
                             tipo: 'select',
                             options: this.state.tiposSubOptions,
                             onChange: async (valor) => { await this.setState({ eventoTipo: valor }); },
@@ -793,6 +796,7 @@ class AddOS extends Component {
                         {
                             titulo: 'Taxa',
                             valor: evento.taxa,
+                            obrigatorio: [0,1].includes(evento.tipo_sub),
                             tipo: 'select',
                             options: this.state.taxasOptions,
                             onChange: async (valor) => { await this.setState({ eventoTaxa: valor }); },
@@ -800,6 +804,7 @@ class AddOS extends Component {
                         {
                             titulo: 'Fornecedor',
                             valor: evento.fornecedor,
+                            obrigatorio: evento.tipo_sub == 0,
                             tipo: 'select',
                             options: this.state.fornecedoresOptions,
                             onChange: async (valor) => { await this.setState({ eventoFornecedor: valor }); },
@@ -807,6 +812,7 @@ class AddOS extends Component {
                         {
                             titulo: 'Fornecedor Custeio',
                             valor: evento.Fornecedor_Custeio,
+                            obrigatorio: evento.tipo_sub == 1,
                             tipo: 'select',
                             options: this.state.fornecedoresOptions,
                             onChange: async (valor) => { await this.setState({ eventoFornecedorCusteio: valor }); },
@@ -821,6 +827,7 @@ class AddOS extends Component {
                         {
                             titulo: 'Descrição',
                             valor: evento.descricao,
+                            obrigatorio: true,
                             tipo: 'text',
                             onChange: async (valor) => {
                                 await this.setState({ eventoDescricao: valor });
@@ -828,6 +835,7 @@ class AddOS extends Component {
                         }, {
                             half: true,
                             titulo: "Valor",
+                            obrigatorio: true,
                             valor1: evento.Moeda,
                             tipo1: "select",
                             options1: this.state.moedasOptions,
@@ -843,6 +851,12 @@ class AddOS extends Component {
                             tipo: "money",
                             onChange: async (valor) => { await this.setState({ eventoVlrc: valor }); },
                             onBlur: async (valor) => { await this.setState({ eventoVlrc: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }); },
+                        },
+                        {
+                            titulo: "Remarks",
+                            valor: evento.remarks,
+                            tipo: "textarea",
+                            onChange: async (valor) => { await this.setState({ eventoRemarks: valor }); },
                         }
                     ]
                 }
@@ -874,18 +888,21 @@ class AddOS extends Component {
                     valores: [
                         {
                             titulo: 'Data',
+                            obrigatorio: true,
                             valor: moment().format("YYYY-MM-DD"),
                             tipo: 'date',
                             onChange: async (valor) => { await this.setState({ eventoData: valor }); },
                         },
                         {
                             titulo: 'Ordem',
+                            obrigatorio: true,
                             valor: `${Math.floor(Math.max(...this.state.eventos.map((e) => parseFloat(e.ordem)), 0)) + 1}`,
                             tipo: 'text',
                             onChange: async (valor) => { await this.setState({ eventoOrdem: valor }); },
                         },
                         {
                             titulo: 'Tipo',
+                            obrigatorio: true,
                             valor: 0,
                             tipo: 'select',
                             options: this.state.tiposSubOptions,
@@ -899,6 +916,7 @@ class AddOS extends Component {
                         },
                         {
                             titulo: 'Taxa',
+                            obrigatorio: true,
                             valor: '',
                             tipo: 'select',
                             options: this.state.taxasOptions,
@@ -906,6 +924,7 @@ class AddOS extends Component {
                         },
                         {
                             titulo: 'Fornecedor',
+                            obrigatorio: true,
                             valor: '',
                             tipo: 'select',
                             options: this.state.fornecedoresOptions,
@@ -927,6 +946,7 @@ class AddOS extends Component {
                         },
                         {
                             titulo: 'Descrição',
+                            obrigatorio: true,
                             valor: '',
                             tipo: 'text',
                             onChange: async (valor) => {
@@ -935,6 +955,7 @@ class AddOS extends Component {
                         }, {
                             half: true,
                             titulo: "Valor",
+                            obrigatorio: true,
                             valor1: 5,
                             tipo1: "select",
                             options1: this.state.moedasOptions,
@@ -950,6 +971,12 @@ class AddOS extends Component {
                             tipo: "money",
                             onChange: async (valor) => { await this.setState({ eventoVlrc: valor }); },
                             onBlur: async (valor) => { await this.setState({ eventoVlrc: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '' }); },
+                        },
+                        {
+                            titulo: "Remarks",
+                            valor: '',
+                            tipo: "textarea",
+                            onChange: async (valor) => { await this.setState({ eventoRemarks: valor }); },
                         }
                     ]
                 }
@@ -3573,7 +3600,7 @@ class AddOS extends Component {
         if (parseInt(this.state.eventoChave) === 0) {
             await apiEmployee.post(`insertServicoItemBasico.php`, {
                 token: true,
-                values: `'${this.state.chave}', '${this.state.eventoData}', '${this.state.eventoFornecedor}', '${this.state.eventoTaxa}', '${this.state.eventoDescricao}', '${this.state.eventoTipo}', '${this.state.eventoFornecedorCusteio}', '', '${this.state.eventoMoeda}', '${parseFloat(this.state.eventoValor == "" ? 0 : this.state.eventoValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.eventoVlrc == "" ? 0 : this.state.eventoVlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.eventoRepasse && this.state.eventoRepasse != "0" ? 1 : 0}'`,
+                values: `'${this.state.chave}', '${this.state.eventoData}', '${this.state.eventoFornecedor}', '${this.state.eventoTaxa}', '${this.state.eventoDescricao}', '${this.state.eventoTipo}', '${this.state.eventoFornecedorCusteio}', '${this.state.eventoRemarks}', '${this.state.eventoMoeda}', '${parseFloat(this.state.eventoValor == "" ? 0 : this.state.eventoValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.eventoVlrc == "" ? 0 : this.state.eventoVlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.eventoRepasse && this.state.eventoRepasse != "0" ? 1 : 0}'`,
                 chave_os: this.state.chave,
                 ordem: this.state.eventoOrdem.replaceAll(',', '.')
             }).then(
