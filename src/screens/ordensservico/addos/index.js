@@ -865,7 +865,7 @@ class AddOS extends Component {
             await this.setState({
                 eventoData: moment().format("YYYY-MM-DD"),
                 eventoFornecedor: '',
-                eventoMoeda: 5,
+                eventoMoeda: 6,
                 eventoTaxa: '',
                 eventoDescricao: '',
                 eventoTipo: 0,
