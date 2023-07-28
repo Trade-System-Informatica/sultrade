@@ -1694,7 +1694,7 @@ class AddEvento extends Component {
                                                                 </div>
                                                                 <div className='col-1'></div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <input className='form_control' checked={this.state.repasse} onChange={(e) => { this.setState({ repasse: e.target.checked, pessoa: '', tipo: '', contaDesconto: '', fornecedorCusteio: "", vlrc: e.target.checked ? this.state.valor : '0,00' }) }} type="checkbox" />
+                                                                    <input className='form_control' checked={this.state.repasse} onChange={(e) => { this.setState({ repasse: e.target.checked, pessoa: '', tipo: '', contaDesconto: '', fornecedorCusteio: "", vlrc: e.target.checked ? this.state.valor : this.state.vlrc }) }} type="checkbox" />
                                                                 </div>
                                                                 <div className='col-1'></div>
                                                             </>
@@ -1811,26 +1811,30 @@ class AddEvento extends Component {
                                                             }
                                                         </div>
                                                         <div className="fieldDividido col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <select disabled={this.state.repasse} className='form-control nextToInput fieldDividido_1' value={this.state.moeda} onChange={(e) => { if (!this.state.repasse) { this.setState({ moeda: e.target.value }) } }}>
+                                                            <select className='form-control nextToInput fieldDividido_1' value={this.state.moeda} onChange={(e) => { if (!this.state.repasse) { this.setState({ moeda: e.target.value }) } }}>
                                                                 {this.state.moedas.map((e) => (
                                                                     <option value={e.Chave}>{e.Sigla}</option>
                                                                 ))}
                                                             </select>
-                                                            <Field disabled={this.state.repasse} className="form-control fieldDividido_2 text-right " type="text" onClick={(e) => e.target.select()} value={this.state.valor} onChange={async e => { if (!this.state.repasse) { this.setState({ valor: e.currentTarget.value }) } }} onBlur={async e => { this.setState({ valor: e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.') ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }) }} />
+                                                            <Field className="form-control fieldDividido_2 text-right " type="text" onClick={(e) => e.target.select()} value={this.state.valor} onChange={async e => { this.setState({ valor: e.currentTarget.valur }); if (this.state.repasse) { this.setState({ vlrc: e.currentTarget.value }) } }} onBlur={async e => { this.setState({ valor: e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.') ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }); if (this.state.repasse) { this.setState({ vlrc: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }) } }} />
                                                         </div>
 
                                                         <div className='col-1'></div>
 
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>VCP</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Field className="form-control text-right" type="text" step="0.1" value={this.state.vlrc} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ vlrc: e.currentTarget.value }); if (this.state.repasse) { this.setState({ valor: e.currentTarget.value }) } }} onBlur={async e => { this.setState({ vlrc: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }); if (this.state.repasse) { this.setState({ valor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }) } }} />
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                        </div>
+                                                        {!this.state.repasse &&
+                                                            <>
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>VCP</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field disabled={this.state.repasse} className="form-control text-right" type="text" step="0.1" value={this.state.vlrc} onClick={(e) => e.target.select()} onChange={async e => { this.setState({ vlrc: e.currentTarget.value }); if (this.state.repasse) { this.setState({ valor: e.currentTarget.value }) } }} onBlur={async e => { this.setState({ vlrc: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }); if (this.state.repasse) { this.setState({ valor: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }) } }} />
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                            </>
+                                                        }
 
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Remarks</label>

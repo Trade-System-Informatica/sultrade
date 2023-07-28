@@ -76,8 +76,8 @@ class EventoEdit extends Component {
             }
         }
 
-        if (itemEdit.valores.find((e, i) => i === index)?.titulo == "VCP" && itemEdit.valores.find((e) => e.titulo == "Repasse")?.valor) {
-            itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Valor" ? ({ ...e, valor2: value }) : ({ ...e }));
+        if (itemEdit.valores.find((e, i) => i === index)?.titulo == "Valor" && itemEdit.valores.find((e) => e.titulo == "Repasse")?.valor) {
+            itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "VCP" ? ({ ...e, valor: value }) : ({ ...e }));
             if (blur) {
                 itemEdit.valores.find((e) => e.titulo == "Valor").onChange2(value);
                 itemEdit.valores.find((e) => e.titulo == "VCP").onChange(value);
@@ -89,10 +89,11 @@ class EventoEdit extends Component {
         } else if (itemEdit.valores.find((e, i) => i === index)?.titulo == "Repasse") {
             if (value) {
                 const VCP = itemEdit.valores.find((e) => e.titulo == "VCP")?.valor;
-                itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Valor" ? ({ ...e, valor2: VCP, disabled2: true }) : ({ ...e }))
+                itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Valor" ? ({ ...e, valor2: VCP }) : ({ ...e }))
+                itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "VCP" ? ({ ...e, hidden: true }) : ({ ...e }))
                 itemEdit.valores.find((e) => e.titulo == "Valor").onChange2(itemEdit.valores.find((e) => e.titulo == "Valor")?.valor2);
             } else {
-                itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Valor" ? ({ ...e, disabled2: false }) : ({ ...e }))
+                itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "VCP" ? ({ ...e, hidden: false }) : ({ ...e }))
             }
         }
 
