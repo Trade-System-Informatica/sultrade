@@ -956,7 +956,7 @@ class AddOS extends Component {
                             half: true,
                             titulo: "Valor",
                             obrigatorio: true,
-                            valor1: 5,
+                            valor1: 6,
                             tipo1: "select",
                             options1: this.state.moedasOptions,
                             onChange1: async (valor) => { await this.setState({ eventoMoeda: valor }); },
