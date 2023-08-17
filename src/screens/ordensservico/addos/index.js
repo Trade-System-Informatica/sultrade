@@ -524,10 +524,12 @@ class AddOS extends Component {
                 }
             }
 
-            const firstItem = this.state.eventos.find((evento) => evento.chave == this.state.agrupadorEventos[0]);
+            if (this.state.agrupadorEventos[0]) {
+                const firstItem = this.state.eventos.find((evento) => evento.chave == this.state.agrupadorEventos[0]);
 
-            if (item.tipo_sub != firstItem?.tipo_sub || item.Fornecedor_Custeio != firstItem?.Fornecedor_Custeio) {
-                return false;
+                if (item.tipo_sub != firstItem?.tipo_sub || item.Fornecedor_Custeio != firstItem?.Fornecedor_Custeio) {
+                    return false;
+                }
             }
         }
         if (this.state.agrupadorTipo == 'CUSTEIO') {
@@ -3034,8 +3036,6 @@ class AddOS extends Component {
 
             await this.salvarOS(validForm, false)
 
-            this.setState({ pdfNome: `Invoices${this.state.codigo ? ` - ${this.state.codigo}` : ""}` })
-
             await this.setState({
                 loading: true,
                 pdfContent: await loader.getBody(`invoices.php`, {
@@ -3050,6 +3050,8 @@ class AddOS extends Component {
             }
 
             const { pdfContent } = this.state;
+
+            this.setState({ pdfNome: `Invoices${this.state.codigo ? ` - ${this.state.codigo}:(${pdfContent.invoice})` : ""}` })
 
             let cabecalho;
             try {
