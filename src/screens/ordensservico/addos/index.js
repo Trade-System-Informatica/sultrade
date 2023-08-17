@@ -515,7 +515,7 @@ class AddOS extends Component {
 
         if (this.state.agrupadorTipo == 'INVOICE') {
             if (this.state.grupoSelecionado != 0) {
-                this.state.invoices_groups.filter((e) => e.grupo != this.state.grupoSelecionado).map((e) => e.evento.split(",").map((el) => {
+                this.state.invoices_groups.filter((e) => e.grupo == this.state.grupoSelecionado).map((e) => e.evento.split(",").map((el) => {
                     eventosUsados.push(el);
                 }));
 
