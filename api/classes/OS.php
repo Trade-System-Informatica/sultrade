@@ -443,6 +443,26 @@ class OS
         return $result;
     }
 
+    public static function getInvoices($chave_os)
+    {
+        $database = new Database();
+
+        $result = $database->doSelect(
+            'os_invoices LEFT JOIN os_servicos_itens ON os_servicos_itens.chave = os_invoices.evento LEFT JOIN pessoas ON os_servicos_itens.fornecedor = pessoas.chave',
+            'os_invoices.grupo,
+            GROUP_CONCAT(os_invoices.chave) as chave,
+            os_invoices.os,
+            GROUP_CONCAT(os_invoices.evento) as evento,
+            SUM(os_servicos_itens.valor1) as valor,
+            os_invoices.chave as chave_grupo,
+            pessoas.nome as fornecedorNome,
+            os_servicos_itens.tipo_sub as tipo',
+            "os_invoices.os = '" . $chave_os . "' GROUP BY os_invoices.grupo"
+        );
+        $database->closeConection();
+        return $result;
+    }
+
     public static function getValoresOS($chave)
     {
         $database = new Database();

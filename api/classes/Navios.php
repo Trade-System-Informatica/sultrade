@@ -81,7 +81,7 @@ class Navios
 
             "os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND (((os_servicos_itens.tipo_sub = 0 OR os_servicos_itens.tipo_sub = 1) AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.fornecedor_custeio != 0)) OR (os_servicos_itens.tipo_sub = 2 OR os_servicos_itens.tipo_sub = 3))
             ORDER BY os_servicos_itens.ordem ASC"
-/*            "(os_taxas.tipo='R' OR os_servicos_itens.repasse= 1 OR (os_servicos_itens.fornecedor_custeio != '0' AND os_servicos_itens.fornecedor_custeio != '')) AND os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0
+            /*            "(os_taxas.tipo='R' OR os_servicos_itens.repasse= 1 OR (os_servicos_itens.fornecedor_custeio != '0' AND os_servicos_itens.fornecedor_custeio != '')) AND os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0
             ORDER BY os_servicos_itens.ordem ASC"*/
         );
 
@@ -145,7 +145,7 @@ class Navios
             pessoas_enderecos.complemento AS complemento',
 
             "os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 && (os_servicos_itens.tipo_sub = 2 || os_servicos_itens.tipo_sub = 3 || (os_servicos_itens.repasse = 1 || os_servicos_itens.Fornecedor_Custeio != '')) GROUP BY os_servicos_itens.chave ORDER BY os_subgrupos_taxas.codigo ASC LIMIT 100"
-    );
+        );
 
 
         $database->closeConection();
@@ -230,16 +230,89 @@ class Navios
             "os.codigo='" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND (os_servicos_itens.tipo_sub = 0 OR os_servicos_itens.tipo_sub = 1) AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.Fornecedor_Custeio != '') GROUP BY os_subgrupos_taxas.chave ORDER BY os_servicos_itens.ordem ASC"
         );
 
-        $result['campos'] = $database->doSelect("os
+        $result['campos'] = $database->doSelect(
+            "os
         left join os_servicos_itens as eventos on os.chave = eventos.chave_os
         left join os_servicos_itens_complementar as complementos ON eventos.chave = complementos.evento
         left join os_subgrupos_taxas_campos as campos ON complementos.subgrupo_campo = campos.chave",
-        "eventos.chave as chaveEvento,
+            "eventos.chave as chaveEvento,
         complementos.valor as complemento,
         campos.nome as campo,
         campos.tipo as tipoCampo,
         campos.subgrupo as chaveSubgrupo",
-            "os.codigo='" . $codigo . "' AND complementos.valor IS NOT NULL AND complementos.valor != '' AND os.cancelada = 0 AND eventos.cancelada = 0 AND (eventos.tipo_sub = 0 OR eventos.tipo_sub = 1) AND (eventos.repasse = 1 OR eventos.Fornecedor_Custeio != '') ORDER BY eventos.ordem ASC");
+            "os.codigo='" . $codigo . "' AND complementos.valor IS NOT NULL AND complementos.valor != '' AND os.cancelada = 0 AND eventos.cancelada = 0 AND (eventos.tipo_sub = 0 OR eventos.tipo_sub = 1) AND (eventos.repasse = 1 OR eventos.Fornecedor_Custeio != '') ORDER BY eventos.ordem ASC"
+        );
+
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function invoices($os, $eventos)
+    {
+        $database = new Database();
+
+        $result = $database->doSelect(
+            "os
+        left join os_navios on os_navios.chave = os.chave_navio
+        left join os_portos on os_portos.chave = os.porto
+        left join pessoas as clientes on clientes.chave = os.chave_cliente
+        left join pessoas_enderecos on clientes.chave = pessoas_enderecos.chave_pessoa AND pessoas_enderecos.padrao = 1",
+            "pessoas_enderecos.pais, 
+        os.*,
+        clientes.nome as clienteNome,
+        pessoas_enderecos.endereco as address, 
+        os_portos.descricao as portoNome,
+        os_navios.nome as navioNome",
+            "os.chave='" . $os . "' AND os.cancelada = 0"
+        );
+        $result = $result[0];
+
+        if ($eventos[0]) {
+            $events = $database->doSelect(
+                "os_servicos_itens
+                left join pessoas on pessoas.chave = os_servicos_itens.fornecedor_custeio",
+                "os_servicos_itens.*, 
+                pessoas.nome as fornecedorCusteioNome",
+                "os_servicos_itens.chave IN (" . implode(',', $eventos) . ") ORDER BY os_servicos_itens.ordem ASC"
+            );
+        }
+
+        if ($events[0]) {
+            $result['fornecedorCusteio'] = $events[0]['Fornecedor_Custeio'];
+            $result['fornecedorCusteioNome'] = $events[0]['fornecedorCusteioNome'];
+            $result['events'] = $events;
+        }
+
+        $invoice = $database->doSelect('os_invoices', 'os_invoices.codigo',"os_invoices.evento = ".$eventos[0]);
+        
+        if (!$invoice && $result && $result['fornecedorCusteio'] != 0 && $events[0]) {
+            $grupos = $database->doSelect('os_invoices', 'os_invoices.grupo, os_invoices.evento', "os_invoices.os = '$os' GROUP BY grupo ORDER BY grupo DESC");
+            $grupos = $grupos[0]['grupo'];
+
+            if (!$grupos) {
+                $grupo = 1;
+            } else {
+                $grupo = $grupos + 1;
+            }
+            $codigo_invoice = $grupo;
+
+            for ($i = strlen($codigo_invoice); $i < 3;$i++) {
+                $codigo_invoice = "0".$codigo_invoice;
+            }
+            $year = new DateTime($result['Data_Abertura']);
+            $codigo_invoice = $year->format('Y').$codigo_invoice;
+            
+            $result['invoice'] = $codigo_invoice;
+            
+            $cols = 'grupo, os, evento, codigo';
+            foreach ($eventos as $evento) {
+                $values = $grupo . ", $os, $evento, $codigo_invoice";
+                $database->doInsert('os_invoices', $cols, $values);
+            }
+        } else if ($result && $result['fornecedorCusteio'] != 0 && $events[0]) {
+            $result['invoice'] = $invoice[0]['codigo'];
+        }
+
 
         $database->closeConection();
         return $result;

@@ -173,9 +173,12 @@ const estadoInicial = {
     address: "",
 
     agrupadorModal: false,
+    agrupadorTipo: '',
     agrupadorEventos: [],
+    agruparFunction: () => { },
 
     custeios_subagentes: [],
+    invoices_groups: [],
 
     historicosOptions: [],
     planosContasOptions: [],
@@ -466,6 +469,7 @@ class AddOS extends Component {
         await this.getOperadores();
         if (this.state.chave) {
             await this.getCusteiosSubagentes();
+            await this.getInvoices();
             await this.getCentrosCustos();
             await this.getServicosItens();
             await this.getDocumentos();
@@ -492,24 +496,57 @@ class AddOS extends Component {
         )
     }
 
+    getInvoices = async () => {
+        await apiEmployee.post(`getInvoices.php`, {
+            token: true,
+            chave_os: this.state.chave
+        }).then(
+            async res => {
+                if (res.data) {
+                    this.setState({ invoices_groups: [...res.data] });
+                }
+            },
+            async res => await console.log(`Erro: ${res}`)
+        )
+    }
+
     filterAgrupador = (item) => {
         const eventosUsados = [];
 
-        this.state.custeios_subagentes.filter((e) => e.grupo != this.state.grupoSelecionado).map((e) => e.evento.split(",").map((el) => {
-            eventosUsados.push(el);
-        }));
+        if (this.state.agrupadorTipo == 'INVOICE') {
+            if (this.state.grupoSelecionado != 0) {
+                this.state.invoices_groups.filter((e) => e.grupo != this.state.grupoSelecionado).map((e) => e.evento.split(",").map((el) => {
+                    eventosUsados.push(el);
+                }));
 
-        if (eventosUsados.includes(item.chave)) {
-            return false;
+                if (eventosUsados.includes(item.chave)) {
+                    return false;
+                }
+            }
+
+            const firstItem = this.state.eventos.find((evento) => evento.chave == this.state.agrupadorEventos[0]);
+
+            if (item.tipo_sub != firstItem?.tipo_sub || item.Fornecedor_Custeio != firstItem?.Fornecedor_Custeio) {
+                return false;
+            }
         }
+        if (this.state.agrupadorTipo == 'CUSTEIO') {
+            this.state.custeios_subagentes.filter((e) => e.grupo != this.state.grupoSelecionado).map((e) => e.evento.split(",").map((el) => {
+                eventosUsados.push(el);
+            }));
 
-        if (!this.state.agrupadorEventos[0] && !item.conta) {
-            return true;
-        }
-        const firstItem = this.state.eventos.find((evento) => evento.chave == this.state.agrupadorEventos[0]);
+            if (eventosUsados.includes(item.chave)) {
+                return false;
+            }
 
-        if (item.tipo_sub != firstItem?.tipo_sub || item.fornecedor != firstItem?.fornecedor) {
-            return false;
+            if (!this.state.agrupadorEventos[0] && !item.conta) {
+                return true;
+            }
+            const firstItem = this.state.eventos.find((evento) => evento.chave == this.state.agrupadorEventos[0]);
+
+            if (item.tipo_sub != firstItem?.tipo_sub || item.fornecedor != firstItem?.fornecedor) {
+                return false;
+            }
         }
 
         return true;
@@ -659,7 +696,7 @@ class AddOS extends Component {
                 async err => { this.erroApi(err) }
             )
         }
-        this.setState({taxas});
+        this.setState({ taxas });
 
         if (this.state.eventoTipo == 0) {
             const options = taxas.filter((taxa) => taxa.Tipo == "P").map((e) => {
@@ -796,7 +833,7 @@ class AddOS extends Component {
                         {
                             titulo: 'Taxa',
                             valor: evento.taxa,
-                            obrigatorio: [0,1].includes(evento.tipo_sub),
+                            obrigatorio: [0, 1].includes(evento.tipo_sub),
                             tipo: 'select',
                             options: this.state.taxasOptions,
                             onChange: async (valor) => { await this.setState({ eventoTaxa: valor }); },
@@ -2988,6 +3025,239 @@ class AddOS extends Component {
         }*/
     }
 
+    Invoices = async (validForm) => {
+        try {
+            if (!validForm) {
+                await this.setState({ error: { type: "error", msg: "Verifique se as informações estão corretas!" } });
+                return;
+            }
+
+            await this.salvarOS(validForm, false)
+
+            this.setState({ pdfNome: `Invoices${this.state.codigo ? ` - ${this.state.codigo}` : ""}` })
+
+            await this.setState({
+                loading: true,
+                pdfContent: await loader.getBody(`invoices.php`, {
+                    token: true,
+                    os: this.state.chave,
+                    eventos: this.state.agrupadorEventos,
+                })
+            })
+
+            if (!this.state.pdfContent || !this.state.pdfContent.events) {
+                return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
+            }
+
+            const { pdfContent } = this.state;
+
+            let cabecalho;
+            try {
+                cabecalho = JSON.parse(pdfContent.cabecalho);
+            } catch (err) {
+                console.error(err);
+            }
+            const roe = pdfContent.ROE ? parseFloat(pdfContent.ROE) : 5;
+            let valorTotal = 0;
+            let pdf;
+
+
+            if ([16, 17].includes(parseInt(pdfContent.fornecedorCusteio))) {
+                pdf = <div key={546546554654} className='pdf_padding'>
+                    <br />
+                    <div className='invoices_header_sultrade'>
+                        <div className='invoices_header_image_sultrade'>
+                            <img className="img-fluid" src="https://i.ibb.co/NCw9jYX/sultrade-logo.png" alt="logo-lpc" border="0" style={{ width: '500px', height: '134px' }} />
+                        </div>
+                        <div className='invoices_header_info_sultrade'>
+                            <h3>SULTRADE SHIPPING AGENCY</h3>
+                            <span>CNPJ/VAT Number : 10.432.546/0001-75</span>
+                            <span><a href='mailto:sultrade@sultradeagency.com'>E-mail : sultrade@sultradeagency.com</a></span>
+                            <span>Phone : (55 53) 3235 3500</span>
+                            <span><a href='https://www.sultradeagency.com'>www.sultradeagency.com</a></span>
+                        </div>
+                    </div>
+                    <br />
+                    <div className='invoices_info_sultrade'>
+                        <div className='invoices_info_data_sultrade'>COMPANY: <b>{cabecalho?.company ? cabecalho?.company : pdfContent.clienteNome}</b></div>
+                        <div className='invoices_info_data_sultrade'>INVOICE NUMBER: <b>{pdfContent.invoice}</b></div>
+                        <div className='invoices_info_data_sultrade'>C/O: <b>{'-'}</b></div>
+                        <div className='invoices_info_data_sultrade'>DATE OF BILLING: <b>{moment(pdfContent.Data_Faturamento).isValid() ? moment(pdfContent.Data_Faturamento).format("MMMM DD, YYYY") : '-'}</b></div>
+                        <div className='invoices_info_data_sultrade'>ADDRESS: <b>{cabecalho?.address ? cabecalho?.address : pdfContent.address}</b></div>
+                        <div className='invoices_info_data_sultrade'></div>
+                        <div className='invoices_info_data_sultrade'>PO - VESSEL: <b>{pdfContent.codigo}-{pdfContent.navioNome}</b></div>
+                        <div className='invoices_info_data_sultrade'></div>
+                    </div>
+                    <br /><br /><br />
+                    <div className='invoices_content_sultrade'>
+                        <div className='invoices_content_header_sultrade'>
+                            <div className='invoices_content_title_sultrade'>Description</div>
+                            <div className='invoices_content_title_sultrade'>Qty</div>
+                            <div className='invoices_content_title_sultrade'>Unit Price</div>
+                            <div className='invoices_content_title_sultrade'>Total</div>
+                        </div>
+                        {pdfContent.events.map((event) => {
+                            const quantity = 1;
+                            let valor;
+
+                            if (event.Moeda == 5) {
+                                valor = Util.toFixed(parseFloat(event.valor1 / roe), 2);
+                            } else {
+                                valor = parseFloat(event.valor1);
+                            }
+
+                            const total = valor * quantity;
+                            valorTotal += total;
+
+                            return (
+                                <div className='invoices_content_row_sultrade'>
+                                    <div className='invoices_content_col_sultrade'>{event.descricao}</div>
+                                    <div className='invoices_content_col_sultrade'>{quantity}</div>
+                                    <div className='invoices_content_col_sultrade text-right'>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor)}</div>
+                                    <div className='invoices_content_col_sultrade text-right'>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}</div>
+                                </div>
+                            )
+                        })
+                        }
+                        <div className='invoices_total_row_sultrade'>
+                            <div className='invoices_total_sultrade'>Total</div>
+                            <div className='invoices_total_sultrade'>USD</div>
+                            <div className='invoices_total_sultrade'>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotal)}</div>
+                        </div>
+                    </div>
+                </div>
+
+            } else if (pdfContent.fornecedorCusteio == 32) {
+                pdf = <div key={546546554654} className='pdf_padding'>
+                    <br />
+                    <div className='invoices_header_porto'>
+                        <div className='invoices_header_image_porto'>
+                            <img className="img-fluid" src="https://i.ibb.co/QK61hd5/porto-brasil-logo.png" alt="logo-lpc" border="0" style={{ width: '300px', height: '285px' }} />
+                            <h1>Invoice</h1>
+                        </div>
+                        <div className='invoices_header_info_porto'>
+                            <h4><b>TRANSPORTE PORTO BRAZIL LTDA</b></h4>
+                            <span><b>Date:</b> {moment(pdfContent.Data_Faturamento).isValid() ? moment(pdfContent.Data_Faturamento).format("MMMM DD, YYYY") : '-'}</span>
+                            <span></span>
+                            <span><b>Invoice:</b> {pdfContent.invoice}</span>
+                        </div>
+                    </div>
+                    <br />
+                    <div className='invoices_info_porto'>
+                        <div className='invoices_info_data_porto'><b>To:</b> {cabecalho?.company ? cabecalho?.company : pdfContent.clienteNome}</div>
+                        <div className='invoices_info_data_porto'><b>C/O:</b> {'-'}</div>
+                        <div className='invoices_info_data_porto'><b>Address:</b> {cabecalho?.address ? cabecalho?.address : pdfContent.address}</div>
+                        <div className='invoices_info_data_porto'><b>PO - VESSEL:</b> {pdfContent.codigo}-{pdfContent.navioNome}</div>
+                    </div>
+                    <br /><br /><br />
+                    <div className='invoices_content_porto'>
+                        <div className='invoices_content_header_porto'>
+                            <div className='invoices_content_title_porto'>Qty</div>
+                            <div className='invoices_content_title_porto'>Description</div>
+                            <div className='invoices_content_title_porto'>Unit Price(USD)</div>
+                            <div className='invoices_content_title_porto'>Total(USD)</div>
+                        </div>
+                        {pdfContent.events.map((event) => {
+                            const quantity = 1;
+                            let valor;
+
+                            if (event.Moeda == 5) {
+                                valor = Util.toFixed(parseFloat(event.valor1 / roe), 2);
+                            } else {
+                                valor = parseFloat(event.valor1);
+                            }
+
+                            const total = valor * quantity;
+                            valorTotal += total;
+
+                            return (
+                                <div className='invoices_content_row_porto'>
+                                    <div className='invoices_content_col_porto'>{quantity}</div>
+                                    <div className='invoices_content_col_porto'>{event.descricao}</div>
+                                    <div className='invoices_content_col_porto text-right'>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor)}</div>
+                                    <div className='invoices_content_col_porto text-right'>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}</div>
+                                </div>
+                            )
+                        })
+                        }
+                        <div className='invoices_total_row_porto'>
+                            <div className='invoices_total_porto'>Total</div>
+                            <div className='invoices_total_porto'>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotal)}</div>
+                        </div>
+                    </div>
+                </div>
+            } else if (pdfContent.fornecedorCusteio == 269) {
+                pdf = <div key={546546554654} className='pdf_padding'>
+                    <br />
+                    <div className='invoices_header_coast'>
+                        <div className='invoices_header_image_coast'>
+                            <img className="img-fluid" src="https://i.ibb.co/mv8gqfw/coast-logo.png" alt="logo-lpc" border="0" style={{ width: '150px', height: '59px', }} />
+                        </div>
+                        <div className='invoices_header_info_coast'>
+                            <span>COAST SERVICOS ADMINISTRATIVOS LTDA</span>
+                            <span>Date: {moment(pdfContent.Data_Faturamento).isValid() ? moment(pdfContent.Data_Faturamento).format("MMMM DD, YYYY") : '-'}</span>
+                            <span>CPNJ/VAT NUMBER : 15.258.758/0001-00</span>
+                            <span>Invoice: {pdfContent.invoice}</span>
+                        </div>
+                    </div>
+                    <br />
+                    <div className='invoices_info_coast'>
+                        <div className='invoices_info_data_coast'>To: {cabecalho?.company ? cabecalho?.company : pdfContent.clienteNome}</div>
+                        <div className='invoices_info_data_coast'>C/O: {'-'}</div>
+                        <div className='invoices_info_data_coast'>Address: {cabecalho?.address ? cabecalho?.address : pdfContent.address}</div>
+                        <div className='invoices_info_data_coast'>PO - VESSEL: {pdfContent.codigo}-{pdfContent.navioNome}</div>
+                    </div>
+                    <br /><br />
+                    <div className='invoices_content_coast'>
+                        <div className='invoices_content_header_coast'>
+                            <div className='invoices_content_title_coast text-center'>Qty</div>
+                            <div className='invoices_content_title_coast'>Description</div>
+                            <div className='invoices_content_title_coast'>Unit Price</div>
+                            <div className='invoices_content_title_coast'>Total</div>
+                        </div>
+                        {pdfContent.events.map((event) => {
+                            const quantity = 1;
+                            let valor;
+
+                            if (event.Moeda == 5) {
+                                valor = Util.toFixed(parseFloat(event.valor1 / roe), 2);
+                            } else {
+                                valor = parseFloat(event.valor1);
+                            }
+
+                            const total = valor * quantity;
+                            valorTotal += total;
+
+                            return (
+                                <div className='invoices_content_row_coast'>
+                                    <div className='invoices_content_col_coast'>{quantity}</div>
+                                    <div className='invoices_content_col_coast'>{event.descricao}</div>
+                                    <div className='invoices_content_col_coast text-right'>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor)}</div>
+                                    <div className='invoices_content_col_coast text-right'>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}</div>
+                                </div>
+                            )
+                        })
+                        }
+                        <div className='invoices_total_row_coast'>
+                            <div className='invoices_total_coast'>Total</div>
+                            <div className='invoices_total_coast'>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valorTotal)}</div>
+                        </div>
+                    </div>
+                </div>
+            } else {
+                return this.setState({ error: { type: "error", msg: "Fornecedor Custeio desconhecido" }, loading: false })
+            }
+
+
+            await this.setState({ pdfgerado: pdf })
+            this.handleExportWithComponent()
+        } catch (err) {
+            console.log(err);
+            await this.setState({ erro: "Erro ao criar o documento", loading: false });
+        }
+        this.setState({ loading: false });
+    }
+
     RelatorioVoucher = async (codigo, validForm) => {
         try {
             if (!validForm) {
@@ -3565,7 +3835,7 @@ class AddOS extends Component {
             eventoTaxa: itemEdit.valores.find((e) => e.titulo === "Taxa")?.valor,
             eventoMoeda: itemEdit.valores.find((e) => e.titulo === "Valor")?.valor1,
             eventoValor: itemEdit.valores.find((e) => e.titulo === "Valor")?.valor2,
-            eventoVlrc:itemEdit.valores.find((e) => e.titulo === "VCP")?.valor,
+            eventoVlrc: itemEdit.valores.find((e) => e.titulo === "VCP")?.valor,
             eventoRepasse: itemEdit.valores.find((e) => e.titulo === "Repasse")?.valor,
             eventoDescricao: itemEdit.valores.find((e) => e.titulo === "Descrição")?.valor,
             eventoTipo: itemEdit.valores.find((e) => e.titulo === "Tipo")?.valor,
@@ -3595,7 +3865,7 @@ class AddOS extends Component {
             ],
             loading: true
         })
-        
+
 
         if (parseInt(this.state.eventoChave) === 0) {
             await apiEmployee.post(`insertServicoItemBasico.php`, {
@@ -3889,7 +4159,12 @@ class AddOS extends Component {
                                                 onSubmit={async values => {
                                                     await new Promise(r => setTimeout(r, 1000))
                                                     await this.setState({ agrupadorModal: false })
-                                                    await this.agruparEventos();
+
+                                                    if (this.state.agrupadorTipo == 'CUSTEIO') {
+                                                        await this.agruparEventos();
+                                                    } else if (this.state.agrupadorTipo == 'INVOICE') {
+                                                        await this.Invoices(validForm);
+                                                    }
                                                 }}
                                             >
                                                 <Form className="contact-form" >
@@ -3933,7 +4208,15 @@ class AddOS extends Component {
                                                                             {this.state.eventos[0] != undefined && this.state.eventos.filter((feed) => this.state.agrupadorEventos.includes(feed.chave)).map((feed, index) => (
                                                                                 <>
                                                                                     {window.innerWidth < 500 &&
-                                                                                        <tr onClick={() => this.setState({ agrupadorEventos: this.state.agrupadorEventos.filter((e) => e != feed.chave) })}>
+                                                                                        <tr onClick={() => {
+                                                                                            if (this.state.agrupadorTipo == "INVOICE" && this.state.grupoSelecionado != 0) {
+                                                                                                this.setState({
+                                                                                                    grupoSelecionado: '',
+                                                                                                    agrupadorEventos: [],
+                                                                                                });
+                                                                                            }
+                                                                                            this.setState({ agrupadorEventos: this.state.agrupadorEventos.filter((e) => e != feed.chave) })
+                                                                                        }}>
                                                                                             <td className="text-center">
                                                                                                 <p>{feed.chave}</p>
                                                                                             </td>
@@ -3949,7 +4232,15 @@ class AddOS extends Component {
                                                                                         </tr>
                                                                                     }
                                                                                     {window.innerWidth >= 500 &&
-                                                                                        <tr onClick={() => this.setState({ agrupadorEventos: this.state.agrupadorEventos.filter((e) => e != feed.chave) })}>
+                                                                                        <tr onClick={() => {
+                                                                                            if (this.state.agrupadorTipo == "INVOICE" && this.state.grupoSelecionado != 0) {
+                                                                                                this.setState({
+                                                                                                    grupoSelecionado: '',
+                                                                                                    agrupadorEventos: [],
+                                                                                                });
+                                                                                            }
+                                                                                            this.setState({ agrupadorEventos: this.state.agrupadorEventos.filter((e) => e != feed.chave) })
+                                                                                        }}>
                                                                                             <td className="text-center">
                                                                                                 <p>{feed.chave}</p>
                                                                                             </td>
@@ -4013,7 +4304,16 @@ class AddOS extends Component {
                                                                             {this.state.eventos[0] != undefined && this.state.eventos.filter((feed) => !this.state.agrupadorEventos.includes(feed.chave)).filter(this.filterAgrupador).map((feed, index) => (
                                                                                 <>
                                                                                     {window.innerWidth < 500 &&
-                                                                                        <tr onClick={() => this.setState({ agrupadorEventos: [...this.state.agrupadorEventos, feed.chave] })}>
+                                                                                        <tr onClick={() => {
+                                                                                            if (this.state.agrupadorTipo === 'INVOICE' && !this.state.agrupadorEventos[0] && this.state.invoices_groups.find((e) => e.evento.split(', ').find((ev) => ev == feed.chave))) {
+                                                                                                this.setState({
+                                                                                                    grupoSelecionado: this.state.invoices_groups.find((e) => e.evento.split(',').find((ev) => ev?.trim() == feed.chave))?.chave_grupo,
+                                                                                                    agrupadorEventos: this.state.invoices_groups.find((e) => e.evento.split(',').find((ev) => ev?.trim() == feed.chave))?.evento?.split(',')
+                                                                                                });
+                                                                                            } else {
+                                                                                                this.setState({ agrupadorEventos: [...this.state.agrupadorEventos, feed.chave] })
+                                                                                            }
+                                                                                        }}>
                                                                                             <td className="text-center">
                                                                                                 <p>{feed.chave}</p>
                                                                                             </td>
@@ -4021,10 +4321,10 @@ class AddOS extends Component {
                                                                                                 <p>{feed.ordem.replaceAll(',', '.')}</p>
                                                                                             </td>
                                                                                             <td className="text-center">
-                                                                                                <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                                <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor1 : feed.valor1 / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
                                                                                             </td>
                                                                                             <td className="text-center">
-                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor1 : feed.valor1 * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
                                                                                             </td>
                                                                                             <td>
                                                                                                 <input type="checkbox" checked={false} />
@@ -4032,7 +4332,16 @@ class AddOS extends Component {
                                                                                         </tr>
                                                                                     }
                                                                                     {window.innerWidth >= 500 &&
-                                                                                        <tr onClick={() => this.setState({ agrupadorEventos: [...this.state.agrupadorEventos, feed.chave] })}>
+                                                                                        <tr onClick={() => {
+                                                                                            if (this.state.agrupadorTipo === 'INVOICE' && !this.state.agrupadorEventos[0] && this.state.invoices_groups.find((e) => e.evento.split(', ').find((ev) => ev == feed.chave))) {
+                                                                                                this.setState({
+                                                                                                    grupoSelecionado: this.state.invoices_groups.find((e) => e.evento.split(',').find((ev) => ev?.trim() == feed.chave))?.chave_grupo,
+                                                                                                    agrupadorEventos: this.state.invoices_groups.find((e) => e.evento.split(',').find((ev) => ev?.trim() == feed.chave))?.evento?.split(',')
+                                                                                                });
+                                                                                            } else {
+                                                                                                this.setState({ agrupadorEventos: [...this.state.agrupadorEventos, feed.chave] })
+                                                                                            }
+                                                                                        }}>
                                                                                             <td className="text-center">
                                                                                                 <p>{feed.chave}</p>
                                                                                             </td>
@@ -5014,6 +5323,9 @@ class AddOS extends Component {
                                                     <div className="relatorioButton">
                                                         <button className="btn btn-danger" onClick={() => this.FaturamentoCusteio(this.state.os.codigo, validForm)}>Relatório Líquidos</button>
                                                     </div>
+                                                    <div className="relatorioButton">
+                                                        <button className="btn btn-danger" onClick={() => this.setState({ agrupadorModal: true, grupoSelecionado: 0, agrupadorEventos: [], agrupadorTipo: 'INVOICE' })}>Invoices</button>
+                                                    </div>
                                                 </>
                                             }
                                         </div>
@@ -5035,7 +5347,7 @@ class AddOS extends Component {
                                             {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'RELATORIOS_OS') { return e } }).map((e) => e.permissaoImprime)[0] == 1 &&
                                                 <>
                                                     <div className="relatorioButton">
-                                                        <button className="btn btn-danger" onClick={() => this.setState({ agrupadorModal: true, grupoSelecionado: 0, agrupadorEventos: [] })}>Custeio Subagente</button>
+                                                        <button className="btn btn-danger" onClick={() => this.setState({ agrupadorModal: true, grupoSelecionado: 0, agrupadorEventos: [], agrupadorTipo: 'CUSTEIO' })}>Custeio Subagente</button>
                                                     </div>
                                                     <div className="relatorioButton">
                                                         <button className="btn btn-danger"><Link style={{ color: "inherit", textDecoration: "none" }} to={{ pathname: "/financeiro/addFatura/0", state: { backTo: `/ordensservicos/os/${this.state.chave}`, os: this.state.os } }}>Emitir NF</Link></button>
@@ -5345,7 +5657,7 @@ class AddOS extends Component {
                                         taxas={this.state.taxas}
                                         itemPermissao={this.state.itemPermissao}
                                         acessosPermissoes={this.state.acessosPermissoes}
-                                        setItemEdit={(itemEdit) => this.revertItemEdit(itemEdit )}
+                                        setItemEdit={(itemEdit) => this.revertItemEdit(itemEdit)}
                                         itemEdit={this.state.itemEdit}
                                         onSubmit={this.salvarEvento}
                                         valid={validFormEvento}
@@ -5403,7 +5715,7 @@ class AddOS extends Component {
                                                                                         </td>
                                                                                         <td>
                                                                                             <span className='iconelixo giveMargin' type='button' >
-                                                                                                <FontAwesomeIcon icon={faPen} onClick={() => this.setState({ grupoSelecionado: feed.grupo, agrupadorModal: true, agrupadorEventos: feed.evento.split(',') })} />
+                                                                                                <FontAwesomeIcon icon={faPen} onClick={() => this.setState({ grupoSelecionado: feed.grupo, agrupadorModal: true, agrupadorEventos: feed.evento.split(','), agrupadorTipo: 'CUSTEIO' })} />
                                                                                             </span>
                                                                                             <span className='iconelixo giveMargin' type='button'>
                                                                                                 <FontAwesomeIcon icon={faTrashAlt} onClick={() => this.deleteGrupo(feed.grupo)} />
@@ -5428,7 +5740,7 @@ class AddOS extends Component {
                                                                                         </td>
                                                                                         <td>
                                                                                             <span className='iconelixo giveMargin' type='button' >
-                                                                                                <FontAwesomeIcon icon={faPen} onClick={() => this.setState({ grupoSelecionado: feed.grupo, agrupadorModal: true, agrupadorEventos: feed.evento.split(',') })} />
+                                                                                                <FontAwesomeIcon icon={faPen} onClick={() => this.setState({ grupoSelecionado: feed.grupo, agrupadorModal: true, agrupadorEventos: feed.evento.split(','), agrupadorTipo: 'CUSTEIO' })} />
                                                                                             </span>
                                                                                             <span className='iconelixo giveMargin' type='button'>
                                                                                                 <FontAwesomeIcon icon={faTrashAlt} onClick={() => this.deleteGrupo(feed.grupo)} />

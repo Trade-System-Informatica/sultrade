@@ -8,8 +8,6 @@ const estadoInicial = {
     pesquisa: '',
     tipoPesquisa: 1,
     load: 100,
-
-
 }
 
 
@@ -17,7 +15,6 @@ class ModalLogs extends Component {
     state = {
         ...estadoInicial,
     }
-
 
     componentDidMount = async () => {
     }

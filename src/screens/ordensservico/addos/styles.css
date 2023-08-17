@@ -265,6 +265,254 @@
     text-decoration: underline;
 }
 
+.pdf_padding {
+    margin: 5px;
+}
+
+.invoices_header_sultrade {
+    display: flex;
+    min-width: 100%;
+}
+
+.invoices_header_image_sultrade {
+    border-right: 3px solid black;
+    height: 134px !important;
+}
+
+.invoices_header_info_sultrade {
+    min-width: 66%;
+    margin-left: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.invoices_info_sultrade {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.invoices_info_data_sultrade {
+    min-width: 50%;
+}
+
+.invoices_info_data_sultrade:nth-child(even) {
+    text-align: right;
+}
+
+.invoices_content_header_sultrade {
+    min-width: 100%;
+    display: flex;
+}
+
+.invoices_content_title_sultrade {
+    min-width: 16.6%;
+    font-weight: bold;
+    text-align: left;
+}
+
+.invoices_content_title_sultrade:first-child {
+    min-width: 50%;   
+}
+
+.invoices_content_row_sultrade {
+    min-width: 100%;
+    display: flex;
+}
+
+.invoices_content_row_sultrade:nth-child(even) {
+    background-color: #DDDDDD;
+}
+
+.invoices_content_col_sultrade {
+    min-width: 16.6%;
+    padding-right: 5px;
+}
+
+.invoices_content_col_sultrade:first-child {
+    min-width: 50%;
+}
+
+.invoices_total_row_sultrade {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.invoices_total_sultrade {
+    margin-top: 5px;
+    border-top: 1px solid #AAAAAA;
+    min-width: 8%;
+    font-weight: bold;
+}
+
+.invoices_total_sultrade:last-child {
+    text-align: right;
+}
+
+.invoices_header_porto {
+    min-width: 100%;
+}
+
+.invoices_header_image_porto {
+    display: flex;
+    min-width: 100%;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.invoices_header_image_porto > h1 {
+    font-size: 5em;
+}
+
+.invoices_header_info_porto {
+    min-width: 100%;
+    border-top: 5px solid black;
+    border-bottom: 5px solid black;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.invoices_header_info_porto > * {
+    min-width: 50%;
+}
+
+.invoices_header_info_porto > *:nth-child(even) {
+    text-align:right;
+}
+
+.invoices_info_porto {
+    display: flex;
+    flex-direction: column;
+}
+
+.invoices_info_data_porto {
+    min-width: 40%;
+}
+
+.invoices_content_header_porto {
+    min-width: 100%;
+    display: flex;
+}
+
+.invoices_content_title_porto {
+    min-width: 16.6%;
+    font-weight: bold;
+    text-align: left;
+}
+
+.invoices_content_title_porto:nth-child(2) {
+    min-width: 50%;
+}
+
+.invoices_content_row_porto {
+    min-width: 100%;
+    display: flex;
+}
+
+.invoices_content_row_porto:nth-child(even) {
+    background-color: #DDDDDD;
+}
+
+.invoices_content_col_porto {
+    min-width: 16.6%;
+}
+
+.invoices_content_col_porto:nth-child(2) {
+    min-width: 50%;
+}
+
+.invoices_total_row_porto {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.invoices_total_porto {
+    margin-top: 5px;
+    border-top: 1px solid #AAAAAA;
+    min-width: 8%;
+    font-weight: bold;
+}
+
+.invoices_total_porto:last-child {
+    text-align: right;
+}
+
+.invoices_header_coast {
+    min-width: 100%;
+    display: flex;
+}
+
+.invoices_header_image_coast {
+    display: flex;
+    min-width: 20%;
+}
+
+.invoices_header_info_coast {
+    min-width: 80%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.invoices_header_info_coast>* {
+    min-width: 50%;
+}
+
+.invoices_header_info_coast>*:nth-child(even) {
+    text-align: right;
+}
+
+.invoices_info_coast {
+    display: flex;
+    flex-direction: column;
+}
+
+.invoices_info_data_coast {
+    min-width: 40%;
+}
+
+.invoices_content_header_coast {
+    min-width: 100%;
+    display: flex;
+}
+
+.invoices_content_title_coast {
+    min-width: 16.6%;
+    text-align: left;
+}
+
+.invoices_content_title_coast:nth-child(2) {
+    min-width: 50%;
+}
+
+.invoices_content_row_coast {
+    min-width: 100%;
+    display: flex;
+}
+
+.invoices_content_col_coast {
+    min-width: 16.6%;
+    border: 1px solid black;
+}
+
+.invoices_content_col_coast:nth-child(2) {
+    min-width: 50%;
+}
+
+.invoices_total_row_coast {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.invoices_total_coast {
+    margin-top: 5px;
+    border-top: 1px solid #AAAAAA;
+    min-width: 8%;
+    font-weight: bold;
+}
+
+.invoices_total_coast:last-child {
+    text-align: right;
+}
+
 @media (min-width: 768px) {
     .insideFormButton {
         font-size: 1.4em;
