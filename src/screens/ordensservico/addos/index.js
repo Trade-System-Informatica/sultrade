@@ -4393,7 +4393,7 @@ class AddOS extends Component {
                                                     {this.state.agrupadorEventos[0] &&
                                                         <div className="row">
                                                             <div className="col-2"></div>
-                                                            {this.state.grupoSelecionado == 0 &&
+                                                            {(this.state.grupoSelecionado == 0 || this.state.agrupadorTipo == "INVOICE") &&
                                                                 <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
                                                                     <button type="submit" style={{ width: 300 }} >Salvar</button>
                                                                 </div>
