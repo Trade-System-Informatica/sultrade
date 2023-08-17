@@ -514,8 +514,10 @@ class AddOS extends Component {
         const eventosUsados = [];
 
         if (this.state.agrupadorTipo == 'INVOICE') {
-            console.log(this.state.grupoSelecionado);
             if (this.state.grupoSelecionado != 0) {
+                return false;
+            }
+            if (this.state.agrupadorEventos[0]) {
                 this.state.invoices_groups.filter((e) => e.grupo != this.state.grupoSelecionado).map((e) => e.evento.split(",").map((el) => {
                     eventosUsados.push(el);
                 }));
@@ -523,9 +525,7 @@ class AddOS extends Component {
                 if (eventosUsados.includes(item.chave)) {
                     return false;
                 }
-            }
 
-            if (this.state.agrupadorEventos[0]) {
                 const firstItem = this.state.eventos.find((evento) => evento.chave == this.state.agrupadorEventos[0]);
 
                 if (item.tipo_sub != firstItem?.tipo_sub || item.Fornecedor_Custeio != firstItem?.Fornecedor_Custeio) {
