@@ -3134,7 +3134,7 @@ class AddOS extends Component {
                     <br />
                     <div className='invoices_header_porto'>
                         <div className='invoices_header_image_porto'>
-                            <img className="img-fluid" src="https://i.ibb.co/QK61hd5/porto-brasil-logo.png" alt="logo-lpc" border="0" style={{ width: '300px', height: '285px' }} />
+                            <img className="img-fluid" src="https://i.ibb.co/QK61hd5/porto-brasil-logo.png" alt="logo-lpc" border="0" style={{ width: '150px', height: '142px' }} />
                             <h1>Invoice</h1>
                         </div>
                         <div className='invoices_header_info_porto'>
