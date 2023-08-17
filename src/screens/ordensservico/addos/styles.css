@@ -293,6 +293,7 @@
 
 .invoices_info_data_sultrade {
     min-width: 50%;
+    max-width: 50%;
 }
 
 .invoices_info_data_sultrade:nth-child(even) {
@@ -386,6 +387,7 @@
 
 .invoices_info_data_porto {
     min-width: 40%;
+    max-width: 40%;
 }
 
 .invoices_content_header_porto {
@@ -467,6 +469,7 @@
 
 .invoices_info_data_coast {
     min-width: 40%;
+    max-width: 40%;
 }
 
 .invoices_content_header_coast {

@@ -4475,7 +4475,7 @@ class AddOS extends Component {
                                                                     }
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Field className="form-control" type="text" value={this.state.company} onChange={async e => { this.setState({ company: e.currentTarget.value }) }} />
+                                                                    <Field className="form-control" as={"textarea"} rows="3" value={this.state.company} onChange={async e => { this.setState({ company: e.currentTarget.value }) }} />
                                                                 </div>
                                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                     <label>Address:</label>
@@ -4487,7 +4487,7 @@ class AddOS extends Component {
 
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Field className="form-control" type="text" value={this.state.address} onChange={async e => { this.setState({ address: e.currentTarget.value }) }} />
+                                                                <Field className="form-control" as={"textarea"} rows="3" value={this.state.address} onChange={async e => { this.setState({ address: e.currentTarget.value }) }} />
                                                                 </div>
                                                             </div>
                                                         </div>
