@@ -3257,6 +3257,7 @@ class AddOS extends Component {
             console.log(err);
             await this.setState({ erro: "Erro ao criar o documento", loading: false });
         }
+            this.getInvoices();
         this.setState({ loading: false });
     }
 
@@ -4316,7 +4317,7 @@ class AddOS extends Component {
                                                                                 <>
                                                                                     {window.innerWidth < 500 &&
                                                                                         <tr onClick={() => {
-                                                                                            if (this.state.agrupadorTipo === 'INVOICE' && !this.state.agrupadorEventos[0] && this.state.invoices_groups.find((e) => e.evento.split(', ').find((ev) => ev == feed.chave))) {
+                                                                                            if (this.state.agrupadorTipo === 'INVOICE' && this.state.agrupadorEventos.length == 0 && this.state.invoices_groups.find((e) => e.evento.split(',').find((ev) => ev?.trim() == feed.chave))) {
                                                                                                 this.setState({
                                                                                                     grupoSelecionado: this.state.invoices_groups.find((e) => e.evento.split(',').find((ev) => ev?.trim() == feed.chave))?.chave_grupo,
                                                                                                     agrupadorEventos: this.state.invoices_groups.find((e) => e.evento.split(',').find((ev) => ev?.trim() == feed.chave))?.evento?.split(',')
@@ -4344,7 +4345,7 @@ class AddOS extends Component {
                                                                                     }
                                                                                     {window.innerWidth >= 500 &&
                                                                                         <tr onClick={() => {
-                                                                                            if (this.state.agrupadorTipo === 'INVOICE' && !this.state.agrupadorEventos[0] && this.state.invoices_groups.find((e) => e.evento.split(', ').find((ev) => ev == feed.chave))) {
+                                                                                            if (this.state.agrupadorTipo === 'INVOICE' && this.state.agrupadorEventos.length == 0 && this.state.invoices_groups.find((e) => e.evento.split(',').find((ev) => ev?.trim() == feed.chave))) {
                                                                                                 this.setState({
                                                                                                     grupoSelecionado: this.state.invoices_groups.find((e) => e.evento.split(',').find((ev) => ev?.trim() == feed.chave))?.chave_grupo,
                                                                                                     agrupadorEventos: this.state.invoices_groups.find((e) => e.evento.split(',').find((ev) => ev?.trim() == feed.chave))?.evento?.split(',')
