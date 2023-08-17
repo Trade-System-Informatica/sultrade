@@ -3103,9 +3103,9 @@ class AddOS extends Component {
                             let valor;
 
                             if (event.Moeda == 5) {
-                                valor = Util.toFixed(parseFloat(event.valor1 / roe), 2);
+                                valor = Util.toFixed(parseFloat(event.valor / roe), 2);
                             } else {
-                                valor = parseFloat(event.valor1);
+                                valor = parseFloat(event.valor);
                             }
 
                             const total = valor * quantity;
@@ -3164,9 +3164,9 @@ class AddOS extends Component {
                             let valor;
 
                             if (event.Moeda == 5) {
-                                valor = Util.toFixed(parseFloat(event.valor1 / roe), 2);
+                                valor = Util.toFixed(parseFloat(event.valor / roe), 2);
                             } else {
-                                valor = parseFloat(event.valor1);
+                                valor = parseFloat(event.valor);
                             }
 
                             const total = valor * quantity;
@@ -3222,9 +3222,9 @@ class AddOS extends Component {
                             let valor;
 
                             if (event.Moeda == 5) {
-                                valor = Util.toFixed(parseFloat(event.valor1 / roe), 2);
+                                valor = Util.toFixed(parseFloat(event.valor / roe), 2);
                             } else {
-                                valor = parseFloat(event.valor1);
+                                valor = parseFloat(event.valor);
                             }
 
                             const total = valor * quantity;
@@ -4203,7 +4203,10 @@ class AddOS extends Component {
                                                                                 }
                                                                                 <th className='text-center'>
                                                                                     <span>Valor (R$)</span>
-                                                                                </th>
+                                                                            </th>
+                                                                            <th className='text-center'>
+                                                                                <span>Valor (USD)</span>
+                                                                            </th>
                                                                                 <th className='text-center' style={{ width: 20, height: 20, padding: 5 }}>
                                                                                 </th>
                                                                             </tr>
@@ -4226,7 +4229,10 @@ class AddOS extends Component {
                                                                                                 <p>{feed.ordem.replaceAll(',', '.')}</p>
                                                                                             </td>
                                                                                             <td className="text-center">
-                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor1)}</p>
+                                                                                                <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
                                                                                             </td>
                                                                                             <td>
                                                                                                 <input type="checkbox" checked={true} />
@@ -4256,7 +4262,10 @@ class AddOS extends Component {
                                                                                                 <p>{feed.descricao}</p>
                                                                                             </td>
                                                                                             <td className="text-center">
-                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor1)}</p>
+                                                                                                <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
                                                                                             </td>
                                                                                             <td>
                                                                                                 <input type="checkbox" checked={true} />
@@ -4323,10 +4332,10 @@ class AddOS extends Component {
                                                                                                 <p>{feed.ordem.replaceAll(',', '.')}</p>
                                                                                             </td>
                                                                                             <td className="text-center">
-                                                                                                <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor1 : feed.valor1 / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                                <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
                                                                                             </td>
                                                                                             <td className="text-center">
-                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor1 : feed.valor1 * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                                <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
                                                                                             </td>
                                                                                             <td>
                                                                                                 <input type="checkbox" checked={false} />
@@ -4389,7 +4398,7 @@ class AddOS extends Component {
                                                                     <button type="submit" style={{ width: 300 }} >Salvar</button>
                                                                 </div>
                                                             }
-                                                            {this.state.grupoSelecionado != 0 &&
+                                                            {this.state.grupoSelecionado != 0 && this.state.agrupadorTipo == 'CUSTEIO' &&
                                                                 <>
                                                                     <div className="col-4" style={{ display: 'flex', justifyContent: 'center' }}>
                                                                         <button type="submit" style={{ width: 300 }} >Salvar</button>
