@@ -18,6 +18,7 @@ import moment from 'moment'
 import Select from 'react-select';
 import { confirmAlert } from 'react-confirm-alert'
 import { PDFExport } from "@progress/kendo-react-pdf";
+import { drawDOM, exportPDF } from "@progress/kendo-drawing";
 import Modal from '@material-ui/core/Modal';
 import Alert from '../../../components/alert'
 import Util from '../../../classes/util'
@@ -3052,7 +3053,7 @@ class AddOS extends Component {
 
             const { pdfContent } = this.state;
 
-            this.setState({ pdfNome: `Invoices${this.state.codigo ? ` - ${this.state.codigo}:(${pdfContent.invoice})` : ""}` })
+            this.setState({ pdfNome: `Invoices (${pdfContent.invoice})` })
 
             let cabecalho;
             try {
@@ -3066,7 +3067,7 @@ class AddOS extends Component {
 
 
             if ([16, 17].includes(parseInt(pdfContent.fornecedorCusteio))) {
-                pdf = <div key={546546554654} className='pdf_padding'>
+                pdf = <div key={546546554654} className='pdf_padding' id='pdfDiv'>
                     <br />
                     <div className='invoices_header_sultrade'>
                         <div className='invoices_header_image_sultrade'>
@@ -3085,7 +3086,7 @@ class AddOS extends Component {
                         <div className='invoices_info_data_sultrade'>COMPANY: <b>{cabecalho?.company ? cabecalho?.company : pdfContent.clienteNome}</b></div>
                         <div className='invoices_info_data_sultrade'>INVOICE NUMBER: <b>{pdfContent.invoice}</b></div>
                         <div className='invoices_info_data_sultrade'>C/O: <b>{'-'}</b></div>
-                        <div className='invoices_info_data_sultrade'>DATE OF BILLING: <b>{moment(pdfContent.Data_Faturamento).isValid() ? moment(pdfContent.Data_Faturamento).format("MMMM DD, YYYY") : '-'}</b></div>
+                        <div className='invoices_info_data_sultrade'>DATE OF BILLING: <b>{moment(pdfContent.data_emissao).isValid() ? moment(pdfContent.data_emissao).format("MMMM DD, YYYY") : '-'}</b></div>
                         <div className='invoices_info_data_sultrade'>ADDRESS: <b>{cabecalho?.address ? cabecalho?.address : pdfContent.address}</b></div>
                         <div className='invoices_info_data_sultrade'></div>
                         <div className='invoices_info_data_sultrade'>PO - VESSEL: <b>{pdfContent.codigo}-{pdfContent.navioNome}</b></div>
@@ -3131,7 +3132,7 @@ class AddOS extends Component {
                 </div>
 
             } else if (pdfContent.fornecedorCusteio == 32) {
-                pdf = <div key={546546554654} className='pdf_padding'>
+                pdf = <div key={546546554654} className='pdf_padding' id='pdfDiv'>
                     <br />
                     <div className='invoices_header_porto'>
                         <div className='invoices_header_image_porto'>
@@ -3140,7 +3141,7 @@ class AddOS extends Component {
                         </div>
                         <div className='invoices_header_info_porto'>
                             <h4><b>TRANSPORTE PORTO BRAZIL LTDA</b></h4>
-                            <span><b>Date:</b> {moment(pdfContent.Data_Faturamento).isValid() ? moment(pdfContent.Data_Faturamento).format("MMMM DD, YYYY") : '-'}</span>
+                            <span><b>Date:</b> {moment(pdfContent.data_emissao).isValid() ? moment(pdfContent.data_emissao).format("MMMM DD, YYYY") : '-'}</span>
                             <span></span>
                             <span><b>Invoice:</b> {pdfContent.invoice}</span>
                         </div>
@@ -3190,7 +3191,7 @@ class AddOS extends Component {
                     </div>
                 </div>
             } else if (pdfContent.fornecedorCusteio == 269) {
-                pdf = <div key={546546554654} className='pdf_padding'>
+                pdf = <div key={546546554654} className='pdf_padding' id='pdfDiv'>
                     <br />
                     <div className='invoices_header_coast'>
                         <div className='invoices_header_image_coast'>
@@ -3198,7 +3199,7 @@ class AddOS extends Component {
                         </div>
                         <div className='invoices_header_info_coast'>
                             <span>COAST SERVICOS ADMINISTRATIVOS LTDA</span>
-                            <span>Date: {moment(pdfContent.Data_Faturamento).isValid() ? moment(pdfContent.Data_Faturamento).format("MMMM DD, YYYY") : '-'}</span>
+                            <span>Date: {moment(pdfContent.data_emissao).isValid() ? moment(pdfContent.data_emissao).format("MMMM DD, YYYY") : '-'}</span>
                             <span>CPNJ/VAT NUMBER : 15.258.758/0001-00</span>
                             <span>Invoice: {pdfContent.invoice}</span>
                         </div>
@@ -3250,10 +3251,30 @@ class AddOS extends Component {
             } else {
                 return this.setState({ error: { type: "error", msg: "Fornecedor Custeio desconhecido" }, loading: false })
             }
-
-
             await this.setState({ pdfgerado: pdf })
+
+            let gridElement = document.getElementById("pdfDiv");
+
+            const base64 = await drawDOM(gridElement, {
+                paperSize: "A4",
+                margin: '0.5cm',
+                scale: 0.6,
+                portrait: true,
+            })
+                .then((group) => {
+                    return exportPDF(group);
+                }).then((dataUri) => {
+                    return dataUri;
+                });
+
+            await apiEmployee.post(`salvaInvoices.php`, {
+                token: true,
+                base64,
+                name: this.state.pdfNome
+            }).then((res) => {}, (err) => console.error(err));
+                
             this.handleExportWithComponent()
+
         } catch (err) {
             console.log(err);
             await this.setState({ erro: "Erro ao criar o documento", loading: false });

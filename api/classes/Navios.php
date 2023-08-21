@@ -286,31 +286,45 @@ class Navios
         $invoice = $database->doSelect('os_invoices', 'os_invoices.codigo',"os_invoices.evento = ".$eventos[0]);
         
         if (!$invoice && $result && $result['fornecedorCusteio'] != 0 && $events[0]) {
-            $grupos = $database->doSelect('os_invoices', 'os_invoices.grupo, os_invoices.evento', "os_invoices.os = '$os' GROUP BY grupo ORDER BY grupo DESC");
+            $empresa = $result['fornecedorCusteio'];
+            
+            $grupos = $database->doSelect('os_invoices', 'os_invoices.grupo, os_invoices.evento, os_invoices.identificador', "os_invoices.os = '$os' AND os_invoices.empresa = '$empresa' GROUP BY grupo ORDER BY grupo DESC");
             $grupos = $grupos[0]['grupo'];
+            $identificador = $grupos[0]['identificador'];
 
             if (!$grupos) {
                 $grupo = 1;
             } else {
                 $grupo = $grupos + 1;
             }
-            $codigo_invoice = $grupo;
+
+            if (!$identificador) {
+                $identificador = 1;
+            } else {
+                $identificador = $identificador+1;
+            }
+            
+            $codigo_invoice = $identificador;
 
             for ($i = strlen($codigo_invoice); $i < 3;$i++) {
                 $codigo_invoice = "0".$codigo_invoice;
             }
             $year = new DateTime($result['Data_Abertura']);
-            $codigo_invoice = $year->format('Y').$codigo_invoice;
+            $codigo_invoice = $year->format('Ymd').$codigo_invoice;
+            
+            $emissao = new DateTime();
             
             $result['invoice'] = $codigo_invoice;
+            $result['data_emissao'] = $emissao->format('Y-m-d');
             
-            $cols = 'grupo, os, evento, codigo';
+            $cols = 'grupo, os, evento, codigo, identificador';
             foreach ($eventos as $evento) {
-                $values = $grupo . ", $os, $evento, $codigo_invoice";
+                $values = $grupo . ", $os, $evento, $codigo_invoice, $identificador, '".$emissao->format('Y-m-d')."'";
                 $database->doInsert('os_invoices', $cols, $values);
             }
         } else if ($result && $result['fornecedorCusteio'] != 0 && $events[0]) {
             $result['invoice'] = $invoice[0]['codigo'];
+            $result['data_emissao'] = $invoice[0]['emissao'];
         }
 
 

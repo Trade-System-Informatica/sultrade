@@ -128,6 +128,21 @@ function savePDF($picture, $name = null){
     return $name;
 }
 
+function saveInvoice($picture, $name)
+{
+    $link = $name;
+    $link = "documents/invoices/" . $link;
+
+    $img = $picture;
+    $img = str_replace('data:application/pdf;base64,', '', $img);
+    $img = str_replace(' ', '+', $img);
+    $data = base64_decode($img);
+
+    file_put_contents('../../../' . $link, $data);
+
+    return $name;
+}
+
 
 function deletePicture ($name){
     unlink('../pictures/'.$name.'.png');
