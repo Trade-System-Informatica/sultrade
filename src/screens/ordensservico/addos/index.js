@@ -172,6 +172,7 @@ const estadoInicial = {
     cabecalho: "",
     company: "",
     address: "",
+    CO: '',
 
     agrupadorModal: false,
     agrupadorTipo: '',
@@ -308,7 +309,8 @@ class AddOS extends Component {
 
                 await this.setState({
                     company: cabecalho.company,
-                    address: cabecalho.address
+                    address: cabecalho.address,
+                    CO: cabecalho.CO
                 })
             }
         }
@@ -1636,7 +1638,7 @@ class AddOS extends Component {
         this.setState({ ...util.cleanStates(this.state) });
         await this.setState({ loading: true, cabecalhoModal: false });
 
-        const cabecalho = `{"company": "${this.state.company.replaceAll('"', "'").replaceAll("\t", "\\t").replaceAll('\n', '\\n')}", "address": "${this.state.address.replaceAll('"', "'").replaceAll("\t", "\\t").replaceAll('\n', '\\n')}"}`
+        const cabecalho = `{"company": "${this.state.company.replaceAll('"', "'").replaceAll("\t", "\\t").replaceAll('\n', '\\n')}", "address": "${this.state.address.replaceAll('"', "'").replaceAll("\t", "\\t").replaceAll('\n', '\\n')}", "CO": "${this.state.CO.replaceAll('"', "'").replaceAll("\t", "\\t").replaceAll('\n', '\\n')}"}`
 
         await apiEmployee.post(`updateOSCabecalho.php`, {
             token: true,
@@ -3085,7 +3087,7 @@ class AddOS extends Component {
                     <div className='invoices_info_sultrade'>
                         <div className='invoices_info_data_sultrade'>COMPANY: <b>{cabecalho?.company ? cabecalho?.company : pdfContent.clienteNome}</b></div>
                         <div className='invoices_info_data_sultrade'>INVOICE NUMBER: <b>{pdfContent.invoice}</b></div>
-                        <div className='invoices_info_data_sultrade'>C/O: <b>{'-'}</b></div>
+                        <div className='invoices_info_data_sultrade'>{cabecalho?.CO ? `C/O: ` : ''}<b>{ cabecalho?.CO ? cabecalho.CO : ''}</b></div>
                         <div className='invoices_info_data_sultrade'>DATE OF BILLING: <b>{moment(pdfContent.data_emissao).isValid() ? moment(pdfContent.data_emissao).format("MMMM DD, YYYY") : '-'}</b></div>
                         <div className='invoices_info_data_sultrade'>ADDRESS: <b>{cabecalho?.address ? cabecalho?.address : pdfContent.address}</b></div>
                         <div className='invoices_info_data_sultrade'></div>
@@ -3149,7 +3151,7 @@ class AddOS extends Component {
                     <br />
                     <div className='invoices_info_porto'>
                         <div className='invoices_info_data_porto'><b>To:</b> {cabecalho?.company ? cabecalho?.company : pdfContent.clienteNome}</div>
-                        <div className='invoices_info_data_porto'><b>C/O:</b> {'-'}</div>
+                        <div className='invoices_info_data_porto'><b>{cabecalho?.CO ? `C/O: ` : ''}</b>{cabecalho?.CO ? cabecalho.CO : ''}</div>
                         <div className='invoices_info_data_porto'><b>Address:</b> {cabecalho?.address ? cabecalho?.address : pdfContent.address}</div>
                         <div className='invoices_info_data_porto'><b>PO - VESSEL:</b> {pdfContent.codigo}-{pdfContent.navioNome}</div>
                     </div>
@@ -3207,7 +3209,7 @@ class AddOS extends Component {
                     <br />
                     <div className='invoices_info_coast'>
                         <div className='invoices_info_data_coast'>To: {cabecalho?.company ? cabecalho?.company : pdfContent.clienteNome}</div>
-                        <div className='invoices_info_data_coast'>C/O: {'-'}</div>
+                        <div className='invoices_info_data_coast'>{cabecalho?.CO ? `C/O: ${cabecalho.CO}` : ''}</div>
                         <div className='invoices_info_data_coast'>Address: {cabecalho?.address ? cabecalho?.address : pdfContent.address}</div>
                         <div className='invoices_info_data_coast'>PO - VESSEL: {pdfContent.codigo}-{pdfContent.navioNome}</div>
                     </div>
@@ -4513,6 +4515,18 @@ class AddOS extends Component {
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                 <Field className="form-control" as={"textarea"} rows="3" value={this.state.address} onChange={async e => { this.setState({ address: e.currentTarget.value }) }} />
                                                                 </div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>C/O:</label>
+                                                            </div>
+                                                            <div className="col-1 errorMessage">
+                                                                {(this.state.CO.indexOf('"') != -1 || this.state.CO.indexOf("'") != -1) &&
+                                                                    <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                }
+
+                                                            </div>
+                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                <Field className="form-control" as={"textarea"} rows="3" value={this.state.CO} onChange={async e => { this.setState({ CO: e.currentTarget.value }) }} />
+                                                            </div>
                                                             </div>
                                                         </div>
                                                         <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
