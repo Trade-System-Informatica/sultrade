@@ -7,7 +7,7 @@ import ModalListas from '../../../components/modalListas'
 import Skeleton from '../../../components/skeleton'
 import util from '../../../classes/util'
 import loader from '../../../classes/loader'
-import { NOME_EMPRESA, CAMINHO_DOCUMENTOS, CAMBIO_LIQUIDAR } from '../../../config'
+import { NOME_EMPRESA, CAMINHO_DOCUMENTOS, CAMBIO_LIQUIDAR, CAMINHO_INVOICES } from '../../../config'
 import { connect } from 'react-redux'
 import { Link, Redirect } from 'react-router-dom'
 import ModalLogs from '../../../components/modalLogs'
@@ -3270,7 +3270,8 @@ class AddOS extends Component {
             await apiEmployee.post(`salvaInvoices.php`, {
                 token: true,
                 base64,
-                name: this.state.pdfNome
+                name: this.state.pdfNome,
+                os: this.state.chave,
             }).then((res) => {}, (err) => console.error(err));
                 
             this.handleExportWithComponent()
@@ -5838,17 +5839,17 @@ class AddOS extends Component {
                                                                         {this.state.documentos[0] != undefined && this.state.documentos.filter((e) => e.chave_os_itens == 0).map((feed, index) => (
                                                                             <tr className={index % 2 == 0 ? "parTr" : "imparTr"}>
                                                                                 <td className="text-center">
-                                                                                    <a href={`${CAMINHO_DOCUMENTOS}/docs/${feed.caminho}`} className='nonlink' target='_blank'>
+                                                                                    <a href={feed.tipo_docto == 55 ? `${CAMINHO_INVOICES}/${feed.caminho}` : `${CAMINHO_DOCUMENTOS}/docs/${feed.caminho}`} className='nonlink' target='_blank'>
                                                                                         <p>{feed.chave}</p>
                                                                                     </a>
                                                                                 </td>
                                                                                 <td className="text-center">
-                                                                                    <a href={`${CAMINHO_DOCUMENTOS}/docs/${feed.caminho}`} className='nonlink' target='_blank'>
+                                                                                    <a href={feed.tipo_docto == 55 ? `${CAMINHO_INVOICES}/${feed.caminho}` : `${CAMINHO_DOCUMENTOS}/docs/${feed.caminho}`} className='nonlink' target='_blank'>
                                                                                         <p>{feed.descricao}</p>
                                                                                     </a>
                                                                                 </td>
                                                                                 <td className="text-center">
-                                                                                    <a href={`${CAMINHO_DOCUMENTOS}/docs/${feed.caminho}`} className='nonlink' target='_blank'>
+                                                                                    <a href={feed.tipo_docto == 55 ? `${CAMINHO_INVOICES}/${feed.caminho}` : `${CAMINHO_DOCUMENTOS}/docs/${feed.caminho}`} className='nonlink' target='_blank'>
                                                                                         <p>{feed.caminho}</p>
                                                                                     </a>
                                                                                 </td>

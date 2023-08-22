@@ -109,7 +109,7 @@ class AddTipoDocumento extends Component {
 
     loadAll = async () => {
         this.setState({
-            categoriasOptions: await loader.getBaseOptions(`getCategoriasDocumentos.php`, "descricao", "chave")
+            categoriasOptions: await loader.getBaseOptions(`getCategoriasDocumentos.php`, "descricao", "chave", {empresa: this.state.usuarioLogado.empresa})
         });
     }
 

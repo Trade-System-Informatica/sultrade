@@ -81,7 +81,7 @@ class TiposDocumentos extends Component {
 
     loadAll = async () => {
         await this.setState({
-            tiposDocumentos: await loader.getBase('getTiposLancamento.php'),
+            tiposDocumentos: await loader.getBase('getTiposDocumento.php'),
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php')
         })
@@ -260,7 +260,7 @@ class TiposDocumentos extends Component {
                                                     <span className='subtituloships'>Descrição</span>
                                                 </div>
                                                 <div className="col-lg-3 col-md-3 col-sm-3 col-3 text-left">
-                                                    <span className='subtituloships'>Descrição</span>
+                                                    <span className='subtituloships'>Categoria</span>
                                                 </div>
                                                 <div className="col-3 text-right revertItem" onClick={() => this.reverterItens()}>
                                                     <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela} /></span>

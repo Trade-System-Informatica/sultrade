@@ -409,6 +409,16 @@ class OS
         return $result;
     }
 
+    public static function salvaInvoice($chave_os, $tipo_docto, $descricao, $caminho) {
+        $database = new Database();
+
+        $cols = "chave_os, tipo_docto, descricao, caminho";
+        $invoice = $database->doInsert('os_documentos', $cols, "$chave_os, $tipo_docto, '$descricao', $caminho");
+
+        $database->closeConection();
+        return $invoice;
+    }
+
     public static function getUltimoDocumento($chave_os)
     {
         $database = new Database();

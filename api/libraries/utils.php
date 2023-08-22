@@ -138,7 +138,7 @@ function saveInvoice($picture, $name)
     $img = str_replace(' ', '+', $img);
     $data = base64_decode($img);
 
-    file_put_contents('../../../' . $link, $data);
+    file_put_contents('../../../' . $link.'.pdf', $data);
 
     return $name;
 }

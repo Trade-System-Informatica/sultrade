@@ -185,9 +185,10 @@ export default class loader {
         )
     }
 
-    static async getBaseOptions(url, label, chave) {
+    static async getBaseOptions(url, label, chave, body = {}) {
         return await apiEmployee.post(url, {
             token: true
+            ...body
         }).then(
             async res => {
                 const options = res.data.map((e) => {
