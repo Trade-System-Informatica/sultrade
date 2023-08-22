@@ -413,7 +413,7 @@ class OS
         $database = new Database();
 
         $cols = "chave_os, tipo_docto, descricao, caminho";
-        $invoice = $database->doInsert('os_documentos', $cols, "$chave_os, $tipo_docto, '$descricao', $caminho");
+        $invoice = $database->doInsert('os_documentos', $cols, "$chave_os, $tipo_docto, '$descricao', '$caminho'");
 
         $database->closeConection();
         return $invoice;
