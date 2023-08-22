@@ -283,7 +283,8 @@ class Navios
             $result['events'] = $events;
         }
 
-        $invoice = $database->doSelect('os_invoices', 'os_invoices.codigo',"os_invoices.evento = ".$eventos[0]);
+        $invoice = $database->doSelect('os_invoices', 'os_invoices.*',"os_invoices.evento = ".$eventos[0]);
+        $invoice = $invoice[0];
         
         if (!$invoice && $result && $result['fornecedorCusteio'] != 0 && $events[0]) {
             $empresa = $result['fornecedorCusteio'];
@@ -323,8 +324,8 @@ class Navios
                 $database->doInsert('os_invoices', $cols, $values);
             }
         } else if ($result && $result['fornecedorCusteio'] != 0 && $events[0]) {
-            $result['invoice'] = $invoice[0]['codigo'];
-            $result['data_emissao'] = $invoice[0]['emissao'];
+            $result['invoice'] = $invoice['codigo'];
+            $result['data_emissao'] = $invoice['emissao'];
         }
 
 
