@@ -412,8 +412,12 @@ class OS
     public static function salvaInvoice($chave_os, $tipo_docto, $descricao, $caminho) {
         $database = new Database();
 
-        $cols = "chave_os, tipo_docto, descricao, caminho";
-        $invoice = $database->doInsert('os_documentos', $cols, "$chave_os, $tipo_docto, '$descricao', '$caminho'");
+        $invoiceCheck = $database->doSelect('os_documentos', 'os_documentos.*', "chave_os = $chave_os AND tipo_docto = $tipo_docto AND descricao = '$descricao' AND caminho = '$caminho'");
+
+        if (!$invoiceCheck[0]) {
+            $cols = "chave_os, tipo_docto, descricao, caminho";
+            $invoice = $database->doInsert('os_documentos', $cols, "$chave_os, $tipo_docto, '$descricao', '$caminho'");
+        }
 
         $database->closeConection();
         return $invoice;
