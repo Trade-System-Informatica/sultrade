@@ -187,7 +187,7 @@ export default class loader {
 
     static async getBaseOptions(url, label, chave, body = {}) {
         return await apiEmployee.post(url, {
-            token: true
+            token: true,
             ...body
         }).then(
             async res => {
