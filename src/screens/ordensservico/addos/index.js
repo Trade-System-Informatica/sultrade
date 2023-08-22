@@ -308,9 +308,9 @@ class AddOS extends Component {
                 }
 
                 await this.setState({
-                    company: cabecalho.company,
-                    address: cabecalho.address,
-                    CO: cabecalho.CO
+                    company: cabecalho.company ? cabecalho.company : '',
+                    address: cabecalho.address ? cabecalho.address : '',
+                    CO: cabecalho.CO ? cabecalho.CO : ''
                 })
             }
         }
