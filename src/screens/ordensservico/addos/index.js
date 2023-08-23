@@ -1784,6 +1784,7 @@ class AddOS extends Component {
 
             let company = util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].cliente);
             let address = `${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].complemento)} ${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].rua)} ${this.state.pdfContent[0].numero && this.state.pdfContent[0].numero != "0" ? this.state.pdfContent[0].numero : ""} ${this.state.pdfContent[0].cep && this.state.pdfContent[0].cep != "0" ? this.state.pdfContent[0].cep : ""}`;
+            let CO;
 
             if (this.state.pdfContent[0].cabecalho) {
                 let cabecalho;
@@ -1800,6 +1801,10 @@ class AddOS extends Component {
 
                 if (cabecalho.address) {
                     address = cabecalho.address;
+                }
+
+                if (cabecalho.CO) {
+                    CO = cabecalho.CO;
                 }
             }
 
@@ -1838,6 +1843,11 @@ class AddOS extends Component {
                                 <tr>
                                     <td colSpan={4} className="pdf_large_col"><b>Address:</b> {address}</td>
                                 </tr>
+                                {CO &&
+                                <tr>
+                                    <td colSpan={4} className="pdf_large_col"><b>C/O:</b> {CO}</td>
+                                </tr>
+                                }
                                 <tr>
                                     <td colSpan={4} className="pdf_large_col"><b>Vessel Name:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomeNavio)}</td>
                                 </tr>
@@ -3371,6 +3381,7 @@ class AddOS extends Component {
                         {pdfChaves.toSorted((a, b) => parseInt(a.codsubgrupo_taxas) - parseInt(b.codsubgrupo_taxas)).map((chave, index) => {
                             let company = chave.company;
                             let address = chave.address;
+                            let CO;
 
                             if (chave.cabecalho) {
                                 let cabecalho;
@@ -3387,6 +3398,10 @@ class AddOS extends Component {
 
                                 if (cabecalho.address) {
                                     address = cabecalho.address;
+                                }
+
+                                if (cabecalho.CO) {
+                                    CO = cabecalho.CO;
                                 }
                             }
 
@@ -3407,8 +3422,11 @@ class AddOS extends Component {
                                         <table style={{ width: "100%" }}>
                                             <tr>
                                                 {company &&
-                                                    <td colSpan={6} className="pdf_large_column"><b>Company:</b> {company}</td>
+                                                    <td colSpan={4} className="pdf_large_column"><b>Company:</b> {company}</td>
                                                 }
+                                                {CO &&
+                                                    <td colSpan={2} className={company ? "pdf_money_col" : "pdf_small_col"}><b>C/O:</b> {CO}</td>
+                                                    }
                                             </tr>
                                             <tr>
                                                 {address &&
