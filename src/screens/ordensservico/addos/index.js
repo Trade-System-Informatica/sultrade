@@ -3083,7 +3083,7 @@ class AddOS extends Component {
                     <br />
                     <div className='invoices_header_sultrade'>
                         <div className='invoices_header_image_sultrade'>
-                            <img className="img-fluid" src="https://i.ibb.co/NCw9jYX/sultrade-logo.png" alt="logo-lpc" border="0" style={{ width: '500px', height: '134px', objectFit: 'contain' }} />
+                            <img className="img-fluid" src="https://i.ibb.co/NCw9jYX/sultrade-logo.png" alt="logo-lpc" border="0" style={{ width: '500px', height: '134px', objectFit: 'cover' }} />
                         </div>
                         <div className='invoices_header_info_sultrade'>
                             <h3>SULTRADE SHIPPING AGENCY</h3>
@@ -3153,7 +3153,7 @@ class AddOS extends Component {
                     <br />
                     <div className='invoices_header_porto'>
                         <div className='invoices_header_image_porto'>
-                            <img className="img-fluid" src="https://i.ibb.co/QK61hd5/porto-brasil-logo.png" alt="logo-lpc" border="0" style={{ width: '150px', height: '142px', objectFit: 'contain' }} />
+                            <img className="img-fluid" src="https://i.ibb.co/QK61hd5/porto-brasil-logo.png" alt="logo-lpc" border="0" style={{ width: '150px', height: '142px', objectFit: 'cover' }} />
                             <h1>Invoice</h1>
                         </div>
                         <div className='invoices_header_info_porto'>
@@ -3210,7 +3210,7 @@ class AddOS extends Component {
                     <br />
                     <div className='invoices_header_coast'>
                         <div className='invoices_header_image_coast'>
-                            <img className="img-fluid" src="https://i.ibb.co/mv8gqfw/coast-logo.png" alt="logo-lpc" border="0" style={{ width: '150px', height: '59px', objectFit: 'contain' }} />
+                            <img className="img-fluid" src="https://i.ibb.co/mv8gqfw/coast-logo.png" alt="logo-lpc" border="0" style={{ width: '150px', height: '59px', objectFit: 'cover' }} />
                         </div>
                         <div className='invoices_header_info_coast'>
                             <span>COAST SERVICOS ADMINISTRATIVOS LTDA</span>
