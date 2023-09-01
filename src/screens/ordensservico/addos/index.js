@@ -3083,7 +3083,7 @@ class AddOS extends Component {
                     <br />
                     <div className='invoices_header_sultrade'>
                         <div className='invoices_header_image_sultrade'>
-                            <imgclassName="img-fluid" src="https://i.ibb.co/NCw9jYX/sultrade-logo.png" alt="logo-lpc" border="0" style={{ width: '500px', height: '134px', objectFit: 'contain' }} />
+                            <img className="img-fluid" src="https://i.ibb.co/NCw9jYX/sultrade-logo.png" alt="logo-lpc" border="0" style={{ width: '500px', height: '134px', objectFit: 'contain' }} />
                         </div>
                         <div className='invoices_header_info_sultrade'>
                             <h3>SULTRADE SHIPPING AGENCY</h3>
