@@ -318,7 +318,7 @@ class Navios
             $result['invoice'] = $codigo_invoice;
             $result['data_emissao'] = $emissao->format('Y-m-d');
             
-            $cols = 'grupo, os, evento, codigo, identificador';
+            $cols = 'grupo, os, evento, codigo, identificador, emissao';
             foreach ($eventos as $evento) {
                 $values = $grupo . ", $os, $evento, $codigo_invoice, $identificador, '".$emissao->format('Y-m-d')."'";
                 $database->doInsert('os_invoices', $cols, $values);
