@@ -482,7 +482,7 @@
     text-align: left;
 }
 
-.invoices_content_title_coast:nth-child(1) {
+.invoices_content_title_coast:first-child(1) {
     min-width: 75%;
 }
 
@@ -496,7 +496,7 @@
     border: 1px solid black;
 }
 
-.invoices_content_col_coast:nth-child(2) {
+.invoices_content_col_coast:nth-child(1) {
     min-width: 75%;
 }
 
