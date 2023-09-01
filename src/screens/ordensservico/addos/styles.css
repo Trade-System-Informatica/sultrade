@@ -482,7 +482,7 @@
     text-align: left;
 }
 
-.invoices_content_title_coast:nth-child(2) {
+.invoices_content_title_coast:nth-child(1) {
     min-width: 75%;
 }
 
