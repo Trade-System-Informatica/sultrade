@@ -256,7 +256,7 @@ class Navios
         left join os_navios on os_navios.chave = os.chave_navio
         left join os_portos on os_portos.chave = os.porto
         left join pessoas as clientes on clientes.chave = os.chave_cliente
-        left join pessoas_enderecos on clientes.chave = pessoas_enderecos.chave_pessoa AND pessoas_enderecos.padrao = 1",
+        left join pessoas_enderecos on clientes.chave = pessoas_enderecos.chave_pessoa AND pessoas_enderecos.tipo = 0",
             "pessoas_enderecos.pais, 
         os.*,
         clientes.nome as clienteNome,
