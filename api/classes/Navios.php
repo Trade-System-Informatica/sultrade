@@ -310,11 +310,10 @@ class Navios
             for ($i = strlen($codigo_invoice); $i < 3;$i++) {
                 $codigo_invoice = "0".$codigo_invoice;
             }
-            $year = new DateTime($result['Data_Abertura']);
-            $codigo_invoice = $year->format('Ymd').$codigo_invoice;
             
             $emissao = new DateTime();
             
+            $codigo_invoice = $emissao->format('Ymd').$codigo_invoice;
             $result['invoice'] = $codigo_invoice;
             $result['data_emissao'] = $emissao->format('Y-m-d');
             
