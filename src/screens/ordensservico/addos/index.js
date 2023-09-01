@@ -1844,9 +1844,9 @@ class AddOS extends Component {
                                     <td colSpan={4} className="pdf_large_col"><b>Address:</b> {address}</td>
                                 </tr>
                                 {CO &&
-                                <tr>
-                                    <td colSpan={4} className="pdf_large_col"><b>C/O:</b> {CO}</td>
-                                </tr>
+                                    <tr>
+                                        <td colSpan={4} className="pdf_large_col"><b>C/O:</b> {CO}</td>
+                                    </tr>
                                 }
                                 <tr>
                                     <td colSpan={4} className="pdf_large_col"><b>Vessel Name:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomeNavio)}</td>
@@ -3083,13 +3083,13 @@ class AddOS extends Component {
                     <br />
                     <div className='invoices_header_sultrade'>
                         <div className='invoices_header_image_sultrade'>
-                            <img className="img-fluid" src="https://i.ibb.co/NCw9jYX/sultrade-logo.png" alt="logo-lpc" border="0" style={{ width: '500px', height: '134px' }} />
+                            <imgclassName="img-fluid" src="https://i.ibb.co/NCw9jYX/sultrade-logo.png" alt="logo-lpc" border="0" style={{ width: '500px', height: '134px', objectFit: 'contain' }} />
                         </div>
                         <div className='invoices_header_info_sultrade'>
                             <h3>SULTRADE SHIPPING AGENCY</h3>
                             <span>CNPJ/VAT Number : 10.432.546/0001-75</span>
                             <span><a href='mailto:sultrade@sultradeagency.com'>E-mail : sultrade@sultradeagency.com</a></span>
-                            <span>Phone : (55 53) 3235 3500</span>
+                            <span>Phone : +55 (53) 3235 3500</span>
                             <span><a href='https://www.sultradeagency.com'>www.sultradeagency.com</a></span>
                         </div>
                     </div>
@@ -3097,10 +3097,19 @@ class AddOS extends Component {
                     <div className='invoices_info_sultrade'>
                         <div className='invoices_info_data_sultrade'>COMPANY: <b>{cabecalho?.company ? cabecalho?.company : pdfContent.clienteNome}</b></div>
                         <div className='invoices_info_data_sultrade'>INVOICE NUMBER: <b>{pdfContent.invoice}</b></div>
-                        <div className='invoices_info_data_sultrade'>{cabecalho?.CO ? `C/O: ` : ''}<b>{ cabecalho?.CO ? cabecalho.CO : ''}</b></div>
-                        <div className='invoices_info_data_sultrade'>DATE OF BILLING: <b>{moment(pdfContent.data_emissao).isValid() ? moment(pdfContent.data_emissao).format("MMMM DD, YYYY") : '-'}</b></div>
-                        <div className='invoices_info_data_sultrade'>ADDRESS: <b>{cabecalho?.address ? cabecalho?.address : pdfContent.address}</b></div>
-                        <div className='invoices_info_data_sultrade'></div>
+                        {cabecalho?.CO &&
+                            <>
+                                <div className='invoices_info_data_sultrade'>{cabecalho?.CO ? `C/O: ` : ''}<b>{cabecalho?.CO ? cabecalho.CO : ''}</b></div>
+                                <div className='invoices_info_data_sultrade'>DATE OF BILLING: <b>{moment(pdfContent.data_emissao).isValid() ? moment(pdfContent.data_emissao).format("MMMM DD, YYYY") : '-'}</b></div>
+                                <div className='invoices_info_data_sultrade'>ADDRESS: <b>{cabecalho?.address ? cabecalho?.address : pdfContent.address}</b></div>
+                            </>
+                        }
+                        {!cabecalho?.CO &&
+                            <>
+                                <div className='invoices_info_data_sultrade'>ADDRESS: <b>{cabecalho?.address ? cabecalho?.address : pdfContent.address}</b></div>
+                                <div className='invoices_info_data_sultrade'>DATE OF BILLING: <b>{moment(pdfContent.data_emissao).isValid() ? moment(pdfContent.data_emissao).format("MMMM DD, YYYY") : '-'}</b></div>
+                            </>
+                        }
                         <div className='invoices_info_data_sultrade'>PO - VESSEL: <b>{pdfContent.codigo}-{pdfContent.navioNome}</b></div>
                         <div className='invoices_info_data_sultrade'></div>
                     </div>
@@ -3108,8 +3117,6 @@ class AddOS extends Component {
                     <div className='invoices_content_sultrade'>
                         <div className='invoices_content_header_sultrade'>
                             <div className='invoices_content_title_sultrade'>Description</div>
-                            <div className='invoices_content_title_sultrade'>Qty</div>
-                            <div className='invoices_content_title_sultrade'>Unit Price</div>
                             <div className='invoices_content_title_sultrade'>Total</div>
                         </div>
                         {pdfContent.events.map((event) => {
@@ -3128,8 +3135,6 @@ class AddOS extends Component {
                             return (
                                 <div className='invoices_content_row_sultrade'>
                                     <div className='invoices_content_col_sultrade'>{event.descricao}</div>
-                                    <div className='invoices_content_col_sultrade'>{quantity}</div>
-                                    <div className='invoices_content_col_sultrade text-right'>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor)}</div>
                                     <div className='invoices_content_col_sultrade text-right'>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}</div>
                                 </div>
                             )
@@ -3148,7 +3153,7 @@ class AddOS extends Component {
                     <br />
                     <div className='invoices_header_porto'>
                         <div className='invoices_header_image_porto'>
-                            <img className="img-fluid" src="https://i.ibb.co/QK61hd5/porto-brasil-logo.png" alt="logo-lpc" border="0" style={{ width: '150px', height: '142px' }} />
+                            <img className="img-fluid" src="https://i.ibb.co/QK61hd5/porto-brasil-logo.png" alt="logo-lpc" border="0" style={{ width: '150px', height: '142px', objectFit: 'contain' }} />
                             <h1>Invoice</h1>
                         </div>
                         <div className='invoices_header_info_porto'>
@@ -3161,16 +3166,16 @@ class AddOS extends Component {
                     <br />
                     <div className='invoices_info_porto'>
                         <div className='invoices_info_data_porto'><b>To:</b> {cabecalho?.company ? cabecalho?.company : pdfContent.clienteNome}</div>
-                        <div className='invoices_info_data_porto'><b>{cabecalho?.CO ? `C/O: ` : ''}</b>{cabecalho?.CO ? cabecalho.CO : ''}</div>
+                        {cabecalho?.CO &&
+                            <div className='invoices_info_data_porto'><b>{cabecalho?.CO ? `C/O: ` : ''}</b>{cabecalho?.CO ? cabecalho.CO : ''}</div>
+                        }
                         <div className='invoices_info_data_porto'><b>Address:</b> {cabecalho?.address ? cabecalho?.address : pdfContent.address}</div>
                         <div className='invoices_info_data_porto'><b>PO - VESSEL:</b> {pdfContent.codigo}-{pdfContent.navioNome}</div>
                     </div>
                     <br /><br /><br />
                     <div className='invoices_content_porto'>
                         <div className='invoices_content_header_porto'>
-                            <div className='invoices_content_title_porto'>Qty</div>
                             <div className='invoices_content_title_porto'>Description</div>
-                            <div className='invoices_content_title_porto'>Unit Price(USD)</div>
                             <div className='invoices_content_title_porto'>Total(USD)</div>
                         </div>
                         {pdfContent.events.map((event) => {
@@ -3188,9 +3193,7 @@ class AddOS extends Component {
 
                             return (
                                 <div className='invoices_content_row_porto'>
-                                    <div className='invoices_content_col_porto'>{quantity}</div>
                                     <div className='invoices_content_col_porto'>{event.descricao}</div>
-                                    <div className='invoices_content_col_porto text-right'>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor)}</div>
                                     <div className='invoices_content_col_porto text-right'>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}</div>
                                 </div>
                             )
@@ -3207,7 +3210,7 @@ class AddOS extends Component {
                     <br />
                     <div className='invoices_header_coast'>
                         <div className='invoices_header_image_coast'>
-                            <img className="img-fluid" src="https://i.ibb.co/mv8gqfw/coast-logo.png" alt="logo-lpc" border="0" style={{ width: '150px', height: '59px', }} />
+                            <img className="img-fluid" src="https://i.ibb.co/mv8gqfw/coast-logo.png" alt="logo-lpc" border="0" style={{ width: '150px', height: '59px', objectFit: 'contain' }} />
                         </div>
                         <div className='invoices_header_info_coast'>
                             <span>COAST SERVICOS ADMINISTRATIVOS LTDA</span>
@@ -3219,16 +3222,16 @@ class AddOS extends Component {
                     <br />
                     <div className='invoices_info_coast'>
                         <div className='invoices_info_data_coast'>To: {cabecalho?.company ? cabecalho?.company : pdfContent.clienteNome}</div>
-                        <div className='invoices_info_data_coast'>{cabecalho?.CO ? `C/O: ${cabecalho.CO}` : ''}</div>
+                        {cabecalho?.CO &&
+                           <div className='invoices_info_data_coast'>{cabecalho?.CO ? `C/O: ${cabecalho.CO}` : ''}</div>
+            }
                         <div className='invoices_info_data_coast'>Address: {cabecalho?.address ? cabecalho?.address : pdfContent.address}</div>
                         <div className='invoices_info_data_coast'>PO - VESSEL: {pdfContent.codigo}-{pdfContent.navioNome}</div>
                     </div>
                     <br /><br />
                     <div className='invoices_content_coast'>
                         <div className='invoices_content_header_coast'>
-                            <div className='invoices_content_title_coast text-center'>Qty</div>
                             <div className='invoices_content_title_coast'>Description</div>
-                            <div className='invoices_content_title_coast'>Unit Price</div>
                             <div className='invoices_content_title_coast'>Total</div>
                         </div>
                         {pdfContent.events.map((event) => {
@@ -3246,9 +3249,7 @@ class AddOS extends Component {
 
                             return (
                                 <div className='invoices_content_row_coast'>
-                                    <div className='invoices_content_col_coast'>{quantity}</div>
                                     <div className='invoices_content_col_coast'>{event.descricao}</div>
-                                    <div className='invoices_content_col_coast text-right'>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor)}</div>
                                     <div className='invoices_content_col_coast text-right'>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}</div>
                                 </div>
                             )
@@ -3284,15 +3285,15 @@ class AddOS extends Component {
                 base64,
                 name: this.state.pdfNome,
                 os: this.state.chave,
-            }).then((res) => {}, (err) => console.error(err));
-                
+            }).then((res) => { }, (err) => console.error(err));
+
             this.handleExportWithComponent()
 
         } catch (err) {
             console.log(err);
             await this.setState({ erro: "Erro ao criar o documento", loading: false });
         }
-            this.getInvoices();
+        this.getInvoices();
         this.setState({ loading: false });
     }
 
@@ -3426,7 +3427,7 @@ class AddOS extends Component {
                                                 }
                                                 {CO &&
                                                     <td colSpan={2} className={company ? "pdf_money_col" : "pdf_small_col"}><b>C/O:</b> {CO}</td>
-                                                    }
+                                                }
                                             </tr>
                                             <tr>
                                                 {address &&
@@ -4247,10 +4248,10 @@ class AddOS extends Component {
                                                                                 }
                                                                                 <th className='text-center'>
                                                                                     <span>Valor (R$)</span>
-                                                                            </th>
-                                                                            <th className='text-center'>
-                                                                                <span>Valor (USD)</span>
-                                                                            </th>
+                                                                                </th>
+                                                                                <th className='text-center'>
+                                                                                    <span>Valor (USD)</span>
+                                                                                </th>
                                                                                 <th className='text-center' style={{ width: 20, height: 20, padding: 5 }}>
                                                                                 </th>
                                                                             </tr>
@@ -4531,20 +4532,20 @@ class AddOS extends Component {
 
                                                                 </div>
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                <Field className="form-control" as={"textarea"} rows="3" value={this.state.address} onChange={async e => { this.setState({ address: e.currentTarget.value }) }} />
+                                                                    <Field className="form-control" as={"textarea"} rows="3" value={this.state.address} onChange={async e => { this.setState({ address: e.currentTarget.value }) }} />
                                                                 </div>
-                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                <label>C/O:</label>
-                                                            </div>
-                                                            <div className="col-1 errorMessage">
-                                                                {(this.state.CO.indexOf('"') != -1 || this.state.CO.indexOf("'") != -1) &&
-                                                                    <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                                }
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>C/O:</label>
+                                                                </div>
+                                                                <div className="col-1 errorMessage">
+                                                                    {(this.state.CO.indexOf('"') != -1 || this.state.CO.indexOf("'") != -1) &&
+                                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                    }
 
-                                                            </div>
-                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                <Field className="form-control" as={"textarea"} rows="3" value={this.state.CO} onChange={async e => { this.setState({ CO: e.currentTarget.value }) }} />
-                                                            </div>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control" as={"textarea"} rows="3" value={this.state.CO} onChange={async e => { this.setState({ CO: e.currentTarget.value }) }} />
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>

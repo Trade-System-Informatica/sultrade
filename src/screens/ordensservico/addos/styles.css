@@ -325,12 +325,12 @@
 }
 
 .invoices_content_col_sultrade {
-    min-width: 16.6%;
+    min-width: 50%;
     padding-right: 5px;
 }
 
 .invoices_content_col_sultrade:first-child {
-    min-width: 50%;
+    min-width: 75%;
 }
 
 .invoices_total_row_sultrade {
@@ -396,13 +396,13 @@
 }
 
 .invoices_content_title_porto {
-    min-width: 16.6%;
+    min-width: 25%;
     font-weight: bold;
     text-align: left;
 }
 
 .invoices_content_title_porto:nth-child(2) {
-    min-width: 50%;
+    min-width: 75%;
 }
 
 .invoices_content_row_porto {
@@ -415,11 +415,11 @@
 }
 
 .invoices_content_col_porto {
-    min-width: 16.6%;
+    min-width: 25%;
 }
 
 .invoices_content_col_porto:nth-child(2) {
-    min-width: 50%;
+    min-width: 75%;
 }
 
 .invoices_total_row_porto {
@@ -478,12 +478,12 @@
 }
 
 .invoices_content_title_coast {
-    min-width: 16.6%;
+    min-width: 25%;
     text-align: left;
 }
 
 .invoices_content_title_coast:nth-child(2) {
-    min-width: 50%;
+    min-width: 75%;
 }
 
 .invoices_content_row_coast {
@@ -492,12 +492,12 @@
 }
 
 .invoices_content_col_coast {
-    min-width: 16.6%;
+    min-width: 25%;
     border: 1px solid black;
 }
 
 .invoices_content_col_coast:nth-child(2) {
-    min-width: 50%;
+    min-width: 75%;
 }
 
 .invoices_total_row_coast {
