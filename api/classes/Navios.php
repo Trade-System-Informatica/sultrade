@@ -317,9 +317,9 @@ class Navios
             $result['invoice'] = $codigo_invoice;
             $result['data_emissao'] = $emissao->format('Y-m-d');
             
-            $cols = 'grupo, os, evento, codigo, identificador, emissao';
+            $cols = 'grupo, os, evento, empresa, codigo, identificador, emissao';
             foreach ($eventos as $evento) {
-                $values = $grupo . ", $os, $evento, $codigo_invoice, $identificador, '".$emissao->format('Y-m-d')."'";
+                $values = $grupo . ", $os, $evento, $empresa, $codigo_invoice, $identificador, '".$emissao->format('Y-m-d')."'";
                 $database->doInsert('os_invoices', $cols, $values);
             }
         } else if ($result && $result['fornecedorCusteio'] != 0 && $events[0]) {
