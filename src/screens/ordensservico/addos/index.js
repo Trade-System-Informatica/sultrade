@@ -25,6 +25,7 @@ import Util from '../../../classes/util'
 import XLSX from "xlsx-js-style";
 import ModalEventoEdit from '../../../components/modalEventoEdit'
 import EventoEdit from '../../../components/eventoEdit'
+import ModalCamposOS from '../../../components/modalCamposOS'
 
 const estadoInicial = {
     os: '',
@@ -236,6 +237,9 @@ const estadoInicial = {
 
     dadosIniciaisSol: [],
     dadosFinaisSol: [],
+
+    modalCamposOS: false,
+    camposOS: [],
 }
 
 class AddOS extends Component {
@@ -3223,8 +3227,8 @@ class AddOS extends Component {
                     <div className='invoices_info_coast'>
                         <div className='invoices_info_data_coast'>To: {cabecalho?.company ? cabecalho?.company : pdfContent.clienteNome}</div>
                         {cabecalho?.CO &&
-                           <div className='invoices_info_data_coast'>{cabecalho?.CO ? `C/O: ${cabecalho.CO}` : ''}</div>
-            }
+                            <div className='invoices_info_data_coast'>{cabecalho?.CO ? `C/O: ${cabecalho.CO}` : ''}</div>
+                        }
                         <div className='invoices_info_data_coast'>Address: {cabecalho?.address ? cabecalho?.address : pdfContent.address}</div>
                         <div className='invoices_info_data_coast'>PO - VESSEL: {pdfContent.codigo}-{pdfContent.navioNome}</div>
                     </div>
@@ -3960,6 +3964,18 @@ class AddOS extends Component {
         }
 
         await this.setState({ modalItemAberto: false });
+    }
+
+    getCamposVoucher = async () => {
+        const camposOS = await loader.getBody('getCamposOS.php', {
+            token: true,
+            chave_os: this.state.chave
+        })
+
+        this.setState({
+            camposOS,
+            modalCamposOS: true,
+        })
     }
 
     handleExportWithComponent = event => {
@@ -4842,7 +4858,14 @@ class AddOS extends Component {
                             closeModal={() => { this.setState({ modalAberto: false }) }}
                         />
 
-
+                        {this.state.modalCamposOS &&
+                            <ModalCamposOS
+                                open={this.state.modalCamposOS}
+                                closeModal={() => { this.setState({ modalCamposOS: false }) }}
+                                campos={this.state.camposOS}
+                                submit={() => { this.setState({ modalCamposOS: false }); this.salvarOS(validForm, false)}}
+                            />
+                        }
 
                         <section>
                             <Header voltarOS titulo="OS" chave={this.state.codigo != 0 ? this.state.codigo : ''} />
@@ -5419,6 +5442,9 @@ class AddOS extends Component {
                                                     </div>
                                                     <div className="relatorioButton">
                                                         <button className="btn btn-danger"><Link style={{ color: "inherit", textDecoration: "none" }} to={{ pathname: "/financeiro/addFatura/0", state: { backTo: `/ordensservicos/os/${this.state.chave}`, os: this.state.os } }}>Emitir NF</Link></button>
+                                                    </div>
+                                                    <div className="relatorioButton">
+                                                        <button className="btn btn-danger" onClick={() => this.getCamposVoucher()}>Campos de Voucher</button>
                                                     </div>
                                                 </>
                                             }

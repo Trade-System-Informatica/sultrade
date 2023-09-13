@@ -236,7 +236,7 @@ class OS
                 LEFT JOIN os ON os_documentos.chave_os = os.chave 
                 LEFT JOIN os_servicos_itens ON os_documentos.chave_os_itens = os_servicos_itens.chave',
             'os_documentos.*, tipos_docto_categorias.descricao AS categoria',
-            'os_documentos.chave_os = ' . $chave_os.' ORDER BY tipos_docto_categorias.descricao ASC'
+            'os_documentos.chave_os = ' . $chave_os . ' ORDER BY tipos_docto_categorias.descricao ASC'
         );
         $database->closeConection();
         return $result;
@@ -409,7 +409,8 @@ class OS
         return $result;
     }
 
-    public static function salvaInvoice($chave_os, $tipo_docto, $descricao, $caminho) {
+    public static function salvaInvoice($chave_os, $tipo_docto, $descricao, $caminho)
+    {
         $database = new Database();
 
         $invoiceCheck = $database->doSelect('os_documentos', 'os_documentos.*', "chave_os = $chave_os AND tipo_docto = $tipo_docto AND descricao = '$descricao' AND caminho = '$caminho'");
@@ -456,6 +457,32 @@ class OS
         $database->closeConection();
         return $result;
     }
+
+    public static function getCamposOS($chave_os)
+    {
+        $database = new Database();
+
+        $result = $database->doSelect(
+            'os_subgrupos_taxas_campos AS campos
+		LEFT JOIN os_subgrupos_taxas AS subgrupos ON subgrupos.chave = campos.subgrupo
+		LEFT JOIN os_taxas AS taxas ON taxas.sub_grupo = subgrupos.chave
+		LEFT JOIN os_servicos_itens AS eventos ON eventos.taxa = taxas.chave
+		LEFT JOIN os_servicos_itens_complementar AS eventos_complementar ON eventos_complementar.evento = eventos.chave AND eventos_complementar.subgrupo_campo = campos.chave',
+
+            'campos.*,
+	    eventos.descricao AS eventoNome,
+	    eventos_complementar.valor AS eventoCampoValor,
+	    eventos.chave AS eventoChave,
+        eventos_complementar.chave AS eventoCampoChave',
+
+            "eventos.chave_os = $chave_os
+	GROUP BY campos.chave, eventos.chave"
+        );
+
+        $database->closeConection();
+        return $result;
+    }
+
 
     public static function getInvoices($chave_os)
     {
@@ -513,7 +540,7 @@ class OS
         return $result;
     }
 
-    public static function getCategoriasDocumentos($empresa) 
+    public static function getCategoriasDocumentos($empresa)
     {
         $database = new Database();
 
@@ -657,7 +684,7 @@ class OS
             foreach ($os as $item) {
                 if ($item["ordem"] == $ordem) {
 
-                    $database->doUpdate("os_servicos_itens", "os_servicos_itens.ordem = (os_servicos_itens.ordem + 1)", "chave_os = '$chave_os' AND os_servicos_itens.ordem >= ".$item["ordem"]);
+                    $database->doUpdate("os_servicos_itens", "os_servicos_itens.ordem = (os_servicos_itens.ordem + 1)", "chave_os = '$chave_os' AND os_servicos_itens.ordem >= " . $item["ordem"]);
                 }
             }
         }
@@ -803,19 +830,22 @@ class OS
 
         foreach ($eventos as $key => $evento) {
             foreach ($campos as $key => $campo) {
-                $campo_titulo = $database->doSelect('os_subgrupos_taxas_campos', 'nome', "chave = ".$campo->{"subgrupo_campo"});
+                $campo_titulo = $database->doSelect('os_subgrupos_taxas_campos', 'nome', "chave = " . $campo->{"subgrupo_campo"});
                 if ($campo_titulo[0]) {
                     $campo_titulo = $campo_titulo[0]["nome"];
-                    
-                    $campo_evento = $database->doSelect('os_servicos_itens 
+
+                    $campo_evento = $database->doSelect(
+                        'os_servicos_itens 
                     LEFT JOIN os_taxas ON os_taxas.chave = os_servicos_itens.taxa
                     LEFT JOIN os_subgrupos_taxas ON os_subgrupos_taxas.chave = os_taxas.sub_grupo
                     LEFT JOIN os_subgrupos_taxas_campos ON os_subgrupos_taxas_campos.subgrupo = os_subgrupos_taxas.chave',
-                    'os_subgrupos_taxas_campos.chave AS subgrupo_campo', "os_subgrupos_taxas_campos.nome = '$campo_titulo' AND os_servicos_itens.chave = $evento");
-                    
+                        'os_subgrupos_taxas_campos.chave AS subgrupo_campo',
+                        "os_subgrupos_taxas_campos.nome = '$campo_titulo' AND os_servicos_itens.chave = $evento"
+                    );
+
                     if ($campo_evento[0]) {
                         $values = "'" . $campo_evento[0]["subgrupo_campo"] . "', '" . $campo->{"valor"} . "', " . $evento;
-                        
+
                         $database->doInsert('os_servicos_itens_complementar', $cols, $values);
                     } else {
                         return false;
@@ -855,6 +885,40 @@ class OS
         }
         $database->closeConection();
         return $result;
+    }
+
+    public static function saveCamposOS($campoNome, $valor, $eventos, $eventosDeletados)
+    {
+        $database = new Database();
+        $cols = 'evento, subgrupo_campo, valor';
+
+        foreach ($eventos as $key => $evento) {
+            $campo = $database->doSelect('os_subgrupos_taxas_campos', 'chave', "subgrupo = ".$evento->{'subgrupo'}." AND nome = '$campoNome'");
+            $campo = $campo[0]['chave'];
+
+            $campoCheck = $database->doSelect('os_servicos_itens_complementar', 'chave', "evento = ".$evento->{'chave'}." AND subgrupo_campo = $campo");
+
+            if ($campoCheck[0]) {
+                $eventoCampo = $campoCheck[0]['chave'];
+                $values = "valor = '$valor'";   
+
+                $database->doUpdate('os_servicos_itens_complementar', $values, "chave = $eventoCampo");                
+            } else {
+                $values = "'".$evento->{'chave'}."', $campo, '$valor'";
+
+                $database->doInsert('os_servicos_itens_complementar', $cols, $values);
+            }            
+        }
+
+        foreach ($eventosDeletados as $key => $evento) {
+            $campo = $database->doSelect('os_subgrupos_taxas_campos', 'chave', "subgrupo = " . $evento->{'subgrupo'} . " AND nome = '$campoNome'");
+            $campo = $campo[0]['chave'];
+
+            $database->doDelete('os_servicos_itens_complementar', "evento = " . $evento->{'chave'} . " AND subgrupo_campo = $campo");
+        }
+
+        $database->closeConection();
+        return true;
     }
 
     public static function checkAndDeleteContaOS($os)
@@ -1195,7 +1259,7 @@ class OS
             return $result;
         }
     }
-    
+
     public static function updateEventoTemplate($chave, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks, $Moeda, $valor, $valor1, $repasse)
     {
         $database = new Database();
