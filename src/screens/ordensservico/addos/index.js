@@ -3073,7 +3073,16 @@ class AddOS extends Component {
 
             const { pdfContent } = this.state;
 
-            this.setState({ pdfNome: `Invoices (${pdfContent.invoice})` })
+            let name;
+            if ([16, 17].includes(parseInt(pdfContent.fornecedorCusteio))) {
+                name = 'sultrade';
+            } else if (parseInt(pdfContent.fornecedorCusteio) == 32) {
+                name = 'porto'
+            } else if (parseInt(pdfContent.fornecedorCusteio) == 269) {
+                name = 'coast'
+            }
+
+            this.setState({ pdfNome: `Invoices - ${name} (${pdfContent.invoice})` })
 
             let cabecalho;
             try {
