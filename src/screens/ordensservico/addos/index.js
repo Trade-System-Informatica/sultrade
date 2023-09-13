@@ -2016,16 +2016,20 @@ class AddOS extends Component {
                                         <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinalDolar))}</td>
                                         <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinal))}</td>
                                     </tr>
-                                    <tr>
-                                        <td colSpan='5' className='pdf_small_col'>Funds Received</td>
-                                        <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(recebimentoFinalDolar))}</td>
-                                        <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(recebimentoFinal))}</td>
-                                    </tr>
-                                    <tr>
-                                        <td colSpan='5' className='pdf_small_col'>Discount</td>
-                                        <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinalDolar))}</td>
-                                        <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinal))}</td>
-                                    </tr>
+                                    {parseFloat(recebimentoFinal) > 0 &&
+                                        <tr>
+                                            <td colSpan='5' className='pdf_small_col'>Funds Received</td>
+                                            <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(recebimentoFinalDolar))}</td>
+                                            <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(recebimentoFinal))}</td>
+                                        </tr>
+                                    }
+                                    {parseFloat(descontoFinal) > 0 &&
+                                        <tr>
+                                            <td colSpan='5' className='pdf_small_col'>Discount</td>
+                                            <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinalDolar))}</td>
+                                            <td className='pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(descontoFinal))}</td>
+                                        </tr>
+                                    }
                                     <tr>
                                         <td colSpan='5' className='pdfTitle pdf_small_col'>Final Blce/Debit Customer</td>
                                         <td className='pdfTitle pdf_money_col'>{util.formataDinheiroBrasileiro(parseFloat(totalFinalDolar) - parseFloat(descontoFinalDolar) - parseFloat(recebimentoFinalDolar))}</td>
@@ -3121,7 +3125,7 @@ class AddOS extends Component {
                     <div className='invoices_content_sultrade'>
                         <div className='invoices_content_header_sultrade'>
                             <div className='invoices_content_title_sultrade'>Description</div>
-                            <div className='invoices_content_title_sultrade'>Total</div>
+                            <div className='invoices_content_title_sultrade'></div>
                         </div>
                         {pdfContent.events.map((event) => {
                             const quantity = 1;
@@ -3180,7 +3184,7 @@ class AddOS extends Component {
                     <div className='invoices_content_porto'>
                         <div className='invoices_content_header_porto'>
                             <div className='invoices_content_title_porto'>Description</div>
-                            <div className='invoices_content_title_porto'>Total(USD)</div>
+                            <div className='invoices_content_title_porto'></div>
                         </div>
                         {pdfContent.events.map((event) => {
                             const quantity = 1;
@@ -3198,7 +3202,7 @@ class AddOS extends Component {
                             return (
                                 <div className='invoices_content_row_porto'>
                                     <div className='invoices_content_col_porto'>{event.descricao}</div>
-                                    <div className='invoices_content_col_porto text-right'>{new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}</div>
+                                    <div className='invoices_content_col_porto text-right'>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}</div>
                                 </div>
                             )
                         })
@@ -3236,7 +3240,7 @@ class AddOS extends Component {
                     <div className='invoices_content_coast'>
                         <div className='invoices_content_header_coast'>
                             <div className='invoices_content_title_coast'>Description</div>
-                            <div className='invoices_content_title_coast'>Total</div>
+                            <div className='invoices_content_title_coast'></div>
                         </div>
                         {pdfContent.events.map((event) => {
                             const quantity = 1;
@@ -3721,16 +3725,20 @@ class AddOS extends Component {
                                     <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotalDolar))}</b></td>
                                     <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotal))}</b></td>
                                 </tr>
-                                <tr>
-                                    <td colSpan='7' className='pdf_large_col pdfTitle'>Discount</td>
-                                    <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(descontoTotalDolar))}</b></td>
-                                    <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(descontoTotal))}</b></td>
-                                </tr>
-                                <tr>
-                                    <td colSpan='7' className='pdf_large_col pdfTitle'>Received</td>
-                                    <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(recebimentoTotalDolar))}</b></td>
-                                    <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(recebimentoTotal))}</b></td>
-                                </tr>
+                                {parseFloat(descontoTotal) > 0 &&
+                                    <tr>
+                                        <td colSpan='7' className='pdf_large_col pdfTitle'>Discount</td>
+                                        <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(descontoTotalDolar))}</b></td>
+                                        <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(descontoTotal))}</b></td>
+                                    </tr>
+                                }
+                                {parseFloat(recebimentoTotal) > 0 &&
+                                    <tr>
+                                        <td colSpan='7' className='pdf_large_col pdfTitle'>Received</td>
+                                        <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(recebimentoTotalDolar))}</b></td>
+                                        <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(recebimentoTotal))}</b></td>
+                                    </tr>
+                                }
                                 <tr>
                                     <td colSpan='7' className='pdf_large_col pdfTitle'>Balance</td>
                                     <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotalDolar) - (parseFloat(recebimentoTotalDolar) + parseFloat(descontoTotalDolar)))}</b></td>
@@ -4863,7 +4871,7 @@ class AddOS extends Component {
                                 open={this.state.modalCamposOS}
                                 closeModal={() => { this.setState({ modalCamposOS: false }) }}
                                 campos={this.state.camposOS}
-                                submit={() => { this.setState({ modalCamposOS: false }); this.salvarOS(validForm, false)}}
+                                submit={() => { this.setState({ modalCamposOS: false }); this.salvarOS(validForm, false) }}
                             />
                         }
 
