@@ -25,11 +25,13 @@ const estadoInicial = {
     campoFormTitulo: '',
     campoFormValor: '',
     campoFormEventosAfetados: [],
-    campoFormEventosEscolhidos: [],
     campoFormSubgrupos: [],
+    campoFormSubgruposEscolhidos: [],
 
     todosEventos: [],
-    eventosOptions: [],
+    todosSubgrupos: [],
+    
+    subgruposOptions: [],
     optionsTexto: "",
 }
 
@@ -45,6 +47,7 @@ class ModalCamposOS extends Component {
         const camposPreenchidosFormatados = [];
         const camposBrancosFormatados = [];
         const todosEventos = [];
+        const todosSubgrupos = [];
 
 
         campos.forEach((campo) => {
@@ -54,6 +57,13 @@ class ModalCamposOS extends Component {
                     label: campo.eventoNome,
                     subgrupo: campo.subgrupo
                 });
+            }
+
+            if (!todosSubgrupos.find((e) => e.value === campo.subgrupo)) {
+                todosSubgrupos.push({
+                    value: campo.subgrupo,
+                    label: campo.subgrupoNome
+                })
             }
 
             if (campo.eventoCampoValor?.trim()) {
@@ -67,14 +77,19 @@ class ModalCamposOS extends Component {
                         eventoCampoChave: [campo.eventoCampoChave],
                         eventoChave: [campo.eventoChave],
                         eventoNome: [campo.eventoNome],
-                        subgrupo: [campo.subgrupo]
+                        subgrupo: [campo.subgrupo],
+                        subgrupoNome: [campo.subgrupoNome]
                     });
                 } else {
                     camposPreenchidosFormatados[index].chave.push(campo.chave);
                     camposPreenchidosFormatados[index].eventoCampoChave.push(campo.eventoCampoChave);
                     camposPreenchidosFormatados[index].eventoChave.push(campo.eventoChave);
                     camposPreenchidosFormatados[index].eventoNome.push(campo.eventoNome);
-                    camposPreenchidosFormatados[index].subgrupo.push(campo.subgrupo);
+
+                    if (!camposPreenchidosFormatados[index].subgrupo.includes(campo.subgrupo)) {
+                        camposPreenchidosFormatados[index].subgrupo.push(campo.subgrupo);
+                        camposPreenchidosFormatados[index].subgrupoNome.push(campo.subgrupoNome);
+                    }
                 }
             } else {
                 const index = camposBrancosFormatados.findIndex((c) => c.nome == campo.nome && c.tipo == campo.tipo);
@@ -87,23 +102,30 @@ class ModalCamposOS extends Component {
                         eventoCampoChave: [campo.eventoCampoChave],
                         eventoChave: [campo.eventoChave],
                         eventoNome: [campo.eventoNome],
-                        subgrupo: [campo.subgrupo]
+                        subgrupo: [campo.subgrupo],
+                        subgrupoNome: [campo.subgrupoNome],
                     })
                 } else {
-                    camposPreenchidosFormatados[index].chave.push(campo.chave);
-                    camposPreenchidosFormatados[index].eventoCampoChave.push(campo.eventoCampoChave);
-                    camposPreenchidosFormatados[index].eventoChave.push(campo.eventoChave);
-                    camposPreenchidosFormatados[index].eventoNome.push(campo.eventoNome);
-                    camposPreenchidosFormatados[index].subgrupo.push(campo.subgrupo);
+                    camposBrancosFormatados[index].chave.push(campo.chave);
+                    camposBrancosFormatados[index].eventoCampoChave.push(campo.eventoCampoChave);
+                    camposBrancosFormatados[index].eventoChave.push(campo.eventoChave);
+                    camposBrancosFormatados[index].eventoNome.push(campo.eventoNome);
+
+                    if (!camposBrancosFormatados[index].subgrupo.includes(campo.subgrupo)) {
+                        camposBrancosFormatados[index].subgrupo.push(campo.subgrupo);
+                        camposBrancosFormatados[index].subgrupoNome.push(campo.subgrupoNome);
+                    }
                 }
             }
         })
 
 
+        console.log({camposPreenchidosFormatados, camposBrancosFormatados, todosEventos, todosSubgrupos})
         this.setState({
             camposPreenchidos: camposPreenchidosFormatados,
             camposBrancos: camposBrancosFormatados,
-            todosEventos
+            todosEventos,
+            todosSubgrupos
         });
     }
 
@@ -118,19 +140,15 @@ class ModalCamposOS extends Component {
     }
 
     setOptions = (campo, preenchido = false) => {
-        const eventosOptions = campo.eventoChave.map((evento) => ({
-            value: evento,
-            label: this.state.todosEventos.find((ev) => ev.value == evento)?.label,
+        const eventos = campo.eventoChave.map((evento) => ({
             subgrupo: this.state.todosEventos.find((ev) => ev.value == evento)?.subgrupo
         }));
 
         if (preenchido) {
             this.state.camposBrancos.filter((branco) => branco.subgrupo.find((grupo) => this.state.campoFormSubgrupos.includes(grupo))).forEach((branco) => {
                 branco.eventoChave.forEach((evento) => {
-                    if (!eventosOptions.find((opt) => opt.value == evento)) {
-                        eventosOptions.push({
-                            value: evento,
-                            label: this.state.todosEventos.find((ev) => ev.value == evento)?.label,
+                    if (!eventos.find((opt) => opt.value == evento)) {
+                        eventos.push({
                             subgrupo: this.state.todosEventos.find((ev) => ev.value == evento)?.subgrupo
                         })
                     }
@@ -138,8 +156,19 @@ class ModalCamposOS extends Component {
             })
         }
 
+        const subgruposOptions = [];
+
+        eventos.forEach((evento) => {
+            if (!subgruposOptions.find((sub) => sub.value == evento.subgrupo))
+            subgruposOptions.push({
+                value: evento.subgrupo,
+                label: this.state.todosSubgrupos.find((sub) => sub.value == evento.subgrupo)?.label
+            });
+        });
+        console.log({subgruposOptions});
+
         this.setState({
-            eventosOptions
+            subgruposOptions
         })
 
     }
@@ -149,8 +178,11 @@ class ModalCamposOS extends Component {
             campoForm: false,
         })
         
-        const eventosDeletados = this.state.campoFormEventosAfetados.filter((evento) => !this.state.campoFormEventosEscolhidos.find((e) => e == evento)).map((evento) => ({ chave: evento, subgrupo: this.state.eventosOptions.find((e) => e.value == evento)?.subgrupo }));
-        const eventos = this.state.campoFormEventosEscolhidos.map((evento) => ({ chave: evento, subgrupo: this.state.eventosOptions.find((e) => e.value == evento)?.subgrupo }));
+        const eventosEscolhidos = this.state.todosEventos.filter((evento) => this.state.campoFormSubgruposEscolhidos.find((sub) => sub == evento.subgrupo));
+
+        const eventosDeletados = this.state.campoFormEventosAfetados.filter((evento) => !eventosEscolhidos.find((e) => e == evento.value)).map((evento) => ({ chave: evento.value, subgrupo: evento.subgrupo }));
+        const eventos = eventosEscolhidos.map((evento) => ({ chave: evento.value, subgrupo: evento.subgrupo }));
+        console.log({eventosEscolhidos, eventosDeletados, eventos});
 
         await loader.getBody('saveCamposOS.php', {
             token: true,
@@ -168,7 +200,7 @@ class ModalCamposOS extends Component {
     }
 
     filterSearch = (e, state) => {
-        if (this.state.campoFormEventosEscolhidos.find((ev) => ev == e.value)) {
+        if (this.state.campoFormSubgruposEscolhidos.find((ev) => ev == e.value)) {
             return false;
         }
 
@@ -224,8 +256,8 @@ class ModalCamposOS extends Component {
                                                                                 campoFormTitulo: c.nome,
                                                                                 campoFormValor: c.eventoCampoValor,
                                                                                 campoFormEventosAfetados: c.eventoChave,
-                                                                                campoFormEventosEscolhidos: c.eventoChave,
                                                                                 campoFormSubgrupos: c.subgrupo,
+                                                                                campoFormSubgruposEscolhidos: c.subgrupo,
                                                                             });
                                                                             this.setOptions(c, true);
                                                                         }} />
@@ -239,9 +271,9 @@ class ModalCamposOS extends Component {
                                                                     <div className='campo_valor_valor'>{c.eventoCampoValor}</div>
                                                                 </div>
                                                                 <div className='campo_eventos'>
-                                                                    <div className='campo_eventos_titulo'>Eventos:</div>
-                                                                    {c.eventoNome.map((e) => (
-                                                                        <div className='campo_evento_nome'>{e}</div>
+                                                                    <div className='campo_eventos_titulo'>Vouchers:</div>
+                                                                    {c.subgrupoNome.map((s) => (
+                                                                        <div className='campo_evento_nome'>{s}</div>
                                                                     ))}
                                                                 </div>
                                                             </div>
@@ -303,7 +335,7 @@ class ModalCamposOS extends Component {
                                             campoFormTitulo: '',
                                             campoFormValor: '',
                                             campoFormEventosAfetados: [],
-                                            campoFormEventosEscolhidos: [],
+                                            campoFormSubgruposEscolhidos: [],
                                             campoFormSubgrupos: [],
                                         });
                                         }}>
@@ -339,16 +371,16 @@ class ModalCamposOS extends Component {
                                                                 <Field className="form-control textareaFix" as={"textarea"} rows={4} value={this.state.campoFormValor} onChange={async e => { this.setState({ campoFormValor: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                <label>Eventos:</label>
+                                                                <label>Vouchers:</label>
                                                             </div>
                                                             <div className="col-1 errorMessage">
 
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                <Select className='SearchSelect' options={this.state.eventosOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 75)} onInputChange={e => { this.setState({ optionsTexto: e }) }} search={true} onChange={(e) => { this.setState({ campoFormEventosEscolhidos: [...this.state.campoFormEventosEscolhidos, e.value] }) }} />
-                                                                {this.state.campoFormEventosEscolhidos.map((e, i) => {
+                                                                <Select className='SearchSelect' options={this.state.subgruposOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 75)} onInputChange={e => { this.setState({ optionsTexto: e }) }} search={true} onChange={(e) => { this.setState({ campoFormSubgruposEscolhidos: [...this.state.campoFormSubgruposEscolhidos, e.value] }) }} />
+                                                                {this.state.campoFormSubgruposEscolhidos.map((e, i) => {
                                                                     return (
-                                                                        <span class="click_to_erase" style={{ color: 'white' }} onClick={() => this.setState({ campoFormEventosEscolhidos: this.state.campoFormEventosEscolhidos.filter((c) => c != e) })}>{this.state.eventosOptions.find((ev) => ev.value == e)?.label}{i != this.state.campoFormEventosEscolhidos.length - 1 ? ', ' : ' '}</span>
+                                                                        <span class="click_to_erase" style={{ color: 'white' }} onClick={() => this.setState({ campoFormSubgruposEscolhidos: this.state.campoFormSubgruposEscolhidos.filter((c) => c != e) })}>{this.state.subgruposOptions.find((ev) => ev.value == e)?.label}{i != this.state.campoFormSubgruposEscolhidos.length - 1 ? ', ' : ' '}</span>
                                                                     )
                                                                 })}
                                                             </div>

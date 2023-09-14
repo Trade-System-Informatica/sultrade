@@ -3499,7 +3499,7 @@ class AddOS extends Component {
                                                         camposTitulos.push({ titulo: campo.campo, tipo: campo.tipoCampo });
                                                     }
 
-                                                    if (campo.tipoCampo == "LISTA") {
+                                                    if (campo.tipoCampo == "LISTA" && !campos.find((c) => c.campo == campo.campo)) {
                                                         const complementos = campo.complemento?.split("\n");
 
                                                         if (complementos[0]) {
@@ -3507,7 +3507,7 @@ class AddOS extends Component {
                                                                 campos.push({ ...campo, complemento });
                                                             })
                                                         }
-                                                    } else if (campo.tipoCampo == "TEXTO") {
+                                                    } else if (campo.tipoCampo == "TEXTO" && !campos.find((c) => c.campo == campo.campo)) {
                                                         campos.push(campo);
                                                     }
                                                 })

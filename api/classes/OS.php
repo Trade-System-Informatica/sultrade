@@ -470,6 +470,7 @@ class OS
 		LEFT JOIN os_servicos_itens_complementar AS eventos_complementar ON eventos_complementar.evento = eventos.chave AND eventos_complementar.subgrupo_campo = campos.chave',
 
             'campos.*,
+        subgrupos.descricao AS subgrupoNome,
 	    eventos.descricao AS eventoNome,
 	    eventos_complementar.valor AS eventoCampoValor,
 	    eventos.chave AS eventoChave,
