@@ -67,7 +67,7 @@ class ModalCamposOS extends Component {
             }
 
             if (campo.eventoCampoValor?.trim()) {
-                const index = camposPreenchidosFormatados.findIndex((c) => c.eventoCampoValor == campo.eventoCampoValor && c.nome == campo.nome && c.tipo == campo.tipo);
+                const index = camposPreenchidosFormatados.findIndex((c) => c.eventoCampoValor?.trim() == campo.eventoCampoValor?.trim() && c.nome == campo.nome && c.tipo == campo.tipo);
 
                 if (index == -1) {
                     camposPreenchidosFormatados.push({
@@ -75,6 +75,7 @@ class ModalCamposOS extends Component {
                         key: camposPreenchidosFormatados.length + 1,
                         chave: [campo.chave],
                         eventoCampoChave: [campo.eventoCampoChave],
+                        eventoCampoValor: campo.eventoCampoValor?.trim(),
                         eventoChave: [campo.eventoChave],
                         eventoNome: [campo.eventoNome],
                         subgrupo: [campo.subgrupo],
@@ -120,7 +121,6 @@ class ModalCamposOS extends Component {
         })
 
 
-        console.log({camposPreenchidosFormatados, camposBrancosFormatados, todosEventos, todosSubgrupos})
         this.setState({
             camposPreenchidos: camposPreenchidosFormatados,
             camposBrancos: camposBrancosFormatados,
@@ -165,8 +165,7 @@ class ModalCamposOS extends Component {
                 label: this.state.todosSubgrupos.find((sub) => sub.value == evento.subgrupo)?.label
             });
         });
-        console.log({subgruposOptions});
-
+        
         this.setState({
             subgruposOptions
         })
@@ -182,8 +181,7 @@ class ModalCamposOS extends Component {
 
         const eventosDeletados = this.state.campoFormEventosAfetados.filter((evento) => !eventosEscolhidos.find((e) => e == evento.value)).map((evento) => ({ chave: evento.value, subgrupo: evento.subgrupo }));
         const eventos = eventosEscolhidos.map((evento) => ({ chave: evento.value, subgrupo: evento.subgrupo }));
-        console.log({eventosEscolhidos, eventosDeletados, eventos});
-
+        
         await loader.getBody('saveCamposOS.php', {
             token: true,
             eventosDeletados,
