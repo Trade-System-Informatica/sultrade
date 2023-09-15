@@ -179,9 +179,9 @@ class ModalCamposOS extends Component {
         
         const eventosEscolhidos = this.state.todosEventos.filter((evento) => this.state.campoFormSubgruposEscolhidos.find((sub) => sub == evento.subgrupo));
 
-        const eventosDeletados = this.state.campoFormEventosAfetados.filter((evento) => !eventosEscolhidos.find((e) => e == evento.value)).map((evento) => ({ chave: evento.value, subgrupo: evento.subgrupo }));
+        const eventosDeletados = this.state.campoFormEventosAfetados.filter((evento) => !eventosEscolhidos.find((e) => e.value == evento)).map((evento) => ({ chave: evento, subgrupo: this.state.todosEventos.find((ev) => ev.value == evento)?.subgrupo }));
         const eventos = eventosEscolhidos.map((evento) => ({ chave: evento.value, subgrupo: evento.subgrupo }));
-        
+
         await loader.getBody('saveCamposOS.php', {
             token: true,
             eventosDeletados,
