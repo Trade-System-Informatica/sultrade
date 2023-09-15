@@ -535,7 +535,7 @@ class AddOS extends Component {
 
                 const firstItem = this.state.eventos.find((evento) => evento.chave == this.state.agrupadorEventos[0]);
 
-                if (item.tipo_sub != firstItem?.tipo_sub || item.Fornecedor_Custeio != firstItem?.Fornecedor_Custeio) {
+                if (item.voucher != firstItem?.voucher || item.Fornecedor_Custeio != firstItem?.Fornecedor_Custeio) {
                     return false;
                 }
             }

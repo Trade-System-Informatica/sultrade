@@ -121,6 +121,7 @@ class OS
             LEFT JOIN os_navios ON os_navios.chave = os.chave_navio 
             LEFT JOIN pessoas ON pessoas.chave = os.chave_cliente
             LEFT JOIN os_taxas ON os_taxas.chave = os_servicos_itens.taxa
+            LEFT JOIN os_subgrupos_taxas ON os_subgrupos_taxas.chave = os_taxas.sub_grupo
             LEFT JOIN os_portos ON os_portos.chave = os.porto',
                 'os_servicos_itens.*, 
                                           os_navios.nome AS navioNome, 
@@ -130,6 +131,7 @@ class OS
                                           os.codigo as osCodigo, 
                                           pessoas.Nome AS fornecedorNome, 
                                           os_taxas.Conta_Contabil as contaContabil, 
+                os_subgrupos_taxas.chave as voucher,
                                           os.centro_custo AS centroCusto, 
                                           os_portos.Codigo AS portoNome',
                 "1=1 ORDER BY chave DESC LIMIT 101 OFFSET " . $offset
@@ -141,6 +143,7 @@ class OS
             LEFT JOIN os_navios ON os_navios.chave = os.chave_navio 
             LEFT JOIN pessoas ON pessoas.chave = os.chave_cliente
             LEFT JOIN os_taxas ON os_taxas.chave = os_servicos_itens.taxa
+            LEFT JOIN os_subgrupos_taxas ON os_subgrupos_taxas.chave = os_taxas.sub_grupo
             LEFT JOIN os_portos ON os_portos.chave = os.porto',
                 'os_servicos_itens.*, 
                 os_navios.nome AS navioNome, 
@@ -150,6 +153,7 @@ class OS
                 os.codigo as osCodigo, 
                 pessoas.Nome AS fornecedorNome, 
                 os_taxas.Conta_Contabil as contaContabil, 
+                os_subgrupos_taxas.chave as voucher,
                 os.centro_custo AS centroCusto, 
                 os_portos.Codigo AS portoNome',
                 "os.empresa = '" . $empresa . "' ORDER BY chave DESC LIMIT 101 OFFSET " . $offset
