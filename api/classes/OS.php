@@ -169,9 +169,15 @@ class OS
         $database = new Database();
 
         $result = $database->doSelect(
-            'os_servicos_itens LEFT JOIN pessoas ON pessoas.chave = os_servicos_itens.fornecedor LEFT JOIN moedas ON moedas.chave = os_servicos_itens.moeda LEFT JOIN contas_aberto ON contas_aberto.Docto_Origem = os_servicos_itens.chave',
+            'os_servicos_itens 
+                LEFT JOIN pessoas ON pessoas.chave = os_servicos_itens.fornecedor 
+                LEFT JOIN moedas ON moedas.chave = os_servicos_itens.moeda 
+                LEFT JOIN contas_aberto ON contas_aberto.Docto_Origem = os_servicos_itens.chave
+                LEFT JOIN os_taxas ON os_taxas.chave = os_servicos_itens.taxa
+                LEFT JOIN os_subgrupos_taxas ON os_subgrupos_taxas.chave = os_taxas.sub_grupo',
             'os_servicos_itens.*, 
             pessoas.nome AS fornecedorNome,
+            os_subgrupos_taxas.chave AS voucher,
             moedas.Sigla,
             contas_aberto.chave AS conta',
             "os_servicos_itens.chave_os = '" . $chave_os . "' ORDER BY os_servicos_itens.ordem"

@@ -1811,7 +1811,7 @@ class AddEvento extends Component {
                                                             }
                                                         </div>
                                                         <div className="fieldDividido col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <select className='form-control nextToInput fieldDividido_1' value={this.state.moeda} onChange={(e) => { if (!this.state.repasse) { this.setState({ moeda: e.target.value }) } }}>
+                                                            <select className='form-control nextToInput fieldDividido_1' value={this.state.moeda} onChange={(e) => { this.setState({ moeda: e.target.value }) }}>
                                                                 {this.state.moedas.map((e) => (
                                                                     <option value={e.Chave}>{e.Sigla}</option>
                                                                 ))}
