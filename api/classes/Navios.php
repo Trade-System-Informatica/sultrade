@@ -289,7 +289,11 @@ class Navios
         if (!$invoice && $result && $result['fornecedorCusteio'] != 0 && $events[0]) {
             $empresa = $result['fornecedorCusteio'];
             
-            $grupos = $database->doSelect('os_invoices', 'os_invoices.grupo, os_invoices.evento, os_invoices.identificador', "os_invoices.os = '$os' AND os_invoices.empresa = '$empresa' GROUP BY grupo ORDER BY grupo DESC");
+            if ($result['fornecedorCusteio'] != 16 && $result['fornecedorCusteio'] != 17) {
+                $grupos = $database->doSelect('os_invoices', 'os_invoices.grupo, os_invoices.evento, os_invoices.identificador', "os_invoices.empresa = '$empresa' GROUP BY grupo ORDER BY grupo DESC");
+            } else {
+                $grupos = $database->doSelect('os_invoices', 'os_invoices.grupo, os_invoices.evento, os_invoices.identificador', "os_invoices.empresa IN (16, 17) GROUP BY grupo ORDER BY grupo DESC");
+            }
             $grupos = $grupos[0]['grupo'];
             $identificador = $grupos[0]['identificador'];
 
