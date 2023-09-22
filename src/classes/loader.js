@@ -97,6 +97,7 @@ export default class loader {
             "os_navios.nome LIKE '%" + pesquisa + "%'",
             "os_tipos_servicos.descricao LIKE '%" + pesquisa + "%'",
             "os_portos.descricao LIKE '%" + pesquisa + "%'",
+            "pessoas.nome LIKE '%"+ pesquisa + "%'"
         ][tipoPesquisa];
         return await apiEmployee.post(`getOSPesquisa.php`, {
             token: true,

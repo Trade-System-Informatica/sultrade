@@ -288,11 +288,12 @@ class Navios
         
         if (!$invoice && $result && $result['fornecedorCusteio'] != 0 && $events[0]) {
             $empresa = $result['fornecedorCusteio'];
-            
+            $emissao = new DateTime();
+
             if ($result['fornecedorCusteio'] != 16 && $result['fornecedorCusteio'] != 17) {
-                $grupos = $database->doSelect('os_invoices', 'os_invoices.grupo, os_invoices.evento, os_invoices.identificador', "os_invoices.empresa = '$empresa' GROUP BY grupo ORDER BY grupo DESC");
+                $grupos = $database->doSelect('os_invoices', 'os_invoices.grupo, os_invoices.evento, os_invoices.identificador', "os_invoices.empresa = '$empresa' AND os_invoices.emissao = '". $emissao->format('Y-m-d') ."' GROUP BY grupo ORDER BY grupo DESC");
             } else {
-                $grupos = $database->doSelect('os_invoices', 'os_invoices.grupo, os_invoices.evento, os_invoices.identificador', "os_invoices.empresa IN (16, 17) GROUP BY grupo ORDER BY grupo DESC");
+                $grupos = $database->doSelect('os_invoices', 'os_invoices.grupo, os_invoices.evento, os_invoices.identificador', "os_invoices.empresa IN (16, 17) AND os_invoices.emissao = '" . $emissao->format('Y-m-d') . "' GROUP BY grupo ORDER BY grupo DESC");
             }
             $grupos = $grupos[0]['grupo'];
             $identificador = $grupos[0]['identificador'];
@@ -314,8 +315,6 @@ class Navios
             for ($i = strlen($codigo_invoice); $i < 3;$i++) {
                 $codigo_invoice = "0".$codigo_invoice;
             }
-            
-            $emissao = new DateTime();
             
             $codigo_invoice = $emissao->format('Ymd').$codigo_invoice;
             $result['invoice'] = $codigo_invoice;
