@@ -129,6 +129,14 @@ class EventoEdit extends Component {
                     <div className="col-lg-12">
                         <br />
 
+                        <div className="relatoriosSection">
+                            <div className="relatorioButton">
+                                <button className="btn btn-danger" onClick={() => this.props.openTemplates()}>Carregar template</button>
+                            </div>
+                        </div>
+
+                        <br />
+
                         {this.props.acessosPermissoes.filter((e) => { if (e.acessoAcao == this.props.itemPermissao) { return e } }).map((e) => e.permissaoEdita)[0] == 1 &&
                             <Formik
                                 initialValues={{
@@ -228,12 +236,12 @@ class EventoEdit extends Component {
                                                                         <Field
                                                                             className="form-control textareaFix"
                                                                             as={"textarea"}
-                                                                            rows="3" 
+                                                                            rows="3"
                                                                             type="text"
                                                                             onClick={(e) => e.target.select()}
                                                                             value={valor.valor}
                                                                             disabled={valor.disabled}
-                                                                            onChange={async (e) => { this.changeState(index, e.currentTarget.value) }}/>
+                                                                            onChange={async (e) => { this.changeState(index, e.currentTarget.value) }} />
                                                                     }
                                                                     {valor.tipo != "select" && valor.tipo != "money" && valor.tipo != "check" && valor.tipo != "textarea" &&
                                                                         <Field

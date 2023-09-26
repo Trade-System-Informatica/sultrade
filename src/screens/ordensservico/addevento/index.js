@@ -143,6 +143,9 @@ const estadoInicial = {
 
     alert: { type: "", msg: "" },
 
+    templatesModal: false,
+    templates: [],
+
     anexosForn: [],
 
     anexosValidadosOptions: [
@@ -225,6 +228,7 @@ class AddEvento extends Component {
         await this.getDescricaoPadrao();
         await this.getDocumentos();
         await this.getTiposDocumento();
+        await this.getTemplates();
 
         if (this.state.chave != 0) {
             const anexos = await loader.getBody("getAnexos.php", { evento: this.state.chave });
@@ -303,11 +307,37 @@ class AddEvento extends Component {
         })
 
         await this.setState({ acessosPermissoes: acessosPermissoes });
-
-
-
     }
 
+    getTemplates = async () => {
+        await apiEmployee.post(`getEventosTemplates.php`, {
+            token: true,
+            empresa: this.state.usuarioLogado.empresa,
+        }).then(
+            async res => {
+                await this.setState({ templates: res.data })
+            },
+            async err => { this.erroApi(err) }
+        )
+    }
+
+    setTemplates = async (evento) => {
+        this.setState({
+            data: evento.data,
+            fornecedor: evento.fornecedor,
+            moeda: evento.Moeda,
+            taxa: evento.taxa,
+            descricao: evento.descricao,
+            tipo: evento.tipo_sub,
+            remarks: evento.remarks,
+            valor: evento.valor,
+            valor: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(evento.valor),
+            vlrc: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(evento.valor1),
+            repasse: evento.repasse == 1 ? true : false,
+            fornecedorCusteio: evento.Fornecedor_Custeio,
+        });
+    }
+    
     getOSUma = async () => {
         await apiEmployee.post(`getOSUma.php`, {
             token: true,
@@ -1564,6 +1594,136 @@ class AddEvento extends Component {
                             </div >
                         </Modal >
 
+                    <Modal
+                        aria-labelledby="transition-modal-title"
+                        aria-describedby="transition-modal-description"
+                        style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
+                        open={this.state.templatesModal}
+                        onClose={async () => await this.setState({ templatesModal: false })}
+                    >
+                        <div className='modalContainer'>
+                            <div className='modalCriar'>
+                                <div className='containersairlistprodmodal'>
+                                    <div className='botaoSairModal' onClick={async () => await this.setState({ templatesModal: false })}>
+                                        <span>X</span>
+                                    </div>
+                                </div>
+                                <div className='modalContent'>
+
+                                    <div className='modalForm' style={{ width: "95%" }}>
+                                        <Formik
+                                            initialValues={{
+                                                name: '',
+                                            }}
+                                            onSubmit={async values => {
+                                                await new Promise(r => setTimeout(r, 1000))
+                                                await this.setState({ templatesModal: false })
+                                            }}
+                                        >
+                                            <Form className="contact-form" >
+
+
+                                                <div className="row">
+
+                                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
+
+                                                        <div className="row addservicos">
+                                                            <div className="col-12">
+                                                                <h4 className='text-center white'>Templates:</h4>
+                                                            </div>
+                                                            {this.state.templates[0] &&
+                                                                <div className="agrupador_eventos_selecionados">
+                                                                    <table className='agrupador_lista'>
+                                                                        <tr>
+                                                                            <th className='text-center'>
+                                                                                <span>Chave</span>
+                                                                            </th>
+                                                                            {window.innerWidth >= 500 &&
+                                                                                <th className='text-center'>
+                                                                                    <span>Tipo</span>
+                                                                                </th>
+                                                                            }
+                                                                            {window.innerWidth >= 500 &&
+                                                                                <th className='text-center'>
+                                                                                    <span>Descrição</span>
+                                                                                </th>
+                                                                            }
+                                                                            <th className='text-center'>
+                                                                                <span>Valor (R$)</span>
+                                                                            </th>
+                                                                            <th className='text-center'>
+                                                                                <span>Valor (USD)</span>
+                                                                            </th>
+                                                                        </tr>
+                                                                        {this.state.templates[0] != undefined && this.state.templates.filter((feed) => /*this.filterTemplate*/ { return true }).map((feed, index) => (
+                                                                            <>
+                                                                                {window.innerWidth < 500 &&
+                                                                                    <tr onClick={() => {
+                                                                                        this.setTemplates(feed);
+                                                                                        this.setState({ templatesModal: false });
+                                                                                    }}>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.chave}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                }
+                                                                                {window.innerWidth >= 500 &&
+                                                                                    <tr onClick={() => {
+                                                                                        this.setTemplates(feed);
+                                                                                        this.setState({ templatesModal: false });
+                                                                                    }}>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.chave}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>{this.state.tiposSubOptions.find((e) => e.value == feed.tipo_sub)?.label}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.descricao}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                }
+                                                                            </>
+                                                                        )
+                                                                        )}
+                                                                    </table>
+                                                                </div>
+                                                            }
+                                                            {!this.state.templates[0] &&
+                                                                <h4 className='text-center'>Nenhum</h4>
+                                                            }
+
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                                                </div>
+                                            </Form>
+                                        </Formik>
+
+                                    </div>
+                                </div>
+
+
+
+
+
+                            </div >
+
+                        </div >
+                    </Modal >
+
                         <ModalCopiarCampos
                             modalAberto={this.state.duplicarModal}
                             closeModal={() => { this.setState({ duplicarModal: false }) }}
@@ -1588,6 +1748,12 @@ class AddEvento extends Component {
                         <div className="contact-section">
 
                             <div className="row">
+                            <div className="relatoriosSection">
+                                <div className="relatorioButton">
+                                    <button className="btn btn-danger" onClick={() => this.setState({templatesModal: true})}>Carregar template</button>
+                                </div>
+                            </div>
+                                
                                 <div className="col-lg-12">
                                     <Formik
                                         initialValues={{

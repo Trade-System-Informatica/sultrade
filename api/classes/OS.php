@@ -566,22 +566,28 @@ class OS
         $database = new Database();
 
         if ($empresa == 0) {
+            if ($offset || $offset === "0" || $offset === 0) {
+                $where = "os_servicos_itens.template = 1 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 101 OFFSET " . $offset;
+            } else if ($offset !== "0" && $offset !== 0) {
+                $where = "os_servicos_itens.template = 1 GROUP BY os_servicos_itens.chave ORDER BY chave DESC";
+            }
+            
             $result = $database->doSelect(
-                'os_servicos_itens 
-            LEFT JOIN templates_relacoes ON os_servicos_itens.chave = templates_relacoes.evento 
-            LEFT JOIN templates_grupos ON templates_relacoes.grupo = templates_grupos.chave',
-                'os_servicos_itens.*, 
-                    GROUP_CONCAT(templates_grupos.nome SEPARATOR) AS grupoNome',
-                "template = 1 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 101 OFFSET " . $offset
+                'os_servicos_itens LEFT JOIN os ON os_servicos_itens.chave_os = os.chave',
+                'os_servicos_itens.*',
+                $where
             );
         } else {
+            if ($offset || $offset ==="0" || $offset === 0) {
+                $where = "  os_servicos_itens.template = 1 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 101 OFFSET " . $offset;
+            } else if ($offset !== "0" && $offset !== 0) {
+                $where = "os_servicos_itens.template = 1 GROUP BY os_servicos_itens.chave ORDER BY chave DESC";
+            }
+            
             $result = $database->doSelect(
-                'os_servicos_itens 
-                    LEFT JOIN templates_relacoes ON os_servicos_itens.chave = templates_relacoes.evento 
-                    LEFT JOIN templates_grupos ON templates_relacoes.grupo = templates_grupos.chave',
-                'os_servicos_itens.*, 
-                    GROUP_CONCAT(templates_grupos.nome SEPARATOR) AS grupoNome',
-                "empresa = $empresa AND template = 1 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 101 OFFSET " . $offset
+                'os_servicos_itens LEFT JOIN os ON os_servicos_itens.chave_os = os.chave',
+                'os_servicos_itens.*',
+                $where
             );
         }
 

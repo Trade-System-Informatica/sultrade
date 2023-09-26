@@ -110,7 +110,7 @@ class EventosTemplates extends Component {
             empresa: this.state.usuarioLogado.empresa
         }).then(
             async response => {
-                const eventos = [...this.state.eventos]
+                const eventos = [...response.data]
                 await this.setState({ eventos })
             },
             response => { this.erroApi(response) }
@@ -177,7 +177,10 @@ class EventosTemplates extends Component {
 
     filtrarPesquisa = (eventos) => {
         let eventosfiltrados = eventos
-
+        if (!this.state.pesquisa) {
+            return true;
+        }
+        
         if (eventosfiltrados.descricao && this.state.tipoPesquisa == 1) {
             return eventosfiltrados.descricao.toLowerCase().includes(this.state.pesquisa.toLowerCase())
         }

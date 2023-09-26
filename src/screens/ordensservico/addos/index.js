@@ -238,6 +238,9 @@ const estadoInicial = {
     dadosIniciaisSol: [],
     dadosFinaisSol: [],
 
+    templatesModal: false,
+    templates: [],
+
     modalCamposOS: false,
     camposOS: [],
 }
@@ -481,6 +484,8 @@ class AddOS extends Component {
             await this.getServicosItens();
             await this.getDocumentos();
         }
+
+        await this.getTemplates();
 
         await this.setState({
             planosContasOptions,
@@ -765,7 +770,11 @@ class AddOS extends Component {
         )
     }
 
-    setItemEdit = async (evento = null) => {
+    setItemEdit = async (evento = null, template = false) => {
+        await this.setState({
+            modalItemAberto: false,
+        })
+
         await this.getTaxasOptions();
         if (!this.state.fornecedoresOptions[0]) {
             await this.getFornecedores();
@@ -782,13 +791,13 @@ class AddOS extends Component {
                 eventoTaxa: evento.taxa,
                 eventoDescricao: evento.descricao,
                 eventoTipo: evento.tipo_sub,
-                eventoOrdem: evento.ordem,
+                eventoOrdem: !template ? evento.ordem : this.state.eventoOrdem,
                 eventoRemarks: evento.remarks,
                 eventoValor: Number(evento.valor) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(evento.valor) : '0,00',
                 eventoVlrc: Number(evento.valor1) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(evento.valor1) : '0,00',
                 eventoRepasse: evento.repasse,
                 eventoFornecedorCusteio: evento.Fornecedor_Custeio,
-                eventoChave: evento.chave,
+                eventoChave: !template ? evento.chave : this.state.eventoChave,
 
                 modalItemAberto: true,
                 itemNome: evento.descricao,
@@ -821,7 +830,7 @@ class AddOS extends Component {
                         },
                         {
                             titulo: 'Ordem',
-                            valor: evento.ordem,
+                            valor: !template ? evento.ordem : this.state.itemEdit.find((e) => e.titulo === "Ordem")?.valor,
                             obrigatorio: true,
                             tipo: 'text',
                             onChange: async (valor) => { await this.setState({ eventoOrdem: valor }); },
@@ -1291,6 +1300,18 @@ class AddOS extends Component {
         })
     }
 
+    getTemplates = async () => {
+        await apiEmployee.post(`getEventosTemplates.php`, {
+            token: true,
+            empresa: this.state.usuarioLogado.empresa,
+        }).then(
+            async res => {
+                await this.setState({ templates: res.data })
+            },
+            async err => { this.erroApi(err) }
+        )
+    }
+        
     salvarOS = async (validForm, reload = true) => {
         this.setState({ ...util.cleanStates(this.state) });
 
@@ -4505,6 +4526,140 @@ class AddOS extends Component {
                             </div >
                         </Modal >
 
+                    <Modal
+                        aria-labelledby="transition-modal-title"
+                        aria-describedby="transition-modal-description"
+                        style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
+                        open={this.state.templatesModal}
+                        onClose={async () => await this.setState({ templatesModal: false })}
+                    >
+                        <div className='modalContainer'>
+                            <div className='modalCriar'>
+                                <div className='containersairlistprodmodal'>
+                                    <div className='botaoSairModal' onClick={async () => await this.setState({ templatesModal: false })}>
+                                        <span>X</span>
+                                    </div>
+                                </div>
+                                <div className='modalContent'>
+
+                                    <div className='modalForm' style={{ width: "95%" }}>
+                                        <Formik
+                                            initialValues={{
+                                                name: '',
+                                            }}
+                                            onSubmit={async values => {
+                                                await new Promise(r => setTimeout(r, 1000))
+                                                await this.setState({ templatesModal: false })
+                                            }}
+                                        >
+                                            <Form className="contact-form" >
+
+
+                                                <div className="row">
+
+                                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
+
+                                                        <div className="row addservicos">
+                                                            <div className="col-12">
+                                                                <h4 className='text-center white'>Templates:</h4>
+                                                            </div>
+                                                            {this.state.templates[0] &&
+                                                                <div className="agrupador_eventos_selecionados">
+                                                                    <table className='agrupador_lista'>
+                                                                        <tr>
+                                                                            <th className='text-center'>
+                                                                                <span>Chave</span>
+                                                                            </th>
+                                                                            {window.innerWidth >= 500 &&
+                                                                                <th className='text-center'>
+                                                                                    <span>Tipo</span>
+                                                                                </th>
+                                                                            }
+                                                                            <th className='text-center'>
+                                                                                <span>Ordem</span>
+                                                                            </th>
+                                                                            {window.innerWidth >= 500 &&
+                                                                                <th className='text-center'>
+                                                                                    <span>Descrição</span>
+                                                                                </th>
+                                                                            }
+                                                                            <th className='text-center'>
+                                                                                <span>Valor (R$)</span>
+                                                                            </th>
+                                                                            <th className='text-center'>
+                                                                                <span>Valor (USD)</span>
+                                                                            </th>
+                                                                        </tr>
+                                                                        {this.state.templates[0] != undefined && this.state.templates.filter((feed) => /*this.filterTemplate*/{return true}).map((feed, index) => (
+                                                                            <>
+                                                                                {window.innerWidth < 500 &&
+                                                                                    <tr onClick={() => {
+                                                                                       this.setItemEdit(feed, true);
+                                                                                       this.setState({templatesModal: false});
+                                                                                    }}>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.chave}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.ordem.replaceAll(',', '.')}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                }
+                                                                                {window.innerWidth >= 500 &&
+                                                                                    <tr onClick={() => {
+                                                                                        this.setItemEdit(feed, true);
+                                                                                        this.setState({ templatesModal: false });
+                                                                                    }}>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.chave}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>{this.state.tiposServicosItens[feed.tipo_sub]}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.ordem.replaceAll(',', '.')}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.descricao}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>USD {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 6 ? feed.valor : feed.valor / (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                }
+                                                                            </>
+                                                                        )
+                                                                        )}
+                                                                    </table>
+                                                                </div>
+                                                            }
+                                                            {!this.state.templates[0] &&
+                                                                <h4 className='text-center'>Nenhum</h4>
+                                                            }
+                                                            
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                                                </div>
+                                            </Form>
+                                        </Formik>
+
+                                    </div>
+                                </div>
+                            </div >
+
+                        </div >
+                    </Modal >
+
                         <Modal
                             aria-labelledby="transition-modal-title"
                             aria-describedby="transition-modal-description"
@@ -5773,6 +5928,8 @@ class AddOS extends Component {
                                         onSubmit={this.salvarEvento}
                                         valid={validFormEvento}
                                         aberto={this.state.modalItemAberto}
+
+                                        openTemplates={() => this.setState({templatesModal: true})}
                                     />
                                 </div>
 

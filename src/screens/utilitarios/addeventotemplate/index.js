@@ -469,11 +469,9 @@ class AddEventoTemplate extends Component {
                 async res => {
                     await this.setState({
                         evento: res.data[0],
-
-                    });
-                    await this.setState({
                         chave: this.state.evento.chave,
-                    })
+                        loading: false,
+                    });
                     await loader.salvaLogs('os_servicos_itens', this.state.usuarioLogado.codigo, null, "Inclusão (template)", res.data[0].chave);
                 },
                 async res => await console.log(`Erro: ${res.data}`)
@@ -498,6 +496,9 @@ class AddEventoTemplate extends Component {
                 async res => {
                     if (res.data[0]) {
                         await loader.salvaLogs('os_servicos_itens', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `TEMPLATE DE EVENTO: ${this.state.descricao}`);
+                        this.setState({
+                            loading: false,
+                        })
                     } else {
                         await alert(`Erro ${JSON.stringify(res)}`)
                     }
