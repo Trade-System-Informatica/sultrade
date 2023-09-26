@@ -323,18 +323,18 @@ class AddEvento extends Component {
 
     setTemplates = async (evento) => {
         this.setState({
-            data: evento.data,
-            fornecedor: evento.fornecedor,
-            moeda: evento.Moeda,
-            taxa: evento.taxa,
-            descricao: evento.descricao,
-            tipo: evento.tipo_sub,
-            remarks: evento.remarks,
-            valor: evento.valor,
-            valor: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(evento.valor),
-            vlrc: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(evento.valor1),
+            data: evento.data || this.state.data,
+            fornecedor: evento.fornecedor || this.state.fornecedor,
+            moeda: evento.Moeda || this.state.moeda,
+            taxa: evento.taxa || this.state.taxa,
+            descricao: evento.descricao || this.state.descricao,
+            tipo: evento.tipo_sub || this.state.tipo,
+            remarks: evento.remarks || this.state.remarks,
+            valor: evento.valor || this.state.valor,
+            valor: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(evento.valor || this.state.valor),
+            vlrc: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(evento.valor1 || this.state.vlrc),
             repasse: evento.repasse == 1 ? true : false,
-            fornecedorCusteio: evento.Fornecedor_Custeio,
+            fornecedorCusteio: evento.Fornecedor_Custeio || this.state.fornecedorCusteio,
         });
     }
     
