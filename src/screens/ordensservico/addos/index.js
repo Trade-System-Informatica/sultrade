@@ -1400,7 +1400,7 @@ class AddOS extends Component {
         }).then(
             async res => {
                 await this.setState({ operadores: res.data })
-                const options = this.state.operadores.map((e) => {
+                const options = this.state.operadores.filter((e) => e.ativo == 1).map((e) => {
                     return { label: e.Nome, value: e.Codigo }
                 })
                 options.unshift({ label: 'NENHUM', value: '' })

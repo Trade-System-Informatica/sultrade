@@ -64,7 +64,7 @@ class Login extends Component {
             token: true
         }).then(
             async res => {
-                await this.setState({ operadores: res.data })
+                await this.setState({ operadores: res.data?.filter((e) => e.ativo == 1) })
             }
         )
 
