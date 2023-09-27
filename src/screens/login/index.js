@@ -64,11 +64,11 @@ class Login extends Component {
             token: true
         }).then(
             async res => {
-                await this.setState({ operadores: res.data?.filter((e) => e.ativo == 1) })
+                await this.setState({ operadores: res.data })
             }
         )
 
-        const options = this.state.operadores.filter((e) => (e.empresa == this.state.empresa || e.empresa == 0)).map((e) => {
+        const options = this.state.operadores.filter((e) => (e.empresa == this.state.empresa || e.empresa == 0) && e.ativo == 1).map((e) => {
             return { label: e.Nome, value: e.Codigo }
         })
 
