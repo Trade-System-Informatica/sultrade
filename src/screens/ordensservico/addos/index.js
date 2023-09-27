@@ -915,14 +915,14 @@ class AddOS extends Component {
                             valor2: Number(template.valor) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(template.valor) : '0,00',
                             tipo2: "text",
                             onChange2: async (valor) => { await this.setState({ eventoValor: valor }); },
-                            onBlur2: async (valor) => { await this.setState({ eventoValor: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(template.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }); },
+                            onBlur2: async (valor) => { await this.setState({ eventoValor: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }); },
                         },
                         {
                             titulo: "VCP",
                             valor: Number(template.valor1) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(template.valor1) : '0,00',
                             tipo: "money",
                             onChange: async (valor) => { await this.setState({ eventoVlrc: valor }); },
-                            onBlur: async (valor) => { await this.setState({ eventoVlrc: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(template.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }); },
+                            onBlur: async (valor) => { await this.setState({ eventoVlrc: Number(valor.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }); },
                         },
                         {
                             titulo: "Remarks",
