@@ -3,6 +3,7 @@ header("Access-Control-Allow-Origin:*");
 header("Content-Type: application/x-www-form-urlencoded");
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
+//application/x-httpd-php updateSeaport.php ( PHP script, ASCII text, with CRLF line terminators )
 include_once '../classes/OS.php';
 include_once '../libraries/utils.php';
 
@@ -11,15 +12,17 @@ $objData = json_decode($data);
 
 if($objData != NULL){
     $token = prepareInput($objData->token);
-    $values = prepareInput($objData->values);
-    $grupos = $objData->grupos;
-
-    //$employees = new Employees();
+    $chave = prepareInput($objData->chave);
+    $nome = prepareInput($objData->nome);
+    $templatesNovas = $objData->templatesNovas;
+    $templatesDeletadas = $objData->templatesDeletadas;
+    
     $os = new OS();
 
     //$result = $employees->checkToken($token);
     //if($result == 'true'){
-    $result = $os->insertEventoTemplate($values, $grupos);
+        //$result = "'" . $id_seaport . "'";
+        $result = $os->updateGrupoTemplate($chave, $nome, $templatesNovas, $templatesDeletadas);
     //}
 } else {
     $result = "false";
@@ -27,4 +30,5 @@ if($objData != NULL){
 
 echo(json_encode($result));
 exit;
+
 ?>

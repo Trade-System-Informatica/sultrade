@@ -164,6 +164,15 @@ class Utilitarios extends Component {
                                             </li>
                                         }
 
+                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'GRUPOS_TEMPLATES') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                            <li className=" text-left itemMenu list-group-item ">
+                                                <Link className="semTextDecoration" to={{ pathname: `/utilitarios/grupostemplates` }}>
+                                                    <FontAwesomeIcon icon={faFileContract} size="2x" color="tomato" />
+                                                    <h4 className="textoMenu">Grupos de Templates</h4>
+                                                </Link>
+                                            </li>
+                                        }
+
                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PARAMETROS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                             <li className=" text-left itemMenu list-group-item ">
                                                 <Link className="semTextDecoration" to={{ pathname: `/utilitarios/parametros` }}>

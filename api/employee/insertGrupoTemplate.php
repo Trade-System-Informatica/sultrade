@@ -12,14 +12,14 @@ $objData = json_decode($data);
 if($objData != NULL){
     $token = prepareInput($objData->token);
     $values = prepareInput($objData->values);
-    $grupos = $objData->grupos;
+    $templates = $objData->templates;
 
     //$employees = new Employees();
     $os = new OS();
 
     //$result = $employees->checkToken($token);
     //if($result == 'true'){
-    $result = $os->insertEventoTemplate($values, $grupos);
+    $result = $os->insertGrupoTemplate($values, $templates);
     //}
 } else {
     $result = "false";

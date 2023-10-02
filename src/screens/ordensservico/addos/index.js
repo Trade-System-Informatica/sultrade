@@ -241,6 +241,11 @@ const estadoInicial = {
     templatesModal: false,
     templates: [],
 
+    grupoTemplate: {},
+
+    gruposTemplates: [],
+    gruposTemplatesModal: false,
+
     modalCamposOS: false,
     camposOS: [],
 }
@@ -799,7 +804,7 @@ class AddOS extends Component {
                 Fornecedor_Custeio: evento.Fornecedor_Custeio || this.state.eventoFornecedorCusteio,
                 chave: this.state.eventoChave
             }
-            
+
             await this.setState({
                 eventoData: template.data,
                 eventoFornecedor: template.fornecedor,
@@ -1462,6 +1467,43 @@ class AddOS extends Component {
             },
             async err => { this.erroApi(err) }
         )
+    }
+
+    getGruposTemplates = async () => {
+        if (!this.state.gruposTemplates[0]) {
+            await apiEmployee.post(`getGruposTemplates.php`, {
+                token: true,
+            }).then(
+                async res => {
+                    await this.setState({ gruposTemplates: res.data })
+                },
+                async err => { this.erroApi(err) }
+            )
+        }
+        this.setState({
+            gruposTemplatesModal: true
+        })
+    }
+
+    criarGrupoTemplates = async () => {
+        const { grupoTemplate } = this.state;
+        const templates = grupoTemplate.templatesChaves?.split('@.@')?.map((e) => (
+            this.state.templates.find((t) => t.chave == e)
+        ));
+
+        templates.forEach(async (template, index) => {
+            await apiEmployee.post(`insertServicoItemBasico.php`, {
+                token: true,
+                values: `'${this.state.chave}', '', '${template.fornecedor}', '${template.taxa}', '${template.descricao}', '${template.tipo_sub}', '${template.Fornecedor_Custeio}', '${template.remarks}', '${template.Moeda}', '${template.valor}', '${template.valor1}', '${template.repasse}'`,
+                chave_os: this.state.chave,
+                ordem: parseFloat(this.state.eventos[this.state.eventos.length-1]?.ordem.replaceAll(',', '.')) + (index + 1)
+            }).then(
+                async res => {
+                    await loader.salvaLogs('os_servicos_itens', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
+                },
+                async res => await console.log(`Erro: ${res.data}`)
+            )
+        })
     }
 
     salvarOS = async (validForm, reload = true) => {
@@ -4816,6 +4858,94 @@ class AddOS extends Component {
                             aria-labelledby="transition-modal-title"
                             aria-describedby="transition-modal-description"
                             style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
+                        open={this.state.gruposTemplatesModal}
+                            onClose={async () => await this.setState({ gruposTemplatesModal: false })}
+                        >
+                            <div className='modalContainer'>
+                                <div className='modalCriar'>
+                                    <div className='containersairlistprodmodal'>
+                                    <div className='botaoSairModal' onClick={async () => await this.setState({ gruposTemplatesModal: false })}>
+                                            <span>X</span>
+                                        </div>
+                                    </div>
+                                    <div className='modalContent'>
+
+                                        <div className='modalForm' style={{ width: "95%" }}>
+                                            <Formik
+                                                initialValues={{
+                                                    name: '',
+                                                }}
+                                                onSubmit={async values => {
+                                                    await new Promise(r => setTimeout(r, 1000))
+                                                    await this.criarGrupoTemplates();
+                                                    await this.setState({ gruposTemplatesModal: false })
+                                                }}
+                                            >
+                                                <Form className="contact-form" >
+
+
+                                                    <div className="row">
+
+                                                        <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
+
+                                                            <div className="row addservicos">
+                                                                <div className="col-12">
+                                                                    <h4 className='text-center white'>Grupos de Templates:</h4>
+                                                                </div>
+                                                                {this.state.gruposTemplates[0] &&
+                                                                    <div className="agrupador_eventos_selecionados">
+                                                                        <table className='agrupador_lista'>
+                                                                            <tr>
+                                                                                <th className='text-center'>
+                                                                                    <span>Chave</span>
+                                                                                </th>
+                                                                                <th className='text-center'>
+                                                                                    <span>Nome</span>
+                                                                                </th>
+                                                                            </tr>
+                                                                            {this.state.gruposTemplates[0] != undefined && this.state.gruposTemplates.filter((feed) => /*this.filterTemplate*/ { return true }).map((feed, index) => (
+                                                                                <tr onClick={() => { if (this.state.grupoTemplate && this.state.grupoTemplate.chave != feed.chave) { this.setState({ grupoTemplate: feed }) } else { this.setState({ grupoTemplate: {} }) } }} style={{ filter: feed.chave == this.state.grupoTemplate.chave ? 'brightness(0.5)' : undefined }}>
+                                                                                    <td className="text-center">
+                                                                                        <p>{feed.chave}</p>
+                                                                                    </td>
+                                                                                    <td className="text-center">
+                                                                                        <p>{feed.nome}</p>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            ))}
+                                                                        </table>
+                                                                    </div>
+                                                                }
+                                                                {!this.state.gruposTemplates[0] &&
+                                                                    <h4 className='text-center'>Nenhum</h4>
+                                                                }
+
+                                                            </div>
+                                                        </div>
+                                                        {this.state.grupoTemplate &&
+                                                            <div className="row">
+                                                                <div className="col-2"></div>
+                                                                <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                                    <button type="submit" disabled={!this.state.grupoTemplate?.chave} style={{ width: 300 }} >Salvar</button>
+                                                                </div>
+                                                                <div className="col-2"></div>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </Form>
+                                            </Formik>
+
+                                        </div>
+                                    </div>
+                                </div >
+
+                            </div >
+                        </Modal >
+
+                        <Modal
+                            aria-labelledby="transition-modal-title"
+                            aria-describedby="transition-modal-description"
+                            style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
                             open={this.state.cabecalhoModal}
                             onClose={async () => { await this.setState({ cabecalhoModal: false }); await this.salvarCabecalho() }}
                         >
@@ -5764,14 +5894,17 @@ class AddOS extends Component {
                                                     <div className="relatorioButton">
                                                         <button className="btn btn-danger" onClick={() => this.setState({ agrupadorModal: true, grupoSelecionado: 0, agrupadorEventos: [], agrupadorTipo: 'CUSTEIO' })}>Custeio Subagente</button>
                                                     </div>
-                                                    <div className="relatorioButton">
-                                                        <button className="btn btn-danger"><Link style={{ color: "inherit", textDecoration: "none" }} to={{ pathname: "/financeiro/addFatura/0", state: { backTo: `/ordensservicos/os/${this.state.chave}`, os: this.state.os } }}>Emitir NF</Link></button>
-                                                    </div>
-                                                    <div className="relatorioButton">
-                                                        <button className="btn btn-danger" onClick={() => this.getCamposVoucher()}>Campos de Voucher</button>
-                                                    </div>
                                                 </>
                                             }
+                                            <div className="relatorioButton">
+                                                <button className="btn btn-danger"><Link style={{ color: "inherit", textDecoration: "none" }} to={{ pathname: "/financeiro/addFatura/0", state: { backTo: `/ordensservicos/os/${this.state.chave}`, os: this.state.os } }}>Emitir NF</Link></button>
+                                            </div>
+                                            <div className="relatorioButton">
+                                                <button className="btn btn-danger" onClick={() => this.getCamposVoucher()}>Campos de Voucher</button>
+                                            </div>
+                                            <div className="relatorioButton">
+                                                <button className="btn btn-danger" onClick={() => this.getGruposTemplates()}>Gerar templates</button>
+                                            </div>
                                         </div>
 
                                     </>

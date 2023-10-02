@@ -20,7 +20,6 @@ import Select from 'react-select';
 import Modal from '@material-ui/core/Modal';
 import ModalLogs from '../../../components/modalLogs'
 import Alert from '../../../components/alert'
-import ModalCopiarCampos from '../../../components/modalCopiarCampos'
 
 const estadoInicial = {
     evento: '',
@@ -145,6 +144,11 @@ const estadoInicial = {
 
     anexosForn: [],
 
+    optionsTexto: '',
+    gruposOptions: [],
+    gruposIniciais: [],
+    gruposEscolhidos: [],
+
     anexosValidadosOptions: [
         { label: "Aguardando...", value: 0 },
         { label: "Invalidado", value: 1 },
@@ -168,12 +172,8 @@ class AddEventoTemplate extends Component {
 
 
         if (parseInt(id) != 0) {
-            if (!this.props.location || !this.props.location.state || !this.props.location.state.evento) {
-                const evento = await loader.getBody(`getEventoTemplate.php`, { chave: this.state.chave });
-                await this.setState({ evento: evento[0] });
-            } else {
-                await this.setState({ evento: this.props.location.state.evento });
-            }
+            const evento = await loader.getBody(`getEventoTemplate.php`, { chave: this.state.chave });
+            await this.setState({ evento: evento[0] });
 
             await this.setState({
                 data: this.state.evento.data,
@@ -183,12 +183,13 @@ class AddEventoTemplate extends Component {
                 taxa: this.state.evento.taxa,
                 descricao: this.state.evento.descricao,
                 tipo: this.state.evento.tipo_sub,
-                ordem: this.state.evento.ordem,
                 remarks: this.state.evento.remarks,
                 valor: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.evento.valor),
                 vlrc: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.evento.valor1),
                 repasse: this.state.evento.repasse == 1 ? true : false,
                 fornecedorCusteio: this.state.evento.Fornecedor_Custeio,
+                gruposIniciais: this.state.evento.gruposChaves?.split('@.@'),
+                gruposEscolhidos: this.state.evento.gruposChaves?.split('@.@')
             })
 
             if (this.state.repasse) {
@@ -204,6 +205,7 @@ class AddEventoTemplate extends Component {
         await this.getMoedas();
         await this.getPessoas();
         await this.getDescricaoPadrao();
+        await this.getGruposTemplates();
 
         if (this.state.chave != 0) {
             await this.setState({
@@ -349,6 +351,12 @@ class AddEventoTemplate extends Component {
         )
     }
 
+    getGruposTemplates = async () => {
+        this.setState({
+            gruposOptions: await loader.getBaseOptions(`getGruposTemplates.php`, 'nome', 'chave')
+        });
+    }
+
     getDescricaoPadrao = async () => {
         await apiEmployee.post(`getDescricaoPadrao.php`, {
             token: true,
@@ -461,10 +469,13 @@ class AddEventoTemplate extends Component {
             loading: true
         })
 
+
+
         if (parseInt(this.state.chave) === 0 && validForm) {
             await apiEmployee.post(`insertEventoTemplate.php`, {
                 token: true,
                 values: `'${this.state.data}', '${this.state.fornecedor}', '${this.state.taxa}', '${this.state.descricao}', '${this.state.tipo}', '${this.state.fornecedorCusteio}', '${this.state.remarks}', '${this.state.moeda}', '${parseFloat(this.state.valor == "" ? 0 : this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.vlrc == "" ? 0 : this.state.vlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.repasse ? 1 : 0}', 1`,
+                grupos: this.state.gruposEscolhidos
             }).then(
                 async res => {
                     await this.setState({
@@ -473,10 +484,17 @@ class AddEventoTemplate extends Component {
                         loading: false,
                     });
                     await loader.salvaLogs('os_servicos_itens', this.state.usuarioLogado.codigo, null, "Inclusão (template)", res.data[0].chave);
+
+                    await this.setState({
+                        redirectVoltar: true,
+                    })
                 },
                 async res => await console.log(`Erro: ${res.data}`)
             )
         } else if (validForm) {
+            const gruposNovos = this.state.gruposEscolhidos.filter((e) => !this.state.gruposIniciais.find((g) => g == e));
+            const gruposDeletados = this.state.gruposIniciais.filter((e) => !this.state.gruposEscolhidos.find((g) => g == e));
+            
             await apiEmployee.post(`updateEventoTemplate.php`, {
                 token: true,
                 chave: this.state.chave,
@@ -490,14 +508,16 @@ class AddEventoTemplate extends Component {
                 descricao: this.state.descricao,
                 ordem: this.state.ordem.replaceAll(',', '.'),
                 tipo_sub: this.state.tipo,
-                Fornecedor_Custeio: this.state.fornecedorCusteio
-
+                Fornecedor_Custeio: this.state.fornecedorCusteio,
+                gruposNovos,
+                gruposDeletados
             }).then(
                 async res => {
                     if (res.data[0]) {
                         await loader.salvaLogs('os_servicos_itens', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `TEMPLATE DE EVENTO: ${this.state.descricao}`);
                         this.setState({
                             loading: false,
+                            redirectVoltar: true,
                         })
                     } else {
                         await alert(`Erro ${JSON.stringify(res)}`)
@@ -691,7 +711,7 @@ class AddEventoTemplate extends Component {
                                                             <Field className='form-control' type='date' value={this.state.data} onChange={(e) => { this.setState({ data: e.currentTarget.value }) }} />
                                                         </div>
 
-                                                       <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Tipo</label>
                                                         </div>
                                                         <div className='col-1'></div>
@@ -835,6 +855,26 @@ class AddEventoTemplate extends Component {
                                                             <Field className="form-control textareaFix" as={"textarea"} value={this.state.remarks} onChange={async e => { this.setState({ remarks: e.currentTarget.value }) }} />
                                                         </div>
                                                         <div className='col-1'></div>
+
+                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'GRUPOS_TEMPLATES') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                                            <>
+                                                                <div><hr /></div>
+
+                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Grupos de Templates</label>
+                                                                </div>
+                                                                <div className='col-1 errorMessage'>
+                                                                </div>
+                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Select className='SearchSelect' options={this.state.gruposOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ optionsTexto: e }) }} search={true} onChange={(e) => { if (!this.state.gruposEscolhidos.find((g) => g == e.value)) this.setState({ gruposEscolhidos: [...this.state.gruposEscolhidos, e.value] }) }} />
+                                                                    <div style={{ marginBottom: 20, color: 'white', fontSize: 13 }}>
+                                                                        {this.state.gruposEscolhidos.map((e, i) => (
+                                                                            <span class="click_to_erase" onClick={() => this.setState({ gruposEscolhidos: this.state.gruposEscolhidos.filter((c) => c != e) })}>{`${this.state.gruposOptions.find((g) => g.value == e)?.label}${i != this.state.gruposEscolhidos.length - 1 ? ', ' : ' '}`}</span>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            </>
+                                                        }
                                                     </div>
 
 
@@ -853,11 +893,11 @@ class AddEventoTemplate extends Component {
                                                 <div className="col-2"></div>
 
                                                 <div className="col-8" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                                    {validForm && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'EVENTOS_FINANCEIRO') { return e } }).map((e) => e.permissaoInsere)[0] == 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'EVENTOS_FINANCEIRO') { return e } }).map((e) => e.permissaoEdita)[0] == 1 &&
+                                                    {/* {validForm && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'EVENTOS_FINANCEIRO') { return e } }).map((e) => e.permissaoInsere)[0] == 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'EVENTOS_FINANCEIRO') { return e } }).map((e) => e.permissaoEdita)[0] == 1 &&
                                                         <button title="Financeiro" style={{ borderRadius: 15, margin: 3 }} onClick={async () => { await this.setState({ financeiro: true }); await this.salvarEventoTemplate(validForm) }}>
                                                             <FontAwesomeIcon icon={faDollarSign} />
                                                         </button>
-                                                    }
+                                                    } */}
 
                                                 </div>
                                                 <div className="col-2"></div>

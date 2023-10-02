@@ -395,6 +395,11 @@ class Header extends Component {
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
+                            {this.props.voltarGruposTemplates &&
+                                <Link to={{ pathname: `/utilitarios/grupostemplates`, state: { chave: this.props.chave } }}>
+                                    <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
+                                </Link>
+                            }
                             {this.props.voltarPermissoes &&
                                 <Link to={{ pathname: `/utilitarios/permissoes` }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
@@ -748,6 +753,11 @@ class Header extends Component {
                                                 {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                                     <Link className="dropdown-item" to={{ pathname: `/utilitarios/eventostemplates` }}>
                                                         Templates de Eventos
+                                                    </Link>
+                                                }
+                                                {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'GRUPOS_TEMPLATES') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                    <Link className="dropdown-item" to={{ pathname: `/utilitarios/grupostemplates` }}>
+                                                        Grupos de Templates
                                                     </Link>
                                                 }
                                                     {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PARAMETROS') { return e } }).map((e) => e.permissoes)[0] == 1 &&

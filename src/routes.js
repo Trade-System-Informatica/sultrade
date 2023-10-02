@@ -52,9 +52,11 @@ import Permissoes from './screens/utilitarios/permissoes'
 import Logs from './screens/utilitarios/logs'
 import Parametros from './screens/utilitarios/parametros'
 import EventosTemplates from './screens/utilitarios/eventostemplates'
+import GruposTemplates from './screens/utilitarios/grupostemplates'
 
 import AddOperador from './screens/utilitarios/addoperador'
 import AddEventoTemplate from './screens/utilitarios/addeventotemplate'
+import AddGrupoTemplate from './screens/utilitarios/addgrupotemplate'
 
 
 import OS from './screens/ordensservico/os'
@@ -143,9 +145,11 @@ export default function Routes(){
                 <Route path="/utilitarios/logs" component={Logs} />
                 <Route path="/utilitarios/parametros" component={Parametros} />
                 <Route path="/utilitarios/eventostemplates" component={EventosTemplates} />
+                <Route path="/utilitarios/grupostemplates" component={GruposTemplates} />
 
                 <Route path="/utilitarios/addoperador/:id" component={AddOperador} />
                 <Route path="/utilitarios/addeventotemplate/:id" component={AddEventoTemplate} />
+                <Route path="/utilitarios/addgrupotemplate/:id" component={AddGrupoTemplate} />
 
 
                 <Route path="/ordensservico/os" component={OS} />

@@ -567,26 +567,32 @@ class OS
 
         if ($empresa == 0) {
             if ($offset || $offset === "0" || $offset === 0) {
-                $where = "os_servicos_itens.template = 1 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 101 OFFSET " . $offset;
+                $where = "os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 101 OFFSET " . $offset;
             } else if ($offset !== "0" && $offset !== 0) {
-                $where = "os_servicos_itens.template = 1 GROUP BY os_servicos_itens.chave ORDER BY chave DESC";
+                $where = "os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY chave DESC";
             }
-            
+
             $result = $database->doSelect(
-                'os_servicos_itens LEFT JOIN os ON os_servicos_itens.chave_os = os.chave',
-                'os_servicos_itens.*',
+                'os_servicos_itens 
+                    LEFT JOIN templates_relacoes ON templates_relacoes.template = os_servicos_itens.chave
+                    LEFT JOIN templates_grupos ON templates_grupos.chave = templates_relacoes.grupo',
+                "os_servicos_itens.*,
+                GROUP_CONCAT(templates_grupos.chave SEPARATOR '@.@') as gruposChaves",
                 $where
             );
         } else {
-            if ($offset || $offset ==="0" || $offset === 0) {
-                $where = "  os_servicos_itens.template = 1 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 101 OFFSET " . $offset;
+            if ($offset || $offset === "0" || $offset === 0) {
+                $where = "  os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 101 OFFSET " . $offset;
             } else if ($offset !== "0" && $offset !== 0) {
-                $where = "os_servicos_itens.template = 1 GROUP BY os_servicos_itens.chave ORDER BY chave DESC";
+                $where = "os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY chave DESC";
             }
-            
+
             $result = $database->doSelect(
-                'os_servicos_itens LEFT JOIN os ON os_servicos_itens.chave_os = os.chave',
-                'os_servicos_itens.*',
+                'os_servicos_itens 
+                    LEFT JOIN templates_relacoes ON templates_relacoes.template = os_servicos_itens.chave
+                    LEFT JOIN templates_grupos ON templates_grupos.chave = templates_relacoes.grupo',
+                "os_servicos_itens.*,
+                GROUP_CONCAT(templates_grupos.chave SEPARATOR '@.@') as gruposChaves",
                 $where
             );
         }
@@ -595,6 +601,63 @@ class OS
         return $result;
     }
 
+    public static function getGruposTemplates($offset)
+    {
+        $database = new Database();
+
+        if ($offset || $offset === "0" || $offset === 0) {
+            $where = "1=1 GROUP BY templates_grupos.chave ORDER BY templates_grupos.chave DESC LIMIT 101 OFFSET " . $offset;
+        } else if ($offset !== "0" && $offset !== 0) {
+            $where = "1=1 GROUP BY templates_grupos.chave ORDER BY templates_grupos.chave DESC";
+        }
+
+        $result = $database->doSelect(
+            'templates_grupos 
+                    LEFT JOIN templates_relacoes ON templates_relacoes.grupo = templates_grupos.chave
+                    LEFT JOIN os_servicos_itens ON os_servicos_itens.chave = templates_relacoes.template',
+            "templates_grupos.*,
+                GROUP_CONCAT(os_servicos_itens.chave SEPARATOR '@.@') as templatesChaves",
+            $where
+        );
+
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function getEventoTemplate($chave)
+    {
+        $database = new Database();
+
+        $result = $database->doSelect(
+            'os_servicos_itens 
+                    LEFT JOIN templates_relacoes ON templates_relacoes.template = os_servicos_itens.chave
+                    LEFT JOIN templates_grupos ON templates_grupos.chave = templates_relacoes.grupo',
+            "os_servicos_itens.*,
+                GROUP_CONCAT(templates_grupos.chave SEPARATOR '@.@') as gruposChaves",
+            "os_servicos_itens.chave = '$chave'"
+        );
+
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function getGrupoTemplate($chave)
+    {
+        $database = new Database();
+
+        $result = $database->doSelect(
+            'templates_grupos 
+                    LEFT JOIN templates_relacoes ON templates_relacoes.grupo = templates_grupos.chave
+                    LEFT JOIN os_servicos_itens ON os_servicos_itens.chave = templates_relacoes.template',
+            "templates_grupos.*,
+                GROUP_CONCAT(os_servicos_itens.chave SEPARATOR '@.@') as templatesChaves",
+            "templates_grupos.chave = '$chave'"
+        );
+
+        $database->closeConection();
+        return $result;
+    }
+    
     public static function gerarRelatorioOS($where)
     {
         $database = new Database();
@@ -823,6 +886,25 @@ class OS
         return $result;
     }
 
+    public static function insertGrupoTemplate($values, $templates)
+    {
+        $database = new Database();
+
+        $cols = 'nome';
+
+        $result = $database->doInsert('templates_grupos', $cols, $values);
+        $chave = $result[0]['chave'];
+
+        if ($chave) {
+            foreach ($templates as $key => $template) {
+                $database->doInsert('templates_relacoes', "template, grupo", "'$template', $chave");
+            }
+        }
+
+        $database->closeConection();
+        return $result;
+    }
+
     public static function insertCusteioSubagente($os, $eventos)
     {
         $database = new Database();
@@ -889,7 +971,7 @@ class OS
         return $result;
     }
 
-    public static function insertEventoTemplate($values)
+    public static function insertEventoTemplate($values, $grupos)
     {
         $database = new Database();
 
@@ -900,6 +982,12 @@ class OS
         if ($result) {
             $result = $database->doSelect('os_servicos_itens', 'os_servicos_itens.*', "1=1 ORDER BY chave DESC LIMIT 1");
         }
+
+        $chave = $result[0]['chave'];
+        foreach ($grupos as $key => $grupo) {
+            $database->doInsert('templates_relacoes', "template, grupo", "'$chave', '$grupo'");
+        }
+
         $database->closeConection();
         return $result;
     }
@@ -910,21 +998,21 @@ class OS
         $cols = 'evento, subgrupo_campo, valor';
 
         foreach ($eventos as $key => $evento) {
-            $campo = $database->doSelect('os_subgrupos_taxas_campos', 'chave', "subgrupo = ".$evento->{'subgrupo'}." AND nome = '$campoNome'");
+            $campo = $database->doSelect('os_subgrupos_taxas_campos', 'chave', "subgrupo = " . $evento->{'subgrupo'} . " AND nome = '$campoNome'");
             $campo = $campo[0]['chave'];
 
-            $campoCheck = $database->doSelect('os_servicos_itens_complementar', 'chave', "evento = ".$evento->{'chave'}." AND subgrupo_campo = $campo");
+            $campoCheck = $database->doSelect('os_servicos_itens_complementar', 'chave', "evento = " . $evento->{'chave'} . " AND subgrupo_campo = $campo");
 
             if ($campoCheck[0]) {
                 $eventoCampo = $campoCheck[0]['chave'];
-                $values = "valor = '$valor'";   
+                $values = "valor = '$valor'";
 
-                $database->doUpdate('os_servicos_itens_complementar', $values, "chave = $eventoCampo");                
+                $database->doUpdate('os_servicos_itens_complementar', $values, "chave = $eventoCampo");
             } else {
-                $values = "'".$evento->{'chave'}."', $campo, '$valor'";
+                $values = "'" . $evento->{'chave'} . "', $campo, '$valor'";
 
                 $database->doInsert('os_servicos_itens_complementar', $cols, $values);
-            }            
+            }
         }
 
         foreach ($eventosDeletados as $key => $evento) {
@@ -1277,7 +1365,7 @@ class OS
         }
     }
 
-    public static function updateEventoTemplate($chave, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks, $Moeda, $valor, $valor1, $repasse)
+    public static function updateEventoTemplate($chave, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks, $Moeda, $valor, $valor1, $repasse, $gruposNovos, $gruposDeletados)
     {
         $database = new Database();
 
@@ -1285,7 +1373,39 @@ class OS
 
         $result = $database->doUpdate('os_servicos_itens', $query, 'template = 1 AND chave = ' . $chave);
 
+        foreach ($gruposNovos as $key => $grupo) {
+            $database->doInsert('templates_relacoes', 'template, grupo', "'$chave', '$grupo'");
+        }
+        foreach ($gruposDeletados as $key => $grupo) {
+            $database->doDelete('templates_relacoes', "template = '$chave' AND grupo = '$grupo'");
+        }
+
+
         $result = $database->doSelect('os_servicos_itens', "os_servicos_itens.*", 'template = 1 AND chave = ' . $chave);
+        $database->closeConection();
+        if ($result == NULL) {
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+
+    public static function updateGrupoTemplate($chave, $nome, $templatesNovas, $templatesDeletadas)
+    {
+        $database = new Database();
+
+        $query = "nome = '" . $nome . "'";
+
+        $result = $database->doUpdate('templates_grupos', $query, 'chave = ' . $chave);
+
+        foreach ($templatesNovas as $key => $template) {
+            $database->doInsert('templates_relacoes', 'template, grupo', "'$template', '$chave'");
+        }
+        foreach ($templatesDeletadas as $key => $template) {
+            $database->doDelete('templates_relacoes', "template = '$template' AND grupo = '$template'");
+        }
+
+        $result = $database->doSelect('templates_grupos', "templates_grupos.*", 'chave = ' . $chave);
         $database->closeConection();
         if ($result == NULL) {
             return 'false';
@@ -1383,6 +1503,28 @@ class OS
         $database = new Database();
 
         $result = $database->doDelete('tipos_docto_categorias', "chave = '$chave'");
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function deleteEventoTemplate($chave)
+    {
+        $database = new Database();
+
+        $result = $database->doDelete('os_servicos_itens', "chave = '$chave'");
+
+        $database->doDelete('templates_relacoes', "template = '$chave'");
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function deleteGrupoTemplate($chave)
+    {
+        $database = new Database();
+
+        $result = $database->doDelete('templates_grupos', "chave = '$chave'");
+
+        $database->doDelete('templates_relacoes', "grupo = '$chave'");
         $database->closeConection();
         return $result;
     }

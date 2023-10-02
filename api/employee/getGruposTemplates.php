@@ -11,20 +11,20 @@ $objData = json_decode($data);
 
 if($objData != NULL){
     $token = prepareInput($objData->token);
-    $values = prepareInput($objData->values);
-    $grupos = $objData->grupos;
+    $offset = prepareInput($objData->offset);
 
-    //$employees = new Employees();
     $os = new OS();
 
-    //$result = $employees->checkToken($token);
+    //$operadores = $operadores->checkToken($token);
     //if($result == 'true'){
-    $result = $os->insertEventoTemplate($values, $grupos);
-    //}
-} else {
-    $result = "false";
-}
-
+        $result = $os->getGruposTemplates($offset, $empresa);
+		//$result = 'Entrou aqui';
+        //}
+    } else {
+        $result = "false";
+    }
+    
 echo(json_encode($result));
 exit;
+
 ?>
