@@ -1485,7 +1485,7 @@ class AddOS extends Component {
         })
     }
 
-    criarGrupoTemplates = async () => {
+    criarGrupoTemplates = async (validForm) => {
         const { grupoTemplate } = this.state;
         const templates = grupoTemplate.templatesChaves?.split('@.@')?.map((e) => (
             this.state.templates.find((t) => t.chave == e)
@@ -1511,6 +1511,12 @@ class AddOS extends Component {
                 async res => await console.log(`Erro: ${res.data}`)
             )
         })
+
+        if (validForm) {
+            this.salvarOS(validForm);
+        } else {
+            this.setState({ recarregaPagina: reload });
+        }
     }
 
     salvarOS = async (validForm, reload = true) => {
@@ -4884,7 +4890,7 @@ class AddOS extends Component {
                                                 }}
                                                 onSubmit={async values => {
                                                     await new Promise(r => setTimeout(r, 1000))
-                                                    await this.criarGrupoTemplates();
+                                                    await this.criarGrupoTemplates(validForm);
                                                     await this.setState({ gruposTemplatesModal: false })
                                                 }}
                                             >
@@ -4933,7 +4939,7 @@ class AddOS extends Component {
                                                             <div className="row">
                                                                 <div className="col-2"></div>
                                                                 <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                                    <button type="submit" disabled={!this.state.grupoTemplate?.chave} style={{ width: 300 }} >Salvar</button>
+                                                                    <button type="submit" disabled={!this.state.grupoTemplate?.chave || !validForm} style={{ width: 300 }} >Salvar</button>
                                                                 </div>
                                                                 <div className="col-2"></div>
                                                             </div>
