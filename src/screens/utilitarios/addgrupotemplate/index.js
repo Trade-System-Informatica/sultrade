@@ -35,11 +35,12 @@ const estadoInicial = {
 
     recarregaPagina: "",
 
-    templatesOptions: [],
-    optionsTexto: '',
+    templates: [],
 
     templatesIniciais: [],
     templatesEscolhidas: [],
+
+    tiposServicosItens: ['Pagar', 'Receber', 'Adiantamento', 'Desconto'],
 
     acessos: [],
     permissoes: [],
@@ -142,7 +143,7 @@ class AddGrupoTemplate extends Component {
 
     getEventosTemplates = async () => {
         this.setState({
-            templatesOptions: await loader.getBaseOptions(`getEventosTemplates.php`, 'descricao', 'chave')
+            templates: await loader.getBase(`getEventosTemplates.php`)
         });
     }
 
@@ -186,7 +187,7 @@ class AddGrupoTemplate extends Component {
         } else if (validForm) {
             const templatesNovas = this.state.templatesEscolhidas.find((e) => !this.state.templatesIniciais.find((g) => e == g));
             const templatesDeletadas = this.state.templatesIniciais.find((e) => !this.state.templatesEscolhidas.find((g) => e == g));
-            
+
             await apiEmployee.post(`updateGrupoTemplate.php`, {
                 token: true,
                 chave: this.state.chave,
@@ -277,6 +278,210 @@ class AddGrupoTemplate extends Component {
                             modalAberto={this.state.modalLog}
                         />
 
+                        <Modal
+                            aria-labelledby="transition-modal-title"
+                            aria-describedby="transition-modal-description"
+                            style={{ display: 'flex', justifyContent: 'center', paddingTop: '5%', paddingBottom: '5%', overflow: 'scroll' }}
+                            open={this.state.selectModal}
+                            onClose={async () => await this.setState({ selectModal: false })}
+                        >
+                            <div className='modalContainer'>
+                                <div className='modalCriar'>
+                                    <div className='containersairlistprodmodal'>
+                                        <div className='botaoSairModal' onClick={async () => await this.setState({ selectModal: false })}>
+                                            <span>X</span>
+                                        </div>
+                                    </div>
+                                    <div className='modalContent'>
+
+                                        <div className='modalForm' style={{ width: "95%" }}>
+                                            <Formik
+                                                initialValues={{
+                                                    name: '',
+                                                }}
+                                                onSubmit={async values => {
+                                                    await new Promise(r => setTimeout(r, 1000))
+                                                    await this.setState({ selectModal: false })
+                                                }}
+                                            >
+                                                <Form className="contact-form" >
+
+
+                                                    <div className="row">
+
+                                                        <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
+
+                                                            <div className="row addservicos">
+                                                                <div className="col-12">
+                                                                    <h4 className='text-center white'>Templates:</h4>
+                                                                </div>
+                                                                <h3 className='text-center white'>Selecionados</h3>
+                                                                {this.state.templatesEscolhidas[0] &&
+                                                                    <div className="agrupador_eventos_selecionados">
+                                                                        <table className='agrupador_lista'>
+                                                                            <tr>
+                                                                                <th className='text-center'>
+                                                                                    <span>Chave</span>
+                                                                                </th>
+                                                                                {window.innerWidth >= 500 &&
+                                                                                    <th className='text-center'>
+                                                                                        <span>Tipo</span>
+                                                                                    </th>
+                                                                                }
+                                                                                <th className='text-center'>
+                                                                                    <span>Descrição</span>
+                                                                                </th>
+                                                                                <th className='text-center'>
+                                                                                    <span>Valor </span>
+                                                                                </th>
+                                                                                <th className='text-center' style={{ width: 20, height: 20, padding: 5 }}>
+                                                                                </th>
+                                                                            </tr>
+                                                                            {this.state.templates[0] != undefined && this.state.templates.filter((feed) => this.state.templatesEscolhidas.includes(feed.chave)).map((feed, index) => (
+                                                                                <>
+                                                                                    {window.innerWidth < 500 &&
+                                                                                        <tr onClick={() => {
+                                                                                            this.setState({ templatesEscolhidas: this.state.templatesEscolhidas.filter((e) => e != feed.chave) })
+                                                                                        }}>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.chave}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.descricao}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.Moeda == 5 ? "BRL" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor)}</p>
+                                                                                            </td>
+                                                                                            <td>
+                                                                                                <input type="checkbox" checked={true} />
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    }
+                                                                                    {window.innerWidth >= 500 &&
+                                                                                        <tr onClick={() => {
+                                                                                            this.setState({ templatesEscolhidas: this.state.templatesEscolhidas.filter((e) => e != feed.chave) })
+                                                                                        }}>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.chave}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{this.state.tiposServicosItens[feed.tipo_sub]}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.descricao}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.Moeda == 5 ? "BRL" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor)}</p>
+                                                                                            </td>
+                                                                                            <td>
+                                                                                                <input type="checkbox" checked={true} />
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    }
+                                                                                </>
+                                                                            )
+                                                                            )}
+                                                                        </table>
+                                                                    </div>
+                                                                }
+                                                                {!this.state.templatesEscolhidas[0] &&
+                                                                    <h4 className='text-center'>Nenhum</h4>
+                                                                }
+                                                                <br /><br /><br />
+                                                                <h3 className='text-center white'>Eventos</h3>
+                                                                {this.state.templates.find((feed) => !this.state.templatesEscolhidas.includes(feed.chave)) &&
+                                                                    <div className="agrupador_eventos">
+                                                                        <table className='agrupador_lista'>
+                                                                            <tr>
+                                                                                <th className='text-center'>
+                                                                                    <span>Chave</span>
+                                                                                </th>
+                                                                                {window.innerWidth >= 500 &&
+                                                                                    <th className='text-center'>
+                                                                                        <span>Tipo</span>
+                                                                                    </th>
+                                                                                }
+                                                                                <th className='text-center'>
+                                                                                    <span>Descrição</span>
+                                                                                </th>
+                                                                                <th className='text-center'>
+                                                                                    <span>Valor</span>
+                                                                                </th>
+                                                                                <th className='text-center' style={{ width: 20, height: 20, padding: 5 }}>
+                                                                                </th>
+                                                                            </tr>
+                                                                            {this.state.templates[0] != undefined && this.state.templates.filter((feed) => !this.state.templatesEscolhidas.includes(feed.chave)).map((feed, index) => (
+                                                                                <>
+                                                                                    {window.innerWidth < 500 &&
+                                                                                        <tr onClick={() => {
+                                                                                            this.setState({ templatesEscolhidas: [...this.state.templatesEscolhidas, feed.chave] })
+                                                                                        }}>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.chave}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.descricao}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.Moeda == 5 ? "BRL" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor)}</p>
+                                                                                            </td>
+                                                                                            <td>
+                                                                                                <input type="checkbox" checked={false} />
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    }
+                                                                                    {window.innerWidth >= 500 &&
+                                                                                        <tr onClick={() => {
+                                                                                            this.setState({ templatesEscolhidas: [...this.state.templatesEscolhidas, feed.chave] })
+                                                                                        }}>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.chave}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{this.state.tiposServicosItens[feed.tipo_sub]}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.descricao}</p>
+                                                                                            </td>
+                                                                                            <td className="text-center">
+                                                                                                <p>{feed.Moeda == 5 ? "BRL" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor)}</p>
+                                                                                            </td>
+                                                                                            <td>
+                                                                                                <input type="checkbox" checked={false} />
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    }
+                                                                                </>
+                                                                            )
+                                                                            )}
+                                                                        </table>
+                                                                    </div>
+                                                                }
+                                                                {!this.state.templates.find((feed) => !this.state.templatesEscolhidas.includes(feed.chave)) &&
+                                                                    <h4 className="text-center">Nenhum disponível</h4>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                                                    </div>
+
+                                                    <div className="row">
+                                                        <div className="col-2"></div>
+                                                        <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                            <button type="submit" style={{ width: 300 }} >Salvar</button>
+                                                        </div>
+                                                        <div className="col-2"></div>
+                                                    </div>
+
+                                                </Form>
+                                            </Formik>
+
+                                        </div>
+                                    </div>
+                                </div >
+                            </div >
+                        </Modal >
+
                         <Alert
                             alert={this.state.alert}
                             setAlert={(e) => this.setState({ alert: e })}
@@ -323,26 +528,6 @@ class AddGrupoTemplate extends Component {
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Field className='form-control' value={this.state.nome} onChange={(e) => { this.setState({ nome: e.currentTarget.value }) }} />
                                                         </div>
-
-                                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
-                                                            <>
-                                                                <div><hr /></div>
-
-                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                    <label>Templates</label>
-                                                                </div>
-                                                                <div className='col-1 errorMessage'>
-                                                                </div>
-                                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                    <Select className='SearchSelect' options={this.state.templatesOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ optionsTexto: e }) }} search={true} onChange={(e) => { if (!this.state.templatesEscolhidas.find((g) => g == e.value)) this.setState({ templatesEscolhidas: [...this.state.templatesEscolhidas, e.value] }) }} />
-                                                                    <div style={{ marginBottom: 20, color: 'white', fontSize: 13 }}>
-                                                                        {this.state.templatesEscolhidas.map((e, i) => (
-                                                                            <span class="click_to_erase" onClick={() => this.setState({ templatesEscolhidas: this.state.templatesEscolhidas.filter((c) => c != e) })}>{`${this.state.templatesOptions.find((g) => g.value == e)?.label}${i != this.state.templatesEscolhidas.length - 1 ? ', ' : ' '}`}</span>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            </>
-                                                        }
                                                     </div>
 
 
@@ -376,7 +561,94 @@ class AddGrupoTemplate extends Component {
                                 </div>
                             </div>
 
+                            {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                <>
+                                    <div className="relatoriosSection">
+                                        <div className="relatorioButton">
+                                            <button className="btn btn-danger" onClick={() => this.setState({ selectModal: true })}>Selecionar Templates</button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <br />
+                                        <div>
+                                            <div>
+                                                <div className="page-breadcrumb2"><h3>Templates Selecionadas</h3></div>
+                                            </div>
+                                            <br />
+                                            <div>
+                                                <div>
+                                                    <div className="row" id="product-list">
+                                                        <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags">
+                                                            <div className="single-product-item">
+                                                                <div className="row subtitulosTabela">
+                                                                    <table className='addOsTable'>
+                                                                        <tr>
+                                                                            <th className='text-center'>
+                                                                                <span>Chave</span>
+                                                                            </th>
+                                                                            {window.innerWidth >= 500 &&
+                                                                                <th className='text-center'>
+                                                                                    <span>Tipo</span>
+                                                                                </th>
+                                                                            }
+                                                                            <th className='text-center'>
+                                                                                <span>Descrição</span>
+                                                                            </th>
+                                                                            <th className='text-center'>
+                                                                                <span>Valor</span>
+                                                                            </th>
+                                                                        </tr>
+                                                                        {this.state.templates[0] != undefined && this.state.templates.filter((e) => this.state.templatesEscolhidas.includes(e.chave)).map((feed, index) => (
+                                                                            <>
+                                                                                {window.innerWidth < 500 &&
+                                                                                    <tr className={index % 2 == 0 ? "parTr" : "imparTr"}>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.chave}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.descricao}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.Moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor)}</p>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                }
+                                                                                {window.innerWidth >= 500 &&
+                                                                                    <tr className={index % 2 == 0 ? "parTr" : "imparTr"}>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.chave}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>{this.state.tiposServicosItens[feed.tipo_sub]}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.descricao}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                            <p>{feed.Moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor)}</p>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                }
+                                                                            </>
+                                                                        )
+                                                                        )}
+                                                                    </table>
+
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            }
+
                         </div>
+
                         <Rodape />
                     </>
                 }

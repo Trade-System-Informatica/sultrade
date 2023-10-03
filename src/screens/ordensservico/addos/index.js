@@ -1492,11 +1492,18 @@ class AddOS extends Component {
         ));
 
         templates.forEach(async (template, index) => {
+            let ordem;
+            if (this.state.eventos.length > 0) {
+                ordem = parseFloat(this.state.eventos[this.state.eventos.length-1]?.ordem.replaceAll(',', '.')) + (index + 1);
+            } else {
+                ordem = (index + 1);
+            }
+            
             await apiEmployee.post(`insertServicoItemBasico.php`, {
                 token: true,
                 values: `'${this.state.chave}', '', '${template.fornecedor}', '${template.taxa}', '${template.descricao}', '${template.tipo_sub}', '${template.Fornecedor_Custeio}', '${template.remarks}', '${template.Moeda}', '${template.valor}', '${template.valor1}', '${template.repasse}'`,
                 chave_os: this.state.chave,
-                ordem: parseFloat(this.state.eventos[this.state.eventos.length-1]?.ordem.replaceAll(',', '.')) + (index + 1)
+                ordem
             }).then(
                 async res => {
                     await loader.salvaLogs('os_servicos_itens', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
