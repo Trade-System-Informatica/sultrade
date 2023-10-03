@@ -1515,7 +1515,7 @@ class AddOS extends Component {
         if (validForm) {
             this.salvarOS(validForm);
         } else {
-            this.setState({ recarregaPagina: reload });
+            this.setState({ recarregaPagina: true });
         }
     }
 
