@@ -41,12 +41,12 @@ try {
         ]
     ];
 
-    $mail->Host       = '177.52.181.15';                     //Set the SMTP server to send through
+    $mail->Host       = 'mail.vetorial.com';                     //Set the SMTP server to send through
     $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
     $mail->Username   = 'soa@sultradeagency.com';                     //SMTP username
-    $mail->Password   = 'senha123@';                               //SMTP password
-    //$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
-    $mail->Port  = 587;
+    $mail->Password   = 'Trade@2023#';                               //SMTP password
+    $mail->SMTPSecure = 'ssl'; //PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
+    $mail->Port  = 465;
 
     //Recipients
     $mail->setFrom('soa@sultradeagency.com', 'Sultrade Agency');
