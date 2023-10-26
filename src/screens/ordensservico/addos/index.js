@@ -294,8 +294,8 @@ class AddOS extends Component {
                 porto: this.state.os.porto,
                 eta: moment(this.state.os.eta).format('YYYY-MM-DD'),
                 atb: moment(this.state.os.atb).format('YYYY-MM-DD'),
-                etb: moment(this.state.os.etb).format('YYYY-MM-DD'),
-                data_saida: moment(this.state.os.Data_Saida).format("YYYY-MM-DD") != "Invalid date" ? moment(this.state.os.Data_Saida).format('YYYY-MM-DD') : 'T.B.I.',
+                etb: moment(this.state.os.etb).format('YYYY-MM-DD HH:mm'),
+                data_saida: moment(this.state.os.Data_Saida).format("YYYY-MM-DD") != "Invalid date" ? moment(this.state.os.Data_Saida).format('YYYY-MM-DD HH:mm') : 'T.B.I.',
 
                 encerramento: moment(this.state.os.Data_Encerramento).format("YYYY-MM-DD") != "Invalid date" ? moment(this.state.os.Data_Encerramento).format('YYYY-MM-DD') : 'T.B.I.',
                 faturamento: moment(this.state.os.Data_Faturamento).format("YYYY-MM-DD") != "Invalid date" ? moment(this.state.os.Data_Faturamento).format('YYYY-MM-DD') : 'T.B.I.',
@@ -344,10 +344,10 @@ class AddOS extends Component {
                     { titulo: 'Porto', valor: util.formatForLogs(this.state.porto, 'options', '', '', this.state.portosOptions) },
                     { titulo: 'ETA', valor: util.formatForLogs(this.state.eta, 'date') },
                     { titulo: 'ATB', valor: util.formatForLogs(this.state.atb, 'date') },
-                    { titulo: 'ETB', valor: util.formatForLogs(this.state.etb, 'date') },
+                    { titulo: 'ETB', valor: util.formatForLogs(this.state.etb, 'datetime') },
                     { titulo: 'Government Taxes', valor: util.formatForLogs(this.state.governmentTaxes, 'money') },
                     { titulo: 'Bank Charges', valor: util.formatForLogs(this.state.bankCharges, 'money') },
-                    { titulo: 'Data de Saida', valor: util.formatForLogs(this.state.data_saida, 'date') },
+                    { titulo: 'Data de Saida', valor: util.formatForLogs(this.state.data_saida, 'datetime') },
                     { titulo: 'Data de Encerramento', valor: util.formatForLogs(this.state.encerramento, 'date') },
                     { titulo: 'Data de Faturamento', valor: util.formatForLogs(this.state.faturamento, 'date') },
                     { titulo: 'Centro de Custo', valor: util.formatForLogs(this.state.centroCusto, 'options', '', '', this.state.centrosCustosOptions) },
@@ -1537,10 +1537,10 @@ class AddOS extends Component {
                 { titulo: 'Porto', valor: util.formatForLogs(this.state.porto, 'options', '', '', this.state.portosOptions) },
                 { titulo: 'ETA', valor: util.formatForLogs(this.state.eta, 'date') },
                 { titulo: 'ATB', valor: util.formatForLogs(this.state.atb, 'date') },
-                { titulo: 'ETB', valor: util.formatForLogs(this.state.etb, 'date') },
+                { titulo: 'ETB', valor: util.formatForLogs(this.state.etb, 'datetime') },
                 { titulo: 'Government Taxes', valor: util.formatForLogs(this.state.governmentTaxes, 'money') },
                 { titulo: 'Bank Charges', valor: util.formatForLogs(this.state.bankCharges, 'money') },
-                { titulo: 'Data de Saida', valor: util.formatForLogs(this.state.data_saida, 'date') },
+                { titulo: 'Data de Saida', valor: util.formatForLogs(this.state.data_saida, 'datetime') },
                 { titulo: 'Data de Encerramento', valor: util.formatForLogs(this.state.encerramento, 'date') },
                 { titulo: 'Data de Faturamento', valor: util.formatForLogs(this.state.faturamento, 'date') },
                 { titulo: 'Centro de Custo', valor: util.formatForLogs(this.state.centroCusto, 'options', '', '', this.state.centrosCustosOptions) },
@@ -1561,7 +1561,7 @@ class AddOS extends Component {
 
             await apiEmployee.post(`insertOS.php`, {
                 token: true,
-                values: `'${this.state.usuarioLogado.codigo}', '${this.state.descricao}', 'ST${this.state.codigo.Proximo}', '${this.state.cliente}', '${this.state.navio}', '${moment(this.state.abertura).format('YYYY-MM-DD')}', '${moment(this.state.chegada).format('YYYY-MM-DD')}', '${moment(this.state.data_saida).format('YYYY-MM-DD')}', '${this.state.tipoServico}', '${this.state.viagem}', '${this.state.porto}', '${this.state.encerradoPor}', '${this.state.faturadoPor}', '${this.state.empresa}', '${this.state.eta}', '${this.state.atb}', '${this.state.etb}', '${this.state.governmentTaxes ? parseFloat(this.state.governmentTaxes.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.bankCharges ? parseFloat(this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.operador}', '${this.state.envio}'`,
+                values: `'${this.state.usuarioLogado.codigo}', '${this.state.descricao}', 'ST${this.state.codigo.Proximo}', '${this.state.cliente}', '${this.state.navio}', '${moment(this.state.abertura).format('YYYY-MM-DD')}', '${moment(this.state.chegada).format('YYYY-MM-DD')}', '${moment(this.state.data_saida).format('YYYY-MM-DD HH:mm')}', '${this.state.tipoServico}', '${this.state.viagem}', '${this.state.porto}', '${this.state.encerradoPor}', '${this.state.faturadoPor}', '${this.state.empresa}', '${this.state.eta}', '${this.state.atb}', '${this.state.etb}', '${this.state.governmentTaxes ? parseFloat(this.state.governmentTaxes.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.bankCharges ? parseFloat(this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.operador}', '${this.state.envio}'`,
                 codigo: this.state.codigo.Proximo,
                 tipo: this.state.codigo.Tipo,
                 navio: this.state.naviosOptions.find((navio) => navio.value == this.state.navio)?.label,
@@ -1611,9 +1611,9 @@ class AddOS extends Component {
                 porto: this.state.porto,
                 eta: this.state.eta ? moment(this.state.eta).format('YYYY-MM-DD') : '',
                 atb: this.state.atb ? moment(this.state.atb).format('YYYY-MM-DD') : '',
-                etb: this.state.etb ? moment(this.state.etb).format('YYYY-MM-DD') : '',
+                etb: this.state.etb ? moment(this.state.etb).format('YYYY-MM-DD HH:mm') : '',
 
-                Data_Saida: this.state.data_saida ? moment(this.state.data_saida).format('YYYY-MM-DD') : '',
+                Data_Saida: this.state.data_saida ? moment(this.state.data_saida).format('YYYY-MM-DD HH:mm') : '',
                 Data_Encerramento: this.state.encerramento ? moment(this.state.encerramento).format('YYYY-MM-DD') : '',
                 Data_Faturamento: this.state.faturamento ? moment(this.state.faturamento).format('YYYY-MM-DD') : '',
                 centro_custo: this.state.centroCusto,
@@ -4045,8 +4045,8 @@ class AddOS extends Component {
             operador: this.state.operadoresOptions.find((operador) => operador.value == this.state.operador) ? this.state.operadoresOptions.find((operador) => operador.value == this.state.operador).label : "",
             porto: this.state.portosOptions.find((porto) => porto.value == this.state.porto) ? this.state.portosOptions.find((porto) => porto.value == this.state.porto).label : "",
             eta: moment(this.state.eta).format("DD/MM/YYYY") != "Invalid date" ? moment(this.state.eta).format("DD/MM/YYYY") : "T.B.I.",
-            etb: moment(this.state.etb).format("DD/MM/YYYY") != "Invalid date" ? moment(this.state.etb).format("DD/MM/YYYY") : "T.B.I.",
-            data_saida: moment(this.state.data_saida).format("DD/MM/YYYY") != "Invalid date" ? moment(this.state.data_saida).format("DD/MM/YYYY") : "T.B.I."
+            etb: moment(this.state.etb).format("DD/MM/YYYY") != "Invalid date" ? moment(this.state.etb).format("DD/MM/YYYY HH:mm") : "T.B.I.",
+            data_saida: moment(this.state.data_saida).format("DD/MM/YYYY") != "Invalid date" ? moment(this.state.data_saida).format("DD/MM/YYYY HH:mm") : "T.B.I."
         })
     }
 
@@ -5525,16 +5525,16 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="date" value={this.state.etb} onChange={async e => { this.setState({ etb: e.currentTarget.value }) }} />
+                                                                <Field className="form-control" type="datetime-local" value={this.state.etb} onChange={async e => { this.setState({ etb: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                <label>E.T.S</label>
+                                                                <label>E.T.S.</label>
                                                             </div>
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="date" value={this.state.data_saida} onChange={async e => { this.setState({ data_saida: e.currentTarget.value }) }} />
+                                                                <Field className="form-control" type="datetime-local" value={this.state.data_saida} onChange={async e => { this.setState({ data_saida: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             {this.state.governmentTaxes &&
@@ -5727,7 +5727,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="date" value={this.state.etb} onChange={async e => { this.setState({ etb: e.currentTarget.value }) }} />
+                                                                <Field className="form-control" type="datetime-local" value={this.state.etb} onChange={async e => { this.setState({ etb: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -5736,7 +5736,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="date" value={this.state.data_saida} onChange={async e => { this.setState({ data_saida: e.currentTarget.value }) }} />
+                                                                <Field className="form-control" type="datetime-local" value={this.state.data_saida} onChange={async e => { this.setState({ data_saida: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             {this.state.governmentTaxes &&

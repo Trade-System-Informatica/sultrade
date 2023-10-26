@@ -379,7 +379,7 @@ class OS extends Component {
                                                                 <p>{feed.portoNome}</p>
                                                             </div>
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
-                                                                <p>{feed.clienteNome.length > 30 ? `${feed.clienteNome.substring(0, 28)}...` : feed.clienteNome}</p>
+                                                                <p>{feed.clienteNome?.length > 30 ? `${feed.clienteNome.substring(0, 28)}...` : feed.clienteNome}</p>
                                                             </div>
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left" style={{ overflowWrap: 'anywhere ' }}>
                                                                 <p>{feed.tipoServicoNome}</p>
@@ -428,7 +428,7 @@ class OS extends Component {
                                                                 <p>{feed.navioNome}</p>
                                                             </div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-left">
-                                                                <p>{feed.clienteNome.length > 30 ? `${feed.clienteNome.substring(0,28)}...` : feed.clienteNome}</p>
+                                                                <p>{feed.clienteNome?.length > 30 ? `${feed.clienteNome.substring(0,28)}...` : feed.clienteNome}</p>
                                                             </div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-left" style={{ overflowWrap: 'anywhere ' }}>
                                                                 <p>{feed.tipoServicoNome}</p>
@@ -505,7 +505,7 @@ class OS extends Component {
                                                                 <p>{feed.Descricao}</p>
                                                             </div>
                                                             <div className="col-3 text-center" style={{ overflowWrap: 'anywhere' }}>
-                                                                <p>{feed.clienteNome.length > 30 ? `${feed.clienteNome.substring(0, 28)}...` : feed.clienteNome}</p>
+                                                                <p>{feed.clienteNome?.length > 30 ? `${feed.clienteNome.substring(0, 28)}...` : feed.clienteNome}</p>
                                                             </div>
                                                             <div className="col-2  text-left  mobileajuster4 icones">
                                                                 <div className='iconelixo giveMargin' type='button' >
@@ -566,7 +566,7 @@ class OS extends Component {
                                                                 <p>{feed.portoNome}</p>
                                                             </div>
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
-                                                                <p>{feed.clienteNome.length > 30 ? `${feed.clienteNome.substring(0, 28)}...` : feed.clienteNome}</p>
+                                                                <p>{feed.clienteNome?.length > 30 ? `${feed.clienteNome.substring(0, 28)}...` : feed.clienteNome}</p>
                                                             </div>
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left" style={{ overflowWrap: 'anywhere ' }}>
                                                                 <p>{feed.tipoServicoNome}</p>
@@ -615,7 +615,7 @@ class OS extends Component {
                                                                 <p>{feed.navioNome}</p>
                                                             </div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-left">
-                                                                <p>{feed.clienteNome.length > 30 ? `${feed.clienteNome.substring(0, 28)}...` : feed.clienteNome}</p>
+                                                                <p>{feed.clienteNome?.length > 30 ? `${feed.clienteNome.substring(0, 28)}...` : feed.clienteNome}</p>
                                                             </div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-left" style={{ overflowWrap: 'anywhere ' }}>
                                                                 <p>{feed.tipoServicoNome}</p>
