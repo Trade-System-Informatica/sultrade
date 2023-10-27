@@ -32,6 +32,10 @@ const estadoInicial = {
     navioBandeira: '',
     navioBloqueado: false,
     navioImo: '',
+    navioGrt: 0,
+    navioDwt: 0,
+    navioLoa: 0,
+    navioBeam: 0,
 
     bandeiras: [],
     banderiasOptions: [],
@@ -660,13 +664,17 @@ class ModalListas extends Component {
                 { titulo: 'nome', valor: this.state.navioNome },
                 { titulo: 'bandeira', valor: this.state.navioBandeira },
                 { titulo: 'imo', valor: this.state.navioImo },
+                { titulo: 'grt', valor: this.state.navioGrt },
+                { titulo: 'dwt', valor: this.state.navioDwt },
+                { titulo: 'loa', valor: this.state.navioLoa },
+                { titulo: 'beam', valor: this.state.navioBeam },
             ]
         })
 
         if (this.state.navioChave == 0) {
             await apiEmployee.post('insertNavioBasico.php', {
                 token: true,
-                values: `'${this.state.navioNome}', '${this.state.navioBandeira}', ${this.state.navioImo}`
+                values: `'${this.state.navioNome}', '${this.state.navioBandeira}', '${this.state.navioImo}', '${this.state.navioGrt?.replace(/[^0-9\\,]/gi, '').replace(',', '.')}', '${this.state.navioDwt?.replace(/[^0-9\\,]/gi, '').replace(',', '.')}', '${this.state.navioLoa?.replace(/[^0-9\\,]/gi, '').replace(',', '.')}', '${this.state.navioBeam?.replace(/[^0-9\\,]/gi, '').replace(',', '.')}'`,
             }).then(
                 async res => {
                     await loader.salvaLogs('os_navios', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
@@ -681,7 +689,12 @@ class ModalListas extends Component {
                 token: true,
                 chave: this.state.navioChave,
                 nome: this.state.navioNome,
-                bandeira: this.state.navioBandeira
+                bandeira: this.state.navioBandeira,
+                imo: this.state.navioImo,
+                grt: this.state.navioGrt?.replace(/[^0-9\\,]/gi, '').replace(',', '.'),
+                dwt: this.state.navioDwt?.replace(/[^0-9\\,]/gi, '').replace(',', '.'),
+                loa: this.state.navioLoa?.replace(/[^0-9\\,]/gi, '').replace(',', '.'),
+                beam: this.state.navioBeam?.replace(/[^0-9\\,]/gi, '').replace(',', '.'),
             }).then(
                 async res => {
                     await loader.salvaLogs('os_navios', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.navioChave, `NAVIO: ${this.state.navioNome}`);
@@ -1973,7 +1986,11 @@ class ModalListas extends Component {
                                                                         navioChave: 0,
                                                                         navioNome: '',
                                                                         navioBandeira: '',
-                                                                        navioImo: ''
+                                                                        navioImo: '',
+                                                                        navioGrt: 0,
+                                                                        navioDwt: 0,
+                                                                        navioLoa: 0,
+                                                                        navioBeam: 0,
                                                                     });
                                                                     this.props.alteraModal('criarNavio')
                                                                 }}
@@ -1995,10 +2012,18 @@ class ModalListas extends Component {
                                                                         navioBandeira: feed.bandeira,
                                                                         navioChave: feed.chave,
                                                                         navioImo: feed.imo,
+                                                                        navioGrt: feed.grt,
+                                                                        navioDwt: feed.dwt,
+                                                                        navioLoa: feed.loa,
+                                                                        navioBeam: feed.beam,
                                                                         dadosIniciais: [
                                                                             { titulo: 'nome', valor: feed.nome },
                                                                             { titulo: 'bandeira', valor: feed.bandeira },
                                                                             { titulo: 'imo', valor: feed.imo },
+                                                                            { titulo: 'grt', valor: feed.grt },
+                                                                            { titulo: 'dwt', valor: feed.dwt },
+                                                                            { titulo: 'loa', valor: feed.loa },
+                                                                            { titulo: 'beam', valor: feed.beam },
                                                                         ]
                                                                     }); this.props.alteraModal('criarNavio')
                                                                 }}
@@ -2097,6 +2122,45 @@ class ModalListas extends Component {
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Field className="form-control" type="text" value={this.state.navioImo} onChange={async e => { this.setState({ navioImo: e.currentTarget.value }) }} />
+                                                        </div>
+
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
+                                                            <label>Grt</label>
+                                                        </div>
+                                                        <div className="col-1 errorMessage">
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Field className="form-control" type="text" value={this.state.navioGrt} onChange={async e => { this.setState({ navioGrt: e.currentTarget.value?.replace(/[^0-9\\,]/gi, '') }) }} />
+                                                        </div>
+                                                        <div className="col-1"></div>
+
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
+                                                            <label>Dwt</label>
+                                                        </div>
+                                                        <div className="col-1 errorMessage">
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Field className="form-control" type="text" value={this.state.navioDwt} onChange={async e => { this.setState({ navioDwt: e.currentTarget.value?.replace(/[^0-9\\,]/gi, '') }) }} />
+                                                        </div>
+                                                        <div className="col-1"></div>
+
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
+                                                            <label>Loa</label>
+                                                        </div>
+                                                        <div className="col-1 errorMessage">
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Field className="form-control" type="text" value={this.state.navioLoa} onChange={async e => { this.setState({ navioLoa: e.currentTarget.value?.replace(/[^0-9\\,]/gi, '') }) }} />
+                                                        </div>
+                                                        <div className="col-1"></div>
+
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel">
+                                                            <label>Beam</label>
+                                                        </div>
+                                                        <div className="col-1 errorMessage">
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Field className="form-control" type="text" value={this.state.navioBeam} onChange={async e => { this.setState({ navioBeam: e.currentTarget.value?.replace(/[^0-9\\,]/gi, '') }) }} />
                                                         </div>
                                                         <div className="col-1"></div>
 

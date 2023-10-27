@@ -261,7 +261,7 @@ export default class Util {
         if (isNaN(parseInt(num))) {
             return 0;
         }
-    
+
         return parseFloat((+(Math.round(+(num + 'e' + precision)) + 'e' + -precision)).toFixed(precision));
     }
 
@@ -274,6 +274,8 @@ export default class Util {
             }
         } else if (type == 'date') {
             return value && moment(value).isValid() ? moment(value).format("DD/MM/YYYY") : falseReturn;
+        } else if (type == 'datetime') {
+            return value && moment(value).isValid() ? moment(value).format("DD/MM/YYYY HH:mm") : falseReturn;
         } else if (type == 'bool') {
             if (value) {
                 return trueReturn ? trueReturn : "Sim";
@@ -283,12 +285,12 @@ export default class Util {
         } else if (type == 'options') {
             if (options && options[0]) {
                 const trueValue = options.find((opt) => opt && opt[optionKeyValue]);
-                
+
                 return trueValue && trueValue[optionLabelValue] ? trueValue[optionLabelValue] : falseReturn;
             } else {
                 return value;
             }
-        } else  {
+        } else {
             return value;
         }
     }

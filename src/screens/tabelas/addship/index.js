@@ -21,118 +21,19 @@ const estadoInicial = {
     nome: '',
     bandeira: '',
     imo: '',
+    grt: '0',
+    dwt: '0',
+    loa: '0',
+    beam: '0',
 
     logs: [],
     modalLog: false,
 
-    classificacao: '',
-    velocidade_cruzeiro: '',
-    call_sign: '',
-    tonelagem_bruta: '',
-    tonelagem_liquida: '',
-    tonelagem_porte: '',
-    comprimento: '',
-    tipo_casco: '',
-    bow_stern: '',
-    boca_bean: '',
-    fone1: '',
-    fone2: '',
-    email: '',
-    armador: '',
-    comandante: '',
-    pessoas: [],
     paises: [],
     paisesOptions: [],
 
     dadosIniciais: '',
     dadosFinais: '',
-
-    seaports: [],
-    embarcadores: [],
-    terminais: [],
-    cargos: [],
-    embarcador: [],
-    clients: [],
-    documents: [],
-    document: null,
-    ship_name: '',
-    seaport_origin: undefined,
-    id_seaport: undefined,
-    seaport_destiny: undefined,
-    terminal: '',
-    agent: '',
-    agents: [],
-    eta: '',
-    etb: '',
-    ets: '',
-    type: '',
-    dosage: null,
-    full_shipment: null,
-    shipment: null,
-    temperature: 0,
-    textservice: '',
-    cargo: '',
-    doomed: 2,
-    recirculation: 2,
-    status: '',
-    liberation: 0,
-    position_ship: 0,
-    exportation: 0,
-    id: null,
-    redirect: false,
-    token: '',
-    statusSelected: 0,
-    empresas: [],
-    charterers: '',
-    appointment: '',
-    spanerror1: '',
-    spanerror2: '',
-    spanerror3: '',
-    spanerror4: '',
-    spanerror5: '',
-    spanerror6: '',
-    spanerror7: '',
-    spanerror8: '',
-    spanerror9: '',
-    spanerror11: '',
-    spanerror12: '',
-    cargo1: 0,
-    cargo2: '',
-    book: '',
-    qty1: '',
-    qty2: '',
-    qty3: '',
-    qty4: '',
-    qty5: '',
-    qty6: '',
-    qty7: '',
-    qty8: '',
-    qty9: '',
-    qty10: '',
-    dst1: '',
-    Operation: '',
-    dst2: '',
-    dst3: '',
-    dst4: '',
-    dst5: '',
-    dst6: '',
-    dst7: '',
-    dst8: '',
-    dst9: '',
-    dst10: '',
-    berth: 0,
-    ativo10: false,
-    ativo2: false,
-    ativo3: false,
-    ativo4: false,
-    ativo5: false,
-    ativo6: false,
-    ativo7: false,
-    ativo8: false,
-    ativo9: false,
-    service: 'FULL',
-    numero: 1,
-    Status: [],
 
     dadosIniciais: '',
     dadosFinais: '',
@@ -142,7 +43,6 @@ const estadoInicial = {
     acessosPermissoes: [],
 
     bloqueado: false,
-
 }
 
 class AddShip extends Component {
@@ -164,7 +64,6 @@ class AddShip extends Component {
             //await this.carregaEmbarcadores(id)
             //await this.carregaDocumentos(id)
         }
-        await this.carregaPessoas()
         await this.carregaPaises()
         await this.getLugares();
 
@@ -177,7 +76,11 @@ class AddShip extends Component {
                 dadosIniciais: [
                     { titulo: 'Nome', valor: util.formatForLogs(this.state.nome) },
                     { titulo: 'Bandeira', valor: util.formatForLogs(this.state.bandeira, 'options', '', '', this.state.paisesOptions) },
-                    { titulo: 'IMO', valor: util.formatForLogs(this.state.imo) }
+                    { titulo: 'IMO', valor: util.formatForLogs(this.state.imo) },
+                    { titulo: 'GRT', valor: util.formatForLogs(this.state.grt?.replace(/[^0-9\\.]/gi, '').replace('.', ',')) },
+                    { titulo: 'DWT', valor: util.formatForLogs(this.state.dwt?.replace(/[^0-9\\.]/gi, '').replace('.', ',')) },
+                    { titulo: 'LOA', valor: util.formatForLogs(this.state.loa?.replace(/[^0-9\\.]/gi, '').replace('.', '.')) },
+                    { titulo: 'BEAM', valor: util.formatForLogs(this.state.beam?.replace(/[^0-9\\.]/gi, '').replace('.', ',')) },
                 ]
             })
         }
@@ -253,23 +156,6 @@ class AddShip extends Component {
         )
     }
 
-    carregaPessoas = async () => {
-        await apiEmployee.post('getPessoas.php', {
-            token: true,
-        }).then(
-            async res => {
-                if (res.data === 'false') {
-                    alert('Não logado!')
-                } else {
-                    await this.setState({ pessoas: res.data })
-                }
-            },
-            async err => {
-                alert('Erro: ' + err)
-            }
-        )
-    }
-
     carregaPaises = async () => {
         await apiEmployee.post('getPaises.php', {
             token: true,
@@ -292,18 +178,18 @@ class AddShip extends Component {
             return;
         }
         this.setState({ ...util.cleanStates(this.state) })
-        this.setState({ 
+        this.setState({
             bloqueado: true,
             loading: true
         })
 
         await apiEmployee.post(`insertNavio.php`, {
             token: this.props.token,
-            values: `'${this.state.nome}', '${this.state.bandeira}', '${this.state.imo}'`,
+            values: `'${this.state.nome}', '${this.state.bandeira}', '${this.state.imo}', '${this.state.grt?.replace(/[^0-9\\,]/gi, '').replace(',', '.')}', '${this.state.dwt?.replace(/[^0-9\\,]/gi, '').replace(',', '.')}', '${this.state.loa?.replace(/[^0-9\\,]/gi, '').replace(',', '.')}', '${this.state.beam?.replace(/[^0-9\\,]/gi, '').replace(',', '.') }'`,
         }).then(
             async res => {
                 if (res.data[0].chave) {
-                    await this.setState({chave: res.data[0].chave})
+                    await this.setState({ chave: res.data[0].chave })
                     await loader.salvaLogs('os_navios', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
                 }
                 this.setState({ loading: false, bloqueado: false })
@@ -316,14 +202,18 @@ class AddShip extends Component {
         if (!validForm) {
             return;
         }
-        this.setState({...util.cleanStates(this.state)})
+        this.setState({ ...util.cleanStates(this.state) })
         this.setState({ bloqueado: true })
 
         await this.setState({
             dadosFinais: [
                 { titulo: 'Nome', valor: util.formatForLogs(this.state.nome) },
                 { titulo: 'Bandeira', valor: util.formatForLogs(this.state.bandeira, 'options', '', '', this.state.paisesOptions) },
-                { titulo: 'IMO', valor: util.formatForLogs(this.state.imo) }
+                { titulo: 'IMO', valor: util.formatForLogs(this.state.imo) },
+                { titulo: 'GRT', valor: util.formatForLogs(this.state.grt?.replace(/[^0-9\\,]/gi, '').replace(',', '.')) },
+                { titulo: 'DWT', valor: util.formatForLogs(this.state.dwt?.replace(/[^0-9\\,]/gi, '').replace(',', '.')) },
+                { titulo: 'LOA', valor: util.formatForLogs(this.state.loa?.replace(/[^0-9\\,]/gi, '').replace(',', '.')) },
+                { titulo: 'BEAM', valor: util.formatForLogs(this.state.beam?.replace(/[^0-9\\,]/gi, '').replace(',', '.')) },
             ],
             loading: true
         })
@@ -333,8 +223,11 @@ class AddShip extends Component {
             chave: this.state.chave,
             nome: this.state.nome,
             bandeira: this.state.bandeira,
-            imo: this.state.imo
-
+            imo: this.state.imo,
+            grt: this.state.grt?.replace(/[^0-9\\,]/gi, '').replace(',', '.'),
+            dwt: this.state.dwt?.replace(/[^0-9\\,]/gi, '').replace(',', '.'),
+            loa: this.state.loa?.replace(/[^0-9\\,]/gi, '').replace(',', '.'),
+            beam: this.state.beam?.replace(/[^0-9\\,]/gi, '').replace(',', '.'),
         }).then(
             async res => {
                 if (res.data === true) {
@@ -355,8 +248,15 @@ class AddShip extends Component {
 
     loadData = async (produto) => {
         if (produto !== 0) {
-            await this.setState({ nome: produto.nome, bandeira: produto.bandeira, imo: produto.imo })
-
+            await this.setState({
+                nome: produto.nome,
+                bandeira: produto.bandeira,
+                imo: produto.imo,
+                grt: produto.grt?.replace('.',','),
+                dwt: produto.dwt?.replace('.',','),
+                loa: produto.loa?.replace('.',','),
+                beam: produto.beam?.replace('.',','),
+            })
         }
     }
 
@@ -367,7 +267,7 @@ class AddShip extends Component {
     }
 
     openLogs = async () => {
-        await this.setState({ logs: await loader.getLogs("os_navios", this.state.chave)})
+        await this.setState({ logs: await loader.getLogs("os_navios", this.state.chave) })
         await this.setState({ modalLog: true })
     }
 
@@ -381,7 +281,7 @@ class AddShip extends Component {
         return (
             <div>
 
-                <Header voltarShips titulo="Navios" chave={this.state.chave != 0 ? this.state.chave : ''}/>
+                <Header voltarShips titulo="Navios" chave={this.state.chave != 0 ? this.state.chave : ''} />
                 <br />
                 <br />
                 <br />
@@ -389,7 +289,7 @@ class AddShip extends Component {
                     <Redirect to={'/'} />
                 }
 
-                {this.state.chave !=0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LOGS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                     <div className="logButton">
                         <button onClick={() => this.openLogs()}>Logs</button>
                     </div>
@@ -451,6 +351,36 @@ class AddShip extends Component {
                                                         <div className='col-1'></div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                             <Field type='text' className='form-control' value={this.state.imo} onChange={e => this.setState({ imo: e.currentTarget.value })} />
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>G.R.T.</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                            <Field type='text' className='form-control' value={this.state.grt} onChange={e => this.setState({ grt: e.currentTarget.value?.replace(/[^0-9\\,]/gi, '') })} />
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>D.W.T.</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                            <Field type='text' className='form-control' value={this.state.dwt} onChange={e => this.setState({ dwt: e.currentTarget.value?.replace(/[^0-9\\,]/gi, '') })} />
+                                                        </div>
+
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>L.O.A.</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                            <Field type='text' className='form-control' value={this.state.loa} onChange={e => this.setState({ loa: e.currentTarget.value?.replace(/[^0-9\\,]/gi, '') })} />
+                                                        </div>
+
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>B.E.A.M.</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                            <Field type='text' className='form-control' value={this.state.beam} onChange={e => this.setState({ beam: e.currentTarget.value?.replace(/[^0-9\\,]/gi, '') })} />
                                                         </div>
                                                     </div>
 
@@ -521,6 +451,36 @@ class AddShip extends Component {
                                                         <div className='col-1'></div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                             <Field type='text' className='form-control' value={this.state.imo} onChange={e => this.setState({ imo: e.currentTarget.value })} />
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>G.R.T.</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                            <Field type='text' className='form-control' value={this.state.grt} onChange={e => this.setState({ grt: e.currentTarget.value?.replace(/[^0-9\\,]/gi, '') })} />
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>D.W.T.</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                            <Field type='text' className='form-control' value={this.state.dwt} onChange={e => this.setState({ dwt: e.currentTarget.value?.replace(/[^0-9\\,]/gi, '') })} />
+                                                        </div>
+
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>L.O.A.</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                            <Field type='text' className='form-control' value={this.state.loa} onChange={e => this.setState({ loa: e.currentTarget.value?.replace(/[^0-9\\,]/gi, '') })} />
+                                                        </div>
+
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>B.E.A.M.</label>
+                                                        </div>
+                                                        <div className='col-1'></div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                            <Field type='text' className='form-control' value={this.state.beam} onChange={e => this.setState({ beam: e.currentTarget.value?.replace(/[^0-9\\,]/gi, '') })} />
                                                         </div>
                                                     </div>
 

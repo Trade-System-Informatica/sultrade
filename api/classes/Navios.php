@@ -383,7 +383,7 @@ class Navios
     {
         $database = new Database();
 
-        $cols = 'nome, bandeira, imo';
+        $cols = 'nome, bandeira, imo, grt, dwt, loa, beam';
 
         $result = $database->doInsert('os_navios', $cols, $values);
 
@@ -395,7 +395,7 @@ class Navios
     {
         $database = new Database();
 
-        $cols = 'nome, bandeira, imo';
+        $cols = 'nome, bandeira, imo, grt, dwt, loa, beam';
 
         $result = $database->doInsert('os_navios', $cols, $values);
 
@@ -405,10 +405,10 @@ class Navios
         return $result;
     }
 
-    public static function updateNavio($chave, $nome, $bandeira, $imo)
+    public static function updateNavio($chave, $nome, $bandeira, $imo, $grt, $dwt, $loa, $beam)
     {
         $database = new Database();
-        $query = "nome = '" . $nome . "', bandeira = '" . $bandeira . "', imo = '" . $imo . "'";
+        $query = "nome = '" . $nome . "', bandeira = '" . $bandeira . "', imo = '" . $imo . "', grt = '".$grt."', dwt = '".$dwt."', loa = '".$loa."', beam = '".$beam."'";
 
         $result = $database->doUpdate('os_navios', $query, 'chave = ' . $chave);
         $database->closeConection();
@@ -419,10 +419,10 @@ class Navios
         }
     }
 
-    public static function updateNavioBasico($chave, $nome, $bandeira)
+    public static function updateNavioBasico($chave, $nome, $bandeira, $imo, $grt, $dwt, $loa, $beam)
     {
         $database = new Database();
-        $query = "nome = '" . $nome . "', bandeira = '" . $bandeira . "'";
+        $query = "nome = '" . $nome . "', bandeira = '" . $bandeira . "', imo = '" . $imo . "', grt = '" . $grt . "', dwt = '" . $dwt . "', loa = '" . $loa . "', beam = '" . $beam . "'";
 
         $result = $database->doUpdate('os_navios', $query, 'chave = ' . $chave);
         $database->closeConection();

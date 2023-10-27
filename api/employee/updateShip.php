@@ -16,6 +16,10 @@ if($objData != NULL){
     $nome = prepareInput($objData->nome);
     $bandeira = prepareInput($objData->bandeira);
     $imo = prepareInput($objData->imo);
+    $grt = prepareInput($objData->grt);
+    $dwt = prepareInput($objData->dwt);
+    $loa = prepareInput($objData->loa);
+    $beam = prepareInput($objData->beam);
 
     $employees = new Employees();
     $navios = new Navios();
@@ -23,7 +27,7 @@ if($objData != NULL){
     $result = $employees->checkToken($token);
     //if($result == 'true'){
         //$result = "'" . $id_seaport . "'";
-    $result = $navios->updateNavio($chave, $nome, $bandeira, $imo);
+    $result = $navios->updateNavio($chave, $nome, $bandeira, $imo, $grt, $dwt, $loa, $beam);
     //}else{
     //    $result = "false";
     //}
