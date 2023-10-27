@@ -353,14 +353,14 @@ class AddShip extends Component {
                                                             <Field type='text' className='form-control' value={this.state.imo} onChange={e => this.setState({ imo: e.currentTarget.value })} />
                                                         </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>G.R.T.</label>
+                                                            <label>Grt</label>
                                                         </div>
                                                         <div className='col-1'></div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                             <Field type='text' className='form-control' value={this.state.grt} onChange={e => this.setState({ grt: e.currentTarget.value?.replace(/[^0-9\\,]/gi, '') })} />
                                                         </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>D.W.T.</label>
+                                                            <label>Dwt</label>
                                                         </div>
                                                         <div className='col-1'></div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
@@ -368,7 +368,7 @@ class AddShip extends Component {
                                                         </div>
 
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>L.O.A.</label>
+                                                            <label>Loa</label>
                                                         </div>
                                                         <div className='col-1'></div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
@@ -376,7 +376,7 @@ class AddShip extends Component {
                                                         </div>
 
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>B.E.A.M.</label>
+                                                            <label>Beam</label>
                                                         </div>
                                                         <div className='col-1'></div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
@@ -453,14 +453,14 @@ class AddShip extends Component {
                                                             <Field type='text' className='form-control' value={this.state.imo} onChange={e => this.setState({ imo: e.currentTarget.value })} />
                                                         </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>G.R.T.</label>
+                                                            <label>Grt</label>
                                                         </div>
                                                         <div className='col-1'></div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                             <Field type='text' className='form-control' value={this.state.grt} onChange={e => this.setState({ grt: e.currentTarget.value?.replace(/[^0-9\\,]/gi, '') })} />
                                                         </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>D.W.T.</label>
+                                                            <label>Dwt</label>
                                                         </div>
                                                         <div className='col-1'></div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
@@ -468,7 +468,7 @@ class AddShip extends Component {
                                                         </div>
 
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>L.O.A.</label>
+                                                            <label>Loa</label>
                                                         </div>
                                                         <div className='col-1'></div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
@@ -476,7 +476,7 @@ class AddShip extends Component {
                                                         </div>
 
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>B.E.A.M.</label>
+                                                            <label>Beam</label>
                                                         </div>
                                                         <div className='col-1'></div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
