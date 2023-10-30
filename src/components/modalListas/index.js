@@ -32,10 +32,10 @@ const estadoInicial = {
     navioBandeira: '',
     navioBloqueado: false,
     navioImo: '',
-    navioGrt: 0,
-    navioDwt: 0,
-    navioLoa: 0,
-    navioBeam: 0,
+    navioGrt: '0',
+    navioDwt: '0',
+    navioLoa: '0',
+    navioBeam: '0',
 
     bandeiras: [],
     banderiasOptions: [],
@@ -1987,10 +1987,10 @@ class ModalListas extends Component {
                                                                         navioNome: '',
                                                                         navioBandeira: '',
                                                                         navioImo: '',
-                                                                        navioGrt: 0,
-                                                                        navioDwt: 0,
-                                                                        navioLoa: 0,
-                                                                        navioBeam: 0,
+                                                                        navioGrt: '0',
+                                                                        navioDwt: '0',
+                                                                        navioLoa: '0',
+                                                                        navioBeam: '0',
                                                                     });
                                                                     this.props.alteraModal('criarNavio')
                                                                 }}
