@@ -274,7 +274,7 @@ class Relatorio extends Component {
             token: true,
             where: where.join(' AND '),
             groupBy: por,
-            tipo_sub: tipo_sub === 1 ? 0 : 1,
+            tipo_sub
         }).then(
             async res => {
                 await this.setState({ relatorio: res.data })

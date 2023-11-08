@@ -1452,7 +1452,7 @@ class Contas
                                           GROUP_CONCAT(contas_aberto.sailed_manual SEPARATOR '@.@') AS sailed_manual,
                                           GROUP_CONCAT(contas_aberto.discount_manual SEPARATOR '@.@') AS discount_manual,
                                           GROUP_CONCAT(contas_aberto.received_manual SEPARATOR '@.@') AS received_manual",
-                $where . " AND contas_aberto.Tipo = '$tipo'" . $groupBy
+                                          $where . " and contas_aberto.Tipo = $tipo" . $groupBy
             );
             $database->closeConection();
         } else {
