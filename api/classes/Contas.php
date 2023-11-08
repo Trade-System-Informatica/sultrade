@@ -1406,7 +1406,7 @@ class Contas
             LEFT JOIN os_tp_docto ON os_tp_docto.chave = contas_aberto.tipodocto
             LEFT JOIN os ON os.chave = contas_aberto.os_origem',
                 "GROUP_CONCAT(contas_aberto.Docto SEPARATOR '@.@') AS documento, 
-                                          GROUP_CONCAT(pessoas.nome SEPARATOR '@.@') AS pessoa, 
+                                         pessoas.nome  AS pessoa, 
                                           GROUP_CONCAT(contas_aberto.vencimento SEPARATOR '@.@') AS vencimento,
                                           GROUP_CONCAT(contas_aberto.chave SEPARATOR '@.@') AS conta_chave,
                                           GROUP_CONCAT(contas_aberto.data_pagto SEPARATOR '@.@') AS dataPagamento,
