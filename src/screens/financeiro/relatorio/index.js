@@ -230,12 +230,11 @@ class Relatorio extends Component {
         let tipo_sub = 0;
         if (this.props.location.state.backTo) {
             if (this.props.location.state.backTo == 'contasPagas' || this.props.location.state.backTo == 'contasPagar') {
+                tipo_sub = 0;
+            } else {
                 tipo_sub = 1;
                 periodoInicial = "1 = 1";
                 periodoFinal = "1 = 1";
-            } else {
-                tipo_sub = 0;
-               
             }
         }
 
@@ -275,7 +274,7 @@ class Relatorio extends Component {
             token: true,
             where: where.join(' AND '),
             groupBy: por,
-            tipo_sub
+            tipo_sub: tipo_sub === 1 ? 0 : 1,
         }).then(
             async res => {
                 await this.setState({ relatorio: res.data })
