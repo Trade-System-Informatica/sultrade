@@ -231,10 +231,11 @@ class Relatorio extends Component {
         if (this.props.location.state.backTo) {
             if (this.props.location.state.backTo == 'contasPagas' || this.props.location.state.backTo == 'contasPagar') {
                 tipo_sub = 1;
-            } else {
-                tipo_sub = 0;
                 periodoInicial = "1 = 1";
                 periodoFinal = "1 = 1";
+            } else {
+                tipo_sub = 0;
+               
             }
         }
 
