@@ -580,7 +580,7 @@ class Relatorio extends Component {
 
                             console.log(rows,'rows');
                             console.log(checkBalance);
-                            if (!checkBalance || checkBalance <= 0 || parseFloat(checkBalance?.toFixed(2)) <= 0) {
+                            if (!checkBalance) {
                                 return (<></>)
                             }
 
