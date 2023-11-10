@@ -561,21 +561,6 @@ class Relatorio extends Component {
                                 console.log({ balance, balance2 });
 
                                 if (balance2 > 0) {
-                                    console.log('balança entro aqui')
-                                    
-                                    console.log({
-                                        ship: e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : '',
-                                        os: e.os ? util.removeAcentos(e.os.split('@.@')[index]) : '',
-                                        port: e.porto ? util.removeAcentos(e.porto.split('@.@')[index]) : '',
-                                        sailed: e.sailed ? e.sailed.split('@.@')[index] : '',
-                                        billing: e.envio ? moment(e.envio.split('@.@')[index]).isValid() ? moment(e.envio.split('@.@')[index]).format("DD/MM/YY") : '' : '',
-                                        roe: e.ROE ? e.ROE.split("@.@")[index] : "",
-                                        fda: FDA,
-                                        discount,
-                                        received,
-                                        balance: balance2,
-                                    });
-
                                     rows.push({
                                         ship: e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : '',
                                         os: e.os ? util.removeAcentos(e.os.split('@.@')[index]) : '',
@@ -627,7 +612,8 @@ class Relatorio extends Component {
                                             <th>RECEIVED</th>
                                             <th>BALANCE</th>
                                         </tr>
-                                        {rows.toSorted((a, b) => moment(a.sailed).diff(moment(b.sailed))).map((row, index) => {
+                                        {rows.sort((a, b) => moment(a.sailed).diff(moment(b.sailed))).map((row, index) => {
+                                            console.log(row,'index');
                                             if (parseFloat(row.balance) > 0) {
                                                 totalFDA += parseFloat(row.fda);
                                                 totalDiscount += parseFloat(row.discount);
