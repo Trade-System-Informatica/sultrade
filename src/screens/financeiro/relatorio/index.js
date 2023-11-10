@@ -427,6 +427,7 @@ class Relatorio extends Component {
                             console.log(e?.os, 'os ')
                             console.log(e?.os?.split("@.@"), 'os  split')
                             checkBalance = 0;
+                            const verificador = [];
                             const rows = [];
 
                             if (this.state.por == 'porCliente' && !e.pessoa) {
@@ -558,7 +559,13 @@ class Relatorio extends Component {
                                 const balance2 = isNaN(balance) ? 0 : balance
 
 
-                                console.log({ balance, balance2 });
+                                verificador.push({
+                                    FDA: FDA,
+                                    discount,
+                                    received,
+                                    balance,
+                                    balance2,
+                                })
 
                                 if (balance2 > 0) {
                                     rows.push({
@@ -579,6 +586,7 @@ class Relatorio extends Component {
                             })
 
                             console.log(rows,'rows');
+                            console.log(verificador, 'verificador');
                             console.log(checkBalance);
                             if (!checkBalance) {
                                 return (<></>)
