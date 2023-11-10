@@ -550,7 +550,13 @@ class Relatorio extends Component {
                                     FDA += e.governmentTaxes.split("@.@")[index] && e.governmentTaxes.split("@.@")[index] > 0 ? util.toFixed(parseFloat(e.governmentTaxes.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
                                 }
 
+                                console.log(FDA, received, discount);
+
+
                                 const balance = parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
+
+                                console.log({balance});
+                                
                                 if (parseFloat(balance.toFixed(2)) > 0) {
                                     rows.push({
                                         ship: e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : '',
