@@ -586,7 +586,7 @@ class Relatorio extends Component {
                             let totalDiscountPorGrupo = 0;
                             let totalReceivedPorGrupo = 0;
                             let totalBalancePorGrupo = 0;
-
+                            console.log(rows,'rows');
                             return (
                                 <div>
 
@@ -613,7 +613,7 @@ class Relatorio extends Component {
                                             <th>BALANCE</th>
                                         </tr>
                                         {rows.sort((a, b) => moment(a.sailed).diff(moment(b.sailed))).map((row, index) => {
-                                            console.log(row,'index');
+                                            console.log(row,'index',index);
                                             if (parseFloat(row.balance) > 0) {
                                                 totalFDA += parseFloat(row.fda);
                                                 totalDiscount += parseFloat(row.discount);
