@@ -424,8 +424,8 @@ class Relatorio extends Component {
                             console.log(e,'relatorio');
                             console.log(e?.os_manual,'os manual')
                             console.log(e?.os_manual?.split("@.@"),'os manual split')
-                            console.log(e?.os_manual,'os ')
-                            console.log(e?.os_manual?.split("@.@"),'os  split')
+                            console.log(e?.os,'os ')
+                            console.log(e?.os?.split("@.@"),'os  split')
                             checkBalance = 0;
                             const rows = [];
 
@@ -482,6 +482,8 @@ class Relatorio extends Component {
                                 if (!e?.os?.split("@.@")[index]) {
                                     return;
                                 }
+                                const spli = e?.os?.split("@.@")[index];
+                                console.log(spli, `${index} split`)
                                 const eventMap = e.evento_valor?.split('@.@');
                                 const eventMapReceived = e.evento_valor_received?.split('@.@');
                                 const eventMapDiscount = e.evento_valor_discount?.split('@.@');
