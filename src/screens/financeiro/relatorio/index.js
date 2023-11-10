@@ -567,7 +567,7 @@ class Relatorio extends Component {
                                     balance2,
                                 })
 
-                                if (balance2) {
+                                
                                     rows.push({
                                         ship: e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : '',
                                         os: e.os ? util.removeAcentos(e.os.split('@.@')[index]) : '',
@@ -575,14 +575,14 @@ class Relatorio extends Component {
                                         sailed: e.sailed ? e.sailed.split('@.@')[index] : '',
                                         billing: e.envio ? moment(e.envio.split('@.@')[index]).isValid() ? moment(e.envio.split('@.@')[index]).format("DD/MM/YY") : '' : '',
                                         roe: e.ROE ? e.ROE.split("@.@")[index] : "",
-                                        fda: FDA,
-                                        discount,
-                                        received,
-                                        balance: balance2,
+                                        fda: FDA || 0,
+                                        discount: discount || 0 ,
+                                        received: received || 0,
+                                        balance: balance2 || 0,
                                     });
-                                }
+                                
 
-                                checkBalance += parseFloat(balance.toFixed(2));
+                                checkBalance += parseFloat(balance2.toFixed(2));
                             })
 
                             console.log(rows,'rows');
