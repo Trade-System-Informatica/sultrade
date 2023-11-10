@@ -553,11 +553,29 @@ class Relatorio extends Component {
                                 console.log(FDA, received, discount);
 
 
-                                const balance = parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
+                                const balance = parseFloat(`${parseFloat(FDA) - parseFloat(discount) - parseFloat(received)}`);
 
-                                console.log({balance});
-                                
-                                if (parseFloat(balance.toFixed(2)) > 0) {
+                                const balance2 = isNaN(balance) ? 0 : balance
+
+
+                                console.log({ balance, balance2 });
+
+                                if (balance2 > 0) {
+                                    console.log('balança entro aqui')
+                                    
+                                    console.log({
+                                        ship: e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : '',
+                                        os: e.os ? util.removeAcentos(e.os.split('@.@')[index]) : '',
+                                        port: e.porto ? util.removeAcentos(e.porto.split('@.@')[index]) : '',
+                                        sailed: e.sailed ? e.sailed.split('@.@')[index] : '',
+                                        billing: e.envio ? moment(e.envio.split('@.@')[index]).isValid() ? moment(e.envio.split('@.@')[index]).format("DD/MM/YY") : '' : '',
+                                        roe: e.ROE ? e.ROE.split("@.@")[index] : "",
+                                        fda: FDA,
+                                        discount,
+                                        received,
+                                        balance: balance2,
+                                    });
+
                                     rows.push({
                                         ship: e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : '',
                                         os: e.os ? util.removeAcentos(e.os.split('@.@')[index]) : '',
@@ -568,8 +586,8 @@ class Relatorio extends Component {
                                         fda: FDA,
                                         discount,
                                         received,
-                                        balance
-                                    })
+                                        balance: balance2,
+                                    });
                                 }
 
                                 checkBalance += parseFloat(balance.toFixed(2));
