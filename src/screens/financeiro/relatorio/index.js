@@ -424,6 +424,8 @@ class Relatorio extends Component {
                             console.log(e,'relatorio');
                             console.log(e?.os_manual,'os manual')
                             console.log(e?.os_manual?.split("@.@"),'os manual split')
+                            console.log(e?.os_manual,'os ')
+                            console.log(e?.os_manual?.split("@.@"),'os  split')
                             checkBalance = 0;
                             const rows = [];
 
