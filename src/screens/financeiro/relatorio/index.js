@@ -413,6 +413,58 @@ class Relatorio extends Component {
                 {this.props.location.state.backTo != 'contasPagas' && this.props.location.state.backTo != 'contasPagar' &&
                     <div className='pdfContent'>
                         {relatorio.map((e) => {
+
+                            const formated = {
+                                "pessoa2": e?.pessoa2,
+                                "conta_chave2": e?.conta_chave2,
+                                "conta_chave": e?.conta_chave?.split('@.@')[0] ? e?.conta_chave?.split('@.@')[0]  : [],
+                                "pessoa":  e?.pessoa?.split('@.@')[0] ? e?.pessoa?.split('@.@')[0]  : [],
+                                "documento": e?.documento?.split('@.@')[0] ? e?.documento?.split('@.@')[0] : [],
+                                "vencimento": e?.vencimento?.split('@.@')[0] ? e?.vencimento?.split('@.@')[0] : [],
+                                "dataPagamento": e?.dataPagamento || null,
+                                "historico": e?.historico?.split('@.@')[0] ? e?.historico?.split('@.@')[0] : [],
+                                "tipoDocumento": null,
+                                "lancamento": e?.lancamento?.split('@.@')[0] ? e?.lancamento?.split('@.@')[0] : [],
+                                "envio": e?.envio?.split('@.@')[0] ? e?.envio?.split('@.@')[0] : [],
+                                "CC": e?.CC?.split('@.@')[0] ? e?.CC?.split('@.@')[0] : [],
+                                "saldo":  e?.saldo?.split('@.@')[0] ? e?.saldo?.split('@.@')[0] : [],
+                                "valor":  e?.valor?.split('@.@')[0] ? e?.valor?.split('@.@')[0] : [],
+                                "desconto": e?.desconto?.split('@.@')[0] ? e?.desconto?.split('@.@')[0] : [],
+                                "os": e?.os?.split('@.@')[0] ? e?.os?.split('@.@')[0] : [],
+                                "governmentTaxes": e?.governmentTaxes?.split('@.@')[0] ? e?.governmentTaxes?.split('@.@')[0] : [],
+                                "bankCharges":  e?.bankCharges?.split('@.@')[0] ? e?.bankCharges?.split('@.@')[0] : [],
+                                "sailed": e?.sailed?.split('@.@')[0] ? e?.sailed?.split('@.@')[0] : [],
+                                "ROE": e?.ROE?.split('@.@')[0] ? e?.ROE?.split('@.@')[0] : [],
+                                "evento_moeda": e?.evento_moeda?.split('@.@')[0] ? e?.evento_moeda?.split('@.@')[0] : [],
+                                "evento_valor": e?.evento_valor?.split('@.@')[0] ? e?.evento_valor?.split('@.@')[0] : [],
+                                "evento_os": e?.evento_os?.split('@.@')[0] ? e?.evento_os?.split('@.@')[0] : [],
+                                "evento_moeda_received": e?.evento_moeda_received?.split('@.@')[0] ? e?.evento_moeda_received?.split('@.@')[0] : [],
+                                "evento_valor_received": e?.evento_valor_received?.split('@.@')[0] ? e?.evento_valor_received?.split('@.@')[0] : [],
+                                "evento_os_received": e?.evento_os_received?.split('@.@')[0] ? e?.evento_os_received?.split('@.@')[0] : [],
+                                "evento_moeda_discount": e?.evento_moeda_discount?.split('@.@')[0] ? e?.evento_moeda_discount?.split('@.@')[0] : [],
+                                "evento_valor_discount":e?.evento_valor_discount?.split('@.@')[0] ? e?.evento_valor_discount?.split('@.@')[0] : [],
+                                "evento_os_discount": e?.evento_os_discount?.split('@.@')[0] ? e?.evento_os_discount?.split('@.@')[0] : [],
+                                "FDA":  e?.FDA?.split('@.@')[0] ? e?.FDA?.split('@.@')[0] : [],
+                                "discount":  e?.discount?.split('@.@')[0] ? e?.discount?.split('@.@')[0] : [],
+                                "received": e?.received?.split('@.@')[0] ? e?.received?.split('@.@')[0] : [],
+                                "os_moeda":  e?.os_moeda?.split('@.@')[0] ? e?.os_moeda?.split('@.@')[0] : [],
+                                "navio":  e?.navio?.split('@.@')[0] ? e?.navio?.split('@.@')[0] : [],
+                                "porto": e?.porto?.split('@.@')[0] ? e?.porto?.split('@.@')[0] : [],
+                                "valor_manual": e?.valor_manual?.split('@.@')[0] ? e?.valor_manual?.split('@.@')[0] : [],
+                                "navio_manual": e?.navio_manual?.split('@.@')[0] ? e?.navio_manual?.split('@.@')[0] : [],
+                                "porto_manual": e?.porto_manual?.split('@.@')[0] ? e?.porto_manual?.split('@.@')[0] : [],
+                                "os_manual": e?.os_manual?.split('@.@')[0] ? e?.os_manual?.split('@.@')[0] : [],
+                                "roe_manual": e?.roe_manual?.split('@.@')[0] ? e?.roe_manual?.split('@.@')[0] : [],
+                                "envio_manual": e?.envio_manual?.split('@.@')[0] ? e?.envio_manual?.split('@.@')[0] : [],
+                                "sailed_manual": e?.sailed_manual?.split('@.@')[0] ? e?.sailed_manual?.split('@.@')[0] : [],
+                                "discount_manual": e?.discount_manual?.split('@.@')[0] ? e?.discount_manual?.split('@.@')[0] : [],
+                                "received_manual": e?.received_manual?.split('@.@')[0] ? e?.received_manual?.split('@.@')[0] : [],
+                            }
+                            console.log(formated);
+
+
+
+
                             checkBalance = 0;
                             const rows = [];
 
