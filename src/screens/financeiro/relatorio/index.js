@@ -463,7 +463,7 @@ class Relatorio extends Component {
                                 }
 
                                 const balance = parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
-                                if (parseFloat(balance.toFixed(2)) > 0) {
+                                if (balance) {
                                     rows.push({
                                         ship: e.navio_manual ? util.removeAcentos(e.navio_manual.split('@.@')[index]) : '',
                                         os: e.os_manual ? util.removeAcentos(e.os_manual.split('@.@')[index]) : '',
@@ -567,7 +567,7 @@ class Relatorio extends Component {
                                     balance2,
                                 })
 
-                                if (balance2 > 0) {
+                                if (balance2) {
                                     rows.push({
                                         ship: e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : '',
                                         os: e.os ? util.removeAcentos(e.os.split('@.@')[index]) : '',
