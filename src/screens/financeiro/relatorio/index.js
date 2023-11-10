@@ -309,8 +309,8 @@ class Relatorio extends Component {
             token: true,
             emails: this.state.emails.map((e) => e?.trim()),
             mensagem: base64,
-            nomeCliente: this.state.pessoas.find((p) => p.Chave == this.state.clientes[0])?.Nome.replaceAll(".",""),
-            balance: `${this.state.moeda == 5 ? "R$" : "USD" } ${new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.totalBalance)}`,
+            nomeCliente: this.state.pessoas.find((p) => p.Chave == this.state.clientes[0])?.Nome.replaceAll(".", ""),
+            balance: `${this.state.moeda == 5 ? "R$" : "USD"} ${new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.totalBalance)}`,
         }).then(
             async res => {
                 console.log(res);
@@ -367,10 +367,18 @@ class Relatorio extends Component {
 
         titulo += this.state.periodoFinal && this.state.periodoInicial ? ` a ${moment(this.state.periodoFinal).format('DD/MM/YYYY')}` : "";
 
+        console.log({
+            backTo: this.props.location.state.backTo,
+            titulo: titulo,
+            por: this.state.por,
+            periodoInicial: this.state.periodoInicial,
+            periodoFinal: this.state.periodoFinal,
+        })
+
         let totalFDA = 0;
         let totalDiscount = 0;
         let totalReceived = 0;
-        this.setState({totalBalance: 0});
+        this.setState({ totalBalance: 0 });
 
         let checkBalance = 0;
 
@@ -386,7 +394,7 @@ class Relatorio extends Component {
         let totalSaldoPorGrupo = 0;
 
         if (this.props.location.state.backTo != 'contasPagas' && this.props.location.state.backTo != 'contasPagar') {
-            this.setState({pdfNome: `SOA (${moment().format("DD-MM-YYYY")})${this.state.clientes[0] && !this.state.clientes[1] ? ` - ${this.state.pessoas.find((e) => e.Chave == this.state.clientes[0])?.Nome?.replaceAll('.', '')}` : ""}`})
+            this.setState({ pdfNome: `SOA (${moment().format("DD-MM-YYYY")})${this.state.clientes[0] && !this.state.clientes[1] ? ` - ${this.state.pessoas.find((e) => e.Chave == this.state.clientes[0])?.Nome?.replaceAll('.', '')}` : ""}` })
         } else {
             if (this.props.location.state.backTo == 'contasPagas') {
                 this.setState({ pdfNome: `Relatório de contas pagas (${moment().format("DD-MM-YYYY")})` });
@@ -394,7 +402,7 @@ class Relatorio extends Component {
                 this.setState({ pdfNome: `Relatório de contas à pagar (${moment().format("DD-MM-YYYY")})` });
             }
         }
-        
+
         let pdf =
             <div style={{ zoom: 1 }} id='pdfDiv' key={546546554654}>
 
@@ -413,6 +421,9 @@ class Relatorio extends Component {
                 {this.props.location.state.backTo != 'contasPagas' && this.props.location.state.backTo != 'contasPagar' &&
                     <div className='pdfContent'>
                         {relatorio.map((e) => {
+                            console.log(e,'relatorio');
+                            console.log(e?.os_manual,'os manual')
+                            console.log(e?.os_manual?.split("@.@"),'os manual split')
                             checkBalance = 0;
                             const rows = [];
 
@@ -426,7 +437,7 @@ class Relatorio extends Component {
                                 e.dataPagamento = '';
                             }
                             map = this.state.por == "porCliente" ? e.pessoa.split('@.@') : this.state.por == "porVencimento" ? e.vencimento.split('@.@') : e.dataPagamento.split('@.@');
-
+                            console.log(map,'map');
                             map.map((el, index) => {
                                 if (!e?.os_manual?.split("@.@")[index]) {
                                     return;
@@ -538,7 +549,7 @@ class Relatorio extends Component {
                                         balance
                                     })
                                 }
-                                
+
                                 checkBalance += parseFloat(balance.toFixed(2));
                             })
 
@@ -581,7 +592,7 @@ class Relatorio extends Component {
                                                 totalFDA += parseFloat(row.fda);
                                                 totalDiscount += parseFloat(row.discount);
                                                 totalReceived += parseFloat(row.received);
-                                                this.setState({totalBalance: this.state.totalBalance + parseFloat(row.balance)});
+                                                this.setState({ totalBalance: this.state.totalBalance + parseFloat(row.balance) });
 
                                                 totalFDAPorGrupo += parseFloat(row.fda);
                                                 totalDiscountPorGrupo += parseFloat(row.discount);
@@ -848,7 +859,7 @@ class Relatorio extends Component {
 
                         >
                             <PDFExport
-                                fileName={this.state.pdfNome}   
+                                fileName={this.state.pdfNome}
                                 scale={0.6}
                                 portrait={true}
 
