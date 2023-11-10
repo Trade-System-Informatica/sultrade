@@ -367,14 +367,6 @@ class Relatorio extends Component {
 
         titulo += this.state.periodoFinal && this.state.periodoInicial ? ` a ${moment(this.state.periodoFinal).format('DD/MM/YYYY')}` : "";
 
-        console.log({
-            backTo: this.props.location.state.backTo,
-            titulo: titulo,
-            por: this.state.por,
-            periodoInicial: this.state.periodoInicial,
-            periodoFinal: this.state.periodoFinal,
-        })
-
         let totalFDA = 0;
         let totalDiscount = 0;
         let totalReceived = 0;
@@ -421,13 +413,7 @@ class Relatorio extends Component {
                 {this.props.location.state.backTo != 'contasPagas' && this.props.location.state.backTo != 'contasPagar' &&
                     <div className='pdfContent'>
                         {relatorio.map((e) => {
-                            console.log(e, 'relatorio');
-                            console.log(e?.os_manual, 'os manual')
-                            console.log(e?.os_manual?.split("@.@"), 'os manual split')
-                            console.log(e?.os, 'os ')
-                            console.log(e?.os?.split("@.@"), 'os  split')
                             checkBalance = 0;
-                            const verificador = [];
                             const rows = [];
 
                             if (this.state.por == 'porCliente' && !e.pessoa) {
@@ -440,8 +426,6 @@ class Relatorio extends Component {
                                 e.dataPagamento = '';
                             }
                             map = this.state.por == "porCliente" ? e.pessoa.split('@.@') : this.state.por == "porVencimento" ? e.vencimento.split('@.@') : e.dataPagamento.split('@.@');
-
-                            console.log(map, 'map');
 
                             map.map((el, index) => {
                                 if (!e?.os_manual?.split("@.@")[index]) {
@@ -463,7 +447,7 @@ class Relatorio extends Component {
                                 }
 
                                 const balance = parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
-                                if (balance) {
+                                if (parseFloat(balance.toFixed(2)) > 0) {
                                     rows.push({
                                         ship: e.navio_manual ? util.removeAcentos(e.navio_manual.split('@.@')[index]) : '',
                                         os: e.os_manual ? util.removeAcentos(e.os_manual.split('@.@')[index]) : '',
@@ -483,17 +467,9 @@ class Relatorio extends Component {
                                 if (!e?.os?.split("@.@")[index]) {
                                     return;
                                 }
-                                const spli = e?.os?.split("@.@")[index];
-                                console.log(spli, `${index} split`)
                                 const eventMap = e.evento_valor?.split('@.@');
-                                console.log(eventMap, `${index} evento valor`)
                                 const eventMapReceived = e.evento_valor_received?.split('@.@');
-                                console.log(eventMapReceived, `${index} evento a receber valor`)
                                 const eventMapDiscount = e.evento_valor_discount?.split('@.@');
-                                console.log(eventMapDiscount, `${index} eventos disconto valor`)
-
-                                const events = e.evento_os?.split('@.@');
-                                console.log(events, `${index} eventos`)
 
                                 let FDA = 0;
                                 let discount = 0;
@@ -502,7 +478,6 @@ class Relatorio extends Component {
                                 if (eventMap) {
                                     eventMap.map((elem, eventIndex) => {
                                         if (e.evento_os.split("@.@")[eventIndex] == e.os.split("@.@")[index]) {
-
                                             if (this.state.moeda == e.evento_moeda.split("@.@")[eventIndex]) {
                                                 FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]), 2) : 0;
                                             } else if (this.state.moeda == 5) {
@@ -513,7 +488,6 @@ class Relatorio extends Component {
                                         }
                                     });
                                 }
-
                                 if (eventMapReceived) {
                                     eventMap.map((elem, eventIndex) => {
                                         if (e.evento_os_received.split("@.@")[eventIndex] == e.os.split("@.@")[index]) {
@@ -541,8 +515,6 @@ class Relatorio extends Component {
                                     });
                                 }
 
-                                console.log(FDA, received, discount);
-
                                 if (this.state.moeda == 5) {
                                     FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? parseFloat(e.bankCharges.split("@.@")[index]) : 0;
                                     FDA += e.governmentTaxes.split("@.@")[index] && e.governmentTaxes.split("@.@")[index] > 0 ? parseFloat(e.governmentTaxes.split("@.@")[index]) : 0;
@@ -551,23 +523,8 @@ class Relatorio extends Component {
                                     FDA += e.governmentTaxes.split("@.@")[index] && e.governmentTaxes.split("@.@")[index] > 0 ? util.toFixed(parseFloat(e.governmentTaxes.split("@.@")[index]) / parseFloat(e.ROE && !!e.ROE.split("@.@")[index] && e.ROE.split("@.@")[index] != 0 ? e.ROE.split("@.@")[index] : 5), 2) : 0;
                                 }
 
-                                console.log(FDA, received, discount);
-
-
-                                const balance = parseFloat(`${parseFloat(FDA) - parseFloat(discount) - parseFloat(received)}`);
-
-                                const balance2 = isNaN(balance) ? 0 : balance
-
-
-                                verificador.push({
-                                    FDA: FDA,
-                                    discount,
-                                    received,
-                                    balance,
-                                    balance2,
-                                })
-
-                                
+                                const balance = parseFloat(FDA) - parseFloat(discount) - parseFloat(received);
+                                if (parseFloat(balance.toFixed(2)) > 0) {
                                     rows.push({
                                         ship: e.navio ? util.removeAcentos(e.navio.split('@.@')[index]) : '',
                                         os: e.os ? util.removeAcentos(e.os.split('@.@')[index]) : '',
@@ -575,20 +532,17 @@ class Relatorio extends Component {
                                         sailed: e.sailed ? e.sailed.split('@.@')[index] : '',
                                         billing: e.envio ? moment(e.envio.split('@.@')[index]).isValid() ? moment(e.envio.split('@.@')[index]).format("DD/MM/YY") : '' : '',
                                         roe: e.ROE ? e.ROE.split("@.@")[index] : "",
-                                        fda: FDA || 0,
-                                        discount: discount || 0 ,
-                                        received: received || 0,
-                                        balance: balance2 || 0,
-                                    });
-                                
+                                        fda: FDA,
+                                        discount,
+                                        received,
+                                        balance
+                                    })
+                                }
 
-                                checkBalance += parseFloat(balance2.toFixed(2));
+                                checkBalance += parseFloat(balance.toFixed(2));
                             })
 
-                            console.log(rows,'rows');
-                            console.log(verificador, 'verificador');
-                            console.log(checkBalance);
-                            if (!checkBalance) {
+                            if (!checkBalance || checkBalance <= 0 || parseFloat(checkBalance?.toFixed(2)) <= 0) {
                                 return (<></>)
                             }
 
@@ -596,7 +550,7 @@ class Relatorio extends Component {
                             let totalDiscountPorGrupo = 0;
                             let totalReceivedPorGrupo = 0;
                             let totalBalancePorGrupo = 0;
-                            console.log(rows,'rows');
+
                             return (
                                 <div>
 
@@ -622,9 +576,8 @@ class Relatorio extends Component {
                                             <th>RECEIVED</th>
                                             <th>BALANCE</th>
                                         </tr>
-                                        {rows.sort((a, b) => moment(a.sailed).diff(moment(b.sailed))).map((row, index) => {
-                                            console.log(row,'index',index);
-                                            if (row.balance) {
+                                        {rows.toSorted((a, b) => moment(a.sailed).diff(moment(b.sailed))).map((row, index) => {
+                                            if (parseFloat(row.balance) > 0) {
                                                 totalFDA += parseFloat(row.fda);
                                                 totalDiscount += parseFloat(row.discount);
                                                 totalReceived += parseFloat(row.received);
