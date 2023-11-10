@@ -437,7 +437,9 @@ class Relatorio extends Component {
                                 e.dataPagamento = '';
                             }
                             map = this.state.por == "porCliente" ? e.pessoa.split('@.@') : this.state.por == "porVencimento" ? e.vencimento.split('@.@') : e.dataPagamento.split('@.@');
+                           
                             console.log(map,'map');
+
                             map.map((el, index) => {
                                 if (!e?.os_manual?.split("@.@")[index]) {
                                     return;
