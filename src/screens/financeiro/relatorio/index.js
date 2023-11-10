@@ -624,7 +624,7 @@ class Relatorio extends Component {
                                         </tr>
                                         {rows.sort((a, b) => moment(a.sailed).diff(moment(b.sailed))).map((row, index) => {
                                             console.log(row,'index',index);
-                                            if (parseFloat(row.balance) > 0) {
+                                            if (row.balance) {
                                                 totalFDA += parseFloat(row.fda);
                                                 totalDiscount += parseFloat(row.discount);
                                                 totalReceived += parseFloat(row.received);
