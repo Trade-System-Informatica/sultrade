@@ -216,7 +216,7 @@ class Relatorio extends Component {
             return;
         }
         const empresa = `contas_aberto.Empresa = ${this.state.empresa}`;
-        const abertas = this.state.tipo == 'aberto' ? `contas_aberto.Saldo > 0` : `contas_aberto.Saldo = 0`;
+        const abertas = this.state.tipo == 'aberto' ? `contas_aberto.Saldo >= 1` : `contas_aberto.Saldo = 0`;
         const conta = this.state.conta ? `contas_aberto.Conta_Contabil = '${this.state.conta}'` : '';
         const centroCusto = this.state.centroCusto ? `contas_aberto.Centro_Custo = '${this.state.centroCusto}'` : '';
         const pessoa = this.state.clientes[0] ? `contas_aberto.pessoa IN ('${this.state.clientes.join("','")}')` : '';
