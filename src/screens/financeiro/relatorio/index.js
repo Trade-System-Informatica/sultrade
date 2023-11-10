@@ -485,9 +485,11 @@ class Relatorio extends Component {
                                 const spli = e?.os?.split("@.@")[index];
                                 console.log(spli, `${index} split`)
                                 const eventMap = e.evento_valor?.split('@.@');
+                                console.log(eventMap, `${index} evento valor`)
                                 const eventMapReceived = e.evento_valor_received?.split('@.@');
+                                console.log(eventMapReceived, `${index} evento a receber valor`)
                                 const eventMapDiscount = e.evento_valor_discount?.split('@.@');
-
+                                console.log(eventMapDiscount, `${index} eventos disconto valor`)
                                 let FDA = 0;
                                 let discount = 0;
                                 let received = 0;
