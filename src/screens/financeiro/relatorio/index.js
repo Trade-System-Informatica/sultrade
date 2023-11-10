@@ -421,11 +421,11 @@ class Relatorio extends Component {
                 {this.props.location.state.backTo != 'contasPagas' && this.props.location.state.backTo != 'contasPagar' &&
                     <div className='pdfContent'>
                         {relatorio.map((e) => {
-                            console.log(e,'relatorio');
-                            console.log(e?.os_manual,'os manual')
-                            console.log(e?.os_manual?.split("@.@"),'os manual split')
-                            console.log(e?.os,'os ')
-                            console.log(e?.os?.split("@.@"),'os  split')
+                            console.log(e, 'relatorio');
+                            console.log(e?.os_manual, 'os manual')
+                            console.log(e?.os_manual?.split("@.@"), 'os manual split')
+                            console.log(e?.os, 'os ')
+                            console.log(e?.os?.split("@.@"), 'os  split')
                             checkBalance = 0;
                             const rows = [];
 
@@ -439,8 +439,8 @@ class Relatorio extends Component {
                                 e.dataPagamento = '';
                             }
                             map = this.state.por == "porCliente" ? e.pessoa.split('@.@') : this.state.por == "porVencimento" ? e.vencimento.split('@.@') : e.dataPagamento.split('@.@');
-                           
-                            console.log(map,'map');
+
+                            console.log(map, 'map');
 
                             map.map((el, index) => {
                                 if (!e?.os_manual?.split("@.@")[index]) {
@@ -493,6 +493,7 @@ class Relatorio extends Component {
 
                                 const events = e.evento_os?.split('@.@');
                                 console.log(events, `${index} eventos`)
+
                                 let FDA = 0;
                                 let discount = 0;
                                 let received = 0;
@@ -500,6 +501,7 @@ class Relatorio extends Component {
                                 if (eventMap) {
                                     eventMap.map((elem, eventIndex) => {
                                         if (e.evento_os.split("@.@")[eventIndex] == e.os.split("@.@")[index]) {
+
                                             if (this.state.moeda == e.evento_moeda.split("@.@")[eventIndex]) {
                                                 FDA += e.evento_valor.split("@.@")[eventIndex] ? util.toFixed(parseFloat(e.evento_valor.split("@.@")[eventIndex]), 2) : 0;
                                             } else if (this.state.moeda == 5) {
@@ -510,6 +512,7 @@ class Relatorio extends Component {
                                         }
                                     });
                                 }
+
                                 if (eventMapReceived) {
                                     eventMap.map((elem, eventIndex) => {
                                         if (e.evento_os_received.split("@.@")[eventIndex] == e.os.split("@.@")[index]) {
@@ -536,6 +539,8 @@ class Relatorio extends Component {
                                         }
                                     });
                                 }
+
+                                console.log(FDA, received, discount);
 
                                 if (this.state.moeda == 5) {
                                     FDA += e.bankCharges.split("@.@")[index] && e.bankCharges.split("@.@")[index] > 0 ? parseFloat(e.bankCharges.split("@.@")[index]) : 0;
