@@ -439,6 +439,7 @@ class Relatorio extends Component {
                                 "evento_moeda": e?.evento_moeda?.split('@.@') ? e?.evento_moeda?.split('@.@') : [],
                                 "evento_valor": e?.evento_valor?.split('@.@') ? e?.evento_valor?.split('@.@') : [],
                                 "evento_os": e?.evento_os?.split('@.@') ? e?.evento_os?.split('@.@') : [],
+                                "evento_valor_st": e?.evento_valor_st?.split('@.@') ? e?.evento_valor_st?.split('@.@') : [],
                                 "evento_moeda_received": e?.evento_moeda_received?.split('@.@') ? e?.evento_moeda_received?.split('@.@') : [],
                                 "evento_valor_received": e?.evento_valor_received?.split('@.@') ? e?.evento_valor_received?.split('@.@') : [],
                                 "evento_os_received": e?.evento_os_received?.split('@.@') ? e?.evento_os_received?.split('@.@') : [],
