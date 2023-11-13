@@ -1402,9 +1402,9 @@ class Contas
         if ($where != "") {
             $result = $database->doSelect(
                 'contas_aberto 
-            LEFT JOIN pessoas ON pessoas.chave = contas_aberto.pessoa
-            LEFT JOIN os_tp_docto ON os_tp_docto.chave = contas_aberto.tipodocto
-            LEFT JOIN os ON os.chave = contas_aberto.os_origem',
+            INNER JOIN pessoas ON pessoas.chave = contas_aberto.pessoa
+            INNER JOIN os_tp_docto ON os_tp_docto.chave = contas_aberto.tipodocto
+            INNER JOIN os ON os.chave = contas_aberto.os_origem',
                 "
                                           pessoas.nome  AS pessoa2, 
                                           contas_aberto.chave  AS conta_chave2,
