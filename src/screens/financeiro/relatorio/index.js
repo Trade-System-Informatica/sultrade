@@ -464,8 +464,6 @@ class Relatorio extends Component {
                             console.log(formated);
 
 
-
-
                             checkBalance = 0;
                             const rows = [];
 
@@ -516,6 +514,7 @@ class Relatorio extends Component {
                                 }
                                 checkBalance += parseFloat(balance.toFixed(2));
                             })
+
                             map.map((el, index) => {
                                 if (!e?.os?.split("@.@")[index]) {
                                     return;
