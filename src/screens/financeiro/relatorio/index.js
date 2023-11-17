@@ -684,7 +684,7 @@ class Relatorio extends Component {
                             moment(a.sailed).diff(moment(b.sailed))
                           )
                           .map((row, index) => {
-                            if (parseFloat(row.balance) > 0) {
+                            if (parseFloat(row.balance) > 0.01) {
                                 totalFDA += parseFloat(row.fda);
                                 totalDiscount += parseFloat(row.discount);
                                 totalReceived += parseFloat(row.received);
