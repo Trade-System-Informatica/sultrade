@@ -567,10 +567,10 @@ class Relatorio extends Component {
                     if (this.state.moeda) {
                       if (parseInt(this.state.moeda) === parseInt(f?.moeda)) {
                       } else {
-                        FDA2 = FDA2 / f.roe;
-                        DISCONT2 = DISCONT2 / f?.roe;
-                        RECEIVED2 = RECEIVED2 /f?.roe;
-                        BALANCE2 = BALANCE2 / f?.roe;
+                        FDA2 = f?.FDADOLAR ? f?.FDADOLAR : FDA2 / f?.roe;
+                        DISCONT2 =  f?.discountDOLAR ? f?.discountDOLAR : DISCONT2 / f?.roe;
+                        RECEIVED2 = f?.receivedDOLAR ? f.receivedDOLAR : RECEIVED2 /f?.roe;
+                        BALANCE2 = f?.balanceDolar ? f?.balanceDolar : BALANCE2 / f?.roe;
                         console.log({
                             FDA2,
                             DISCONT2,
@@ -597,7 +597,6 @@ class Relatorio extends Component {
 
                     return f;
                   });
-
                   e.contas_manuais.forEach((f) => {
                     let FDA2 = f?.fda;
                     let DISCONT2 = f?.discount;
