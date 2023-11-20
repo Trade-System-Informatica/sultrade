@@ -790,7 +790,7 @@ class Relatorio extends Component {
                                       minWidth: 65,
                                     }}
                                   >
-                                    {row.roe}
+                                    {parseFloat(row?.roe || 5).toFixed(4)}
                                   </td>
                                   <td
                                     style={{
@@ -1462,7 +1462,7 @@ class Relatorio extends Component {
                                     minWidth: 65,
                                   }}
                                 >
-                                  {row.roe}
+                                  {parseFloat(row?.roe || 5).toFixed(4)}
                                 </td>
                                 <td
                                   style={{
