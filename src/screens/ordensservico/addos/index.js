@@ -4232,7 +4232,7 @@ class AddOS extends Component {
         let logs = await loader.getLogsOS(this.state.chave, this.state.todosEventos.map((e) => e.chave));
 
         logs = logs.map((e) => {
-            if (e.Tabela == "os_servicos_itens" && (e.Campos.includes('Inclusão') || e.Campos.includes('Cancelamento'))) {
+            if (e.Tabela == "os" && (e.Campos.includes('Inclusão') || e.Campos.includes('Cancelamento'))) {
                 return { ...e, Campos: `Solicitação de Serviço: ${e.Campos}` }
             } else {
                 return { ...e }
