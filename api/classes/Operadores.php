@@ -165,6 +165,7 @@ class Operadores {
 
     }
 
+    /*
     public static function getLogsOS($chaveOS, $chaveSI){
         $database = new Database();
 
@@ -173,6 +174,27 @@ class Operadores {
                                       'logs.*, operadores.Nome as operadorNome',
                                       "(Tabela = 'os' AND ChaveAux = '".$chaveOS."') OR (Tabela = 'os_servicos_itens' AND ChaveAux = '".$chaveSI."') ORDER BY Data ASC"
                                     );
+        $database->closeConection();
+        return $result;
+
+    }
+    */
+    public static function getLogsOS($chaveOS, $chaveSI){
+        $database = new Database();
+        if (!isset($chaveSI) || $chaveSI == ''){
+            $result = $database->doSelect('logs 
+                                    LEFT JOIN operadores ON operadores.Codigo = logs.Operador',
+                                    'logs.*, operadores.Nome as operadorNome',
+                                    "(Tabela = 'os' AND ChaveAux = '".$chaveOS."') ORDER BY Data ASC"
+        );
+        } else{
+            $result = $database->doSelect('logs 
+                                        LEFT JOIN operadores ON operadores.Codigo = logs.Operador',
+                                        'logs.*, operadores.Nome as operadorNome',
+                                        "(Tabela = 'os' AND ChaveAux = '".$chaveOS."') OR (Tabela = 'os_servicos_itens' AND ChaveAux = '".$chaveSI."') ORDER BY Data ASC"
+        );
+        };
+
         $database->closeConection();
         return $result;
 
