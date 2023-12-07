@@ -57,11 +57,13 @@ class Login extends Component {
         })
 
         await this.setState({ empresasOptions: options })
+        
     }
 
     setLoginOptions = async () => {
         await apiEmployee.post(`getOperadores.php`, {
-            token: true
+            token: true,
+            empresa: this.state.empresa
         }).then(
             async res => {
                 await this.setState({ operadores: res.data })

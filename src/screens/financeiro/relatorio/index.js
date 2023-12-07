@@ -63,6 +63,7 @@ const estadoInicial = {
 
   pdfEmail: "",
   emails: [],
+  temEmail: false,
   failures: [],
   successes: [],
   emailModal: "",
@@ -296,6 +297,13 @@ class Relatorio extends Component {
 
             if (email) {
               await this.setState({ emails: email.split("; ") });
+              await this.setState({ temEmail: true });
+            } else {
+                const email2 = res.data.find((e) => e.Tipo == "ER")?.Campo1;
+                if (email2){
+                  await this.setState({ emails: email2.split("; ") })
+                  await this.setState({ temEmail: true });
+                }
             }
           }
         });
@@ -364,7 +372,7 @@ class Relatorio extends Component {
           }
         );
       this.setState({ loading: false });
-    }
+    } 
   };
 
   enviarEmail = async (validFormEmail) => {
@@ -403,6 +411,8 @@ class Relatorio extends Component {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         }).format(this.state.totalBalance)}`,
+        clientId: parseInt(this.state.clientes[0]),
+        salvar: !this.state.temEmail,
       })
       .then(
         async (res) => {

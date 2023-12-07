@@ -15,6 +15,7 @@ var apiClient = axios.create({
 var apiEmployee = axios.create({
     //baseURL: 'http://10.0.0.220:8080/html/site/api/employee/',
     baseURL: `${CAMINHO_API}`,
+    //baseURL: `http://localhost/sultrade/api/employee/`,
     timeout: 30000
 })
 

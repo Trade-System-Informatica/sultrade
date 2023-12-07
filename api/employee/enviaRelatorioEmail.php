@@ -13,6 +13,8 @@ require_once '../libraries/Exception.php';
 require_once '../libraries/SMTP.php';
 require_once '../libraries/POP3.php';
 require_once '../libraries/utils.php';
+include_once '../classes/Pessoas.php';
+include_once '../libraries/utils.php';
 
 $data = file_get_contents("php://input");
 $objData = json_decode($data);
@@ -21,6 +23,30 @@ $emails = $objData->emails;
 $mensagem = $objData->mensagem;
 $nomeCliente = prepareInput($objData->nomeCliente);
 $balance = prepareInput($objData->balance);
+$clientId = $objData->clientId;
+$salvar = $objData->salvar;
+$pessoas = new Pessoas();
+$contatos = $pessoas->getContatoEmail($clientId);
+
+if (sizeof($contatos)==0){
+    foreach ($emails as $email) {
+        $values = "'ER','$email', '', $clientId";
+        $result = $pessoas->insertContato($values);
+    }
+}else{
+    foreach ($contatos as $contato) {
+        if (isset($contato['Tipo']) && $contato['Tipo'] == 'EM' || $contato['Tipo'] == 'ER') {
+            foreach ($emails as $email) {
+                if ($email == $contato['Campo1']){
+                    $salvar = false;
+                }else{
+                    $values = "'ER','$email', '', $clientId";
+                    $result = $pessoas->insertContato($values);
+                }
+            }
+        }
+    }
+}
 
 $currentDate = date('M jS\, Y');
 
@@ -101,6 +127,7 @@ if ($emails[0]) {
         array_push($return['warnings'], "Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
     }
 }
+
 
 echo (json_encode($return));
 exit;

@@ -40,6 +40,7 @@ class ContasAbertas extends Component {
     }
 
     componentDidMount = async () => {
+        console.log("user Data redux", this.props.user);
         await this.getContasAbertas();
         await this.getPessoas();
 
@@ -98,7 +99,8 @@ class ContasAbertas extends Component {
 
     getContasAbertas = async () => {
         await apiEmployee.post(`getContasAbertas.php`, {
-            token: true
+            token: true,
+            empresa: this?.props?.user?.empresa ? parseInt(this.props.user?.empresa) : 1,
         }).then(
             async response => {
                 await this.setState({ contas: response.data });
