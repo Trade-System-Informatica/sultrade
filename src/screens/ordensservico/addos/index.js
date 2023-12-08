@@ -1461,6 +1461,7 @@ class AddOS extends Component {
         await apiEmployee.post(`getEventosTemplates.php`, {
             token: true,
             empresa: this.state.usuarioLogado.empresa,
+            offset: 0
         }).then(
             async res => {
                 await this.setState({ templates: res.data })

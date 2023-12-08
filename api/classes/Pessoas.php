@@ -252,7 +252,7 @@ class Pessoas
     {
         $database = new Database();
 
-        $cols = 'Nome, Nome_Fantasia, Cnpj_Cpf, Rg_Ie, Inscricao_Municipal, Nascimento_Abertura, Inclusao, Categoria, Conta_Contabil, Conta_Provisao, Conta_Faturar';
+        $cols = 'Nome, Nome_Fantasia, Cnpj_Cpf, Rg_Ie, Inscricao_Municipal, Nascimento_Abertura, Inclusao, Categoria, Conta_Contabil, Conta_Provisao, Conta_Faturar, Indicado';
 
         $result = $database->doInsert('pessoas', $cols, $values);
         $database->closeConection();
@@ -327,11 +327,11 @@ class Pessoas
         return $result;
     }
 
-    public static function updatePessoa($Chave, $Nome, $Nome_Fantasia, $Cnpj_Cpf, $Rg_Ie, $Inscricao_Municipal, $Nascimento_Abertura, $Inclusao, $Categoria, $Conta_Contabil, $Conta_Provisao, $Conta_Faturar)
+    public static function updatePessoa($Chave, $Nome, $Nome_Fantasia, $Cnpj_Cpf, $Rg_Ie, $Inscricao_Municipal, $Nascimento_Abertura, $Inclusao, $Categoria, $Conta_Contabil, $Conta_Provisao, $Conta_Faturar, $Indicado)
     {
         $database = new Database();
 
-        $query = "Nome = '" . $Nome . "', Nome_Fantasia = '" . $Nome_Fantasia . "', Cnpj_Cpf = '" . $Cnpj_Cpf . "', Rg_Ie = '" . $Rg_Ie . "', Inscricao_Municipal = '$Inscricao_Municipal', Nascimento_Abertura = '" . $Nascimento_Abertura . "', Inclusao = '" . $Inclusao . "', Categoria = '" . $Categoria . "', Conta_Contabil = '" . $Conta_Contabil . "', Conta_Provisao = '" . $Conta_Provisao . "', Conta_Faturar = '$Conta_Faturar'";
+        $query = "Nome = '" . $Nome . "', Nome_Fantasia = '" . $Nome_Fantasia . "', Cnpj_Cpf = '" . $Cnpj_Cpf . "', Rg_Ie = '" . $Rg_Ie . "', Inscricao_Municipal = '$Inscricao_Municipal', Nascimento_Abertura = '" . $Nascimento_Abertura . "', Inclusao = '" . $Inclusao . "', Categoria = '" . $Categoria . "', Conta_Contabil = '" . $Conta_Contabil . "', Conta_Provisao = '" . $Conta_Provisao . "', Conta_Faturar = '$Conta_Faturar', Indicado = $Indicado";
         $result = $database->doUpdate('pessoas', $query, 'Chave = ' . $Chave);
 
         $database->closeConection();

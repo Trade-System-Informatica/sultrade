@@ -85,6 +85,7 @@ const estadoInicial = {
     contaContabil: '',
     contaProvisao: '',
     contaFaturar: '',
+    Indicado: null,
 
     cidades: [],
     cidadesOptions: [],
@@ -114,6 +115,16 @@ const estadoInicial = {
 
     bloqueado: false,
 
+    pessoa:[],
+
+    pessoas: [],
+
+    pessoasOptions: [],
+
+    pessoasOptionsTexto: '',
+
+    apontadoPor: 0,
+
 }
 
 class AddPessoa extends Component {
@@ -131,8 +142,10 @@ class AddPessoa extends Component {
         if (!this.props.location.state || !this.props.location.state.pessoa) {
             await this.getPessoa()
         } else {
-            await this.setState({ pessoa: this.props.location.state.pessoa })
+            await this.setState({ pessoa: this.props.location.state.pessoa })  
         }
+        
+        console.log(this.state.Indicado)    
         if (parseInt(id) !== 0 && this.state.pessoa) {
             //console.log('Servicos: ' + JSON.stringify(this.state.tiposervico))
             //await this.loadData(this.state.tiposervico)
@@ -151,10 +164,12 @@ class AddPessoa extends Component {
                 contaContabil: this.state.pessoa.Conta_Contabil,
                 contaProvisao: this.state.pessoa.Conta_Provisao,
                 contaFaturar: this.state.pessoa.Conta_Faturar,
+                Indicado: this.state.pessoa.Indicado,
             })
             await this.converteCategoria();
         }
 
+        await this.getPessoas()
         await this.loadAll();
         await this.getPessoaEnderecos();
         await this.getPessoaContatos();
@@ -240,6 +255,21 @@ class AddPessoa extends Component {
         }).then(
             async res => {
                 await this.setState({ pessoa: res.data[0] })
+            }
+        )
+    }
+
+    getPessoas = async () => {
+        await apiEmployee.post(`getPessoas.php`, {
+            token: true,
+        }).then(
+            async res => {
+                await this.setState({ pessoas: res.data });
+                let options = this.state.pessoas.map((e) => {
+                    return { label: e.Nome, value: e.Chave }
+                });
+                options.unshift({ label: 'Nenhum', value: 0 })
+                this.setState({ pessoasOptions: options });
             }
         )
     }
@@ -519,7 +549,7 @@ class AddPessoa extends Component {
         if (this.state.chave == 0) {
             await apiEmployee.post(`insertPessoa.php`, {
                 token: true,
-                values: `"${this.state.nome.replaceAll("'", "\'")}", '${this.state.nome_fantasia.replaceAll("'", "\'")}', '${this.state.cnpj_cpfLimpo}', '${this.state.rg_ie}', '${this.state.inscricao_municipal}', '${this.state.nascimento}', '${this.state.inclusao}', '${categoria}', '${this.state.contaContabil}', '${this.state.contaProvisao}', '${this.state.contaFaturar}'`
+                values: `"${this.state.nome.replaceAll("'", "\'")}", '${this.state.nome_fantasia.replaceAll("'", "\'")}', '${this.state.cnpj_cpfLimpo}', '${this.state.rg_ie}', '${this.state.inscricao_municipal}', '${this.state.nascimento}', '${this.state.inclusao}', '${categoria}', '${this.state.contaContabil}', '${this.state.contaProvisao}', '${this.state.contaFaturar}', ${parseInt(this.state.apontadoPor)}`
             }).then(
                 async res => {
                     if (res.data[0].Chave) {
@@ -545,7 +575,8 @@ class AddPessoa extends Component {
                 Categoria: categoria,
                 Conta_Contabil: this.state.contaContabil,
                 Conta_Provisao: this.state.contaProvisao,
-                Conta_Faturar: this.state.contaFaturar
+                Conta_Faturar: this.state.contaFaturar,
+                Indicado: this.state.apontadoPor
             }).then(
                 async res => {
                     console.log(res.data);
@@ -742,6 +773,15 @@ class AddPessoa extends Component {
                                                             <div className='col-1'></div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                                 <Field className="form-control" type="text" value={this.state.inscricao_municipal} onChange={async e => { this.setState({ inscricao_municipal: e.currentTarget.value }) }} />
+                                                            </div>
+                                                            <div className='col-1'></div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>Apontado por:</label>
+                                                            </div>
+                                                            <div className='col-1'></div>
+                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                                <Select className='SearchSelect' options={this.state.pessoasOptions} value={this.state.pessoasOptions.filter((option) => option.value == this.state.Indicado? this.state.Indicado : 0)} onInputChange={e => { this.setState({ pessoasOptionsTexto: e }) }} defaultValue={this.state.pessoasOptions.filter( (e) => e.value == this.state.apontadoPor)} onChange={(e) => { this.setState({ apontadoPor: e.value }); this.setState({ Indicado: e.value })}} />
+                                                                {console.log(this.state.Indicado? this.state.Indicado : 'oi ')}
                                                             </div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 <label>Nascimento / Abertura</label>

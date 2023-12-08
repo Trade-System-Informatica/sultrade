@@ -7,7 +7,7 @@ import './styles.css'
 import { apiEmployee } from '../../../services/apiamrg'
 import { connect } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChartBar, faFileContract, faPaperclip } from '@fortawesome/free-solid-svg-icons'
+import { faChartBar, faFileContract, faPaperclip, faScroll } from '@fortawesome/free-solid-svg-icons'
 
 class OrdensServico extends Component {
 
@@ -146,6 +146,16 @@ class OrdensServico extends Component {
                                                 </Link>
                                             </li>
                                         }
+                                        {/* BOTÃO DAS COMISSÕES
+                                        this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                            <li className=" text-left itemMenu list-group-item  ">
+                                                <Link to={{ pathname: `/ordensservico/os` }} className="semTextDecoration">
+                                                    <FontAwesomeIcon icon={faScroll} size="2x" color="tomato" />
+                                                    <h4 className="textoMenu">Comissões</h4>
+                                                </Link>
+                                            </li>
+                                        */}
+
                                     </ul>
                                 </div>
                             </div>
