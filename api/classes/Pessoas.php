@@ -139,7 +139,7 @@ class Pessoas
     {
         $database = new Database();
 
-        $result = $database->doSelect('pessoas_contatos', 'pessoas_contatos.*', 'pessoas_contatos.Chave_Pessoa = ' . $pessoa . ' and pessoas_contatos.Tipo = "EM" OR pessoas_contatos.Tipo = "ER"');
+        $result = $database->doSelect('pessoas_contatos', 'pessoas_contatos.*', 'pessoas_contatos.Chave_Pessoa = ' . $pessoa . ' and (pessoas_contatos.Tipo = "EM" OR pessoas_contatos.Tipo = "ER")');
 
         $database->closeConection();
         return $result;
