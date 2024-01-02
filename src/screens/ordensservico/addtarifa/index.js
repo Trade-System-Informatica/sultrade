@@ -44,6 +44,8 @@ const estadoInicial = {
     portosDeletados: [],
     anexo: "",
     anexoNome: "",
+    anexo2: "",
+    anexoNome2: "",
     servico: "",
     vencimento: "",
     preferencial: false,
@@ -52,6 +54,8 @@ const estadoInicial = {
         endereco: "",
         anexos: [],
         anexosNomes: [],
+        anexos2: [],
+        anexosNomes2: [],
         formats: [],
         exts: [],
         aberto: false,
@@ -92,6 +96,7 @@ class AddTarifa extends Component {
                 portos: this.props.location.state.tarifa.porto ? this.props.location.state.tarifa.porto.split("@") : [],
                 servico: this.props.location.state.tarifa.servico,
                 anexo: this.props.location.state.tarifa.anexo,
+                anexo2: this.props.location.state.tarifa.anexo2,
                 vencimento: this.props.location.state.tarifa.vencimento,
                 preferencial: this.props.location.state.tarifa.preferencial != 0
             })
@@ -118,6 +123,7 @@ class AddTarifa extends Component {
                     { titulo: 'Portos', valor: this.state.portos.map((p) => util.formatForLogs(p, 'options', '', '', this.state.portosOptions)).join(", ") },
                     { titulo: 'Servico', valor: util.formatForLogs(this.state.servico) },
                     { titulo: 'Anexo', valor: util.formatForLogs(this.state.anexo) },
+                    { titulo: 'Anexo 2', valor: util.formatForLogs(this.state.anexo2) },
                     { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') }
                 ]
             })
@@ -155,6 +161,7 @@ class AddTarifa extends Component {
                 { titulo: 'Portos', valor: this.state.portos.map((p) => util.formatForLogs(p, 'options', '', '', this.state.portosOptions)).join(", ") },
                 { titulo: 'Servico', valor: util.formatForLogs(this.state.servico) },
                 { titulo: 'Anexo', valor: util.formatForLogs(this.state.anexo) },
+                { titulo: 'Anexo 2', valor: util.formatForLogs(this.state.anexo2) },
                 { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') }
             ],
             loading: true
@@ -170,16 +177,33 @@ class AddTarifa extends Component {
         }
 
         const nome = `anexo_forn-${this.state.fornecedor}_port-${this.state.portos[0]}`;
+
+        let documento2 = '';
+        let format2 = '';
+        let ext2 = '';
+
+        if (typeof this.state.anexo2 != "string" && this.state.anexo2[0]) {
+            documento2 = await util.getBase64(this.state.anexo2[0]);
+            format2 = this.state.anexo2[0].type;
+            ext2 = this.state.anexoNome2.split('.')[this.state.anexoNome2.split('.').length - 1];
+        }
+
+        const nome2 = `anexo_forn-${this.state.fornecedor}_port-${this.state.portos[0]}_2`;
+
         if (parseInt(this.state.chave) === 0 && validForm) {
             //$cols = 'data, titulo, texto, imagem, link, inativo';
-            await apiEmployee.post(`insertTarifa.php`, {
+            await apiEmployee.post(`insertTarifa.php`, { // ALTERAÇÃO
                 token: true,
-                values: `'${this.state.fornecedor}', '${this.state.servico}', '${nome}.${ext}', '${this.state.vencimento}', '${this.state.preferencial ? 1 : 0}'`,
+                values: `'${this.state.fornecedor}', '${this.state.servico}', '${nome}.${ext}', '${this.state.vencimento}', '${this.state.preferencial ? 1 : 0}', '${nome2}.${ext2}'`,
                 portos: this.state.portos,
                 nome,
                 documento,
                 format,
-                ext
+                ext,
+                nome2,
+                documento2,
+                format2,
+                ext2
             }).then(
                 async res => {
                     if (res.data[0].chave) {
@@ -204,12 +228,17 @@ class AddTarifa extends Component {
                 portosDeletados: this.state.portosDeletados,
                 servico: this.state.servico,
                 anexo: ext ? `${nome}.${ext}` : "",
+                anexo2: ext2 ? `${nome2}.${ext2}` : "",
                 vencimento: this.state.vencimento,
                 preferencial: this.state.preferencial ? 1 : 0,
                 nome,
                 documento,
                 format,
-                ext
+                ext,
+                nome2,
+                documento2,
+                format2,
+                ext2
             }).then(
                 async res => {
                     console.log(res.data);
@@ -597,6 +626,15 @@ class AddTarifa extends Component {
                                                 </div>
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                     <Field className="form-control" type="file" value={this.state.anexoNome} onChange={async e => { this.setState({ anexo: e.currentTarget.files, anexoNome: e.currentTarget.value }) }} />
+                                                </div>
+                                                <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
+                                                    <label>Anexo 2</label>
+                                                </div>
+                                                <div className='col-1 errorMessage'>
+
+                                                </div>
+                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                    <Field className="form-control" type="file" value={this.state.anexoNome2} onChange={async e => { this.setState({ anexo2: e.currentTarget.files, anexoNome2: e.currentTarget.value }) }} />
                                                 </div>
                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                     <label>Preferencial</label>

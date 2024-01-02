@@ -15,6 +15,7 @@ if($objData != NULL){
     $chave = prepareInput($objData->chave);
     $fornecedor = prepareInput($objData->fornecedor);
     $anexo = prepareInput($objData->anexo);
+    $anexo2 = prepareInput($objData->anexo2);
     $portos = $objData->portos;
     $servico = prepareInput($objData->servico);
     $vencimento = prepareInput($objData->vencimento);
@@ -26,12 +27,20 @@ if($objData != NULL){
     $ext = prepareInput($objData->ext);
     $nome = prepareInput($objData->nome);
 
+    $documento2 = prepareInput($objData->documento2);
+    $format2 = prepareInput($objData->format2);
+    $ext2 = prepareInput($objData->ext2);
+    $nome2 = prepareInput($objData->nome2);
+
     $pessoas = new Pessoas();
 
-    $result = $pessoas->updateTarifa($chave, $fornecedor, $anexo, $portos, $servico, $vencimento, $preferencial, $portosDeletados);
+    $result = $pessoas->updateTarifa($chave, $fornecedor, $anexo, $portos, $servico, $vencimento, $preferencial, $anexo2, $portosDeletados);
     
     if ($ext) {
         $result = savePicture($documento, $nome, $format, $ext);    
+    }
+    if ($ext2) {
+        $result = savePicture($documento2, $nome2, $format2, $ext2);    
     }
     
 } else {

@@ -59,6 +59,19 @@ class Pessoas
         $database->closeConection();
         return $result;
     }
+    
+    public static function getIndicados()
+    {
+        $database = new Database();
+
+        $result = $database->doSelect(
+            'pessoas',
+            'pessoas.*',
+            "pessoas.Indicado != 0"
+        );
+        $database->closeConection();
+        return $result;
+    }
 
     public static function getPessoa($chave)
     {
@@ -135,11 +148,22 @@ class Pessoas
         return $result;
     }
 
+    public static function getContatoEmail($pessoa)
+    {
+        $database = new Database();
+
+        $result = $database->doSelect('pessoas_contatos', 'pessoas_contatos.*', 'pessoas_contatos.Chave_Pessoa = ' . $pessoa . ' and (pessoas_contatos.Tipo = "EM" OR pessoas_contatos.Tipo = "ER")');
+                                                                                                                                 
+
+        $database->closeConection();
+        return $result;
+    }
+
     public static function getTarifas()
     {
         $database = new Database();
 
-        $result = $database->doSelect("tarifas LEFT JOIN pessoas ON tarifas.fornecedor = pessoas.chave LEFT JOIN os_portos ON tarifas.porto = os_portos.chave", "tarifas.fornecedor, tarifas.chave, GROUP_CONCAT(tarifas.porto SEPARATOR '@') as porto, tarifas.anexo, tarifas.vencimento, tarifas.servico, tarifas.email_enviado, tarifas.preferencial, pessoas.nome AS fornecedorNome, GROUP_CONCAT(os_portos.descricao SEPARATOR '@') AS portoNome", "1=1 GROUP BY tarifas.fornecedor, tarifas.vencimento, tarifas.servico, tarifas.preferencial ORDER BY tarifas.preferencial DESC");
+        $result = $database->doSelect("tarifas LEFT JOIN pessoas ON tarifas.fornecedor = pessoas.chave LEFT JOIN os_portos ON tarifas.porto = os_portos.chave", "tarifas.fornecedor, tarifas.chave, GROUP_CONCAT(tarifas.porto SEPARATOR '@') as porto, tarifas.anexo, tarifas.vencimento, tarifas.servico, tarifas.email_enviado, tarifas.preferencial, tarifas.anexo2, pessoas.nome AS fornecedorNome, GROUP_CONCAT(os_portos.descricao SEPARATOR '@') AS portoNome", "1=1 GROUP BY tarifas.fornecedor, tarifas.vencimento, tarifas.servico, tarifas.preferencial ORDER BY tarifas.preferencial DESC");
 
         $database->closeConection();
         return $result;
@@ -242,7 +266,7 @@ class Pessoas
     {
         $database = new Database();
 
-        $cols = 'Nome, Nome_Fantasia, Cnpj_Cpf, Rg_Ie, Inscricao_Municipal, Nascimento_Abertura, Inclusao, Categoria, Conta_Contabil, Conta_Provisao, Conta_Faturar';
+        $cols = 'Nome, Nome_Fantasia, Cnpj_Cpf, Rg_Ie, Inscricao_Municipal, Nascimento_Abertura, Inclusao, Categoria, Conta_Contabil, Conta_Provisao, Conta_Faturar, Indicado';
 
         $result = $database->doInsert('pessoas', $cols, $values);
         $database->closeConection();
@@ -293,7 +317,7 @@ class Pessoas
     public static function insertTarifa($values, $portos)
     {
         $database = new Database();
-        $cols = 'fornecedor, servico, anexo, vencimento, preferencial, porto';
+        $cols = 'fornecedor, servico, anexo, vencimento, preferencial, anexo2, porto'; #ALTERAÇÃO
 
         foreach ($portos as $porto) {
             $baseValues = $values . ", $porto";
@@ -317,11 +341,11 @@ class Pessoas
         return $result;
     }
 
-    public static function updatePessoa($Chave, $Nome, $Nome_Fantasia, $Cnpj_Cpf, $Rg_Ie, $Inscricao_Municipal, $Nascimento_Abertura, $Inclusao, $Categoria, $Conta_Contabil, $Conta_Provisao, $Conta_Faturar)
+    public static function updatePessoa($Chave, $Nome, $Nome_Fantasia, $Cnpj_Cpf, $Rg_Ie, $Inscricao_Municipal, $Nascimento_Abertura, $Inclusao, $Categoria, $Conta_Contabil, $Conta_Provisao, $Conta_Faturar, $Indicado)
     {
         $database = new Database();
 
-        $query = "Nome = '" . $Nome . "', Nome_Fantasia = '" . $Nome_Fantasia . "', Cnpj_Cpf = '" . $Cnpj_Cpf . "', Rg_Ie = '" . $Rg_Ie . "', Inscricao_Municipal = '$Inscricao_Municipal', Nascimento_Abertura = '" . $Nascimento_Abertura . "', Inclusao = '" . $Inclusao . "', Categoria = '" . $Categoria . "', Conta_Contabil = '" . $Conta_Contabil . "', Conta_Provisao = '" . $Conta_Provisao . "', Conta_Faturar = '$Conta_Faturar'";
+        $query = "Nome = '" . $Nome . "', Nome_Fantasia = '" . $Nome_Fantasia . "', Cnpj_Cpf = '" . $Cnpj_Cpf . "', Rg_Ie = '" . $Rg_Ie . "', Inscricao_Municipal = '$Inscricao_Municipal', Nascimento_Abertura = '" . $Nascimento_Abertura . "', Inclusao = '" . $Inclusao . "', Categoria = '" . $Categoria . "', Conta_Contabil = '" . $Conta_Contabil . "', Conta_Provisao = '" . $Conta_Provisao . "', Conta_Faturar = '$Conta_Faturar', Indicado = $Indicado";
         $result = $database->doUpdate('pessoas', $query, 'Chave = ' . $Chave);
 
         $database->closeConection();
@@ -367,7 +391,7 @@ class Pessoas
         }
     }
 
-    public static function updateTarifa($chave, $fornecedor, $anexo, $portos, $servico, $vencimento, $preferencial, $portosDeletados)
+    public static function updateTarifa($chave, $fornecedor, $anexo, $portos, $servico, $vencimento, $preferencial, $anexo2, $portosDeletados)
     {
         $database = new Database();
 
@@ -380,23 +404,28 @@ class Pessoas
                 if ($anexo) {
                     $query .= ", anexo = '$anexo'";
                 }
+                if ($anexo2) {
+                    $query .= ", anexo2 = '$anexo2'";
+                }
 
                 $result = $database->doUpdate('tarifas', $query, 'chave = ' . $chave);
             } else {
 
                 if ($anexo) {
                     $values = "'$fornecedor', '$porto', '$servico', '$anexo', '$vencimento', $preferencial";
+                    if ($anexo2) {
+                        $values = "'$fornecedor', '$porto', '$servico', '$anexo', '$vencimento', $preferencial, '$anexo2'";}
                 } else {
                     $brotherValue = $database->doSelect('tarifas', 'tarifas.anexo', "vencimento = '$vencimento' AND servico = '$servico' AND fornecedor = '$fornecedor'");
                     if ($brotherValue[0]) {
-                        $values = "'$fornecedor', '$porto', '$servico', '" . $brotherValue[0]["anexo"] . "', '$vencimento', $preferencial";
+                        $values = "'$fornecedor', '$porto', '$servico', '" . $brotherValue[0]["anexo"] . "', '$vencimento', $preferencial ". $brotherValue[0]["anexo2"]."";
                     } else {
-                        $values = "'$fornecedor', '$porto', '$servico', '', '$vencimento', $preferencial";
+                        $values = "'$fornecedor', '$porto', '$servico', '', '$vencimento', $preferencial, ''";
                     }
                 }
 
 
-                $cols = "fornecedor, porto, servico, anexo, vencimento, preferencial";
+                $cols = "fornecedor, porto, servico, anexo, vencimento, preferencial, anexo2";
 
                 $result = $database->doInsert('tarifas', $cols, $values);
             }

@@ -11,15 +11,18 @@ $objData = json_decode($data);
 
 if($objData != NULL){
     $token = prepareInput($objData->token);
-    $chave = prepareInput($objData->chave);
 
     $pessoas = new Pessoas();
-    
- $result = $pessoas->deleteTarifa($chave);
-    } else {
-    $result = "false";
-}
 
+    //$operadores = $operadores->checkToken($token);
+    //if($result == 'true'){
+        $result = $pessoas->getIndicados();
+		//$result = 'Entrou aqui';
+        //}
+    } else {
+        $result = "false";
+    }
+    
 echo(json_encode($result));
 exit;
 
