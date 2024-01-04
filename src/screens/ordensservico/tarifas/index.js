@@ -318,7 +318,7 @@ class Tarifas extends Component {
                                             {window.innerWidth >= 500 &&
                                                 <div className="row deleteMargin alignCenter">
                                                     <div className="col-3 text-left">
-                                                        <p className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.fornecedorNome}</a></p>
+                                                        <p className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo2}`)}`} className="nonLink">{feed.fornecedorNome}</a></p>
                                                     </div>
                                                     <div className="col-3 text-left">
                                                         <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed?.portoNome?.split("@").join(", ")}</a></h6>
@@ -326,8 +326,14 @@ class Tarifas extends Component {
                                                     <div className="col-2 text-left">
                                                         <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.servico}</a></h6>
                                                     </div>
-                                                    <div className="col-3 text-center" style={{ justifyContent: "center" }}>
+                                                    <div className="col-3 text-center" style={{ justifyContent: "center"}}>
+                                                    <p className="mobileajuster5">
                                                         <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.preferencial != "0" ? `Sim` : "Não"}</a></h6>
+                                                    
+                                                        <a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">|  ANEXO 1 |</a>
+                                                        
+                                                        {feed.anexo2 != 0 ? <a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo2}`)}`} className="nonLink">|  ANEXO 2 |</a> : null}
+                                                        </p>
                                                     </div>
                                                     <div className="col-1 text-left icones mobileajuster4 ">
                                                         <div className='iconelixo giveMargin' type='button' >
