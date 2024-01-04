@@ -310,7 +310,7 @@ class Tarifas extends Component {
                             </div>
 
                             <div id="product-list">
-                                {this.state.tarifas[0] != undefined && this.state.tarifas.filter(this.filtrarPesquisa).map((feed, index) => (
+                                {this.state?.tarifas[0] != undefined && this.state.tarifas.filter(this.filtrarPesquisa).map((feed, index) => (
                                     <div key={feed.chave} className="row row-list">
                                         <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
                                         <div ref={feed.chave == this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-8 col-md-8 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.chave == this.state.chaveFocus ? "par focusLight" : "par " : feed.chave == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
@@ -318,16 +318,22 @@ class Tarifas extends Component {
                                             {window.innerWidth >= 500 &&
                                                 <div className="row deleteMargin alignCenter">
                                                     <div className="col-3 text-left">
-                                                        <p className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.fornecedorNome}</a></p>
+                                                        <p className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo2}`)}`} className="nonLink">{feed.fornecedorNome}</a></p>
                                                     </div>
                                                     <div className="col-3 text-left">
-                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.portoNome.split("@").join(", ")}</a></h6>
+                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed?.portoNome?.split("@").join(", ")}</a></h6>
                                                     </div>
                                                     <div className="col-2 text-left">
                                                         <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.servico}</a></h6>
                                                     </div>
-                                                    <div className="col-3 text-center" style={{ justifyContent: "center" }}>
+                                                    <div className="col-3 text-center" style={{ justifyContent: "center"}}>
+                                                    <p className="mobileajuster5">
                                                         <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.preferencial != "0" ? `Sim` : "Não"}</a></h6>
+                                                    
+                                                        <a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">|  ANEXO 1 |</a>
+                                                        
+                                                        {feed.anexo2 != 0 ? <a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo2}`)}`} className="nonLink">|  ANEXO 2 |</a> : null}
+                                                        </p>
                                                     </div>
                                                     <div className="col-1 text-left icones mobileajuster4 ">
                                                         <div className='iconelixo giveMargin' type='button' >

@@ -15,6 +15,11 @@ if($objData != NULL){
     $ext = prepareInput($objData->ext);
     $nome = prepareInput($objData->nome);
     
+    $documento2 = prepareInput($objData->documento2);
+    $format2 = prepareInput($objData->format2);
+    $ext2 = prepareInput($objData->ext2);
+    $nome2 = prepareInput($objData->nome2);
+
     $values = prepareInput($objData->values);
     $portos = $objData->portos;
 
@@ -23,7 +28,8 @@ if($objData != NULL){
     //$result = $pessoas->insertAnexo($values, $portos); função nao existe!
 	$result = $pessoas->insertTarifa($values,$portos);
     
-	savePicture($documento, $nome, $format, $ext);    
+	savePicture($documento, $nome, $format, $ext);
+    savePicture($documento2, $nome2, $format2, $ext2); 
     
 } else {
     $result = "false";

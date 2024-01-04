@@ -8,7 +8,8 @@ if (document.URL.search('10.0.0.220') >= 0) {
 }
 var apiClient = axios.create({
     //baseURL: 'http://10.0.0.220:8080/html/site/api/client/',
-    baseURL: `http://ftptrade.ddns.net/sultrade/api/client/`,
+    //baseURL: `http://ftptrade.ddns.net/sultrade/api/client/`,
+    baseURL: `http://132.255.147.28:8080/sultrade/api/client/`,
     timeout: 15000
 })
 
