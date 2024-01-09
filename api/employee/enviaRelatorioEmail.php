@@ -28,22 +28,26 @@ $salvar = $objData->salvar;
 $pessoas = new Pessoas();
 $contatos = $pessoas->getContatoEmail($clientId);
 
-if (sizeof($contatos)==0){
+if (sizeof($contatos) === 0) {
     foreach ($emails as $email) {
         $values = "'ER','$email', '', $clientId";
         $result = $pessoas->insertContato($values);
     }
-}else{
-    foreach ($contatos as $contato) {
-        if (isset($contato['Tipo']) && $contato['Tipo'] == 'EM' || $contato['Tipo'] == 'ER') {
-            foreach ($emails as $email) {
-                if ($email == $contato['Campo1']){
+} else {
+    foreach ($emails as $email) {
+        foreach ($contatos as $contato) {
+            if (isset($contato['Tipo']) && ($contato['Tipo'] == 'EM' || $contato['Tipo'] == 'ER')) {
+                if ($email == $contato['Campo1']) {
                     $salvar = false;
-                }else{
-                    $values = "'ER','$email', '', $clientId";
-                    $result = $pessoas->insertContato($values);
+                    break;
+                } else {
+                    $salvar = true;
                 }
             }
+        }
+        if ($salvar) {
+            $values = "'ER','$email', '', $clientId";
+            $result = $pessoas->insertContato($values);
         }
     }
 }
@@ -94,9 +98,9 @@ if ($emails[0]) {
 
         //Content
         $mail->isHTML(true);                                  //Set email format to HTML
-        $mail->Subject = "SOA - ".strtoupper($nomeCliente)." - UPDATED ".$currentDate." - $balance";
+        $mail->Subject = "SOA - " . strtoupper($nomeCliente) . " - UPDATED " . $currentDate . " - $balance";
         $mail->Body    = "
-        <span>TO: <b>".strtoupper($nomeCliente)."</b></span><br/>
+        <span>TO: <b>" . strtoupper($nomeCliente) . "</b></span><br/>
         <span>FROM: <b>SULTRADE SHIPPING AGENCY</b></span><br/><br/>
 
         <span>Dear ladies and Gentlemen,</span><br/><br/>
@@ -121,7 +125,7 @@ if ($emails[0]) {
         $anexo = explode(",", $mensagem)[1];
         $type = str_replace("data:", "", explode(";", $mensagem)[0]);
 
-        $mail->AddStringAttachment(base64_decode($anexo), "SOA - ".strtoupper($nomeCliente).".pdf", "base64", $type);
+        $mail->AddStringAttachment(base64_decode($anexo), "SOA - " . strtoupper($nomeCliente) . ".pdf", "base64", $type);
         $mail->send();
     } catch (Exception $e) {
         array_push($return['warnings'], "Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
