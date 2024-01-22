@@ -14,7 +14,6 @@ if($objData != NULL){
     $values = prepareInput($objData->values);
     $templates = $objData->templates;
 
-    //$employees = new Employees();
     $os = new OS();
 
     //$result = $employees->checkToken($token);
