@@ -15,15 +15,15 @@ export default class Util {
 
     static verificaDatas(data1, data2){
         const date1 = moment(data1, "yyyy-MM-DD").format("YYYYMMDD");
-        const date2 = moment(data2, "yyyy-MM-DD").format("YYYYMMDD");
+        const date2 = moment(data2, "DD/MM/yyyy").format("YYYYMMDD");
         console.log(date1, date2)
         if (date2 == 'Invalid date'){
             console.log('data invalida')
             return false
         }else{
             console.log('passou na primeira validação de data')
-            if (data2[4]== '-' && data2[7] == '-'){
-                console.log('passou na validacao dos hifens')
+            if (data2[2]== '/' && data2[5] == '/'){
+                console.log('passou na validacao das barras')
                 if (date2 > date1) {
                     console.log('aplica')
                     return true;
