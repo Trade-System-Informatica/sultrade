@@ -13,6 +13,28 @@ export default class Util {
         return moment(data).format('yyyy-MM-DD')
     }
 
+    static verificaDatas(data1, data2){
+        const date1 = moment(data1, "yyyy-MM-DD").format("YYYYMMDD");
+        const date2 = moment(data2, "yyyy-MM-DD").format("YYYYMMDD");
+        console.log(date1, date2)
+        if (date2 == 'Invalid date'){
+            console.log('data invalida')
+            return false
+        }else{
+            console.log('passou na primeira validação de data')
+            if (data2[4]== '-' && data2[7] == '-'){
+                console.log('passou na validacao dos hifens')
+                if (date2 > date1) {
+                    console.log('aplica')
+                    return true;
+                }else{
+                    console.log('nao aplica')
+                    return false;
+                }
+            }
+        }
+    }
+
     static async getBase64(file) {
         return new Promise((resolve, reject) => {
             let reader = new FileReader();

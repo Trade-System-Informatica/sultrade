@@ -432,32 +432,64 @@ class AddOS extends Component {
         for (let i = 0; i < info.length; i++) {
             const e = info[i];
 
-            if (e.Tipo == "BK" && ["SIM", "S"].includes(e.Campo1.toUpperCase())) {
-                const parametros = await loader.getBody(`getParametros.php`, { token: true, empresa: this.state.usuarioLogado.empresa });
-
-                if (parametros[0].bank_charges) {
-                    this.setState({ bankCharges: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parametros[0].bank_charges) });
-                } else {
-                    this.setState({ bankCharges: "0,00" })
+            if (e.Tipo == "BK") {
+                if (["SIM", "S"].includes(e.Campo1.toUpperCase())){
+                    const parametros = await loader.getBody(`getParametros.php`, { token: true, empresa: this.state.usuarioLogado.empresa });
+            
+                    if (parametros[0].bank_charges) {
+                        this.setState({ bankCharges: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parametros[0].bank_charges) });
+                    } else {
+                        this.setState({ bankCharges: "0,00" })
+                    }                
+                } else{
+                    if(Util.verificaDatas(this.state.encerramento, e.Campo1)){
+                        const parametros = await loader.getBody(`getParametros.php`, { token: true, empresa: this.state.usuarioLogado.empresa });
+            
+                        if (parametros[0].bank_charges) {
+                            this.setState({ bankCharges: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parametros[0].bank_charges) });
+                        } else {
+                            this.setState({ bankCharges: "0,00" })
+                        } 
+                    }
                 }
             }
-            if (e.Tipo == "GT" && ["SIM", "S"].includes(e.Campo1.toUpperCase())) {
-                let valor = 0;
-
-                this.state.eventos.filter((evento) => evento.Fornecedor_Custeio != 0).map((evento) => {
-                    if (evento.Moeda == 5) {
-                        valor += parseFloat(evento.valor) * 0.05;
-                    } else if (evento.Moeda == 6) {
-                        let roe = 5;
-                        if (this.state.os && parseFloat(this.state.os.ROE) != 0) {
-                            roe = parseFloat(this.state.os.ROE);
+            if (e.Tipo == "GT") {
+                if (["SIM", "S"].includes(e.Campo1.toUpperCase())){
+                    let valor = 0;
+            
+                    this.state.eventos.filter((evento) => evento.Fornecedor_Custeio != 0).map((evento) => {
+                        if (evento.Moeda == 5) {
+                            valor += parseFloat(evento.valor) * 0.05;
+                        } else if (evento.Moeda == 6) {
+                            let roe = 5;
+                            if (this.state.os && parseFloat(this.state.os.ROE) != 0) {
+                                roe = parseFloat(this.state.os.ROE);
+                            }
+                            valor += (parseFloat(evento.valor) * roe) * 0.05;
                         }
-                        valor += (parseFloat(evento.valor) * roe) * 0.05;
+                    })
+            
+                    this.setState({ governmentTaxes: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor) });
+                }else{
+                    if(Util.verificaDatas(this.state.encerramento, e.Campo1)){
+                        let valor = 0;
+            
+                        this.state.eventos.filter((evento) => evento.Fornecedor_Custeio != 0).map((evento) => {
+                            if (evento.Moeda == 5) {
+                                valor += parseFloat(evento.valor) * 0.05;
+                            } else if (evento.Moeda == 6) {
+                                let roe = 5;
+                                if (this.state.os && parseFloat(this.state.os.ROE) != 0) {
+                                    roe = parseFloat(this.state.os.ROE);
+                                }
+                                valor += (parseFloat(evento.valor) * roe) * 0.05;
+                            }
+                        })
+            
+                        this.setState({ governmentTaxes: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor) });
                     }
-                })
-
-                this.setState({ governmentTaxes: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor) });
-
+                }
+            
             }
         }
         this.calculaTotal()
