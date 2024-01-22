@@ -335,8 +335,6 @@ class AddPessoaContato extends Component {
                                                 </div>
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                     <Select className='SearchSelect' value={this.state.tipo} options={this.state.tiposOptions} onChange={(e) => { this.setState({ tipo: e.value, tipoNome: e.label }) }} placeholder={this.state.tipoNome} />
-                                                    {this.state.tipoNome == "Bank Charges"? <label> ATENÇÃO. Se for uma data, digite dessa forma: ano-mes-dia (ex: 2024-01-31)</label> : null}
-                                                    {this.state.tipoNome == "Governent Tax"? <label> ATENÇÃO. Se for uma data, digite dessa forma: ano-mes-dia (ex: 2024-01-31)</label> : null}
                                                 </div>
                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                     <label>Descrição</label>
