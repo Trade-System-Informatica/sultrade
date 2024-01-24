@@ -53,12 +53,19 @@ function savePicture($picture ,$name, $format, $ext){
     $img = str_replace('data:'.$format.';base64,', '', $img);
     $img = str_replace(' ', '+', $img);
     $data = base64_decode($img);
+    
+    $fullPath = '../../../'.$link;
 
-    if (file_exists("../../../$link")) {
-        unlink("../../../$link");
+    if (file_exists($fullPath)) {
+        echo 'Existe o arquivo.';
+        if (!unlink($fullPath)) {
+            echo "Erro ao excluir o arquivo existente";
+        }
     }
     
-    file_put_contents('../../../'.$link, $data);
+    if (!file_put_contents('../../../'.$link, $data)) {
+        echo "Erro ao salvar o novo arquivo";
+    }
 
     return "../$link";
 }
