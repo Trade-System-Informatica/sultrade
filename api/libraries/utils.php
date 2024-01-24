@@ -54,11 +54,17 @@ function savePicture($picture ,$name, $format, $ext){
     $img = str_replace(' ', '+', $img);
     $data = base64_decode($img);
 
-    if (file_exists("../../../$link")) {
-        unlink("../../../$link");
+    $fullPath = '../../../'.$link;
+
+    if (file_exists($fullPath)) {
+        if (!unlink($fullPath)) {
+            echo "Erro ao excluir o arquivo existente";
+        }
     }
-    
-    file_put_contents('../../../'.$link, $data);
+
+    if (!file_put_contents($fullPath, $data)) {
+        echo "Erro ao salvar o novo arquivo";
+    }
 
     return "../$link";
 }
@@ -146,4 +152,9 @@ function saveInvoice($picture, $name)
 
 function deletePicture ($name){
     unlink('../pictures/'.$name.'.png');
+}
+
+function deletePictureTarifa ($picture){
+    if(unlink('../../../documents/pictures/'.$picture)){
+    }
 }

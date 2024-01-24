@@ -104,7 +104,7 @@ class Tarifas extends Component {
         await this.setState({ redirect: true })
     }
 
-    deleteTarifa = async (id, nome) => {
+    deleteTarifa = async (id, nome, anexo, anexo2) => {
         this.setState({ deleteTarifa: true })
         confirmAlert({
             customUI: ({ onClose }) => {
@@ -130,7 +130,9 @@ class Tarifas extends Component {
                                 async () => {
                                     await apiEmployee.post(`deleteTarifa.php`, {
                                         token: true,
-                                        chave: id
+                                        chave: id,
+                                        anexo1: anexo,
+                                        anexo2: anexo2
                                     }).then(
                                         async response => {
                                             if (response.data == true) {
@@ -359,7 +361,7 @@ class Tarifas extends Component {
                                                         </div>
                                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'TARIFAS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
 
-                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteTarifa(feed.chave, feed.fornecedor)} >
+                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteTarifa(feed.chave, feed.fornecedor, feed.anexo, feed.anexo2)} >
                                                                 <FontAwesomeIcon icon={faTrashAlt} />
                                                             </div>
                                                         }
@@ -425,7 +427,7 @@ class Tarifas extends Component {
                                                         </div>
                                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'HISTORICOS_PADRAO') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
 
-                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteTarifa(feed.chave, feed.fornecedor)} >
+                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteTarifa(feed.chave, feed.fornecedor, feed.anexo, feed.anexo2)} >
                                                                 <FontAwesomeIcon icon={faTrashAlt} />
                                                             </div>
                                                         }
