@@ -150,7 +150,8 @@ export default class Util {
     }
 
     static completarDocuments(valor) {
-        return `${CAMINHO_DOCUMENTOS}/${valor}`
+        //return `${CAMINHO_DOCUMENTOS}/${valor}`
+        return `http://192.168.15.122/documents/${valor}`
     }
 
     static testaCPF(strCPF) {
