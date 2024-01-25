@@ -352,8 +352,11 @@ class AddEventoTemplate extends Component {
     }
 
     getGruposTemplates = async () => {
+
+        const value = await loader.getBaseOptions(`getGruposTemplates.php`, 'nome', 'chave', {token:true, offset: 0})
+
         this.setState({
-            gruposOptions: await loader.getBaseOptions(`getGruposTemplates.php`, 'nome', 'chave')
+            gruposOptions: value,
         });
     }
 
@@ -868,7 +871,7 @@ class AddEventoTemplate extends Component {
                                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                     <Select className='SearchSelect' options={this.state.gruposOptions.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ optionsTexto: e }) }} search={true} onChange={(e) => { if (!this.state.gruposEscolhidos.find((g) => g == e.value)) this.setState({ gruposEscolhidos: [...this.state.gruposEscolhidos, e.value] }) }} />
                                                                     <div style={{ marginBottom: 20, color: 'white', fontSize: 13 }}>
-                                                                        {this.state.gruposEscolhidos.map((e, i) => (
+                                                                        {this.state.gruposEscolhidos?.map((e, i) => (
                                                                             <span class="click_to_erase" onClick={() => this.setState({ gruposEscolhidos: this.state.gruposEscolhidos.filter((c) => c != e) })}>{`${this.state.gruposOptions.find((g) => g.value == e)?.label}${i != this.state.gruposEscolhidos.length - 1 ? ', ' : ' '}`}</span>
                                                                         ))}
                                                                     </div>
