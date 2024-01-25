@@ -66,7 +66,7 @@ class AddGrupoTemplate extends Component {
 
 
         if (parseInt(id) != 0) {
-            const grupo = await loader.getBody(`getGrupoTemplate.php`, { chave: this.state.chave });
+            const grupo = await loader.getBody(`getGrupoTemplate.php`, { chave: this.state.chave, token: true });
             await this.setState({ grupo: grupo[0] });
 
             await this.setState({

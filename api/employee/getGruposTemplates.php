@@ -17,7 +17,7 @@ if($objData != NULL){
 
     //$operadores = $operadores->checkToken($token);
     //if($result == 'true'){
-        $result = $os->getGruposTemplates($offset, $empresa);
+        $result = $os->getGruposTemplates($offset);
 		//$result = 'Entrou aqui';
         //}
     } else {
