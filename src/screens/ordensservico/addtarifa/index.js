@@ -11,9 +11,12 @@ import { Redirect } from 'react-router-dom'
 import ModalLogs from '../../../components/modalLogs'
 import { apiEmployee } from '../../../services/apiamrg'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
+import { faExclamationTriangle, faPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons'
 import util from '../../../classes/util';
 import Modal from '@material-ui/core/Modal';
+import { confirmAlert } from 'react-confirm-alert';
+import { NOME_EMPRESA } from '../../../config';
+import ModalInsertAnexo from '../../../components/modalInsertAnexo';
 
 const estadoInicial = {
     descricao: '',
@@ -42,20 +45,18 @@ const estadoInicial = {
     fornecedor: "",
     portos: [],
     portosDeletados: [],
+    anexos:[],
     anexo: "",
     anexoNome: "",
-    anexo2: "",
-    anexoNome2: "",
     servico: "",
     vencimento: "",
     preferencial: false,
+    modalInsertAnexo: false,
 
     email: {
         endereco: "",
         anexos: [],
         anexosNomes: [],
-        anexos2: [],
-        anexosNomes2: [],
         formats: [],
         exts: [],
         aberto: false,
@@ -96,10 +97,21 @@ class AddTarifa extends Component {
                 portos: this.props.location.state.tarifa.porto ? this.props.location.state.tarifa.porto.split("@") : [],
                 servico: this.props.location.state.tarifa.servico,
                 anexo: this.props.location.state.tarifa.anexo,
-                anexo2: this.props.location.state.tarifa.anexo2,
                 vencimento: this.props.location.state.tarifa.vencimento,
                 preferencial: this.props.location.state.tarifa.preferencial != 0
             })
+
+            const anexos = await apiEmployee.post(`getAnexosTarifas.php`, {
+                token: true,
+                chave: id,
+            }).then(
+                async res => {
+                    return res.data;
+                },
+                err => { this.erroApi(err) }
+            )
+
+            this.setState({ anexos: anexos});
 
             const contatos = await apiEmployee.post(`getContatos.php`, {
                 token: true,
@@ -123,7 +135,6 @@ class AddTarifa extends Component {
                     { titulo: 'Portos', valor: this.state.portos.map((p) => util.formatForLogs(p, 'options', '', '', this.state.portosOptions)).join(", ") },
                     { titulo: 'Servico', valor: util.formatForLogs(this.state.servico) },
                     { titulo: 'Anexo', valor: util.formatForLogs(this.state.anexo) },
-                    { titulo: 'Anexo 2', valor: util.formatForLogs(this.state.anexo2) },
                     { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') }
                 ]
             })
@@ -149,7 +160,46 @@ class AddTarifa extends Component {
             acessosPermissoes: await loader.testaAcesso(this.state.acessos, this.state.permissoes, this.state.usuarioLogado),
             loading: false,
         })
+        console.log(this.state.anexos)
     }
+
+    salvaTarifaAnexo = async (anexo, nomeAnexo) => {
+
+        let documento = '';
+        let format = '';
+        let ext = '';
+        if (typeof anexo != "string" && anexo[0]) {
+            documento = await util.getBase64(anexo[0]);
+            format = anexo[0].type;
+            ext = nomeAnexo.split('.')[nomeAnexo.split('.').length - 1];
+        }
+    
+        const nome = `anexo_forn-${this.state.fornecedor}_port-${this.state.portos[0]}`;
+    
+        if (parseInt(this.state.chave) !== 0) {
+            await apiEmployee.post(`insertAnexoTarifa.php`, {
+                token: true,
+                nome,
+                documento,
+                format,
+                ext,
+                chave_tarifa: this.state.chave
+            }).then(
+                async res => {
+                    if (res.data[0].chave) {
+                        await this.setState({ chave: res.data[0].chave })
+                        await loader.salvaLogs('anexos_tarifas', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].chave);
+    
+                        //alert('Serviço Inserido!')
+                        await this.setState({ loading: false, bloqueado: false, savedRedirect: true })
+                        document.location.reload()
+                    } else {
+                        //alert(`Erro: ${res.data}`)
+                    }
+                },
+                async res => await console.log(`Erro: ${res.data}`)
+            )
+        }}
 
     salvarTarifa = async (validForm) => {
         this.setState({ ...util.cleanStates(this.state) })
@@ -161,7 +211,6 @@ class AddTarifa extends Component {
                 { titulo: 'Portos', valor: this.state.portos.map((p) => util.formatForLogs(p, 'options', '', '', this.state.portosOptions)).join(", ") },
                 { titulo: 'Servico', valor: util.formatForLogs(this.state.servico) },
                 { titulo: 'Anexo', valor: util.formatForLogs(this.state.anexo) },
-                { titulo: 'Anexo 2', valor: util.formatForLogs(this.state.anexo2) },
                 { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') }
             ],
             loading: true
@@ -178,32 +227,16 @@ class AddTarifa extends Component {
 
         const nome = `anexo_forn-${this.state.fornecedor}_port-${this.state.portos[0]}`;
 
-        let documento2 = '';
-        let format2 = '';
-        let ext2 = '';
-
-        if (typeof this.state.anexo2 != "string" && this.state.anexo2[0]) {
-            documento2 = await util.getBase64(this.state.anexo2[0]);
-            format2 = this.state.anexo2[0].type;
-            ext2 = this.state.anexoNome2.split('.')[this.state.anexoNome2.split('.').length - 1];
-        }
-
-        const nome2 = `anexo_forn-${this.state.fornecedor}_port-${this.state.portos[0]}_2`;
-
         if (parseInt(this.state.chave) === 0 && validForm) {
             //$cols = 'data, titulo, texto, imagem, link, inativo';
             await apiEmployee.post(`insertTarifa.php`, { // ALTERAÇÃO
                 token: true,
-                values: `'${this.state.fornecedor}', '${this.state.servico}', '${nome}.${ext}', '${this.state.vencimento}', '${this.state.preferencial ? 1 : 0}', '${nome2}.${ext2}'`,
+                values: `'${this.state.fornecedor}', '${this.state.servico}', '${this.state.vencimento}', '${this.state.preferencial ? 1 : 0}'`,
                 portos: this.state.portos,
                 nome,
                 documento,
                 format,
-                ext,
-                nome2,
-                documento2,
-                format2,
-                ext2
+                ext
             }).then(
                 async res => {
                     if (res.data[0].chave) {
@@ -227,18 +260,8 @@ class AddTarifa extends Component {
                 portos: this.state.portos,
                 portosDeletados: this.state.portosDeletados,
                 servico: this.state.servico,
-                anexo: ext ? `${nome}.${ext}` : "",
-                anexo2: ext2 ? `${nome2}.${ext2}` : "",
                 vencimento: this.state.vencimento,
                 preferencial: this.state.preferencial ? 1 : 0,
-                nome,
-                documento,
-                format,
-                ext,
-                nome2,
-                documento2,
-                format2,
-                ext2
             }).then(
                 async res => {
                     console.log(res.data);
@@ -343,6 +366,56 @@ class AddTarifa extends Component {
         await this.setState({ modalLog: true })
     }
 
+    deleteAnexo = async (chave, nome) => {
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return (
+                    <div className='custom-ui text-center'>
+                        <h1>{NOME_EMPRESA}</h1>
+                        <p>Deseja remover esse anexo? ({nome}) </p>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-success w-25"
+                            onClick={
+                                async () => {
+                                    onClose()
+                                }
+                            }
+                        >
+                            Não
+                        </button>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-danger w-25"
+                            onClick={
+                                async () => {
+                                    await apiEmployee.post(`deleteAnexoTarifa.php`, {
+                                        token: true,
+                                        chave: chave,
+                                        anexo: nome
+                                    }).then(
+                                        async response => {
+                                            if (response.data == true) {
+                                                document.location.reload()
+                                            }
+                                        },
+                                        async response => {
+                                            this.erroApi(response)
+                                        }
+                                    )
+                                    onClose()
+                                }
+                            }
+
+                        >
+                            Sim
+                        </button>
+                    </div>
+                )
+            }
+        })
+    }
+
     render() {
 
         const validations = []
@@ -381,6 +454,13 @@ class AddTarifa extends Component {
                     <br />
                     <br />
                 </section>
+
+                <ModalInsertAnexo
+                        closeModal={() => { this.setState({ modalInsertAnexo: false }) }}
+                        chave={this.state.chave}
+                        modalAberto={this.state.modalInsertAnexo}
+                        salvaAnexoTarifa={this.salvaTarifaAnexo}
+                    />
 
                 <ModalListas
                     pesquisa={this.state.modalPesquisa}
@@ -618,6 +698,8 @@ class AddTarifa extends Component {
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                     <Field className="form-control" type="date" value={this.state.vencimento} onChange={async e => { this.setState({ vencimento: e.currentTarget.value }) }} />
                                                 </div>
+
+                                                {this.state.chave == 0 ? <>
                                                 <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
                                                     <label>Anexo</label>
                                                 </div>
@@ -626,16 +708,9 @@ class AddTarifa extends Component {
                                                 </div>
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                     <Field className="form-control" type="file" value={this.state.anexoNome} onChange={async e => { this.setState({ anexo: e.currentTarget.files, anexoNome: e.currentTarget.value }) }} />
-                                                </div>
-                                                <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
-                                                    <label>Anexo 2</label>
-                                                </div>
-                                                <div className='col-1 errorMessage'>
-
-                                                </div>
-                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                    <Field className="form-control" type="file" value={this.state.anexoNome2} onChange={async e => { this.setState({ anexo2: e.currentTarget.files, anexoNome2: e.currentTarget.value }) }} />
-                                                </div>
+                                                </div> </> : null
+                                                }
+                                                
                                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                     <label>Preferencial</label>
                                                 </div>
@@ -657,7 +732,7 @@ class AddTarifa extends Component {
                                             <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
                                         </div>
                                         <div className="col-4" style={{ display: 'flex', justifyContent: 'center' }}>
-                                            <button disabled={!validForm || this.state.chave == 0} onClick={() => { this.salvarAnexo(); this.setState({ email: { ...this.state.email, aberto: true } }) }} type="submit" style={validForm && this.state.chave != 0 ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Enviar Email</button>
+                                            <button disabled={!validForm || this.state.chave == 0} type='button' onClick={() => {this.setState({ email: { ...this.state.email, aberto: true } }) }} style={validForm && this.state.chave != 0 ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Enviar Email</button>
                                         </div>
                                         <div className="col-2"></div>
                                     </div>
@@ -665,6 +740,85 @@ class AddTarifa extends Component {
                                 </Form>
                             </Formik>
                         </div>
+                        {this.state.chave != 0 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_CONTATOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                        <div>
+                                            <div>
+                                                <div>
+                                                    <div className="page-breadcrumb2"><h3>Anexos</h3></div>
+                                                </div>
+                                                <div>
+                                                    <div>
+                                                        <div className="row" id="product-list">
+                                                            <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
+                                                            <div className="col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags">
+                                                                <div className="single-product-item">
+                                                                    {window.innerWidth >= 500 &&
+                                                                        <div className="row subtitulosTabela">
+                                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center">
+                                                                                <span className="subtituloships">Chave</span>
+                                                                            </div>
+                                                                            <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-center">
+                                                                                <span className="subtituloships">Anexo</span>
+                                                                            </div>
+                                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center">
+                                                                                <span className="subtituloships">Chave Tarifa</span>
+                                                                            </div>
+                                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center" type='button' onClick={() => {this.setState({modalInsertAnexo: true})}}>
+                                                                                <FontAwesomeIcon icon={faPlus} />
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                    {window.innerWidth < 500 &&
+                                                                        <div className="row subtitulosTabela">
+                                                                            <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-center">
+                                                                                <span className="subtituloships">Chave</span>
+                                                                            </div>
+                                                                            <div className="col-xl-5 col-lg-5 col-md-5 col-sm-5 col-5 text-center">
+                                                                                <span className="subtituloships">Anexo</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                            <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
+                                                        </div>
+
+                                                        <div id="product-list">
+                                                            {this.state.anexos[0] != undefined && this.state.anexos.map((feed, index) => (
+                                                                <div key={feed.chave} className="row row-list">
+                                                                    <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
+                                                                    <div className={index % 2 == 0 ? "col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags par" : "col-lg-12 col-md-12 col-sm-12 col-12 mix all dresses bags itemLista impar"}>
+                                                                        {window.innerWidth >= 500 &&
+                                                                            <div className="row deleteMargin alignCenter">
+                                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center alignCenter">
+                                                                                    <p><a target="_blank" href={`${util.completarDocuments(`pictures/${feed?.anexo}`)}`} className='nonLink'>{feed?.chave}</a></p>
+                                                                                </div>
+                                                                                <div className="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 text-center alignCenter">
+                                                                                    <p><a target="_blank" href={`${util.completarDocuments(`pictures/${feed?.anexo}`)}`} className='nonLink'>{feed?.anexo}</a></p>
+                                                                                </div>
+                                                                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center alignCenter">
+                                                                                    <p><a target="_blank" href={`${util.completarDocuments(`pictures/${feed?.anexo}`)}`} className='nonLink'>{feed?.chave_tarifa}</a></p>
+                                                                                </div>
+                                                                                <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones">
+                                                                                {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS_ENDERECOS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
+
+                                                                                        <div type='button' className='iconelixo' onClick={(a) => this.deleteAnexo(feed.chave, feed.anexo)} >
+                                                                                            <FontAwesomeIcon icon={faTrashAlt} />
+                                                                                        </div>
+                                                                                    }
+                                                                                </div>
+                                                                            </div>
+                                                                        }
+                                                                    </div>
+                                                                    <div className="col-xl-2 col-lg-2 col-md-0 col-sm-0 col-0"></div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
                     </div>
 
                 </div>

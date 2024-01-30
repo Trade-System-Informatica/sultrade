@@ -14,22 +14,28 @@ if($objData != NULL){
     $format = prepareInput($objData->format);
     $ext = prepareInput($objData->ext);
     $nome = prepareInput($objData->nome);
-    
-    $documento2 = prepareInput($objData->documento2);
-    $format2 = prepareInput($objData->format2);
-    $ext2 = prepareInput($objData->ext2);
-    $nome2 = prepareInput($objData->nome2);
 
     $values = prepareInput($objData->values);
     $portos = $objData->portos;
 
     $pessoas = new Pessoas();
-
-    //$result = $pessoas->insertAnexo($values, $portos); função nao existe!
-	$result = $pessoas->insertTarifa($values,$portos);
     
-	savePicture($documento, $nome, $format, $ext);
-    savePicture($documento2, $nome2, $format2, $ext2); 
+	$result = $pessoas->insertTarifa($values, $portos);
+
+    if ($nome != NULL && $nome != ""){
+        $keyTarifa = intval($pessoas->getTarifasLen()[0]['chave']);
+
+        $valuesAnexoTarifa = "'', $keyTarifa";
+        $resultAnexosTarifas = $pessoas->insertTarifasAnexos($valuesAnexoTarifa);
+        $keyAnexosTarifas = intval($pessoas->getAnexosTarifasLen()[0]['chave']);
+
+        $fullname = $nome.'_AN-'.$keyAnexosTarifas.'.'.$ext;
+
+        $resultAnexosTarifas = $pessoas->updateTarifasAnexos($fullname, $keyAnexosTarifas);
+    }
+    //$result = $pessoas->insertAnexo($values, $portos); função nao existe!
+    
+	savePicture($documento, $nome, $format, $ext, $keyAnexosTarifas);
     
 } else {
     $result = "false";
