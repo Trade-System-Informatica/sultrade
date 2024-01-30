@@ -39,14 +39,14 @@ function generateRandonToken($size=50, $lower=true, $symbol=false){
     return $code;
 }
 
-function savePicture($picture ,$name, $format, $ext){
+function savePicture($picture ,$name, $format, $ext, $key){
     if($name == null){
         $name = date('m-d-Y-H-i-s', time());
         $name = str_replace("-","",$name);
         $name = $name;
     } 
 
-    $link = $name.'.'.$ext;
+    $link = $name.'_AN-'.$key.'.'.$ext;
     $link = "documents/pictures/" . $link;
 
     $img = $picture;
