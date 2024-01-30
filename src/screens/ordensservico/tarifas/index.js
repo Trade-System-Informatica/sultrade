@@ -320,42 +320,22 @@ class Tarifas extends Component {
                                             {window.innerWidth >= 500 &&
                                                 <div className="row deleteMargin alignCenter">
                                                     <div className="col-3 text-left">
-                                                        <p className="mobileajuster5"><Link to=
-                                                                {{
-                                                                    pathname: `/ordensservico/addtarifa/${feed.chave}`,
-                                                                    state: { tarifa: { ...feed } }
-                                                                }}
-                                                                className="nonLink"
-                                                            >{feed.fornecedorNome}</Link></p>
+                                                        <p className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo2}`)}`} className="nonLink">{feed.fornecedorNome}</a></p>
                                                     </div>
                                                     <div className="col-3 text-left">
-                                                        <h6 className="mobileajuster5"><Link to=
-                                                                {{
-                                                                    pathname: `/ordensservico/addtarifa/${feed.chave}`,
-                                                                    state: { tarifa: { ...feed } }
-                                                                }}
-                                                                className="nonLink"
-                                                            >{feed?.portoNome?.split("@").join(", ")}</Link></h6>
+                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed?.portoNome?.split("@").join(", ")}</a></h6>
                                                     </div>
                                                     <div className="col-2 text-left">
-                                                        <h6 className="mobileajuster5"><Link to=
-                                                                {{
-                                                                    pathname: `/ordensservico/addtarifa/${feed.chave}`,
-                                                                    state: { tarifa: { ...feed } }
-                                                                }}
-                                                                className="nonLink"
-                                                            >{feed.servico}</Link></h6>
+                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.servico}</a></h6>
                                                     </div>
                                                     <div className="col-3 text-center" style={{ justifyContent: "center"}}>
                                                     <p className="mobileajuster5">
-                                                        <h6 className="mobileajuster5"><Link to=
-                                                                {{
-                                                                    pathname: `/ordensservico/addtarifa/${feed.chave}`,
-                                                                    state: { tarifa: { ...feed } }
-                                                                }}
-                                                                className="nonLink"
-                                                            >{feed.preferencial != "0" ? `Sim` : "Não"}</Link></h6>
-                                                    </p>
+                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.preferencial != "0" ? `Sim` : "Não"}</a></h6>
+                                                    
+                                                        <a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">|  ANEXO 1 |</a>
+                                                        
+                                                        {feed.anexo2 != 0 ? <a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo2}`)}`} className="nonLink">|  ANEXO 2 |</a> : null}
+                                                        </p>
                                                     </div>
                                                     <div className="col-1 text-left icones mobileajuster4 ">
                                                         <div className='iconelixo giveMargin' type='button' >
@@ -415,31 +395,13 @@ class Tarifas extends Component {
                                                     }}
                                                     className="row deleteMargin alignCenter">
                                                     <div className="col-4 text-left">
-                                                        <h6 className="mobileajuster5"><Link to=
-                                                                {{
-                                                                    pathname: `/ordensservico/addtarifa/${feed.chave}`,
-                                                                    state: { tarifa: { ...feed } }
-                                                                }}
-                                                                className="nonLink"
-                                                            >{feed.fornecedorNome}</Link></h6>
+                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.fornecedorNome}</a></h6>
                                                     </div>
                                                     <div className="col-4 text-left">
-                                                        <h6 className="mobileajuster5"><Link to=
-                                                                {{
-                                                                    pathname: `/ordensservico/addtarifa/${feed.chave}`,
-                                                                    state: { tarifa: { ...feed } }
-                                                                }}
-                                                                className="nonLink"
-                                                            >{feed.portoNome.split("@").join(", ")}</Link></h6>
+                                                        <h6 className="mobileajuster5"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.portoNome.split("@").join(", ")}</a></h6>
                                                     </div>
                                                     <div className="col-3 text-center" style={{ justifyContent: "center" }}>
-                                                        <h6 className="mobileajuster5 text-center"><Link to=
-                                                                {{
-                                                                    pathname: `/ordensservico/addtarifa/${feed.chave}`,
-                                                                    state: { tarifa: { ...feed } }
-                                                                }}
-                                                                className="nonLink"
-                                                            >{feed.preferencial != "0" ? "Sim" : "Não"}</Link></h6>
+                                                        <h6 className="mobileajuster5 text-center"><a target="_blank" href={`${util.completarDocuments(`pictures/${feed.anexo}`)}`} className="nonLink">{feed.preferencial != "0" ? "Sim" : "Não"}</a></h6>
                                                     </div>
                                                     <div className="col-1 text-left icones mobileajuster4 ">
                                                         <div className='iconelixo giveMargin' type='button' >
