@@ -732,7 +732,7 @@ class AddTarifa extends Component {
                                             <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
                                         </div>
                                         <div className="col-4" style={{ display: 'flex', justifyContent: 'center' }}>
-                                            <button disabled={!validForm || this.state.chave == 0} onClick={() => { this.salvarAnexo(); this.setState({ email: { ...this.state.email, aberto: true } }) }} type="submit" style={validForm && this.state.chave != 0 ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Enviar Email</button>
+                                            <button disabled={!validForm || this.state.chave == 0} type='button' onClick={() => {this.setState({ email: { ...this.state.email, aberto: true } }) }} style={validForm && this.state.chave != 0 ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Enviar Email</button>
                                         </div>
                                         <div className="col-2"></div>
                                     </div>
