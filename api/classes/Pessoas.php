@@ -183,6 +183,16 @@ class Pessoas
         return $result;
     }
 
+    public static function getAnexosTarifas($chave)
+    {
+        $database = new Database();
+
+        $result = $database->doSelect("anexos_tarifas", "anexos_tarifas.*", "anexos_tarifas.chave_tarifa = $chave");
+
+        $database->closeConection();
+        return $result;
+    }
+
     public static function getAnexosNaoValidados()
     {
         $database = new Database();
@@ -317,13 +327,61 @@ class Pessoas
     public static function insertTarifa($values, $portos)
     {
         $database = new Database();
-        $cols = 'fornecedor, servico, anexo, vencimento, preferencial, anexo2, porto'; #ALTERAÇÃO
+        $cols = 'fornecedor, servico, vencimento, preferencial, porto'; #ALTERAÇÃO
 
         foreach ($portos as $porto) {
             $baseValues = $values . ", $porto";
 
             $result = $database->doInsert('tarifas', $cols, $baseValues);
         }
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function insertTarifasAnexos($values)
+    {
+        $database = new Database();
+        $cols = "anexo, chave_tarifa"; 
+            
+        $result = $database->doInsert('anexos_tarifas', $cols, $values);
+        
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function updateTarifasAnexos($value, $chave)
+    {
+        $database = new Database();
+        $query = "anexo = '".$value."'";
+        $result = $database->doUpdate('anexos_tarifas', $query, 'anexos_tarifas.chave = '.$chave);
+        
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function getTarifasLen() {
+        $database = new Database();
+
+        $result = $database->doSelect("tarifas", 'tarifas.chave', "","ORDER BY tarifas.chave DESC LIMIT 1");
+        
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function getAnexosTarifasLen() {
+        $database = new Database();
+
+        $result = $database->doSelect("anexos_tarifas", 'anexos_tarifas.chave', "","ORDER BY anexos_tarifas.chave DESC LIMIT 1");
+        
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function deleteAnexoTarifa($chave)
+    {
+        $database = new Database();
+
+        $result = $database->doDelete('anexos_tarifas', 'anexos_tarifas.chave = '.$chave);
         $database->closeConection();
         return $result;
     }
@@ -391,7 +449,7 @@ class Pessoas
         }
     }
 
-    public static function updateTarifa($chave, $fornecedor, $anexo, $portos, $servico, $vencimento, $preferencial, $anexo2, $portosDeletados)
+    public static function updateTarifa($chave, $fornecedor, $portos, $servico, $vencimento, $preferencial, $portosDeletados)
     {
         $database = new Database();
 
@@ -401,31 +459,11 @@ class Pessoas
             if ($itemExists[0]) {
                 $query = "fornecedor = '" . $fornecedor . "', porto = '" . $porto . "', servico = '" . $servico . "', vencimento = '$vencimento', email_enviado = 0, preferencial = $preferencial";
 
-                if ($anexo) {
-                    $query .= ", anexo = '$anexo'";
-                }
-                if ($anexo2) {
-                    $query .= ", anexo2 = '$anexo2'";
-                }
-
                 $result = $database->doUpdate('tarifas', $query, 'chave = ' . $chave);
             } else {
+                $values = "'$fornecedor', '$porto', '$servico', '$vencimento', $preferencial";
 
-                if ($anexo) {
-                    $values = "'$fornecedor', '$porto', '$servico', '$anexo', '$vencimento', $preferencial";
-                    if ($anexo2) {
-                        $values = "'$fornecedor', '$porto', '$servico', '$anexo', '$vencimento', $preferencial, '$anexo2'";}
-                } else {
-                    $brotherValue = $database->doSelect('tarifas', 'tarifas.anexo', "vencimento = '$vencimento' AND servico = '$servico' AND fornecedor = '$fornecedor'");
-                    if ($brotherValue[0]) {
-                        $values = "'$fornecedor', '$porto', '$servico', '" . $brotherValue[0]["anexo"] . "', '$vencimento', $preferencial ". $brotherValue[0]["anexo2"]."";
-                    } else {
-                        $values = "'$fornecedor', '$porto', '$servico', '', '$vencimento', $preferencial, ''";
-                    }
-                }
-
-
-                $cols = "fornecedor, porto, servico, anexo, vencimento, preferencial, anexo2";
+                $cols = "fornecedor, porto, servico, vencimento, preferencial";
 
                 $result = $database->doInsert('tarifas', $cols, $values);
             }
