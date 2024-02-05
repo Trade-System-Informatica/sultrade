@@ -310,11 +310,7 @@ class Navios
                 $identificador = $identificador+1;
             }
             
-            $codigo_invoice = $identificador;
-
-            for ($i = strlen($codigo_invoice); $i < 3;$i++) {
-                $codigo_invoice = "0".$codigo_invoice;
-            }
+            $codigo_invoice = '';
             
             $codigo_invoice = $emissao->format('Ymd').$codigo_invoice;
             $result['invoice'] = $codigo_invoice;
@@ -322,7 +318,12 @@ class Navios
             
             $cols = 'grupo, os, evento, empresa, codigo, identificador, emissao';
             foreach ($eventos as $evento) {
-                $values = $grupo . ", $os, $evento, $empresa, $codigo_invoice, $identificador, '".$emissao->format('Y-m-d')."'";
+                $num_id = rand(1,999);
+
+                for ($i = strlen($num_id); $i < 3;$i++) {
+                    $num_id = "0".$num_id;
+                }
+                $values = $grupo . ", $os, $evento, $empresa, $codigo_invoice".$num_id.", $identificador, '".$emissao->format('Y-m-d')."'";
                 $database->doInsert('os_invoices', $cols, $values);
             }
         } else if ($result && $result['fornecedorCusteio'] != 0 && $events[0]) {
