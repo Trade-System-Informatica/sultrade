@@ -6418,7 +6418,7 @@ class AddOS extends Component {
                                                                                     </a>
                                                                                 </td>
                                                                                 <td className="text-center">
-                                                                                    <a href={`${CAMINHO_DOCUMENTOS}/docs/${feed.caminho}`} className='nonlink' target='_blank'>
+                                                                                    <a href={feed.tipo_docto == 55 ? `${CAMINHO_INVOICES}/${feed.caminho}` : `${CAMINHO_DOCUMENTOS}/docs/${feed.caminho}`} className='nonlink' target='_blank'>
                                                                                         <p>{feed.categoria}</p>
                                                                                     </a>
                                                                                 </td>
