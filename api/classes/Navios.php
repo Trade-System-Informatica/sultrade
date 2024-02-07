@@ -323,6 +323,7 @@ class Navios
                 for ($i = strlen($num_id); $i < 3;$i++) {
                     $num_id = "0".$num_id;
                 }
+                $result['invoice'] = $codigo_invoice.$num_id;
                 $values = $grupo . ", $os, $evento, $empresa, $codigo_invoice".$num_id.", $identificador, '".$emissao->format('Y-m-d')."'";
                 $database->doInsert('os_invoices', $cols, $values);
             }
