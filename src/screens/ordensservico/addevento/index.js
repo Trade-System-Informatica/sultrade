@@ -231,11 +231,11 @@ class AddEvento extends Component {
         await this.getTemplates();
 
         if (this.state.chave != 0) {
-            const anexos = await loader.getBody("getAnexos.php", { evento: this.state.chave });
+            const anexos = await loader.getBody("getAnexos.php", { evento: this.state.chave, token: true });
             console.log(anexos);
 
             await this.setState({
-                anexosForn: anexos.filter((an) => (anexos.validado == 0 || !anexos.validado))
+                anexosForn: anexos?.filter((an) => (anexos.validado == 0 || !anexos.validado))
             });
 
             await this.setState({
@@ -313,6 +313,7 @@ class AddEvento extends Component {
         await apiEmployee.post(`getEventosTemplates.php`, {
             token: true,
             empresa: this.state.usuarioLogado.empresa,
+            offset: null
         }).then(
             async res => {
                 await this.setState({ templates: res.data })
@@ -360,11 +361,14 @@ class AddEvento extends Component {
     getOS = async () => {
         await apiEmployee.post(`getOS.php`, {
             token: true,
+            empresa: 0, 
+            limit: 'n',
+            offset: 'n'
         }).then(
             async res => {
                 await this.setState({ todasOs: res.data })
 
-                const options = this.state.todasOs.map((e) => {
+                const options = this.state.todasOs?.map((e) => {
                     return { label: e.codigo, value: e.Chave, navio: e.chave_navio, navioNome: e.navioNome, porto: e.porto, portoNome: e.portoNome, viagem: e.viagem }
                 })
 
@@ -1655,7 +1659,7 @@ class AddEvento extends Component {
                                                                                 <span>Valor (USD)</span>
                                                                             </th>
                                                                         </tr>
-                                                                        {this.state.templates[0] != undefined && this.state.templates.filter((feed) => /*this.filterTemplate*/ { return true }).map((feed, index) => (
+                                                                        {this.state.templates[0] != undefined && this?.state?.templates?.filter((feed) => /*this.filterTemplate*/ { return true }).map((feed, index) => (
                                                                             <>
                                                                                 {window.innerWidth < 500 &&
                                                                                     <tr onClick={() => {

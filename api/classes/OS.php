@@ -252,6 +252,15 @@ class OS
         return $result;
     }
 
+    public static function getTipoDocumento($chave)
+    {
+        $database = new Database();
+
+        $result = $database->doSelect('os_documentos','os_documentos.tipo_docto', 'Chave = ' . $chave);
+        $database->closeConection();
+        return $result;
+    }
+
     public static function getDocumentosOSI($chave)
     {
         $database = new Database();
@@ -1179,6 +1188,26 @@ class OS
         $query = "cabecalho = '$cabecalho'";
 
         $result = $database->doUpdate('os', $query, 'Chave = ' . $Chave);
+        $database->closeConection();
+        if ($result == NULL) {
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+
+    public static function updateOsInvoice($chave, $chave_os, $Fornecedor_Custeio)
+    {
+        $database = new Database();
+
+        $query = "empresa = " . $Fornecedor_Custeio;
+
+        $invoice = $database->doSelect("os_invoices", "os_invoices.*", "os_invoices.os = $chave_os AND os_invoices.evento = $chave");
+
+        if ($invoice[0]){
+            $result = $database->doUpdate('os_invoices', $query, "os_invoices.os = $chave_os AND os_invoices.evento = $chave");
+        }
+
         $database->closeConection();
         if ($result == NULL) {
             return 'false';

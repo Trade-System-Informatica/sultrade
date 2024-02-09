@@ -5882,7 +5882,11 @@ class AddOS extends Component {
                                             <div className="row">
                                                 <div className="col-2"></div>
                                                 <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
+                                                    {moment(this.state.os.Data_Encerramento).format("YYYY-MM-DD") != "Invalid date" ?
+                                                    <button disabled={true} type="submit" style={validForm && !this.state.faturado ? { backgroundColor: '#eee', opacity: 0.3, width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >OS ENCERRADA</button>
+                                                    :
                                                     <button disabled={!(validForm && !this.state.faturado)} type="submit" style={validForm && !this.state.faturado ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
+                                                    }
                                                 </div>
                                                 <div className="col-2"></div>
                                             </div>
