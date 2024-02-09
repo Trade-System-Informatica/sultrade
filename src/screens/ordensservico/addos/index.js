@@ -5858,7 +5858,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="number" step="0.1" value={this.state.roe} onChange={async e => { this.setState({ roe: e.currentTarget.value }) }} />
+                                                                <Field className="form-control" type="number" step="0.0000000001" value={this.state.roe} onChange={async e => { this.setState({ roe: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm ">
