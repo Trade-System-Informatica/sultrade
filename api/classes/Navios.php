@@ -282,7 +282,7 @@ class Navios
             $result['fornecedorCusteioNome'] = $events[0]['fornecedorCusteioNome'];
             $result['events'] = $events;
         }
-
+        // AQUI MORA O PERIGO, ELE PEGA EVENTOS CRIADOS ANTIGAMENTE NA CRIAÇÂO DE INVOICES NOVAS
         $invoice = $database->doSelect('os_invoices', 'os_invoices.*',"os_invoices.evento = ".$eventos[0]);
         $invoice = $invoice[0];
         
