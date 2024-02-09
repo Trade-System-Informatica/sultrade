@@ -1,4 +1,6 @@
 <?php
+error_reporting(0);
+ini_set("display_errors", 0 );
 header("Access-Control-Allow-Origin:*");
 header("Content-Type: application/x-www-form-urlencoded");
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
@@ -9,6 +11,7 @@ include_once '../libraries/utils.php';
 
 $data = file_get_contents("php://input");
 $objData = json_decode($data);
+
 
 if($objData != NULL){
     $token = prepareInput($objData->token);
@@ -28,6 +31,8 @@ if($objData != NULL){
     $repasse = prepareInput($objData->repasse);
     
     $os = new OS();
+
+    $delInvoice = $os->updateOsInvoice($chave, $chave_os, $Fornecedor_Custeio);
 
     //$result = $employees->checkToken($token);
     //if($result == 'true'){

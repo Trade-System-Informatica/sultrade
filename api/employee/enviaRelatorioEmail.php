@@ -119,7 +119,7 @@ if ($emails[0]) {
         <span>Sultrade Shipping Agency</span><br/>
         <span>Accounting Dept.</span><br/>
         <span>Phone: +55 53 32353500</span><br/>
-        <span>E-mail: soa@sultrade-ag.com.br</span>
+        <span>E-mail: soa@sultradeagency.com</span>
         ";
 
         $anexo = explode(",", $mensagem)[1];

@@ -231,11 +231,11 @@ class AddEvento extends Component {
         await this.getTemplates();
 
         if (this.state.chave != 0) {
-            const anexos = await loader.getBody("getAnexos.php", { evento: this.state.chave });
+            const anexos = await loader.getBody("getAnexos.php", { evento: this.state.chave, token: true });
             console.log(anexos);
 
             await this.setState({
-                anexosForn: anexos.filter((an) => (anexos.validado == 0 || !anexos.validado))
+                anexosForn: anexos?.filter((an) => (anexos.validado == 0 || !anexos.validado))
             });
 
             await this.setState({
@@ -312,7 +312,7 @@ class AddEvento extends Component {
     getTemplates = async () => {
         await apiEmployee.post(`getEventosTemplates.php`, {
             token: true,
-            empresa: this.state.usuarioLogado.empresa,
+            empresa: this.state.usuarioLogado.empresa
         }).then(
             async res => {
                 await this.setState({ templates: res.data })
@@ -359,12 +359,12 @@ class AddEvento extends Component {
 
     getOS = async () => {
         await apiEmployee.post(`getOS.php`, {
-            token: true,
+            token: true
         }).then(
             async res => {
                 await this.setState({ todasOs: res.data })
 
-                const options = this.state.todasOs.map((e) => {
+                const options = this.state.todasOs?.map((e) => {
                     return { label: e.codigo, value: e.Chave, navio: e.chave_navio, navioNome: e.navioNome, porto: e.porto, portoNome: e.portoNome, viagem: e.viagem }
                 })
 
