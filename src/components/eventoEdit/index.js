@@ -14,6 +14,7 @@ const estadoInicial = {
 
     optionsTexto: "",
     itemEdit: {},
+    habilitado: false,
 }
 
 
@@ -47,6 +48,18 @@ class EventoEdit extends Component {
                 itemEdit
             })
         }
+
+        if(prevState.itemEdit != this.state.itemEdit){
+            console.log('TESTANDO SIFOIIIIIII')
+            if(this.state.itemEdit?.valores?.find((e) => e.titulo == "Tipo")?.valor == 0 || this.state.itemEdit?.valores?.find((e) => e.titulo == "Tipo")?.valor == 1){
+                if(!this.props.editavel){
+                    this.setState({habilitado: false})
+                }
+            }else {
+                this.setState({habilitado: true})
+            }
+        }
+        
     }
 
     changeState = (index, value, half = 0, blur = false) => {
@@ -102,6 +115,13 @@ class EventoEdit extends Component {
         }
 
         this.setState({ itemEdit })
+        if(!this.props.editavel){
+            if(this.state.itemEdit?.valores?.find((e) => e.titulo == "Tipo")?.valor == 0 || this.state.itemEdit?.valores?.find((e) => e.titulo == "Tipo")?.valor == 1){
+                this.setState({habilitado: false})
+            } else{
+                this.setState({habilitado: true})
+            }
+        }
     }
 
     fecharModal = () => {
@@ -209,7 +229,7 @@ class EventoEdit extends Component {
                                                                         <Select
                                                                             className='SearchSelect color_black'
                                                                             options={valor.options.filter(e => this.filterSearch(e, this.state.optionsTexto)).slice(0, 20)}
-                                                                            onInputChange={e => { this.setState({ optionsTexto: e }) }} value={valor.options.filter(option => option.value == valor.valor)}
+                                                                            onInputChange={e => { this.setState({ optionsTexto: e }); }} value={valor.options.filter(option => option.value == valor.valor)}
                                                                             isDisabled={valor.disabled}
                                                                             search={true}
                                                                             onChange={(e) => { this.changeState(index, e.value); valor.onChange(e.value) }} />
@@ -262,10 +282,16 @@ class EventoEdit extends Component {
                                                 <div className="row">
                                                     <div className="col-2"></div>
                                                     <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                        <button type="submit" disabled={!this.props.valid} style={this.props.valid ? { width: 300, backgroundColor: "white" } : { width: 300 }} >Salvar</button>
+                                                    
+                                                        {this.props.editavel ?
+                                                            <button type="submit" disabled={!this.props.valid} style={this.props.valid ? { width: 300, backgroundColor: "white" } : { width: 300 }} >Salvar</button>
+                                                        :
+                                                            <button type="submit" disabled={!this.props.valid && this.state.habilitado} style={this.props.valid && this.state.habilitado ? { width: 300, backgroundColor: "white" } : { width: 300 }} >Salvar</button>
+                                                        }
                                                     </div>
                                                     <div className="col-2"></div>
                                                 </div>
+                                                {!this.props.editavel? !this.state.habilitado? <p style={{maxWidth: 400, margin: 'auto' , color: 'white'}}>Os encerrada, somente eventos do tipo: Desconto ou Recebimento de Remessas</p> : null : null}
                                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
                                             </div>
                                         </div>

@@ -1655,7 +1655,7 @@ class AddEvento extends Component {
                                                                                 <span>Valor (USD)</span>
                                                                             </th>
                                                                         </tr>
-                                                                        {this.state.templates[0] != undefined && this.state.templates.filter((feed) => /*this.filterTemplate*/ { return true }).map((feed, index) => (
+                                                                        {this.state.templates[0] != undefined && this.state.templates?.filter((feed) => /*this.filterTemplate*/ { return true }).map((feed, index) => (
                                                                             <>
                                                                                 {window.innerWidth < 500 &&
                                                                                     <tr onClick={() => {
