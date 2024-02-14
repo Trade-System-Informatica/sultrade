@@ -58,6 +58,7 @@ const estadoInicial = {
     faturadoPor: '',
     empresa: '',
     operador: '',
+    editavel: true,
 
     deleteSolicitao: false,
 
@@ -310,6 +311,12 @@ class AddOS extends Component {
                 operador: this.state.os.operador
             })
 
+            if (moment(this.state.os.Data_Encerramento).format("YYYY-MM-DD") != "Invalid date"){
+                await this.setState({editavel: false});
+            } else {
+                await this.setState({editavel: true});
+            }
+
             if (this.state.cabecalho) {
                 let cabecalho;
 
@@ -392,6 +399,7 @@ class AddOS extends Component {
                 deleteSolicitao: false
             })
         }
+        
     }
 
     calculaTotal = () => {
@@ -528,7 +536,29 @@ class AddOS extends Component {
             planosContasOptions,
             meiosPagamentosOptions,
             acessosPermissoes: await loader.testaAcesso(this.state.acessos, this.state.permissoes, this.state.usuarioLogado),
+            /*{
+                acesso: e.Chave,
+                acessoAcao: e.Acao,
+                permissaoInsere: permissao ? permissao.Liberacao.split(``)[0] : 0,
+                permissaoEdita: permissao ? permissao.Liberacao.split(``)[1] : 0,
+                permissaoConsulta: permissao ? permissao.Liberacao.split(``)[2] : 0,
+                permissaoDeleta: permissao ? permissao.Liberacao.split(``)[3] : 0,
+                permissaoImprime: permissao ? permissao.Liberacao.split(``)[4] : 0
+            }*/
         });
+        console.log(this.state.acessosPermissoes);
+    }
+
+    checkOsClosed = () => {
+        if(!this.state.editavel){
+            if(this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS_ENCERRADA') { return e } }).map((e) => e.permissaoEdita)[0] == 1){
+                return false;
+            }else{
+                return true;
+            }
+        } else{
+            return false;
+        }
     }
 
     getCusteiosSubagentes = async () => {
@@ -5612,7 +5642,7 @@ class AddOS extends Component {
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10">
-                                                                <Field className="form-control" type="text" disabled value={this.state.codigo.Proximo ? `TS${this.state.codigo.Proximo}` : this.state.codigo ? this.state.codigo : ''} />
+                                                                <Field className="form-control" disabled={!this.state.editavel} type="text" disabled value={this.state.codigo.Proximo ? `TS${this.state.codigo.Proximo}` : this.state.codigo ? this.state.codigo : ''} />
                                                             </div>
                                                             <div className='col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12 labelForm'>
                                                                 <div className="centerDiv">
@@ -5634,7 +5664,7 @@ class AddOS extends Component {
                                                                 }
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="date" disabled value={this.state.abertura} />
+                                                                <Field className="form-control" disabled={!this.state.editavel} type="date" disabled value={this.state.abertura} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -5646,10 +5676,10 @@ class AddOS extends Component {
                                                                 }
                                                             </div>
                                                             <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10 ">
-                                                                <Select className='SearchSelect' options={this.state.naviosOptions.filter(e => this.filterSearch(e, this.state.naviosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ naviosOptionsTexto: e }) }} value={this.state.naviosOptions.filter(option => option.value == this.state.navio)[0]} search={true} onChange={(e) => { this.setState({ navio: e.value, }) }} />
+                                                                <Select className='SearchSelect' isDisabled={!this.state.editavel} options={this.state.naviosOptions.filter(e => this.filterSearch(e, this.state.naviosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ naviosOptionsTexto: e }) }} value={this.state.naviosOptions.filter(option => option.value == this.state.navio)[0]} search={true} onChange={(e) => { this.setState({ navio: e.value, }) }} />
                                                             </div>
                                                             <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
-                                                                {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'NAVIOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                                                {this.state.editavel? this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'NAVIOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                                                     <div className='insideFormButton' onClick={async () => {
                                                                         if (this.state.navios[0]) { } else {
                                                                             await this.setState({
@@ -5658,7 +5688,7 @@ class AddOS extends Component {
                                                                         }
                                                                         await this.setState({ modalAberto: true, modal: 'listarNavios', modalPesquisa: this.state.navio, modalLista: this.state.navios })
                                                                     }}>...</div>
-                                                                }
+                                                                : null}
                                                             </div>
                                                             <div className="col-1">
                                                             </div>
@@ -5671,10 +5701,10 @@ class AddOS extends Component {
                                                                 }
                                                             </div>
                                                             <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
-                                                                <Select className='SearchSelect' options={this.state.portosOptions.filter(e => this.filterSearch(e, this.state.portosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ portosOptionsTexto: e }) }} value={this.state.portosOptions.filter(option => option.value == this.state.porto)[0]} search={true} onChange={(e) => { this.setState({ porto: e.value, }) }} />
+                                                                <Select className='SearchSelect' isDisabled={!this.state.editavel} options={this.state.portosOptions.filter(e => this.filterSearch(e, this.state.portosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ portosOptionsTexto: e }) }} value={this.state.portosOptions.filter(option => option.value == this.state.porto)[0]} search={true} onChange={(e) => { this.setState({ porto: e.value, }) }} />
                                                             </div>
                                                             <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
-                                                                {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PORTOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                                                {this.state.editavel? this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PORTOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                                                     <div className='insideFormButton' onClick={async () => {
                                                                         if (this.state.portos[0]) { } else {
                                                                             await this.setState({
@@ -5683,7 +5713,7 @@ class AddOS extends Component {
                                                                         }
                                                                         await this.setState({ modalAberto: true, modal: 'listarPortos', modalPesquisa: this.state.porto, modalLista: this.state.portos })
                                                                     }}>...</div>
-                                                                }
+                                                                : null}
                                                             </div>
                                                             <div className="col-1">
                                                             </div>
@@ -5696,10 +5726,10 @@ class AddOS extends Component {
                                                                 }
                                                             </div>
                                                             <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
-                                                                <Select className='SearchSelect' options={this.state.clientesOptions.filter(e => this.filterSearch(e, this.state.clientesOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ clientesOptionsTexto: e }) }} value={this.state.clientesOptions.filter(option => option.value == this.state.cliente)[0]} search={true} onChange={async (e) => { await this.setState({ cliente: e.value, }); await this.getDadosCliente() }} />
+                                                                <Select className='SearchSelect' isDisabled={!this.state.editavel} options={this.state.clientesOptions.filter(e => this.filterSearch(e, this.state.clientesOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ clientesOptionsTexto: e }) }} value={this.state.clientesOptions.filter(option => option.value == this.state.cliente)[0]} search={true} onChange={async (e) => { await this.setState({ cliente: e.value, }); await this.getDadosCliente() }} />
                                                             </div>
                                                             <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
-                                                                {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                                                {this.state.editavel? this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                                                     <div className='insideFormButton' onClick={async () => {
                                                                         if (this.state.clientes[0]) { } else {
                                                                             await this.setState({
@@ -5708,7 +5738,7 @@ class AddOS extends Component {
                                                                         }
                                                                         await this.setState({ modalAberto: true, modal: 'listarCliente', modalPesquisa: this.state.cliente, modalLista: this.state.clientes })
                                                                     }}>...</div>
-                                                                }
+                                                                : null}
                                                             </div>
                                                             <div className="col-1">
                                                             </div>
@@ -5721,10 +5751,10 @@ class AddOS extends Component {
                                                                 }
                                                             </div>
                                                             <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
-                                                                <Select className='SearchSelect' options={this.state.tiposServicosOptions.filter(e => this.filterSearch(e, this.state.tiposServicosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ tiposServicosOptionsTexto: e }) }} value={this.state.tiposServicosOptions.filter(option => option.value == this.state.tipoServico)[0]} search={true} onChange={(e) => { this.setState({ tipoServico: e.value, }) }} />
+                                                                <Select className='SearchSelect' isDisabled={!this.state.editavel} options={this.state.tiposServicosOptions.filter(e => this.filterSearch(e, this.state.tiposServicosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ tiposServicosOptionsTexto: e }) }} value={this.state.tiposServicosOptions.filter(option => option.value == this.state.tipoServico)[0]} search={true} onChange={(e) => { this.setState({ tipoServico: e.value, }) }} />
                                                             </div>
                                                             <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
-                                                                {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'TIPOS_SERVICOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                                                {this.state.editavel? this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'TIPOS_SERVICOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                                                     <div className='insideFormButton' onClick={async () => {
                                                                         if (this.state.tiposServicos[0]) { } else {
                                                                             await this.setState({
@@ -5733,7 +5763,7 @@ class AddOS extends Component {
                                                                         }
                                                                         await this.setState({ modalAberto: true, modal: 'listarTiposServicos', modalPesquisa: this.state.tipoServico, modalLista: this.state.tiposServicos })
                                                                     }}>...</div>
-                                                                }
+                                                                : null}
                                                             </div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 <label>Operador</label>
@@ -5741,7 +5771,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
-                                                                <Select className='SearchSelect' options={this.state.operadoresOptions.filter(e => this.filterSearch(e, this.state.operadoresOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ operadoresOptionsTexto: e }) }} value={this.state.operadoresOptions.filter(option => option.value == this.state.operador)[0]} search={true} onChange={(e) => { this.setState({ operador: e.value, }) }} />
+                                                                <Select className='SearchSelect' isDisabled={!this.state.editavel} options={this.state.operadoresOptions.filter(e => this.filterSearch(e, this.state.operadoresOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ operadoresOptionsTexto: e }) }} value={this.state.operadoresOptions.filter(option => option.value == this.state.operador)[0]} search={true} onChange={(e) => { this.setState({ operador: e.value, }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
 
@@ -5751,7 +5781,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="date" value={this.state.eta} onChange={async e => { this.setState({ eta: e.currentTarget.value }) }} />
+                                                                <Field className="form-control" disabled={!this.state.editavel} type="date" value={this.state.eta} onChange={async e => { this.setState({ eta: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -5760,7 +5790,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="datetime-local" value={this.state.etb} onChange={async e => { this.setState({ etb: e.currentTarget.value }) }} />
+                                                                <Field className="form-control" disabled={!this.state.editavel} type="datetime-local" value={this.state.etb} onChange={async e => { this.setState({ etb: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -5769,7 +5799,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="datetime-local" value={this.state.data_saida} onChange={async e => { this.setState({ data_saida: e.currentTarget.value }) }} />
+                                                                <Field className="form-control" disabled={!this.state.editavel} type="datetime-local" value={this.state.data_saida} onChange={async e => { this.setState({ data_saida: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             {this.state.governmentTaxes &&
@@ -5780,7 +5810,7 @@ class AddOS extends Component {
                                                                     <div className='col-1 errorMessage'>
                                                                     </div>
                                                                     <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                        <Field className="form-control text-right" type="text" step="0.1" value={this.state.governmentTaxes} disabled />
+                                                                        <Field className="form-control text-right" disabled={!this.state.editavel} type="text" step="0.1" value={this.state.governmentTaxes} disabled />
                                                                     </div>
                                                                     <div className='col-1 errorMessage'>
                                                                     </div>
@@ -5794,7 +5824,7 @@ class AddOS extends Component {
                                                                     <div className='col-1 errorMessage'>
                                                                     </div>
                                                                     <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                        <Field className="form-control text-right" type="text" step="0.1" value={this.state.bankCharges} disabled />
+                                                                        <Field className="form-control text-right" disabled={!this.state.editavel} type="text" step="0.1" value={this.state.bankCharges} disabled />
                                                                     </div>
                                                                     <div className='col-1 errorMessage'>
                                                                     </div>
@@ -5809,7 +5839,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="date" value={this.state.encerramento} onChange={async e => { await this.setState({ encerramento: e.currentTarget.value }); await this.setState({ encerradoPor: this.state.encerramento == '' ? '' : this.state.usuarioLogado.codigo }) }} />
+                                                                <Field className="form-control" disabled={this.checkOsClosed()} type="date" value={this.state.encerramento} onChange={async e => { await this.setState({ encerramento: e.currentTarget.value }); await this.setState({ encerradoPor: this.state.encerramento == '' ? '' : this.state.usuarioLogado.codigo }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -5818,7 +5848,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="date" value={this.state.faturamento} onChange={async e => { this.faturarData(e.currentTarget.value) }} />
+                                                                <Field className="form-control" disabled={!this.state.editavel} type="date" value={this.state.faturamento} onChange={async e => { this.faturarData(e.currentTarget.value) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -5827,7 +5857,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="date" value={this.state.envio} onChange={async e => { this.setState({ envio: e.currentTarget.value }) }} />
+                                                                <Field className="form-control" disabled={!this.state.editavel} type="date" value={this.state.envio} onChange={async e => { this.setState({ envio: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -5836,7 +5866,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
-                                                                <Select isDisabled={this.state.codigo.slice(2) >= 5850} className='SearchSelect' options={this.state.centrosCustosOptions.filter(e => this.filterSearchCentroCusto(e, this.state.centrosCustosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ centrosCustosOptionsTexto: e }) }} value={this.state.centrosCustosOptions.filter(option => option.value == this.state.centroCusto)[0]} search={true} onChange={(e) => { this.setState({ centroCusto: e.value, }) }} />
+                                                                <Select disabled={!this.state.editavel} isDisabled={this.state.codigo.slice(2) >= 5850} className='SearchSelect' options={this.state.centrosCustosOptions.filter(e => this.filterSearchCentroCusto(e, this.state.centrosCustosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ centrosCustosOptionsTexto: e }) }} value={this.state.centrosCustosOptions.filter(option => option.value == this.state.centroCusto)[0]} search={true} onChange={(e) => { this.setState({ centroCusto: e.value, }) }} />
                                                             </div>
                                                             <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
                                                                 {this.state.codigo.slice(2) < 5850 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CENTROS_CUSTOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
@@ -5858,7 +5888,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="number" id="prevent_step" step="0.01" value={this.state.roe} onChange={async e => {
+                                                                <Field className="form-control" disabled={!this.state.editavel} type="number" id="prevent_step" step="0.01" value={this.state.roe} onChange={async e => {
                                                                      this.setState({ roe: e.currentTarget.value });
                                                                     console.log(e.currentTarget.value) }} />
                                                             </div>
@@ -5869,7 +5899,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" type="text" rows="4" component="textarea" value={this.state.comentario} onChange={async e => { this.setState({ comentario: e.currentTarget.value }) }} />
+                                                                <Field className="form-control" disabled={!this.state.editavel} type="text" rows="4" component="textarea" value={this.state.comentario} onChange={async e => { this.setState({ comentario: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
 
@@ -5886,7 +5916,7 @@ class AddOS extends Component {
                                                 <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
                                                     
                                                     <button disabled={!(validForm && !this.state.faturado)} type="submit" style={validForm && !this.state.faturado ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
-
+                                                    
                                                 </div>
                                                 <div className="col-2"></div>
                                             </div>
@@ -6260,6 +6290,7 @@ class AddOS extends Component {
                                         acessosPermissoes={this.state.acessosPermissoes}
                                         setItemEdit={(itemEdit) => this.revertItemEdit(itemEdit)}
                                         itemEdit={this.state.itemEdit}
+                                        editavel = {this.state.editavel}
                                         onSubmit={this.salvarEvento}
                                         valid={validFormEvento}
                                         aberto={this.state.modalItemAberto}
