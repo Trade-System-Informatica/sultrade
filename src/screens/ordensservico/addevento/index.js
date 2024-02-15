@@ -2048,7 +2048,7 @@ class AddEvento extends Component {
                                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
                                             </div>
 
-                                            {!this.props.editavel? !this.state.habilitado? <p style={{maxWidth: 600, margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>Os encerrada, somente eventos do tipo: Desconto ou Recebimento de Remessas</p> : null : null}
+                                            {/*!this.props.editavel? !this.state.habilitado? <p style={{maxWidth: 600, margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>Os encerrada, somente eventos do tipo: Desconto ou Recebimento de Remessas</p> : null : null*/}
                                             <div className="row">
                                                 <div className="col-2">
                                                 </div>
