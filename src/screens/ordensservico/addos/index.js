@@ -5848,7 +5848,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" disabled={!this.state.editavel} type="date" value={this.state.faturamento} onChange={async e => { this.faturarData(e.currentTarget.value) }} />
+                                                                <Field className="form-control" type="date" value={this.state.faturamento} onChange={async e => { this.faturarData(e.currentTarget.value) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -5857,7 +5857,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" disabled={!this.state.editavel} type="date" value={this.state.envio} onChange={async e => { this.setState({ envio: e.currentTarget.value }) }} />
+                                                                <Field className="form-control" type="date" value={this.state.envio} onChange={async e => { this.setState({ envio: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
