@@ -45,6 +45,8 @@ const estadoInicial = {
     ordem: '',
     remarks: '',
     contatos: [],
+    editavel: '',
+    habilitado: true,
 
     campos: [],
     eventoComplementar: [],
@@ -179,6 +181,9 @@ class AddEvento extends Component {
                 await this.setState({ os: this.props.location.state.os })
             }
         }
+        if(this.props.location?.state?.editavel == true || this.props.location?.state?.editavel == false){
+            this.setState({editavel: this.props.location.state.editavel})
+        }
         if (parseInt(id) != 0) {
             if (!this.props.location || !this.props.location.state || !this.props.location.state.evento) {
                 const evento = await loader.getBody(`getSolicitacao.php`, { chave: this.state.chave });
@@ -263,6 +268,29 @@ class AddEvento extends Component {
         })
 
         await this.setState({ loading: false })
+        if(this.props.location?.state?.editavel == false){
+            if(this.state.tipo == 0 || this.state.tipo == 1){
+                this.setState({habilitado: false})
+            }else{
+                this.setState({habilitado: true})
+            }
+        }
+        console.log(this.state.habilitado)
+    }
+
+    componentDidUpdate = (prevProps, prevState) => {
+        
+        if(prevState.tipo != this.state.tipo){
+            console.log('TESTANDO SIFOIIIIIII')
+            if(this.state.tipo == 0 || this.state.tipo == 1){
+                if(!this.props.editavel){
+                    this.setState({habilitado: false})
+                }
+            }else {
+                this.setState({habilitado: true})
+            }
+        }
+        console.log(this.state.habilitado)
     }
 
     carregaTiposAcessos = async () => {
@@ -2024,10 +2052,18 @@ class AddEvento extends Component {
                                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
                                             </div>
 
+                                            {!this.props.editavel? !this.state.habilitado? <p style={{maxWidth: 600, margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>Os encerrada, somente eventos do tipo: Desconto ou Recebimento de Remessas</p> : null : null}
                                             <div className="row">
-                                                <div className="col-2"></div>
+                                                <div className="col-2">
+                                                </div>
                                                 <div className="col-8" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                                    <button disabled={!validForm} type="submit" style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
+
+                                                    {this.state.editavel ?
+                                                        <button type="submit" disabled={!validForm} style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
+                                                        :
+                                                        <button type="submit" disabled={!validForm? true : this.state.habilitado? false : true} style={validForm? this.state.habilitado ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }: { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
+                                                    }
+                                                        
                                                 </div>
                                                 <div className="col-2"></div>
                                                 <div className="col-2"></div>
