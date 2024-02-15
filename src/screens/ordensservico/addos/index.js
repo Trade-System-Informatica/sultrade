@@ -6031,9 +6031,15 @@ class AddOS extends Component {
                                                                                 <span>Valor (R$)</span>
                                                                             </th>
                                                                             <th className='text-center'>
-                                                                                <span>
-                                                                                    <FontAwesomeIcon icon={faPlus} className='pseudo_link'
-                                                                                        onClick={async () => { await this.setState({ modalItemAberto: false }); await this.setItemEdit() }} />
+                                                                                <span className='iconelixo giveMargin' type='button' >
+                                                                                    <Link to=
+                                                                                        {{
+                                                                                            pathname: `/ordensservico/addevento/0`,
+                                                                                            state: {os: { ...this.state.os }, editavel: this.state.editavel }
+                                                                                        }}
+                                                                                    >
+                                                                                        <FontAwesomeIcon icon={faPlus} />
+                                                                                    </Link>
                                                                                 </span>
                                                                             </th>
                                                                         </tr>
@@ -6065,7 +6071,7 @@ class AddOS extends Component {
                                                                                                 <Link to=
                                                                                                     {{
                                                                                                         pathname: `/ordensservico/addevento/0`,
-                                                                                                        state: { evento: { ...feed }, os: { ...this.state.os } }
+                                                                                                        state: { evento: { ...feed }, os: { ...this.state.os }, editavel: this.state.editavel }
                                                                                                     }}
                                                                                                 >
                                                                                                     <FontAwesomeIcon icon={faPlus} />
@@ -6134,7 +6140,7 @@ class AddOS extends Component {
                                                                                                 <Link to=
                                                                                                     {{
                                                                                                         pathname: `/ordensservico/addevento/0`,
-                                                                                                        state: { evento: { ...feed }, os: { ...this.state.os } }
+                                                                                                        state: { evento: { ...feed }, os: { ...this.state.os }, editavel: this.state.editavel  }
                                                                                                     }}
                                                                                                 >
                                                                                                     <FontAwesomeIcon icon={faPlus} />
