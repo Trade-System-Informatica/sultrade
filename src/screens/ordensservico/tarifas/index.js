@@ -71,6 +71,7 @@ class Tarifas extends Component {
                 this.setState({ redirect: true })
             }
         })
+        this.setState({tarifas: this.state.tarifas.sort((a, b) => new Date(b.vencimento) - new Date(a.vencimento))})
     }
 
     componentDidUpdate = async (prevProps, prevState) => {
@@ -276,14 +277,17 @@ class Tarifas extends Component {
                                                 <div className="col-3 text-left">
                                                     <span className="subtituloships">Fornecedor</span>
                                                 </div>
-                                                <div className="col-3 text-left">
+                                                <div className="col-2 text-left">
                                                     <span className="subtituloships">Porto</span>
                                                 </div>
                                                 <div className="col-2 text-left">
                                                     <span className="subtituloships">Servico</span>
                                                 </div>
-                                                <div className="col-3 text-left">
+                                                <div className="col-2 text-left">
                                                     <span className="subtituloships" style={{ overflowWrap: "anywhere" }}>Preferencial</span>
+                                                </div>
+                                                <div className="col-2 text-left">
+                                                    <span className="subtituloships" style={{ overflowWrap: "anywhere" }}>Vencimento</span>
                                                 </div>
                                                 <div className="col-1 text-right revertItem" onClick={() => this.reverterItens()}>
                                                     <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela} /></span>
@@ -328,7 +332,7 @@ class Tarifas extends Component {
                                                                 className="nonLink"
                                                             >{feed.fornecedorNome}</Link></p>
                                                     </div>
-                                                    <div className="col-3 text-left">
+                                                    <div className="col-2 text-left">
                                                         <h6 className="mobileajuster5"><Link to=
                                                                 {{
                                                                     pathname: `/ordensservico/addtarifa/${feed.chave}`,
@@ -346,7 +350,7 @@ class Tarifas extends Component {
                                                                 className="nonLink"
                                                             >{feed.servico}</Link></h6>
                                                     </div>
-                                                    <div className="col-3 text-center" style={{ justifyContent: "center"}}>
+                                                    <div className="col-2 text-center" style={{ justifyContent: "center"}}>
                                                     <p className="mobileajuster5">
                                                         <h6 className="mobileajuster5"><Link to=
                                                                 {{
@@ -356,6 +360,15 @@ class Tarifas extends Component {
                                                                 className="nonLink"
                                                             >{feed.preferencial != "0" ? `Sim` : "Não"}</Link></h6>
                                                     </p>
+                                                    </div>
+                                                    <div className="col-2 text-center" style={{ justifyContent: "center"}}>
+                                                        <p className="mobileajuster5"><Link to=
+                                                                {{
+                                                                    pathname: `/ordensservico/addtarifa/${feed.chave}`,
+                                                                    state: { tarifa: { ...feed } }
+                                                                }}
+                                                                className="nonLink"
+                                                            >{util.formataDataBr(feed.vencimento)}</Link></p>
                                                     </div>
                                                     <div className="col-1 text-left icones mobileajuster4 ">
                                                         <div className='iconelixo giveMargin' type='button' >

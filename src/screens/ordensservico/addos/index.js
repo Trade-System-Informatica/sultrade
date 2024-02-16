@@ -5888,7 +5888,7 @@ class AddOS extends Component {
                                                             <div className="col-1 errorMessage">
                                                             </div>
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
-                                                                <Field className="form-control" disabled={!this.state.editavel} type="number" id="prevent_step" step="0.01" value={this.state.roe} onChange={async e => {
+                                                                <Field className="form-control" disabled={!this.state.editavel} onWheel={(event) => event.currentTarget.blur()} type="number" step="0.01" value={this.state.roe} onChange={async e => {
                                                                      this.setState({ roe: e.currentTarget.value });
                                                                     console.log(e.currentTarget.value) }} />
                                                             </div>
