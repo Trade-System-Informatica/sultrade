@@ -13,6 +13,10 @@ export default class Util {
         return moment(data).format('yyyy-MM-DD')
     }
 
+    static formataDataBr(data) {
+        return moment(data, 'yyyy-MM-DD').format('DD/MM/yyyy')
+    }
+
     static verificaDatas(data1, data2){
         const date1 = moment(data1, "yyyy-MM-DD").format("YYYYMMDD");
         const date2 = moment(data2, "DD/MM/yyyy").format("YYYYMMDD");
