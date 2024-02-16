@@ -1,8 +1,9 @@
 node_modules/
 api/classes/Database.php
 api/employee/enviaEmail.php
-package.json
+./package.json
 src/config.js
 
+./src/services/*
 
 api/*
