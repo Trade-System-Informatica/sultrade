@@ -340,8 +340,7 @@ class AddEvento extends Component {
     getTemplates = async () => {
         await apiEmployee.post(`getEventosTemplates.php`, {
             token: true,
-            empresa: this.state.usuarioLogado.empresa,
-            offset: null
+            empresa: this.state.usuarioLogado.empresa
         }).then(
             async res => {
                 await this.setState({ templates: res.data })
@@ -388,10 +387,7 @@ class AddEvento extends Component {
 
     getOS = async () => {
         await apiEmployee.post(`getOS.php`, {
-            token: true,
-            empresa: 0, 
-            limit: 'n',
-            offset: 'n'
+            token: true
         }).then(
             async res => {
                 await this.setState({ todasOs: res.data })
