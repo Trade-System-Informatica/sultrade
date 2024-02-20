@@ -268,6 +268,27 @@ class AddEvento extends Component {
         })
 
         await this.setState({ loading: false })
+        /*
+        console.log(this.state.tipo, '1');
+        if(this.state.chave != 0){
+            if(this.state.tipo == 0){
+                this.state.tiposSubOptions.map((item, index)=> {if (item.label == 'Receber'){this.state.tiposSubOptions.splice(index, 1)}})
+            }
+            if(this.state.tipo == 1){
+                this.state.tiposSubOptions.map((item, index)=> {if (item.label == 'Pagar'){this.state.tiposSubOptions.splice(index, 1)}})
+            }
+            if (this.state.tipo == 2 || this.state.tipo == 3){
+                this.state.tiposSubOptions.map((item, index)=> {if (item.label == 'Pagar' || item.label == 'Receber'){this.state.tiposSubOptions.splice(index, 1)}})                
+            }            
+        } else{
+            if(this.props.location?.state?.editavel == false){
+                this.state.tiposSubOptions.map((item, index)=> {if (item.label == 'Pagar'){this.state.tiposSubOptions.splice(index, 1)}})
+                this.state.tiposSubOptions.map((item, index)=> {if (item.label == 'Receber'){this.state.tiposSubOptions.splice(index, 1)}})
+                this.setState({tipo: 2})
+            }
+        }
+        console.log(this.state.tipo);
+        */
         if(this.props.location?.state?.editavel == false){
             if(this.state.tipo == 0 || this.state.tipo == 1){
                 this.setState({habilitado: false})
@@ -290,7 +311,6 @@ class AddEvento extends Component {
                 this.setState({habilitado: true})
             }
         }
-        console.log(this.state.habilitado)
     }
 
     carregaTiposAcessos = async () => {
@@ -1873,8 +1893,9 @@ class AddEvento extends Component {
                                                             <label>Tipo</label>
                                                         </div>
                                                         <div className='col-1'></div>
+                                    
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <select className='form-control' value={this.state.tipo} onChange={async e => { await this.setState({ tipo: e.currentTarget.value }); if (this.state.tipo == 1) { await this.setState({ fornecedor: '' }) } else if (this.state.fornecedor == '' && this.state.chave != 0) { await this.setState({ fornecedor: this.state.fornecedorInicial }) } await this.getTaxasOptions() }}>
+                                                            <select className='form-control' value={this.state.tipo} disabled={this.state.chave != 0 ?  true : false} onChange={async e => { await this.setState({ tipo: e.currentTarget.value }); if (this.state.tipo == 1) { await this.setState({ fornecedor: '' }) } else if (this.state.fornecedor == '' && this.state.chave != 0) { await this.setState({ fornecedor: this.state.fornecedorInicial }) } await this.getTaxasOptions() }}>
                                                                 {this.state.tiposSubOptions.map((t) => (
                                                                     <option value={t.value}>{t.label}</option>
                                                                 ))}
@@ -2055,10 +2076,14 @@ class AddEvento extends Component {
                                                 </div>
                                                 <div className="col-8" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 
-                                                    {this.state.editavel ?
+                                                    {this.state.chave != 0 ?
+                                                        <button type="submit" disabled={!validForm} style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
+                                                    :
+                                                        this.state.editavel ?
                                                         <button type="submit" disabled={!validForm} style={validForm ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
                                                         :
                                                         <button type="submit" disabled={!validForm? true : this.state.habilitado? false : true} style={validForm? this.state.habilitado ? { width: 300 } : { backgroundColor: '#eee', opacity: 0.3, width: 300 }: { backgroundColor: '#eee', opacity: 0.3, width: 300 }} >Salvar</button>
+
                                                     }
                                                         
                                                 </div>
