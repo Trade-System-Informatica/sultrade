@@ -7,7 +7,8 @@ import './styles.css'
 import { apiEmployee } from '../../../services/apiamrg'
 import { connect } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChartBar, faFileContract, faPaperclip, faScroll } from '@fortawesome/free-solid-svg-icons'
+import { faChartBar, faFileContract, faPaperclip, faDollarSign } from '@fortawesome/free-solid-svg-icons'
+
 
 class OrdensServico extends Component {
 
@@ -127,6 +128,14 @@ class OrdensServico extends Component {
                                             </li>
                                         }
 
+                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                            <li className=" text-left itemMenu list-group-item  ">
+                                                <Link to={{ pathname: `/ordensservico/osOrcamento` }} className="semTextDecoration">
+                                                    <FontAwesomeIcon icon={faDollarSign} size="2x" color="tomato" />
+                                                    <h4 className="textoMenu">OS - Orçamento</h4>
+                                                </Link>
+                                            </li>
+                                        }
 
                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'TARIFAS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                             <li className=" text-left itemMenu list-group-item ">

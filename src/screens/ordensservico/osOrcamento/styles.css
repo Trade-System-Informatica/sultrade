@@ -1,0 +1,11 @@
+.cancelada {
+    min-height: 2.5em !important;
+    height: auto !important;
+    margin-bottom: 0.3em;
+    padding-top: 10px;
+    background-color: gray;
+    color: gainsboro;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}

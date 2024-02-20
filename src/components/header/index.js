@@ -602,6 +602,11 @@ class Header extends Component {
                                                             OS
                                                         </Link>
                                                     }
+                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                        <Link className="dropdown-item" to={{ pathname: `/ordensservico/osOrcamento` }}>
+                                                            OS - Orçamento
+                                                        </Link>
+                                                    }
                                                     {/* {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                                             <Link className="dropdown-item" to={{ pathname: `/ordensservico/eventos` }}>
                                                                 Solitações de Serviço

@@ -1,0 +1,556 @@
+.insideFormButton {
+    margin-bottom: 10px;
+    margin-left: 40%;
+    margin-right: 40%;
+    text-align: center;
+    font-weight: bold;
+    min-width: 25px;
+    border: 1px solid #abacaf;
+    border-radius: 10px;
+    background-color: #f8f8f8;
+    cursor: pointer;
+}
+
+.insideFormButton:active {
+    opacity: 0.8;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.errorMessage {
+    color: rgb(255, 0, 0);
+    font-size: 1.1em;
+}
+
+.errorMessage>svg {
+    cursor: pointer;
+}
+
+.parTr {
+    background-color: white;
+}
+
+.imparTr>td {
+    background-color: black;
+    color: white;
+}
+
+.voucherCabecalho {
+    text-align: right;
+    font-size: 0.9em;
+}
+
+.voucherImagem {
+    position: absolute;
+    top: 120px;
+    right: 100px;
+}
+
+.k-grid {
+    font-family: "DejaVu Sans", "Arial", sans-serif;
+}
+
+.voucherHeader {
+    width: 90%;
+    margin-left: 5%;
+}
+
+.voucherHeader>table {
+    width: 90%;
+    margin-left: 5%;
+}
+
+.voucherContent>table {
+    width: 90%;
+    margin-left: 5%;
+}
+
+.voucherContent>table,
+.voucherContent>table tr,
+.voucherContent>table tr td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+.voucherCamposLista {
+    width: 90%;
+    margin-top: 15px;
+    margin-left: 5%;
+}
+
+.voucherCampoTitulos {
+    font-weight: bold;
+}
+
+.voucherLiListaCampos {
+    list-style-type: disc;
+}
+
+.voucherComplementosLista {
+    margin-left: 10px;
+}
+
+.faturamentoCabecalho {
+    text-align: left;
+    font-size: 0.9em;
+}
+
+.faturamentoTitulo {
+    width: 100%;
+    background-color: #9a9a9a;
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.faturamentoFooter {
+    width: 100%;
+    text-align: right;
+    padding-right: 25px;
+}
+
+
+.relatoriosSection {
+    width: 90%;
+    min-width: 300px;
+    margin-left: 5%;
+    margin-right: 5%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.k-grid {
+    font-family: "DejaVu Sans", "Arial", sans-serif;
+}
+
+.k-pdf-export .k-grid-content td[role="gridcell"] {
+    word-wrap: break-word;
+}
+
+.pdfTableCabecalho {
+    width: 90%;
+    margin-left: 5%;
+}
+
+.voucherTableFinal {
+    margin-left: 5%;
+    margin-bottom: 20px;
+    width: 90%;
+    border: 3px solid black !important;
+}
+
+.voucherFooter {
+    margin-left: 100px;
+}
+
+.voucherTable {
+    margin-left: 5%;
+    width: 90%;
+}
+
+.pdfHeader {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    align-items: center;
+}
+
+.anexoList:nth-child(even),
+.anexoList:nth-child(even)>td {
+    background-color: white;
+    padding: 15px;
+    color: black;
+}
+
+.anexoList:nth-child(odd),
+.anexoList:nth-child(odd)>td {
+    background-color: black;
+    padding: 15px;
+    color: white;
+}
+
+.anexoListTitle {
+    padding: 15px;
+}
+
+.anexoListTitle>th {
+    font-weight: bold;
+    padding: 15px;
+    color: white;
+    background-color: black;
+}
+
+.agrupador_lista {
+    width: 100%;
+    margin: 0px;
+}
+
+.agrupador_lista>tr>th,
+.agrupador_lista>tr>td {
+    border-bottom: 1px solid black;
+    cursor: pointer;
+    user-select: none;
+}
+
+.white {
+    color: white;
+}
+
+.tituloPagesModal {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 70%;
+    user-select: none;
+}
+
+.tituloPagesModal>* {
+    padding: 5px;
+}
+
+.relatorioButton:only-child {
+    margin: 0 auto;
+}
+
+.relatorio_liquidos_contas {
+    width: 50%;
+    margin-left: 50%;
+    margin-top: 25px;
+}
+
+.relatorio_liquidos_contas,
+.relatorio_liquidos_contas>tr,
+.relatorio_liquidos_contas>th,
+.relatorio_liquidos_contas>td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+.relatorio_liquidos_contas_titulos {
+    background-color: #acacac;
+    text-align: center;
+}
+
+.relatorio_liquidos_contas_item {
+    border-bottom: 1px solid black;
+    padding: 5px;
+}
+
+.relatorio_liquidos_contas_row:nth-child(even) {
+    background-color: #F8F8F8;
+}
+
+.pdf_small_col {
+    padding-right: 3px;
+}
+
+.pdf_money_col {
+    padding-right: 3px;
+    text-align: right;
+}
+
+.pdf_large_col {
+    padding: 0px 10px 0px 3px;
+}
+
+.reduce-font {
+    font-size: 13px;
+}
+
+.pseudo_link {
+    cursor: pointer;
+}
+
+.pseudo_link:hover {
+    text-decoration: underline;
+}
+
+.pdf_padding {
+    margin: 5px;
+}
+
+.invoices_header_sultrade {
+    display: flex;
+    min-width: 100%;
+}
+
+.invoices_header_image_sultrade {
+    border-right: 3px solid black;
+    height: 93px !important;
+}
+
+.invoices_header_info_sultrade {
+    min-width: 66%;
+    margin-left: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.invoices_info_sultrade {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.invoices_info_data_sultrade {
+    min-width: 50%;
+    max-width: 50%;
+}
+
+.invoices_info_data_sultrade:nth-child(even) {
+    text-align: right;
+}
+
+.invoices_content_header_sultrade {
+    min-width: 100%;
+    display: flex;
+}
+
+.invoices_content_title_sultrade {
+    min-width: 16.6%;
+    font-weight: bold;
+    text-align: left;
+}
+
+.invoices_content_title_sultrade:first-child {
+    min-width: 50%;   
+}
+
+.invoices_content_row_sultrade {
+    min-width: 100%;
+    display: flex;
+}
+
+.invoices_content_row_sultrade:nth-child(even) {
+    background-color: #DDDDDD;
+}
+
+.invoices_content_col_sultrade {
+    min-width: 25%;
+    padding-right: 5px;
+}
+
+.invoices_content_col_sultrade:first-child {
+    min-width: 75%;
+}
+
+.invoices_total_row_sultrade {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.invoices_total_sultrade {
+    margin-top: 5px;
+    border-top: 1px solid #AAAAAA;
+    min-width: 8%;
+    font-weight: bold;
+}
+
+.invoices_total_sultrade:last-child {
+    text-align: right;
+}
+
+.invoices_header_porto {
+    min-width: 100%;
+}
+
+.invoices_header_image_porto {
+    display: flex;
+    min-width: 100%;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.invoices_header_image_porto > h1 {
+    font-size: 5em;
+}
+
+.invoices_header_info_porto {
+    min-width: 100%;
+    border-top: 5px solid black;
+    border-bottom: 5px solid black;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.invoices_header_info_porto > * {
+    min-width: 50%;
+}
+
+.invoices_header_info_porto > *:nth-child(even) {
+    text-align:right;
+}
+
+.invoices_info_porto {
+    display: flex;
+    flex-direction: column;
+}
+
+.invoices_info_data_porto {
+    min-width: 40%;
+    max-width: 40%;
+}
+
+.invoices_content_header_porto {
+    min-width: 100%;
+    display: flex;
+}
+
+.invoices_content_title_porto {
+    min-width: 25%;
+    font-weight: bold;
+    text-align: left;
+}
+
+.invoices_content_title_porto:nth-child(1) {
+    min-width: 75%;
+}
+
+.invoices_content_row_porto {
+    min-width: 100%;
+    display: flex;
+}
+
+.invoices_content_row_porto:nth-child(even) {
+    background-color: #DDDDDD;
+}
+
+.invoices_content_col_porto {
+    min-width: 25%;
+}
+
+.invoices_content_col_porto:nth-child(1) {
+    min-width: 75%;
+}
+
+.invoices_total_row_porto {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.invoices_total_porto {
+    margin-top: 5px;
+    border-top: 1px solid #AAAAAA;
+    min-width: 8%;
+    font-weight: bold;
+}
+
+.invoices_total_porto:last-child {
+    text-align: right;
+}
+
+.invoices_header_coast {
+    min-width: 100%;
+    display: flex;
+}
+
+.invoices_header_image_coast {
+    display: flex;
+    min-width: 20%;
+}
+
+.invoices_header_info_coast {
+    min-width: 80%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.invoices_header_info_coast>* {
+    min-width: 50%;
+}
+
+.invoices_header_info_coast>*:nth-child(even) {
+    text-align: right;
+}
+
+.invoices_info_coast {
+    display: flex;
+    flex-direction: column;
+}
+
+.invoices_info_data_coast {
+    min-width: 40%;
+    max-width: 40%;
+}
+
+.invoices_content_header_coast {
+    min-width: 100%;
+    display: flex;
+}
+
+.invoices_content_title_coast {
+    min-width: 25%;
+    text-align: left;
+}
+
+.invoices_content_title_coast:nth-child(1) {
+    min-width: 75%;
+}
+
+.invoices_content_row_coast {
+    min-width: 100%;
+    display: flex;
+}
+
+.invoices_content_col_coast {
+    min-width: 25%;
+    border: 1px solid black;
+}
+
+.invoices_content_col_coast:nth-child(1) {
+    min-width: 75%;
+}
+
+.invoices_total_row_coast {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.invoices_total_coast {
+    margin-top: 5px;
+    border-top: 1px solid #AAAAAA;
+    min-width: 8%;
+    font-weight: bold;
+}
+
+.invoices_total_coast:last-child {
+    text-align: right;
+}
+
+@media (min-width: 768px) {
+    .insideFormButton {
+        font-size: 1.4em;
+        text-align: center;
+        margin-left: 0;
+        margin-right: 0;
+        margin-top: 7px;
+    }
+}
+
+@media (max-width: 500px) {
+    .relatoriosSection {
+        width: 100%;
+        margin-left: 0px;
+        margin-right: 0px;
+        flex-direction: column;
+        justify-content: center;
+        align-content: center;
+    }
+
+    .relatorioButton {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+}
