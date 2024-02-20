@@ -35,12 +35,12 @@ input[type=number] {
 }
 
 .parTr {
-    background-color: white;
+    background-color: white !important;
 }
 
 .imparTr>td {
-    background-color: black;
-    color: white;
+    background-color: black !important;
+    color: white !important;
 }
 
 .voucherCabecalho {
@@ -268,11 +268,11 @@ input[type=number] {
 }
 
 .pseudo_link {
-    cursor: pointer;
+    cursor: pointer !important; 
 }
 
 .pseudo_link:hover {
-    text-decoration: underline;
+    text-decoration: underline !important;
 }
 
 .pdf_padding {

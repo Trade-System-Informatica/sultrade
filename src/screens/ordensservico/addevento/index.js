@@ -1899,7 +1899,7 @@ class AddEvento extends Component {
                                                         <div className='col-1'></div>
                                     
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <select className='form-control' value={this.state.tipo} disabled={this.state.chave != 0 ? this.state.tipo == 0 || this.state.tipo == 1? true : false : false} onChange={async e => { await this.setState({ tipo: e.currentTarget.value }); if (this.state.tipo == 1) { await this.setState({ fornecedor: '' }) } else if (this.state.fornecedor == '' && this.state.chave != 0) { await this.setState({ fornecedor: this.state.fornecedorInicial }) } await this.getTaxasOptions() }}>
+                                                            <select className='form-control' value={this.state.tipo} disabled={this.state.chave != 0 ? true : false} onChange={async e => { await this.setState({ tipo: e.currentTarget.value }); if (this.state.tipo == 1) { await this.setState({ fornecedor: '' }) } else if (this.state.fornecedor == '' && this.state.chave != 0) { await this.setState({ fornecedor: this.state.fornecedorInicial }) } await this.getTaxasOptions() }}>
                                                                 {this.state.tiposSubOptions.map((t) => (
                                                                     <option value={t.value}>{t.label}</option>
                                                                 ))}
