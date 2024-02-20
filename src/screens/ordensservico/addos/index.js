@@ -249,6 +249,7 @@ const estadoInicial = {
 
     modalCamposOS: false,
     camposOS: [],
+    redirectEventos: false,
 }
 
 class AddOS extends Component {
@@ -4384,6 +4385,15 @@ class AddOS extends Component {
                         {window.location.reload()}
                     </>
                 }
+                {this.state.redirectEventos &&
+                    <>
+                        <Redirect to=
+                                {{
+                                    pathname: `/ordensservico/addevento/${this.state.eventofeed.chave}`,
+                                    state: { evento: { ...this.state.eventofeed }, os: { ... this.state.os } }
+                                }} />
+                    </>
+                }
 
                 {!this.state.loading &&
                     <>
@@ -6113,8 +6123,8 @@ class AddOS extends Component {
                                                                                 {window.innerWidth >= 500 &&
                                                                                     <tr
                                                                                         onClick={async () => {
-                                                                                            await this.setState({ modalItemAberto: false })
-                                                                                            await this.setItemEdit(feed);
+                                                                                            await this.setState({eventofeed: feed})
+                                                                                            await this.setState({ redirectEventos: true })
                                                                                         }}
                                                                                         className={index % 2 == 0 ? "parTr" : "imparTr"}>
                                                                                         <td className="text-center pseudo_link">
