@@ -2515,6 +2515,12 @@ class AddOS extends Component {
                 roe = pdfContent[0].ROE;
             }
 
+            console.log(pdfContent)
+            console.log('\n\n\n\n\n\n\n')
+            console.log(pdfCusteio)
+            console.log(pdfCusteioCodigo)
+            console.log(pdfRepasse)
+
             if (pdfContent) {
                 pdfCusteio.map((custeio, custeioIndex) => {
                     valorTotalCobrar = 0;
