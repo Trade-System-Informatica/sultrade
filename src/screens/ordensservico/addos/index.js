@@ -2596,7 +2596,7 @@ class AddOS extends Component {
                                 rowCount++;
                             })
                         } else {
-                            pdfContent.filter((content) => !!content.fornecedor_custeio).map((content, index) => {
+                            pdfContent.filter((content) => content.fornecedor_custeio == custeio).map((content, index) => {
                                 let valor_cobrar = content.valor_cobrar;
                                 let valor_pago = content.valor_pago;
 
