@@ -6318,6 +6318,9 @@ class AddOsOrcamento extends Component {
                                                 <button className="btn btn-danger" style={{backgroundColor: 'green', borderColor: 'green'}} onClick={() => this.gerarOrcamento(this.state.codigo, validForm)}>Gerar Orçamento</button>
                                             </div>
                                             <div className="relatorioButton">
+                                                <button className="btn btn-danger" onClick={() => this.getGruposTemplates()}>Gerar templates</button>
+                                            </div>
+                                            <div className="relatorioButton">
                                                 <button className="btn btn-danger" style={{backgroundColor: 'green', borderColor: 'green'}} onClick={() => this.criarOs(true)}>Criar Ordem de Serviço</button>
                                             </div>
                                             <div className="relatorioButton">
@@ -6338,9 +6341,6 @@ class AddOsOrcamento extends Component {
                                             </div>
                                             <div className="relatorioButton">
                                                 <button className="btn btn-danger" onClick={() => this.getCamposVoucher()}>Campos de Voucher</button>
-                                            </div>
-                                            <div className="relatorioButton">
-                                                <button className="btn btn-danger" onClick={() => this.getGruposTemplates()}>Gerar templates</button>
                                             </div>
                                             */}
                                         </div>
