@@ -4234,6 +4234,10 @@ class AddOS extends Component {
 
 
         if (parseInt(this.state.eventoChave) === 0) {
+            if(this.state.eventoRepasse == '1'){
+                console.log('repasse = 1')
+                this.setState({eventoFornecedorCusteio: 0})
+            }
             await apiEmployee.post(`insertServicoItemBasico.php`, {
                 token: true,
                 values: `'${this.state.chave}', '${this.state.eventoData}', '${this.state.eventoFornecedor}', '${this.state.eventoTaxa}', '${this.state.eventoDescricao}', '${this.state.eventoTipo}', '${this.state.eventoFornecedorCusteio}', '${this.state.eventoRemarks}', '${this.state.eventoMoeda}', '${parseFloat(this.state.eventoValor == "" ? 0 : this.state.eventoValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.eventoVlrc == "" ? 0 : this.state.eventoVlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.eventoRepasse && this.state.eventoRepasse != "0" ? 1 : 0}'`,
@@ -4248,6 +4252,10 @@ class AddOS extends Component {
                 async res => await console.log(`Erro: ${res.data}`)
             )
         } else {
+            if(this.state.eventoRepasse == '1'){
+                console.log('repasse = 1')
+                this.setState({eventoFornecedorCusteio: 0})
+            }
             await apiEmployee.post(`updateServicoItem.php`, {
                 token: true,
                 chave: this.state.eventoChave,
