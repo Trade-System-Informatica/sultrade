@@ -179,6 +179,7 @@ class EventoEdit extends Component {
                                         <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12 ">
                                             <div className='row addservicos'>
                                                 <div className="col-12 " style={{ marginBottom: 20 }} >
+                                                    {this.props.chave ? console.log(this.props.chave ) : null}
                                                     <h3 style={{ textAlign: "center", color: "white" }}>{this.props.chave == 0 ? "Criar" : "Editar"} evento</h3>
                                                 </div>
                                                 {this.state.itemEdit?.valores?.map((valor, index) => (
@@ -282,17 +283,19 @@ class EventoEdit extends Component {
                                                 <div className="row">
                                                     <div className="col-2"></div>
                                                     <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                    
-                                                        {this.props.editavel ?
-                                                            <button type="submit" disabled={!this.props.valid} style={this.props.valid ? { width: 300, backgroundColor: "white" } : { width: 300 }} >Salvar</button>
-                                                        :
-                                                            <button type="submit" disabled={!this.props.valid && this.state.habilitado} style={this.props.valid && this.state.habilitado ? { width: 300, backgroundColor: "white" } : { width: 300 }} >Salvar</button>
+                                                        {!this.props.chave? 
+                                                            this.props.editavel ?
+                                                                <button type="submit" disabled={!this.props.valid} style={this.props.valid ? { width: 300, backgroundColor: "white" } : { width: 300 }} >Salvar</button>
+                                                            :
+                                                                <button type="submit" disabled={!this.props.valid && this.state.habilitado} style={this.props.valid && this.state.habilitado ? { width: 300, backgroundColor: "white" } : { width: 300 }} >Salvar</button>
+                                                            
+                                                        : <button type="submit" disabled={!this.props.valid} style={this.props.valid ? { width: 300, backgroundColor: "white" } : { width: 300 }} >Salvar</button>
                                                         }
                                                     </div>
                                                     <div className="col-2"></div>
                                                 </div>
-                                                {!this.props.editavel? !this.state.habilitado? <p style={{maxWidth: 400, margin: 'auto' , color: 'white'}}>Os encerrada, somente eventos do tipo: Desconto ou Recebimento de Remessas</p> : null : null}
                                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                                                {!this.props.chave? !this.props.editavel? !this.state.habilitado? <p style={{ display: 'flex', justifyContent: 'center', margin: 'auto' , color: 'white'}}>Os encerrada, somente eventos do tipo: Desconto ou Recebimento de Remessas</p> : null : null : null}
                                             </div>
                                         </div>
                                     </div>
