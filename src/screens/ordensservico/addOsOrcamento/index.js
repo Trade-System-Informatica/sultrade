@@ -6390,14 +6390,10 @@ class AddOsOrcamento extends Component {
                                                                             </th>
                                                                             <th className='text-center'>
                                                                                 <span className='iconelixo giveMargin' type='button' >
-                                                                                    <Link to=
-                                                                                        {{
-                                                                                            pathname: `/ordensservico/addevento/0`,
-                                                                                            state: {os: { ...this.state.os }, editavel: this.state.editavel }
-                                                                                        }}
-                                                                                    >
-                                                                                        <FontAwesomeIcon icon={faPlus} />
-                                                                                    </Link>
+                                                                                
+                                                                                <FontAwesomeIcon icon={faPlus} className='pseudo_link'
+                                                                                        onClick={async () => { await this.setState({ modalItemAberto: false }); await this.setItemEdit() }} />
+                                                                                    
                                                                                 </span>
                                                                             </th>
                                                                         </tr>
@@ -6425,27 +6421,11 @@ class AddOsOrcamento extends Component {
                                                                                             <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
                                                                                         </td>
                                                                                         <td>
+                    
                                                                                             <span className='iconelixo giveMargin' type='button' >
-                                                                                                <Link to=
-                                                                                                    {{
-                                                                                                        pathname: `/ordensservico/addevento/0`,
-                                                                                                        state: { evento: { ...feed }, os: { ...this.state.os }, editavel: this.state.editavel }
-                                                                                                    }}
-                                                                                                >
-                                                                                                    <FontAwesomeIcon icon={faPlus} />
-                                                                                                </Link>
-                                                                                            </span>
-
-
-                                                                                            <span className='iconelixo giveMargin' type='button' >
-                                                                                                <Link to=
-                                                                                                    {{
-                                                                                                        pathname: `/ordensservico/addevento/${feed.chave}`,
-                                                                                                        state: { evento: { ...feed }, os: { ... this.state.os } }
-                                                                                                    }}
-                                                                                                >
-                                                                                                    <FontAwesomeIcon icon={faPen} />
-                                                                                                </Link>
+                                                                                                
+                                                                                                <FontAwesomeIcon icon={faPen} />
+                                                                                                
                                                                                             </span>
 
                                                                                             <span className='iconelixo giveMargin' type='button' >
@@ -6494,27 +6474,11 @@ class AddOsOrcamento extends Component {
                                                                                             <p>R$ {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.Moeda == 5 ? feed.valor : feed.valor * (parseFloat(this.state.os.ROE) != 0 ? parseFloat(this.state.os.ROE) : 5))}</p>
                                                                                         </td>
                                                                                         <td>
-                                                                                            <span className='iconelixo giveMargin' type='button' >
-                                                                                                <Link to=
-                                                                                                    {{
-                                                                                                        pathname: `/ordensservico/addevento/0`,
-                                                                                                        state: { evento: { ...feed }, os: { ...this.state.os }, editavel: this.state.editavel  }
-                                                                                                    }}
-                                                                                                >
-                                                                                                    <FontAwesomeIcon icon={faPlus} />
-                                                                                                </Link>
-                                                                                            </span>
-
 
                                                                                             <span className='iconelixo giveMargin' type='button' >
-                                                                                                <Link to=
-                                                                                                    {{
-                                                                                                        pathname: `/ordensservico/addevento/${feed.chave}`,
-                                                                                                        state: { evento: { ...feed }, os: { ... this.state.os } }
-                                                                                                    }}
-                                                                                                >
+                                                                                                
                                                                                                     <FontAwesomeIcon icon={faPen} />
-                                                                                                </Link>
+                                                                                                
                                                                                             </span>
 
                                                                                             <span className='iconelixo giveMargin' type='button' >
