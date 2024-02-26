@@ -6,6 +6,9 @@ import Select from 'react-select';
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
+import ModalListas from '../modalListas';
+import { apiEmployee } from '../../services/apiamrg';
+import util from '../../classes/util'
 
 const estadoInicial = {
     pesquisa: '',
@@ -15,6 +18,23 @@ const estadoInicial = {
     optionsTexto: "",
     itemEdit: {},
     habilitado: false,
+
+    modalAberto: false,
+    modal: '',
+    modalLista: [],
+    modalPesquisa: '',
+    fornecedorCusteioAtivo: false,
+    pessoas: [],
+    pessoasOptions: [],
+    pessoasOptionsTexto: '',
+
+    taxas: [],
+    taxasOptions: [],
+    taxasOptionsTexto: '',
+    
+    descricoesPadrao: [],
+    descricoesPadraoOptions: [],
+    descricoesPadraoOptionsTexto: '',
 }
 
 
@@ -60,6 +80,105 @@ class EventoEdit extends Component {
             }
         }
         
+    }
+    alteraModal = async (valor) => {
+        this.setState({ modal: valor });
+    }
+    alteraCliente = async (valor, categoria) => {
+        if (categoria.split('')[1] == '1' && !this.state.fornecedorCusteioAtivo) {
+            await this.setState({ fornecedor: valor });
+        } else if (categoria.split('')[1] == '1') {
+            await this.setState({ fornecedorCusteio: valor });
+        }
+        await this.setState({ modalAberto: false });
+        await this.getPessoas()
+    }
+    alteraTaxa = async (valor, tipo) => {
+        await this.getTaxas()
+
+        if (tipo == "P" && this.state.tipo != 1) {
+            await this.setState({ taxa: valor });
+
+            const taxa = this.state.taxasOptions.find((option) => option.value = valor);
+
+            if (taxa) {
+                await this.setState({ valor: taxa.money })
+            }
+
+        } else if (tipo == "R" && this.state.tipo != 0) {
+            await this.setState({ taxa: valor });
+
+            const taxa = this.state.taxasOptions.find((option) => option.value = valor);
+
+            if (taxa) {
+                await this.setState({ valor: taxa.money })
+            }
+        } else if (tipo != "P" && tipo != "R") {
+            await this.setState({ taxa: valor });
+
+            const taxa = this.state.taxasOptions.find((option) => option.value = valor);
+
+            if (taxa) {
+                await this.setState({ valor: taxa.money })
+            }
+        }
+
+        await this.setState({ modalAberto: false });
+    }
+    alteraDescricaoPadrao = async (valor) => {
+        await this.setState({ descricao: valor });
+
+        await this.setState({ modalAberto: false });
+        await this.getDescricaoPadrao()
+    }
+
+    getTaxas = async () => {
+        await apiEmployee.post(`getTaxas.php`, {
+            token: true,
+        }).then(
+            async res => {
+                await this.setState({ taxas: res.data })
+
+                await this.getTaxasOptions();
+            },
+            async err => { this.erroApi(err) }
+        )
+    }
+    
+    getDescricaoPadrao = async () => {
+        await apiEmployee.post(`getDescricaoPadrao.php`, {
+            token: true,
+        }).then(
+            async res => {
+                await this.setState({ descricoesPadrao: res.data })
+
+                const options = this.state.descricoesPadrao.map((e) => {
+                    return { label: e.descricao, value: e.chave }
+                })
+
+                await this.setState({ descricoesPadraoOptions: options })
+            },
+            async err => { this.erroApi(err) }
+        )
+    }
+
+    getPessoas = async () => {
+        await apiEmployee.post(`getFornecedores.php`, {
+            token: true,
+        }).then(
+            async res => {
+                await this.setState({ pessoas: res.data })
+
+                const options = this.state.pessoas.map((e) => {
+                    return { label: `${e.Nome_Fantasia ? e.Nome_Fantasia : e.Nome}${e.Cnpj_Cpf ? ` - ${util.formataCPF(e.Cnpj_Cpf)}` : ""}`, value: e.Chave }
+                })
+
+                options.unshift({ label: 'Nenhum', value: '' })
+
+                await this.setState({ pessoasOptions: options })
+            },
+            async err => { this.erroApi(err) }
+        )
     }
 
     changeState = (index, value, half = 0, blur = false) => {
@@ -182,6 +301,7 @@ class EventoEdit extends Component {
                                                     {this.props.chave ? console.log(this.props.chave ) : null}
                                                     <h3 style={{ textAlign: "center", color: "white" }}>{this.props.chave == 0 ? "Criar" : "Editar"} evento</h3>
                                                 </div>
+                                                
                                                 {this.state.itemEdit?.valores?.map((valor, index) => (
                                                     <>
                                                         {valor.half && !valor.hidden &&
@@ -235,6 +355,11 @@ class EventoEdit extends Component {
                                                                             search={true}
                                                                             onChange={(e) => { this.changeState(index, e.value); valor.onChange(e.value) }} />
                                                                     }
+                                                                    {valor.titulo == 'Fornecedor'?
+                                                                    this.props.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'PESSOAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                                                        <div className='insideFormButton' onClick={() => { this.setState({ modalAberto: true, modal: 'listarCliente', modalPesquisa: this.state.fornecedor, modalLista: this.state.pessoas, fornecedorCusteioAtivo: false }) }}>...</div>
+                                                                    : null}
+                                                                    
                                                                     {valor.tipo == "money" &&
                                                                         <Field
                                                                             className="form-control text-right"
@@ -303,6 +428,18 @@ class EventoEdit extends Component {
                                 </Form>
                             </Formik>
                         }
+                    <ModalListas
+                        pesquisa={this.state.modalPesquisa}
+                        alteraModal={this.alteraModal}
+                        alteraCliente={this.alteraCliente}
+                        alteraTaxa={this.alteraTaxa}
+                        alteraDescricaoPadrao={this.alteraDescricaoPadrao}
+                        acessosPermissoes={this.state.acessosPermissoes}
+                        modalAberto={this.state.modalAberto}
+                        modal={this.state.modal}
+                        modalLista={this.state.modalLista}
+                        closeModal={() => { this.setState({ modalAberto: false }) }}
+                    />
 
                     </div>
                 </div>

@@ -2464,7 +2464,7 @@ class ModalListas extends Component {
                                     <div className="row" id="product-list">
                                         <div className="col-lg-2 col-md-2 col-sm-0 col-0"></div>
                                         <div className="col-lg-8 col-md-8 col-sm-12 mobileajuste14 ">
-                                            {this.props.modalLista[0].Nome != undefined && this.props.modalLista.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (
+                                            {this.props.modalLista[0]?.Nome != undefined && this.props.modalLista.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (
                                                 <div key={feed.id} className={index % 2 == 0 ? "col-lg-12 col-md-12 col-sm-12 mix all dresses bags par lightHover" : "col-lg-12 col-md-12 col-sm-12 mix all dresses bags itemLista impar darkHover"}>
 
                                                     <div className="row ">
