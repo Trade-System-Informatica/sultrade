@@ -167,6 +167,9 @@ const estadoInicial = {
 
     loading: true,
     recarregaPagina: false,
+    redirectToNewOs: false,
+    redirectAfterDelOrcamento: false,
+
 
     eventosTotal: 0,
 
@@ -1692,7 +1695,7 @@ class AddOsOrcamento extends Component {
             }).then(
                 async res => {
                     if (res.data === true) {
-                        await loader.salvaLogs('os', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `OS: ${this.state.codigo}`);
+                        await loader.salvaLogs('os', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `OS-Orçamento: ${this.state.codigo}`);
                         await this.setState({ loading: false, bloqueado: false, governmentTaxes: this.state.governmentTaxes ? this.state.governmentTaxes : false, bankCharges: this.state.bankCharges ? this.state.bankCharges : false })
                         if (reload) {
                             window.location.reload();
@@ -4097,7 +4100,252 @@ class AddOsOrcamento extends Component {
             await this.setState({ erro: "Erro ao criar o pdf", loading: false });
         }
     }
-    //
+    // PDF ORÇAMENTO orcamento pdf
+    gerarOrcamento = async (codigo, validForm) => {
+        try {
+            if (!validForm) {
+                console.log('foi no !validForm')
+                await this.setState({ error: { type: "error", msg: "Verifique se as informações estão corretas!" } });
+                return;
+            }
+
+            await this.salvarOS(validForm, false)
+
+            this.setState({ pdfNome: `PROFORMA INVOICE${this.state.codigo ? ` - ${this.state.codigo}` : ""}` })
+
+            console.log(codigo)
+
+            await this.setState({ loading: true })
+            await apiEmployee.post(`getOrcamentoDataPdf.php`, {
+                token: true,
+                codigo: codigo
+            })
+                .then(
+                    async response => {
+                        await this.setState({ pdfContent: response.data })
+                    },
+                    async response => { console.log(response) }
+                )
+            let valorTotal = 0;
+            let valorTotalDolar = 0;
+            let recebimentoTotal = 0;
+            let recebimentoTotalDolar = 0;
+            let descontoTotal = 0;
+            let descontoTotalDolar = 0;
+            let pdf = '';
+
+
+            if (!this.state.pdfContent || !this.state.pdfContent[0]) {
+                console.log('foi no !this.state.pdfContent ||...')
+                console.log(this.state.pdfContent)
+                return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
+            }
+
+            if (this.state.pdfContent[0]) {
+                if (this.state.pdfContent[0].governmentTaxes > 0) {
+                    valorTotal += parseFloat(this.state.pdfContent[0].governmentTaxes);
+                    valorTotalDolar += Util.toFixed(parseFloat(this.state.pdfContent[0].governmentTaxes / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)), 2);
+                }
+                if (this.state.pdfContent[0].bankCharges > 0) {
+                    valorTotal += parseFloat(this.state.pdfContent[0].bankCharges);
+                    valorTotalDolar += Util.toFixed(parseFloat(this.state.pdfContent[0].bankCharges / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)), 2);
+                }
+
+                if (this.state.pdfContent.find((os) => ((os.tipo == 0 || os.tipo == 1) && !os.chavTaxa))) {
+                    return this.setState({ error: { type: "error", msg: "Há eventos sem taxas" }, loading: false })
+                }
+
+                pdf =
+                    <div style={{ zoom: 1 }} key={546546554654}>
+
+                        <div className='pdfHeader'>
+                            <img className="img-fluid" src="https://i.ibb.co/vmKJkx4/logo.png" alt="logo-lpc" border="0" style={{ width: '24%', height: '150px' }} />
+                            <h3 className='pdfTitle'></h3>
+                            <h4>PROFORMA INVOICE</h4>
+                        </div>
+                        <hr />
+                        <div className='pdfContent'>
+                            <div>
+                                <table className='pdfTableCabecalho'>
+                                    <tr>
+                                        <td colSpan={4} className="pdf_large_col"><b style={{ paddingRight: 5 }}>COMPANY:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].cliente)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="pdf_large_col" colSpan='4'><b style={{ paddingRight: 5 }}>ADDRESS:</b> {`${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].complemento)} ${util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].rua)} ${this.state.pdfContent[0].numero && this.state.pdfContent[0].numero != "0" ? this.state.pdfContent[0].numero : ""} ${this.state.pdfContent[0].cep && this.state.pdfContent[0].cep != "0" ? this.state.pdfContent[0].cep : ""}`}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="pdf_small_col" colSpan='4'><b style={{ paddingRight: 5 }}>Vessel Name:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomeNavio)}</td>
+                                        {this.state.pdfContent[0].data_chegada && moment(this.state.pdfContent[0].data_chegada).isValid() &&
+                                            <td className="pdf_money_col" colSpan='2'><b style={{ paddingRight: 5 }}>ETA:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].data_chegada)).format('MMMM DD, YYYY')}</td>
+                                        }
+                                    </tr>
+                                    <tr>
+                                    <td className="pdf_small_col" colSpan='4'><b style={{ paddingRight: 5 }}>Port:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].nomePorto)}</td>
+                                        {this.state.pdfContent[0].etb && moment(this.state.pdfContent[0].etb).isValid() &&
+                                            <td className="pdf_money_col" colSpan='2'><b style={{ paddingRight: 5 }}>ETB:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].etb)).format('MMMM DD, YYYY')}</td>
+                                        }
+                                    </tr>
+                                    <tr>
+                                    </tr>
+                                    <tr>
+                                    {/*
+                                        <td className="pdf_small_col" colSpan='2'><b style={{ paddingRight: 5 }}>PO:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].codigo)}</td>
+                                        <td className="pdf_money_col" colSpan='2'><b style={{ paddingRight: 5 }}>O.C.C:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].centro_custo)}</td>
+                                    */}
+                                    </tr>
+                                    <tr>
+                                        <td className="pdf_small_col" colSpan='4'><b style={{ paddingRight: 5 }}>ROE:</b> {util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].roe.replaceAll('.', ','))}</td>
+                                        {this.state.pdfContent[0].data_saida && moment(this.state.pdfContent[0].data_saida).format("DD/MM/YYYY") != "Invalid date" &&
+                                            <td className={`${this.state.pdfContent[0].data_chegada && moment(this.state.pdfContent[0].data_chegada).isValid ? "pdf_money_col" : "pdf_small_col"}`} colSpan='2'><b style={{ paddingRight: 5 }}>ETS:</b> {moment(util.returnIfExists(this.state.pdfContent[0], this.state.pdfContent[0].data_saida)).format('MMMM DD, YYYY')}</td>
+                                        }
+                                    </tr>
+                                </table>
+                                <br />
+                            </div>
+                        </div>
+                        <div>
+                            <table style={{ width: "90%", marginLeft: "5%" }}>
+                                <tr>
+                                    <td colSpan='2' className='pdf_small_col pdfTitle'></td>
+                                    <td className="pdf_small_col"></td>
+                                    <td className="pdf_small_col"></td>
+                                </tr>
+                                <tr>
+                                </tr>
+                                <tr>
+                                    <td colSpan='7' className="pdf_large_col" style={{ backgroundColor: "#CDCDCD" }}>DESCRIPTION:</td>
+                                    <td className='pdf_money_col' style={{ backgroundColor: "#CDCDCD" }}>VALUE (USD)</td>
+                                    <td className='pdf_money_col' style={{ backgroundColor: "#CDCDCD" }}>VALUE (R$)</td>
+                                </tr>
+                                {this.state.pdfContent.map((e, index) => {
+                                    if (e.tipo == 0 || e.tipo == 1) {
+                                        if (e.moeda == 5) {
+                                            valorTotal += parseFloat(e.valor);
+                                            valorTotalDolar += Util.toFixed(parseFloat(e.valor / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)), 2)
+                                        } else {
+                                            valorTotal += Util.toFixed(parseFloat(e.valor * (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)), 2);
+                                            valorTotalDolar += parseFloat(e.valor)
+                                        }
+                                    } else if (e.tipo == 2) {
+                                        if (e.moeda == 5) {
+                                            recebimentoTotal += parseFloat(e.valor);
+                                            recebimentoTotalDolar += Util.toFixed(parseFloat(e.valor / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)), 2)
+                                        } else {
+                                            recebimentoTotal += Util.toFixed(parseFloat(e.valor * (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)), 2);
+                                            recebimentoTotalDolar += parseFloat(e.valor)
+                                        }
+                                    } else if (e.tipo == 3) {
+                                        if (e.moeda == 5) {
+                                            descontoTotal += parseFloat(e.valor);
+                                            descontoTotalDolar += Util.toFixed(parseFloat(e.valor / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)), 2)
+                                        } else {
+                                            descontoTotal += Util.toFixed(parseFloat(e.valor * (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)), 2);
+                                            descontoTotalDolar += parseFloat(e.valor)
+                                        }
+                                    }
+
+                                    if (e.tipo == 0 || e.tipo == 1) {
+                                        return (
+                                            <tr style={{ background: index % 2 == 0 ? "white" : "#dddddd" }}>
+                                                <td colSpan='7' className='pdf_large_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.descos}</td>
+                                                <td className='pdf_money_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.moeda == 5 ? util.formataDinheiroBrasileiro(parseFloat(e.valor / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5))) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
+                                                <td className='pdf_money_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.moeda == 6 ? util.formataDinheiroBrasileiro(parseFloat(e.valor * (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5))) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
+                                            </tr>
+                                        )
+                                    }
+                                })}
+                                {this.state.pdfContent[0].governmentTaxes > 0 &&
+                                    <tr>
+                                        <td colSpan='7' className='pdf_large_col reduce_font'><b>GOVERNMENT TAXES</b></td>
+                                        <td className='pdf_money_col reduce_font'><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)))}</b></td>
+                                        <td className='pdf_money_col reduce_font'><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].governmentTaxes))}</b></td>
+                                    </tr>
+                                }
+                                {this.state.pdfContent[0].bankCharges > 0 &&
+                                    <tr styles={{ padding: "37px 0px 37px 0px" }}>
+                                        <td colSpan='7' className='pdf_large_col reduce_font'><b>BANK CHARGES</b></td>
+                                        <td className='pdf_money_col reduce_font'><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5)))}</b></td>
+                                        <td className='pdf_money_col reduce_font'><b>{util.formataDinheiroBrasileiro(parseFloat(this.state.pdfContent[0].bankCharges))}</b></td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td colSpan='7' className='pdf_large_col pdfTitle'>Total</td>
+                                    <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotalDolar))}</b></td>
+                                    <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotal))}</b></td>
+                                </tr>
+                                {parseFloat(descontoTotal) > 0 &&
+                                    <tr>
+                                        <td colSpan='7' className='pdf_large_col pdfTitle'>Discount</td>
+                                        <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(descontoTotalDolar))}</b></td>
+                                        <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(descontoTotal))}</b></td>
+                                    </tr>
+                                }
+                                {parseFloat(recebimentoTotal) > 0 &&
+                                    <tr>
+                                        <td colSpan='7' className='pdf_large_col pdfTitle'>Received</td>
+                                        <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(recebimentoTotalDolar))}</b></td>
+                                        <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(recebimentoTotal))}</b></td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td colSpan='7' className='pdf_large_col pdfTitle'>Balance</td>
+                                    <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotalDolar) - (parseFloat(recebimentoTotalDolar) + parseFloat(descontoTotalDolar)))}</b></td>
+                                    <td className='pdf_money_col'><b>{util.formataDinheiroBrasileiro(parseFloat(valorTotal) - (parseFloat(recebimentoTotal) + parseFloat(descontoTotal)))}</b></td>
+                                </tr>
+
+                            </table>
+                        </div>
+                        <br />
+                        <br />
+                        <br />
+
+                        <h5 style={{ width: "100%", textAlign: "center" }}>BANKING DETAILS</h5>
+                        <table style={{ width: "80%", marginLeft: "5%" }}>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Bank's name:</b> Banco do Brasil</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Branch's name:</b> Rio Grande</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Address:</b> Benjamin Constant St, 72</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Swift Code:</b> BRASBRRJCTA</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>IBAN:</b> BR6400000000026940001614410C1</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Branch's number:</b> 2694-8</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Account number:</b> 161441-X</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Account name:</b> SUL TRADE AGENCIAMENTOS MARITIMOS LTDA-ME</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>Phone:</b> +55 53 3235 3500</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}><b style={{ paddingRight: 5 }}>CNPJ:</b> 10.432.546/0001-75</td>
+                            </tr>
+
+                        </table>
+                    </div>
+            } else {
+                await this.setState({ erro: 'Sem as informações necessárias para gerar o pdf!', loading: false })
+                return;
+            }
+
+            await this.setState({ pdfgerado: pdf })
+            this.handleExportWithComponent()
+        } catch (err) {
+            await this.setState({ erro: "Erro ao criar o pdf", loading: false });
+        }
+    }
+
 
     GerarEtiqueta = async (codigo) => {
         await apiEmployee.post(`enviaEtiquetaOS.php`, {
@@ -4306,6 +4554,83 @@ class AddOsOrcamento extends Component {
         await this.setState({ logs, modalLog: true })
     }
 
+    deleteOrcamento = async (chave) => {
+        this.setState({ deleteOS: true })
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return (
+                    <div className='custom-ui text-center'>
+                        <h1>{NOME_EMPRESA}</h1>
+                        <p>Cancelar este orçamento? </p>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-danger w-25"
+                            onClick={
+                                async () => {
+                                    onClose()
+                                }
+                            }
+                        >
+                            Não
+                        </button>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-success w-25"
+                            onClick={
+                                async () => {
+                                    await apiEmployee.post(`deleteOS.php`, {
+                                        token: true,
+                                        chave: chave,
+                                        canceladoPor: this.state.usuarioLogado.codigo
+                                    }).then(
+                                        async response => {
+                                            if (response.data == true) {
+                                                await loader.salvaLogs('os', this.state.usuarioLogado.codigo, null, "Cancelamento", chave);
+                                                await this.setState({redirectAfterDelOrcamento: true})
+                                                window.location.reload()
+                                            }
+                                        },
+                                        async response => {
+                                            this.erroApi(response)
+                                        }
+                                    )
+                                    onClose()
+                                }
+                            }
+
+                        >
+                            Sim
+                        </button>
+                    </div>
+                )
+            }
+        })
+    }
+    
+
+    criarOs = async (reload = false) => {
+        await apiEmployee.post(`transformaOrcamentoEmOs.php`, {
+            token: true,
+            Chave: this.state.chave,
+            
+        }).then(
+            async res => {
+                if (res.data === true) {
+                    await loader.salvaLogs('os', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `OS: ${this.state.codigo}`);
+                    await this.setState({ loading: false, bloqueado: false, governmentTaxes: this.state.governmentTaxes ? this.state.governmentTaxes : false, bankCharges: this.state.bankCharges ? this.state.bankCharges : false })
+                    if (reload) {
+                        await this.setState({redirectToNewOs: reload})
+                        window.location.reload()
+                    }
+                } else {
+                    await alert(`Erro ${JSON.stringify(res)}`)
+                }
+            },
+            async res => await console.log(`Erro: ${res}`)
+        )
+        console.log('oi')
+    }
+
 
     render() {
         const validations = []
@@ -4382,6 +4707,19 @@ class AddOsOrcamento extends Component {
                     <>
                         <Redirect to={{ pathname: `/ordensservico/addOsOrcamento/${this.state.chave}`, state: { ... this.props.location.state, os: { ... this.state.os } } }} />
                         {window.location.reload()}
+                    </>
+                }
+
+                {this.state.redirectToNewOs &&
+                    <>
+                        <Redirect to={{ pathname: `/ordensservico/addos/${this.state.chave}`, state: { ... this.props.location.state, os: { ... this.state.os } } }} />
+                        
+                    </>
+                }
+                {this.state.redirectAfterDelOrcamento &&
+                    <>
+                        <Redirect to={{ pathname: `/ordensservico/osOrcamento`}} />
+                        
                     </>
                 }
 
@@ -5834,6 +6172,7 @@ class AddOsOrcamento extends Component {
                                                             <div>
                                                                 <hr />
                                                             </div>
+                                                            {/*
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 <label>Data Encerramento</label>
                                                             </div>
@@ -5861,6 +6200,7 @@ class AddOsOrcamento extends Component {
                                                                 <Field className="form-control" type="date" value={this.state.envio} onChange={async e => { this.setState({ envio: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
+                                                            */}
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 <label>Centro de Custo</label>
                                                             </div>
@@ -5968,6 +6308,21 @@ class AddOsOrcamento extends Component {
                                         </div>
                                         <br />
                                         <div className="relatoriosSection">
+
+                                            <div className="relatorioButton">
+                                            </div>
+                                            <div className="relatorioButton">
+                                                <button className="btn btn-danger" onClick={() => this.deleteOrcamento(this.state.chave)}>Cancelar orçamento</button>
+                                            </div>
+                                            <div className="relatorioButton">
+                                                <button className="btn btn-danger" style={{backgroundColor: 'green', borderColor: 'green'}} onClick={() => this.gerarOrcamento(this.state.codigo, validForm)}>Gerar Orçamento</button>
+                                            </div>
+                                            <div className="relatorioButton">
+                                                <button className="btn btn-danger" style={{backgroundColor: 'green', borderColor: 'green'}} onClick={() => this.criarOs(true)}>Criar Ordem de Serviço</button>
+                                            </div>
+                                            <div className="relatorioButton">
+                                            </div>
+                                            {/*
                                             <div className="relatorioButton">
                                                 <button className="btn btn-danger" onClick={() => this.GerarEtiqueta(this.state.os.codigo)}>Enviar Etiqueta</button>
                                             </div>
@@ -5987,6 +6342,7 @@ class AddOsOrcamento extends Component {
                                             <div className="relatorioButton">
                                                 <button className="btn btn-danger" onClick={() => this.getGruposTemplates()}>Gerar templates</button>
                                             </div>
+                                            */}
                                         </div>
 
                                     </>

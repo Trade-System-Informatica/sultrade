@@ -75,6 +75,7 @@ const estadoInicial = {
 
     recarregaPagina: "",
     redirectOS: false,
+    redirectOsOrcamento: false,
 
     pessoas: [],
     pessoasOptions: [],
@@ -226,7 +227,12 @@ class AddEvento extends Component {
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
         await this.testaAcesso()
-        await this.getOS();
+        console.log(this.props.location.state.os.orcamento)
+        if (this.props.location.state.os.orcamento == 0){
+            await this.getOS();
+        }else{
+            await this.getOsOrcamento();
+        }
         await this.getTaxas();
         await this.getMoedas();
         await this.getPessoas();
@@ -401,6 +407,26 @@ class AddEvento extends Component {
                 }
                 await this.changeOS(os);
 
+            },
+            async err => { this.erroApi(err) }
+        )
+    }
+
+    getOsOrcamento = async () => {
+        await apiEmployee.post(`getOsOrcamento.php`, {
+            token: true,
+            empresa: 0, 
+            limit: 'n',
+            offset: 'n'
+        }).then(
+            async res => {
+                await this.setState({ todasOs: res.data })
+
+                const options = this.state.todasOs?.map((e) => {
+                    return { label: e.codigo, value: e.Chave, navio: e.chave_navio, navioNome: e.navioNome, porto: e.porto, portoNome: e.portoNome, viagem: e.viagem }
+                })
+
+                await this.setState({ osOptions: options })
             },
             async err => { this.erroApi(err) }
         )
@@ -1002,8 +1028,8 @@ class AddEvento extends Component {
             ],
             loading: true
         })
-
-        const os = this.state.osOptions.find(option => option.value == this.state.chave_os).label;
+        console.log(this.state.chave_os)
+        const os = this.state?.osOptions?.find(option => option?.value == this.state?.chave_os).label;
         const navio = this.state.osOptions.find((e) => e.value == this.state.chave_os).navioNome;
         const porto = this.state.osOptions.find((e) => e.value == this.state.chave_os).portoNome;
 
@@ -1210,11 +1236,13 @@ class AddEvento extends Component {
     finalizaSalvamento = async () => {
         confirmAlert({
             customUI: ({ onClose }) => {
+                console.log('FINALIZA SALVAMENTO e o orcamento é:', this.props.location.state.os.orcamento)
                 return (
                     <div className='custom-ui text-center'>
                         <h1>{NOME_EMPRESA}</h1>
                         <p>Solicitação salva!</p>
                         <p>Deseja criar mais?</p>
+                        {this.props.location.state.os.orcamento == 0 ?
                         <button
                             style={{ marginRight: 5 }}
                             className="btn btn-danger w-50"
@@ -1227,6 +1255,20 @@ class AddEvento extends Component {
                         >
                             Não
                         </button>
+                        :
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-danger w-50"
+                            onClick={
+                                async () => {
+                                    this.setState({ redirectOsOrcamento: true });
+                                    onClose()
+                                }
+                            }
+                        >
+                            Não
+                        </button>
+                        }
                         <button
                             style={{ marginRight: 5 }}
                             className="btn btn-success w-50"
@@ -1293,6 +1335,9 @@ class AddEvento extends Component {
                 }
                 {this.state.redirectOS &&
                     <Redirect to={{ pathname: `/ordensservico/addos/${this.props.location?.state?.os?.Chave}`, state: { os: this.props?.location?.state?.os } }} />
+                }
+                {this.state.redirectOsOrcamento &&
+                    <Redirect to={{ pathname: `/ordensservico/addOsOrcamento/${this.props.location?.state?.os?.Chave}`, state: { os: this.props?.location?.state?.os } }} />
                 }
                 {this.state.irParaFinanceiro && this.props.location.state && this.props.location.state.os &&
                     <Redirect to={{ pathname: `/ordensservico/addeventofinanceiro/${this.state.evento.chave}`, state: { evento: { ...this.state.evento }, os: { ...this.state.os } } }} />

@@ -126,7 +126,7 @@ class OsOrcamento extends Component {
                 return (
                     <div className='custom-ui text-center'>
                         <h1>{NOME_EMPRESA}</h1>
-                        <p>Cancelar esta OS? ({nome}) </p>
+                        <p>Cancelar esta OS? </p>
                         <button
                             style={{ marginRight: 5 }}
                             className="btn btn-danger w-25"
@@ -271,17 +271,16 @@ class OsOrcamento extends Component {
                                     </div>
                                     <div className='col-1 col-sm-2 col-md-2 col-lg-4 col-xl-4'>
                                     </div>
-                                    {/*
                                     <div className='col-3 col-sm-3 col-md-2 col-lg-2 col-xl-2'>
                                         <label style={{ fontSize: '1.1em', marginTop: 3, fontWeight: 'bold' }}>Situação: </label>
                                     </div>
                                     <div className='col-5 col-sm-5 col-md-4 col-lg-2 col-xl-2'>
                                         <select className='form-control' value={this.state.situacao} onChange={(e) => { this.setState({ situacao: e.currentTarget.value }) }}>
-                                            <option value={1}>Aprovadas</option>
-                                            <option value={2}>Não aprovadas</option>
+                                            <option value={1}>Todas</option>
+                                            <option value={2}>Em aberto</option>
+                                            <option value={3}>Canceladas</option>
                                         </select>
                                     </div>
-                                     */}
                                     <div className="col-0 col-sm-0 col-md-3 col-lg-3 col-xl-3">
                                     </div>
                                     <div>
