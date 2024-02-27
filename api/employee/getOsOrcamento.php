@@ -2,7 +2,7 @@
 header("Access-Control-Allow-Origin:*");
 header("Content-Type: application/x-www-form-urlencoded");
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING );
+
 include_once '../classes/OS.php';
 include_once '../libraries/utils.php';
 
@@ -11,15 +11,13 @@ $objData = json_decode($data);
 
 if($objData != NULL){
     $token = prepareInput($objData->token);
+    $empresa = prepareInput($objData->empresa);
+    $limit = prepareInput($objData->limit);
     $offset = prepareInput($objData->offset);
-
     $os = new OS();
 
-    //$operadores = $operadores->checkToken($token);
-    //if($result == 'true'){
-        $result = $os->getGruposTemplates($offset);
-		//$result = 'Entrou aqui';
-        //}
+    $result = $os->getOsOrcamento($empresa, null, null);
+    
     } else {
         $result = "false";
     }
