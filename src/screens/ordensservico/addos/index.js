@@ -2563,7 +2563,7 @@ class AddOS extends Component {
 
                         const fields = [];
                         if (!["17", "16"].includes(pdfCusteioCodigo[custeioIndex])) {
-
+                            // ESTE TRECHO DO CODIGO CARREGA OS DADOS CASO CUSTEIO NAO SEJA A SULTRADE
                             pdfContent.filter((content) => content.fornecedor_custeio == custeio).map((content, index) => {
                                 let valor_cobrar = content.valor_cobrar;
                                 let valor_pago = content.valor_pago;
@@ -2595,13 +2595,13 @@ class AddOS extends Component {
                                     evento: content.evento.trim(),
                                     conta: content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod ? content.contaCod : "",
                                     valor_a_cobrar: parseFloat(valor_cobrar),
-                                    valor_pago: 0,
+                                    valor_pago: parseFloat(valor_pago),
                                     valor_liquido: "",
                                 })
                                 fieldsRows.push(rowCount);
                                 rowCount++;
                             })
-                        } else {
+                        } else { // ESTE TRECHO CARREGA OS DADOS CASO CUSTEIO SEJA SULTRADE
                             pdfContent.filter((content) => content.fornecedor_custeio == custeio).map((content, index) => {
                                 let valor_cobrar = content.valor_cobrar;
                                 let valor_pago = content.valor_pago;
@@ -4234,6 +4234,10 @@ class AddOS extends Component {
 
 
         if (parseInt(this.state.eventoChave) === 0) {
+            if(this.state.eventoRepasse == '1'){
+                console.log('repasse = 1')
+                this.setState({eventoFornecedorCusteio: 0})
+            }
             await apiEmployee.post(`insertServicoItemBasico.php`, {
                 token: true,
                 values: `'${this.state.chave}', '${this.state.eventoData}', '${this.state.eventoFornecedor}', '${this.state.eventoTaxa}', '${this.state.eventoDescricao}', '${this.state.eventoTipo}', '${this.state.eventoFornecedorCusteio}', '${this.state.eventoRemarks}', '${this.state.eventoMoeda}', '${parseFloat(this.state.eventoValor == "" ? 0 : this.state.eventoValor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.eventoVlrc == "" ? 0 : this.state.eventoVlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.eventoRepasse && this.state.eventoRepasse != "0" ? 1 : 0}'`,
@@ -4248,6 +4252,10 @@ class AddOS extends Component {
                 async res => await console.log(`Erro: ${res.data}`)
             )
         } else {
+            if(this.state.eventoRepasse == '1'){
+                console.log('repasse = 1')
+                this.setState({eventoFornecedorCusteio: 0})
+            }
             await apiEmployee.post(`updateServicoItem.php`, {
                 token: true,
                 chave: this.state.eventoChave,
@@ -6048,10 +6056,14 @@ class AddOS extends Component {
                                                                             </th>
                                                                             <th className='text-center'>
                                                                                 <span className='iconelixo giveMargin' type='button' >
-                                                                                
-                                                                                <FontAwesomeIcon icon={faPlus} className='pseudo_link'
-                                                                                        onClick={async () => { await this.setState({ modalItemAberto: false }); await this.setItemEdit() }} />
-                                                                                    
+                                                                                    <Link to=
+                                                                                        {{
+                                                                                            pathname: `/ordensservico/addevento/0`,
+                                                                                            state: {os: { ...this.state.os }, editavel: this.state.editavel }
+                                                                                        }}
+                                                                                    >
+                                                                                        <FontAwesomeIcon icon={faPlus} />
+                                                                                    </Link>    
                                                                                 </span>
                                                                             </th>
                                                                         </tr>
