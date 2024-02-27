@@ -3,6 +3,8 @@ api/classes/Database.php
 api/employee/enviaEmail.php
 package.json
 src/config.js
+src/services
+.package.json
 
 
 api/*
