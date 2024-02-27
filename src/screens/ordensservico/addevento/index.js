@@ -411,11 +411,7 @@ class AddEvento extends Component {
     
     getOsOrcamento = async () => {
         await apiEmployee.post(`getOsOrcamento.php`, {
-            token: true,
-            empresa: 0, 
-            limit: 'n',
-            offset: 'n'
-            //AQUI TBM
+            token: true
         }).then(
             async res => {
                 await this.setState({ todasOs: res.data })
