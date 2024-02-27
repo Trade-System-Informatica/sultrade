@@ -4024,6 +4024,11 @@ class AddOS extends Component {
                   let valor_cobrar = content.valor_cobrar;
                   let valor_pago = content.valor_pago;
 
+                  if(content?.fornecedor_custeioCodigo == 269 || content?.fornecedor_custeioCodigo == 32) 
+                  {
+                    valor_pago = 0;
+                  }
+
                   if (content.moeda == 6) {
                     valor_cobrar = Util.toFixed(
                       parseFloat(valor_cobrar) * parseFloat(roe),
