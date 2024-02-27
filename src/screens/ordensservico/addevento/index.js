@@ -274,49 +274,47 @@ class AddEvento extends Component {
         })
 
         await this.setState({ loading: false })
-        /*
-        console.log(this.state.tipo, '1');
-        if(this.state.chave != 0){
-            if(this.state.tipo == 0){
-                this.state.tiposSubOptions.map((item, index)=> {if (item.label == 'Receber'){this.state.tiposSubOptions.splice(index, 1)}})
-            }
-            if(this.state.tipo == 1){
-                this.state.tiposSubOptions.map((item, index)=> {if (item.label == 'Pagar'){this.state.tiposSubOptions.splice(index, 1)}})
-            }
-            if (this.state.tipo == 2 || this.state.tipo == 3){
-                this.state.tiposSubOptions.map((item, index)=> {if (item.label == 'Pagar' || item.label == 'Receber'){this.state.tiposSubOptions.splice(index, 1)}})                
-            }            
-        } else{
+        
+        if(this.state.chave == 0){
             if(this.props.location?.state?.editavel == false){
-                this.state.tiposSubOptions.map((item, index)=> {if (item.label == 'Pagar'){this.state.tiposSubOptions.splice(index, 1)}})
-                this.state.tiposSubOptions.map((item, index)=> {if (item.label == 'Receber'){this.state.tiposSubOptions.splice(index, 1)}})
-                this.setState({tipo: 2})
-            }
-        }
-        console.log(this.state.tipo);
-        */
-        if(this.props.location?.state?.editavel == false){
-            if(this.state.tipo == 0 || this.state.tipo == 1){
-                this.setState({habilitado: false})
-            }else{
-                this.setState({habilitado: true})
+                if(this.state.tipo == 0 || this.state.tipo == 1){
+                    this.setState({habilitado: false})
+                }else{
+                    this.setState({habilitado: true})
+                }
             }
         }
         console.log(this.state.habilitado)
+        console.log(this.props.location.state.editavel)
     }
 
     componentDidUpdate = (prevProps, prevState) => {
         
         if(prevState.tipo != this.state.tipo){
-            console.log('TESTANDO SIFOIIIIIII')
-            if(this.state.tipo == 0 || this.state.tipo == 1){
+            console.log('.')
+            if(this.state.chave == 0){
                 if(!this.props.editavel){
-                    this.setState({habilitado: false})
+                    if(this.state.tipo == 0 || this.state.tipo == 1){
+                        this.setState({habilitado: false})
+                    }else{
+                        this.setState({habilitado: true})
+                    }
+                }else {
+                    this.setState({habilitado: true})
                 }
-            }else {
-                this.setState({habilitado: true})
             }
+            setTimeout(() => {
+                if(this.state.habilitado == true){
+                    console.log('habilitado')
+                }
+                if(this.state.habilitado == false){
+                    console.log('desabilitado')
+                }
+                
+            }, 1000);
+
         }
+        
     }
 
     carregaTiposAcessos = async () => {
@@ -411,7 +409,7 @@ class AddEvento extends Component {
             async err => { this.erroApi(err) }
         )
     }
-
+    
     getOsOrcamento = async () => {
         await apiEmployee.post(`getOsOrcamento.php`, {
             token: true,
@@ -1944,7 +1942,7 @@ class AddEvento extends Component {
                                                         <div className='col-1'></div>
                                     
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <select className='form-control' value={this.state.tipo} disabled={this.state.chave != 0 ? true : false} onChange={async e => { await this.setState({ tipo: e.currentTarget.value }); if (this.state.tipo == 1) { await this.setState({ fornecedor: '' }) } else if (this.state.fornecedor == '' && this.state.chave != 0) { await this.setState({ fornecedor: this.state.fornecedorInicial }) } await this.getTaxasOptions() }}>
+                                                            <select className='form-control' value={this.state.tipo} onChange={async e => { await this.setState({ tipo: e.currentTarget.value }); if (this.state.tipo == 1) { await this.setState({ fornecedor: '' }) } else if (this.state.fornecedor == '' && this.state.chave != 0) { await this.setState({ fornecedor: this.state.fornecedorInicial }) } await this.getTaxasOptions() }}>
                                                                 {this.state.tiposSubOptions.map((t) => (
                                                                     <option value={t.value}>{t.label}</option>
                                                                 ))}
@@ -2119,7 +2117,16 @@ class AddEvento extends Component {
                                             </div>
 
                                             {/* ALERTA */}
-                                            {/*!this.state.editavel? !this.state.habilitado? <p style={{maxWidth: 600, margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>Os encerrada, somente eventos do tipo: Desconto ou Recebimento de Remessas</p> : null : null*/}
+                                            {this.state.chave == 0 ?
+                                                !this.state.editavel?
+                                                    !this.state.habilitado?
+                                                        <p style={{maxWidth: 600, margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>Os encerrada, somente eventos do tipo: Desconto ou Recebimento de Remessas</p>
+                                                    :
+                                                        null
+                                                :
+                                                    null
+                                            :
+                                                null}
                                             <div className="row">
                                                 <div className="col-2">
                                                 </div>
