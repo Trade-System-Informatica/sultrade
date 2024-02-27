@@ -4166,7 +4166,7 @@ class AddOS extends Component {
                   fieldsRows.push(rowCount);
                   rowCount++;
                 }
-                else {
+                else if( content?.repasse == 0 ) {
                     let valor_cobrar = 0;
                     let valor_pago = content.valor_pago;
   
