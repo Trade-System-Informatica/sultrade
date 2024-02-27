@@ -2563,7 +2563,7 @@ class AddOS extends Component {
 
                         const fields = [];
                         if (!["17", "16"].includes(pdfCusteioCodigo[custeioIndex])) {
-
+                            // ESTE TRECHO DO CODIGO CARREGA OS DADOS CASO CUSTEIO NAO SEJA A SULTRADE
                             pdfContent.filter((content) => content.fornecedor_custeio == custeio).map((content, index) => {
                                 let valor_cobrar = content.valor_cobrar;
                                 let valor_pago = content.valor_pago;
@@ -2595,13 +2595,13 @@ class AddOS extends Component {
                                     evento: content.evento.trim(),
                                     conta: content.uf == 81 ? content.contaEstrangeiraCod : content.contaCod ? content.contaCod : "",
                                     valor_a_cobrar: parseFloat(valor_cobrar),
-                                    valor_pago: 0,
+                                    valor_pago: parseFloat(valor_pago),
                                     valor_liquido: "",
                                 })
                                 fieldsRows.push(rowCount);
                                 rowCount++;
                             })
-                        } else {
+                        } else { // ESTE TRECHO CARREGA OS DADOS CASO CUSTEIO SEJA SULTRADE
                             pdfContent.filter((content) => content.fornecedor_custeio == custeio).map((content, index) => {
                                 let valor_cobrar = content.valor_cobrar;
                                 let valor_pago = content.valor_pago;
