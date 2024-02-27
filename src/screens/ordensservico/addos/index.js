@@ -6056,10 +6056,14 @@ class AddOS extends Component {
                                                                             </th>
                                                                             <th className='text-center'>
                                                                                 <span className='iconelixo giveMargin' type='button' >
-                                                                                
-                                                                                <FontAwesomeIcon icon={faPlus} className='pseudo_link'
-                                                                                        onClick={async () => { await this.setState({ modalItemAberto: false }); await this.setItemEdit() }} />
-                                                                                    
+                                                                                    <Link to=
+                                                                                        {{
+                                                                                            pathname: `/ordensservico/addevento/0`,
+                                                                                            state: {os: { ...this.state.os }, editavel: this.state.editavel }
+                                                                                        }}
+                                                                                    >
+                                                                                        <FontAwesomeIcon icon={faPlus} />
+                                                                                    </Link>    
                                                                                 </span>
                                                                             </th>
                                                                         </tr>
