@@ -366,6 +366,7 @@ class AddEvento extends Component {
             token: true,
             empresa: this.state.usuarioLogado.empresa,
             offset: null
+            //AQUI
         }).then(
             async res => {
                 await this.setState({ templates: res.data })
@@ -416,6 +417,7 @@ class AddEvento extends Component {
             empresa: 0, 
             limit: 'n',
             offset: 'n'
+            //AQUI TBM
         }).then(
             async res => {
                 await this.setState({ todasOs: res.data })
@@ -436,6 +438,7 @@ class AddEvento extends Component {
             empresa: 0, 
             limit: 'n',
             offset: 'n'
+            // E AQUI TBM
         }).then(
             async res => {
                 await this.setState({ todasOs: res.data })

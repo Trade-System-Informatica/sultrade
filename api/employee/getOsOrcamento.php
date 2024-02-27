@@ -16,7 +16,7 @@ if($objData != NULL){
     $offset = prepareInput($objData->offset);
     $os = new OS();
 
-    $result = $os->getOsOrcamento($empresa, null, null);
+    $result = $os->getOsOrcamento($empresa, $limit, $offset);
     
     } else {
         $result = "false";
