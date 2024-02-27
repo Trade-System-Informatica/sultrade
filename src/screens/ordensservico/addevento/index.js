@@ -360,7 +360,8 @@ class AddEvento extends Component {
     getTemplates = async () => {
         await apiEmployee.post(`getEventosTemplates.php`, {
             token: true,
-            empresa: this.state.usuarioLogado.empresa
+            empresa: this.state.usuarioLogado.empresa,
+            offset: null
         }).then(
             async res => {
                 await this.setState({ templates: res.data })
