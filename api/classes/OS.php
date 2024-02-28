@@ -21,6 +21,7 @@ class OS
         if ($offset != null) {
             $offset = " OFFSET " . $offset;
         } else {
+            $offset ='';
             $limit = '';
         }
 
