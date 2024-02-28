@@ -21,6 +21,7 @@ class OS
         if ($offset != null) {
             $offset = " OFFSET " . $offset;
         } else {
+            $offset ='';
             $limit = '';
         }
 
@@ -38,7 +39,7 @@ class OS
                                           os_portos.Descricao AS portoNome,
                                           centros_custos.Descricao AS centroCustoNome,
                                           os_tipos_servicos.descricao AS tipoServicoNome',
-                "1 = 1 ORDER BY chave DESC" . $limit . $offset
+                "1 = 1 and orcamento = 0 ORDER BY chave DESC" . $limit . $offset
             );
         } else {
             $result = $database->doSelect(
@@ -54,7 +55,7 @@ class OS
                     os_portos.Descricao AS portoNome,
                     centros_custos.Descricao AS centroCustoNome,
                     os_tipos_servicos.descricao AS tipoServicoNome',
-                "empresa = '" . $Empresa . "' ORDER BY chave DESC" . $limit . $offset
+                "empresa = '" . $Empresa . "' and orcamento = 0 ORDER BY chave DESC" . $limit . $offset
             );
         }
 
