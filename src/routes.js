@@ -60,12 +60,14 @@ import AddGrupoTemplate from './screens/utilitarios/addgrupotemplate'
 
 
 import OS from './screens/ordensservico/os'
+import OsOrcamento from './screens/ordensservico/osOrcamento'
 import Eventos from './screens/ordensservico/eventos'
 import RelatorioOS from './screens/ordensservico/relatorio'
 import Tarifas from './screens/ordensservico/tarifas'
 import Anexos from './screens/ordensservico/anexos'
 
 import AddOS from './screens/ordensservico/addos'
+import AddOsOrcamento from './screens/ordensservico/addOsOrcamento'
 import AddEvento from './screens/ordensservico/addevento'
 import AddEventoFinanceiro from './screens/ordensservico/addeventofinanceiro'
 import AddTarifa from './screens/ordensservico/addtarifa'
@@ -151,14 +153,15 @@ export default function Routes(){
                 <Route path="/utilitarios/addeventotemplate/:id" component={AddEventoTemplate} />
                 <Route path="/utilitarios/addgrupotemplate/:id" component={AddGrupoTemplate} />
 
-
                 <Route path="/ordensservico/os" component={OS} />
+                <Route path="/ordensservico/osOrcamento" component={OsOrcamento} />
                 <Route path="/ordensservico/eventos" component={Eventos} />
                 <Route path="/ordensservico/relatorio" component={RelatorioOS} />
                 <Route path="/ordensservico/tarifas" component={Tarifas} />
                 <Route path="/ordensservico/anexos" component={Anexos} />
                 
                 <Route path="/ordensservico/addos/:id/" component={AddOS} />
+                <Route path="/ordensservico/addOsOrcamento/:id/" component={AddOsOrcamento} />
                 <Route path="/ordensservico/addevento/:id/" component={AddEvento} />
                 <Route path="/ordensservico/addeventoFinanceiro/:id/" component={AddEventoFinanceiro} />
                 <Route path="/ordensservico/addtarifa/:id/" component={AddTarifa} />          

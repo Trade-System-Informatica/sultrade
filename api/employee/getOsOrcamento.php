@@ -11,16 +11,13 @@ $objData = json_decode($data);
 
 if($objData != NULL){
     $token = prepareInput($objData->token);
-    $offset = prepareInput($objData->offset);
     $empresa = prepareInput($objData->empresa);
-
+    $limit = prepareInput($objData->limit);
+    $offset = prepareInput($objData->offset);
     $os = new OS();
 
-    //$operadores = $operadores->checkToken($token);
-    //if($result == 'true'){
-        $result = $os->getEventosTemplates($offset, $empresa);
-		//$result = 'Entrou aqui';
-        //}
+    $result = $os->getOsOrcamento($empresa, $limit, $offset);
+    
     } else {
         $result = "false";
     }

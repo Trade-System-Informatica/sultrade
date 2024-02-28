@@ -63,6 +63,59 @@ class OS
         return $result;
     }
 
+    public static function getOsOrcamento($Empresa, $limit, $offset)
+    {
+        $database = new Database();
+
+        if ($limit) {
+            $limit = " LIMIT " . $limit;
+        } else {
+            $limit = '';
+        }
+        if ($offset != null) {
+            $offset = " OFFSET " . $offset;
+        } else {
+            $limit = '';
+        }
+
+        if ($Empresa == 0) {
+            $result = $database->doSelect(
+                'os 
+            LEFT JOIN os_navios ON os_navios.chave = os.chave_navio 
+            LEFT JOIN pessoas ON pessoas.chave = os.chave_cliente
+            LEFT JOIN centros_custos ON centros_custos.Chave = os.centro_custo
+            LEFT JOIN os_tipos_servicos ON os_tipos_servicos.chave = os.chave_tipo_servico
+            LEFT JOIN os_portos ON os_portos.Chave = os.porto',
+                'os.*, 
+                                          os_navios.nome AS navioNome, 
+                                          pessoas.nome AS clienteNome, 
+                                          os_portos.Descricao AS portoNome,
+                                          centros_custos.Descricao AS centroCustoNome,
+                                          os_tipos_servicos.descricao AS tipoServicoNome',
+                "1 = 1 and orcamento = 1 ORDER BY chave DESC" . $limit . $offset
+            );
+        } else {
+            $result = $database->doSelect(
+                'os 
+            LEFT JOIN os_navios ON os_navios.chave = os.chave_navio 
+            LEFT JOIN pessoas ON pessoas.chave = os.chave_cliente
+            LEFT JOIN centros_custos ON centros_custos.Chave = os.centro_custo
+            LEFT JOIN os_tipos_servicos ON os_tipos_servicos.chave = os.chave_tipo_servico
+            LEFT JOIN os_portos ON os_portos.Chave = os.porto',
+                'os.*, 
+                    os_navios.nome AS navioNome, 
+                    pessoas.nome AS clienteNome, 
+                    os_portos.Descricao AS portoNome,
+                    centros_custos.Descricao AS centroCustoNome,
+                    os_tipos_servicos.descricao AS tipoServicoNome',
+                "empresa = '" . $Empresa . "' and orcamento = 1 ORDER BY chave DESC" . $limit . $offset
+            );
+        }
+
+        $database->closeConection();
+        return $result;
+    }
+
     public static function getOSUma($chave_os)
     {
         $database = new Database();
@@ -723,7 +776,7 @@ class OS
     {
         $database = new Database();
 
-
+        // DAQ
         if ($codigo >= 5850 && $navio && $tipoServico && $cliente && $porto) {
             $centroCusto = $database->doSelect('centros_custos', 'Chave', "Codigo = '$codigo'");
 
@@ -735,9 +788,41 @@ class OS
             }
             $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio, centro_custo';
             $result = $database->doInsert('os', $cols, $values . ", '" . $centroCusto[0]["Chave"] . "'");
+        // ATE AQ
         } else {
             $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio';
             $result = $database->doInsert('os', $cols, $values);
+        }
+
+
+        if ($result) {
+            $query = "Proximo = '" . ($codigo + 1) . "'";
+            $database->doUpdate('codigos', $query, "Tipo = '" . $tipo . "'");
+        }
+        $database->closeConection();
+        return $result;
+    }
+    
+    public static function insertOsOrcamento($values, $codigo, $tipo, $navio = null, $tipoServico = null, $cliente = null, $porto = null, $chaveCliente)
+    {
+        $database = new Database();
+
+        // DAQ
+        if ($codigo >= 5850 && $navio && $tipoServico && $cliente && $porto) {
+            $centroCusto = $database->doSelect('centros_custos', 'Chave', "Codigo = '$codigo'");
+
+            if (!$centroCusto[0]) {
+                $valuesCentroCusto = "'$codigo', '$codigo', 'ST$codigo $navio - $tipoServico - $cliente - $porto', '$chaveCliente'";
+                $centroCusto = $database->doInsert('centros_custos', 'Chave, Codigo, Descricao, Cliente', $valuesCentroCusto);
+
+                $database->doUpdate('codigos', "Proximo = '" . ($codigo + 1) . "'", "Tipo = 'CC'");
+            }
+            $cols = 'orcamento, Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio, centro_custo';
+            $result = $database->doInsert('os', $cols, '1, '.$values . ", '" . $centroCusto[0]["Chave"] . "'");
+        // ATE AQ
+        } else { 
+            $cols = 'orcamento, Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio';
+            $result = $database->doInsert('os', $cols, '1, '.$values);
         }
 
 
@@ -1436,6 +1521,21 @@ class OS
         }
 
         $result = $database->doSelect('templates_grupos', "templates_grupos.*", 'chave = ' . $chave);
+        $database->closeConection();
+        if ($result == NULL) {
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+
+    public static function transformaOrcamentoEmOs($Chave)
+    {
+        $database = new Database();
+
+        $query = "orcamento = 0";
+
+        $result = $database->doUpdate('os', $query, 'Chave = ' . $Chave);
         $database->closeConection();
         if ($result == NULL) {
             return 'false';

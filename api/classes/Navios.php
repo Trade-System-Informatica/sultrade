@@ -90,6 +90,66 @@ class Navios
         return $result;
     }
 
+    public static function getOrcamentoDataPdf($codigo)
+    {
+        $database = new Database();
+
+        $result = $database->doSelect(
+            'os 
+        left join os_servicos_itens on os.chave=os_servicos_itens.chave_os
+        left join os_taxas on os_servicos_itens.taxa=os_taxas.chave
+        left join os_tipos_servicos on os.tipo_servico=os_tipos_servicos.chave
+        left join os_navios on os.chave_navio=os_navios.chave
+        left join os_subgrupos_taxas on os_taxas.sub_grupo = os_subgrupos_taxas.chave
+        left join os_portos on os.porto = os_portos.chave
+        left join pessoas on os.chave_cliente = pessoas.chave
+        left join pessoas_enderecos on pessoas.chave = pessoas_enderecos.chave_pessoa AND pessoas_enderecos.tipo = 0
+        left join estados ON pessoas_enderecos.uf = estados.chave
+        left join paises ON pessoas_enderecos.pais = paises.chave',
+
+            'os.chave,
+            os.bankCharges,
+            os.governmentTaxes,
+            os.centro_custo,
+            os.cabecalho,
+            os.roe,
+            os.codigo,
+            os.encerradoPor,
+            os.etb,
+            os_navios.nome as nomeNavio,
+            os_navios.bandeira AS bandeira,
+            os_portos.descricao as nomePorto,
+            pessoas.nome_fantasia AS cliente,
+
+            os.eta AS data_chegada,
+            os.data_saida,
+            os.data_faturamento,
+            os_taxas.descricao as descTaxa,
+            os_taxas.chave as chavTaxa,
+            os_subgrupos_taxas.descricao as descSubgrupo,
+            os_servicos_itens.descricao as descos,
+            os_servicos_itens.valor,
+            os_servicos_itens.moeda,
+            os_servicos_itens.tipo_sub AS tipo,
+            pessoas_enderecos.endereco AS rua,
+            pessoas_enderecos.numero AS numero,
+            pessoas_enderecos.cidade_descricao AS cidade,
+            pessoas_enderecos.cep AS cep,
+            estados.codigo AS estado,
+            paises.nome AS pais,
+            pessoas_enderecos.complemento AS complemento',
+
+            "os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 AND (((os_servicos_itens.tipo_sub = 0 OR os_servicos_itens.tipo_sub = 1) AND (os_servicos_itens.repasse = 1 OR os_servicos_itens.fornecedor_custeio != 0)) OR (os_servicos_itens.tipo_sub = 2 OR os_servicos_itens.tipo_sub = 3))
+            ORDER BY os_servicos_itens.ordem ASC"
+            /*            "(os_taxas.tipo='R' OR os_servicos_itens.repasse= 1 OR (os_servicos_itens.fornecedor_custeio != '0' AND os_servicos_itens.fornecedor_custeio != '')) AND os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0
+            ORDER BY os_servicos_itens.ordem ASC"*/
+        );
+
+
+        $database->closeConection();
+        return $result;
+    }
+
     public static function getCapaVoucher($codigo)
     {
         $database = new Database();
@@ -247,6 +307,15 @@ class Navios
         return $result;
     }
 
+    public static function deleteInvoice($chave)
+    {
+        $database = new Database();
+
+        $result = $database->doDelete('os_invoices', 'Chave = ' . $chave);
+        $database->closeConection();
+        return $result;
+    }
+
     public static function invoices($os, $eventos)
     {
         $database = new Database();
@@ -276,13 +345,35 @@ class Navios
                 "os_servicos_itens.chave IN (" . implode(',', $eventos) . ") ORDER BY os_servicos_itens.ordem ASC"
             );
         }
-
+/*
+        if ($events[0]) {
+            $result['fornecedorCusteio'] = null;
+            if (count($events) > 1){
+                foreach ($events as $event) {
+                    if ($event['Fornecedor_Custeio'] == 32){
+                        $result['fornecedorCusteio'] = $event['Fornecedor_Custeio'];
+                        $result['fornecedorCusteioNome'] = $event['fornecedorCusteioNome'];
+                        $result['events'] = $events;            
+                    }
+                }
+                if (!isset($result['fornecedorCusteio'])){
+                    $result['fornecedorCusteio'] = $events[0]['Fornecedor_Custeio'];
+                    $result['fornecedorCusteioNome'] = $events[0]['fornecedorCusteioNome'];
+                    $result['events'] = $events;
+                }
+            } else {
+                $result['fornecedorCusteio'] = $events[0]['Fornecedor_Custeio'];
+                $result['fornecedorCusteioNome'] = $events[0]['fornecedorCusteioNome'];
+                $result['events'] = $events;
+            }
+        }
+*/
         if ($events[0]) {
             $result['fornecedorCusteio'] = $events[0]['Fornecedor_Custeio'];
             $result['fornecedorCusteioNome'] = $events[0]['fornecedorCusteioNome'];
             $result['events'] = $events;
         }
-        // AQUI MORA O PERIGO, ELE PEGA EVENTOS CRIADOS ANTIGAMENTE NA CRIAÇÂO DE INVOICES NOVAS
+
         $invoice = $database->doSelect('os_invoices', 'os_invoices.*',"os_invoices.evento = ".$eventos[0]);
         $invoice = $invoice[0];
         

@@ -412,8 +412,18 @@ class Header extends Component {
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
+                            {this.props.voltarOsOrcamento &&
+                                <Link to={{ pathname: `/ordensservico/osOrcamento`, state: { chave: this.props.chave } }}>
+                                    <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
+                                </Link>
+                            }
                             {this.props.voltarAddOS &&
                                 <Link to={{ pathname: `/ordensservico/addos/${this.props.os.Chave}`, state: { os: this.props.os } }}>
+                                    <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
+                                </Link>
+                            }
+                            {this.props.voltarAddOsOrcamento &&
+                                <Link to={{ pathname: `/ordensservico/addOsOrcamento/${this.props.os.Chave}`, state: { os: this.props.os } }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
@@ -600,6 +610,11 @@ class Header extends Component {
                                                     {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                                         <Link className="dropdown-item" to={{ pathname: `/ordensservico/os` }}>
                                                             OS
+                                                        </Link>
+                                                    }
+                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                        <Link className="dropdown-item" to={{ pathname: `/ordensservico/osOrcamento` }}>
+                                                            OS - Orçamento
                                                         </Link>
                                                     }
                                                     {/* {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissoes)[0] == 1 &&

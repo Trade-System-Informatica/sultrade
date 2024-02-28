@@ -75,6 +75,7 @@ const estadoInicial = {
 
     recarregaPagina: "",
     redirectOS: false,
+    redirectOsOrcamento: false,
 
     pessoas: [],
     pessoasOptions: [],
@@ -226,7 +227,12 @@ class AddEvento extends Component {
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
         await this.testaAcesso()
-        await this.getOS();
+        console.log(this.props.location.state.os.orcamento)
+        if (this.props.location.state.os.orcamento == 0){
+            await this.getOS();
+        }else{
+            await this.getOsOrcamento();
+        }
         await this.getTaxas();
         await this.getMoedas();
         await this.getPessoas();
@@ -280,6 +286,7 @@ class AddEvento extends Component {
         }
         console.log(this.state.habilitado)
         console.log(this.props.location.state.editavel)
+        console.log(this.props.location.state.os)
     }
 
     componentDidUpdate = (prevProps, prevState) => {
@@ -358,7 +365,7 @@ class AddEvento extends Component {
     getTemplates = async () => {
         await apiEmployee.post(`getEventosTemplates.php`, {
             token: true,
-            empresa: this.state.usuarioLogado.empresa
+            empresa: this.state.usuarioLogado.empresa,
         }).then(
             async res => {
                 await this.setState({ templates: res.data })
@@ -402,10 +409,27 @@ class AddEvento extends Component {
             async err => { this.erroApi(err) }
         )
     }
+    
+    getOsOrcamento = async () => {
+        await apiEmployee.post(`getOsOrcamento.php`, {
+            token: true
+        }).then(
+            async res => {
+                await this.setState({ todasOs: res.data })
+
+                const options = this.state.todasOs?.map((e) => {
+                    return { label: e.codigo, value: e.Chave, navio: e.chave_navio, navioNome: e.navioNome, porto: e.porto, portoNome: e.portoNome, viagem: e.viagem }
+                })
+
+                await this.setState({ osOptions: options })
+            },
+            async err => { this.erroApi(err) }
+        )
+    }
 
     getOS = async () => {
         await apiEmployee.post(`getOS.php`, {
-            token: true
+            token: true,
         }).then(
             async res => {
                 await this.setState({ todasOs: res.data })
@@ -996,8 +1020,8 @@ class AddEvento extends Component {
             ],
             loading: true
         })
-
-        const os = this.state.osOptions.find(option => option.value == this.state.chave_os).label;
+        console.log(this.state.chave_os)
+        const os = this.state?.osOptions?.find(option => option?.value == this.state?.chave_os).label;
         const navio = this.state.osOptions.find((e) => e.value == this.state.chave_os).navioNome;
         const porto = this.state.osOptions.find((e) => e.value == this.state.chave_os).portoNome;
 
@@ -1204,11 +1228,13 @@ class AddEvento extends Component {
     finalizaSalvamento = async () => {
         confirmAlert({
             customUI: ({ onClose }) => {
+                console.log('FINALIZA SALVAMENTO e o orcamento é:', this.props.location.state.os.orcamento)
                 return (
                     <div className='custom-ui text-center'>
                         <h1>{NOME_EMPRESA}</h1>
                         <p>Solicitação salva!</p>
                         <p>Deseja criar mais?</p>
+                        {this.props.location.state.os.orcamento == 0 ?
                         <button
                             style={{ marginRight: 5 }}
                             className="btn btn-danger w-50"
@@ -1221,6 +1247,20 @@ class AddEvento extends Component {
                         >
                             Não
                         </button>
+                        :
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-danger w-50"
+                            onClick={
+                                async () => {
+                                    this.setState({ redirectOsOrcamento: true });
+                                    onClose()
+                                }
+                            }
+                        >
+                            Não
+                        </button>
+                        }
                         <button
                             style={{ marginRight: 5 }}
                             className="btn btn-success w-50"
@@ -1288,6 +1328,9 @@ class AddEvento extends Component {
                 {this.state.redirectOS &&
                     <Redirect to={{ pathname: `/ordensservico/addos/${this.props.location?.state?.os?.Chave}`, state: { os: this.props?.location?.state?.os } }} />
                 }
+                {this.state.redirectOsOrcamento &&
+                    <Redirect to={{ pathname: `/ordensservico/addOsOrcamento/${this.props.location?.state?.os?.Chave}`, state: { os: this.props?.location?.state?.os } }} />
+                }
                 {this.state.irParaFinanceiro && this.props.location.state && this.props.location.state.os &&
                     <Redirect to={{ pathname: `/ordensservico/addeventofinanceiro/${this.state.evento.chave}`, state: { evento: { ...this.state.evento }, os: { ...this.state.os } } }} />
                 }
@@ -1298,7 +1341,10 @@ class AddEvento extends Component {
                 {!this.state.loading &&
                     <>
                         <section>
-                            {this.props.location.state && this.props.location.state.os && this.props.location.state.os.codigo &&
+                            {this.props.location.state && this.props.location.state.os && this.props.location.state.os.codigo && this.props.location.state.os.orcamento == 1 &&
+                                <Header voltarAddOsOrcamento os={this.props.location.state.os} titulo="Eventos" />
+                            }
+                            {this.props.location.state && this.props.location.state.os && this.props.location.state.os.codigo && this.props.location.state.os.orcamento == 0 &&
                                 <Header voltarAddOS os={this.props.location.state.os} titulo="Eventos" />
                             }
                             {(!this.props.location.state || !this.props.location.state.os || !this.props.location.state.os.codigo) &&
@@ -1844,17 +1890,29 @@ class AddEvento extends Component {
                                                                 }
                                                             </>
                                                         }
-                                                        <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
-                                                            <label>Ordem de Serviço</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                            {!this.state.chave_os &&
-                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                            }
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' isDisabled options={this.state.osOptions.filter(e => this.filterSearch(e, this.state.osOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ osOptionsTexto: e }) }} value={this.state.osOptions.filter(option => option.value == this.state.chave_os)[0]} search={true} />
-                                                        </div>
+                                                        {this.props.location.state.os.orcamento == 1?
+                                                            null
+                                                            :
+                                                            <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
+                                                                <label>Ordem de Serviço</label>
+                                                            </div>
+                                                        }
+                                                        {this.props.location.state.os.orcamento == 1?
+                                                            null
+                                                            :
+                                                            <div className='col-1 errorMessage'>
+                                                                {!this.state.chave_os &&
+                                                                    <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                }
+                                                            </div>
+                                                        }
+                                                        {this.props.location.state.os.orcamento == 1?
+                                                            null
+                                                            :
+                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                <Select className='SearchSelect' isDisabled options={this.state.osOptions.filter(e => this.filterSearch(e, this.state.osOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ osOptionsTexto: e }) }} value={this.state.osOptions.filter(option => option.value == this.state.chave_os)[0]} search={true} />
+                                                            </div>
+                                                        }
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Navio</label>
                                                         </div>
