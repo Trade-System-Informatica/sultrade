@@ -1890,21 +1890,29 @@ class AddEvento extends Component {
                                                                 }
                                                             </>
                                                         }
-                                                        <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
                                                         {this.props.location.state.os.orcamento == 1?
-                                                            <label>Orçamento</label>
+                                                            null
                                                             :
-                                                            <label>Ordem de Serviço</label>
+                                                            <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
+                                                                <label>Ordem de Serviço</label>
+                                                            </div>
                                                         }
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                            {!this.state.chave_os &&
-                                                                <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
-                                                            }
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Select className='SearchSelect' isDisabled options={this.state.osOptions.filter(e => this.filterSearch(e, this.state.osOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ osOptionsTexto: e }) }} value={this.state.osOptions.filter(option => option.value == this.state.chave_os)[0]} search={true} />
-                                                        </div>
+                                                        {this.props.location.state.os.orcamento == 1?
+                                                            null
+                                                            :
+                                                            <div className='col-1 errorMessage'>
+                                                                {!this.state.chave_os &&
+                                                                    <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                                }
+                                                            </div>
+                                                        }
+                                                        {this.props.location.state.os.orcamento == 1?
+                                                            null
+                                                            :
+                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                <Select className='SearchSelect' isDisabled options={this.state.osOptions.filter(e => this.filterSearch(e, this.state.osOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ osOptionsTexto: e }) }} value={this.state.osOptions.filter(option => option.value == this.state.chave_os)[0]} search={true} />
+                                                            </div>
+                                                        }
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Navio</label>
                                                         </div>
