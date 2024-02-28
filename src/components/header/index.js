@@ -412,8 +412,18 @@ class Header extends Component {
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }
+                            {this.props.voltarOsOrcamento &&
+                                <Link to={{ pathname: `/ordensservico/osOrcamento`, state: { chave: this.props.chave } }}>
+                                    <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
+                                </Link>
+                            }
                             {this.props.voltarAddOS &&
                                 <Link to={{ pathname: `/ordensservico/addos/${this.props.os.Chave}`, state: { os: this.props.os } }}>
+                                    <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
+                                </Link>
+                            }
+                            {this.props.voltarAddOsOrcamento &&
+                                <Link to={{ pathname: `/ordensservico/addOsOrcamento/${this.props.os.Chave}`, state: { os: this.props.os } }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }

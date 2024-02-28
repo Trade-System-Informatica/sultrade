@@ -286,6 +286,7 @@ class AddEvento extends Component {
         }
         console.log(this.state.habilitado)
         console.log(this.props.location.state.editavel)
+        console.log(this.props.location.state.os)
     }
 
     componentDidUpdate = (prevProps, prevState) => {
@@ -1340,7 +1341,10 @@ class AddEvento extends Component {
                 {!this.state.loading &&
                     <>
                         <section>
-                            {this.props.location.state && this.props.location.state.os && this.props.location.state.os.codigo &&
+                            {this.props.location.state && this.props.location.state.os && this.props.location.state.os.codigo && this.props.location.state.os.orcamento == 1 &&
+                                <Header voltarAddOsOrcamento os={this.props.location.state.os} titulo="Eventos" />
+                            }
+                            {this.props.location.state && this.props.location.state.os && this.props.location.state.os.codigo && this.props.location.state.os.orcamento == 0 &&
                                 <Header voltarAddOS os={this.props.location.state.os} titulo="Eventos" />
                             }
                             {(!this.props.location.state || !this.props.location.state.os || !this.props.location.state.os.codigo) &&
@@ -1887,7 +1891,11 @@ class AddEvento extends Component {
                                                             </>
                                                         }
                                                         <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
+                                                        {this.props.location.state.os.orcamento == 1?
+                                                            <label>Orçamento</label>
+                                                            :
                                                             <label>Ordem de Serviço</label>
+                                                        }
                                                         </div>
                                                         <div className='col-1 errorMessage'>
                                                             {!this.state.chave_os &&

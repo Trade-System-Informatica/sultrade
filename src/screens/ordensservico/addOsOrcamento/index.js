@@ -4126,22 +4126,22 @@ class AddOsOrcamento extends Component {
                     async response => { console.log(response) }
                 )
 
-            this.setState({ pdfNome: `PROFORMA INVOICE${this.state.pdfContent?.centro_custo ? ` - ${this.state.pdfContent?.centro_custo}` : ""}` })
-            let valorTotal = 0;
-            let valorTotalDolar = 0;
+                let valorTotal = 0;
+                let valorTotalDolar = 0;
             let recebimentoTotal = 0;
             let recebimentoTotalDolar = 0;
             let descontoTotal = 0;
             let descontoTotalDolar = 0;
             let pdf = '';
-
-
+            
+            
             if (!this.state.pdfContent || !this.state.pdfContent[0]) {
                 console.log('foi no !this.state.pdfContent ||...')
                 console.log(this.state.pdfContent)
                 return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
             }
-
+            this.setState({ pdfNome: `PROFORMA INVOICE${this.state.pdfContent[0]?.centro_custo ? ` - ${this.state.pdfContent[0]?.centro_custo}` : ""}` })
+            
             if (this.state.pdfContent[0]) {
                 if (this.state.pdfContent[0].governmentTaxes > 0) {
                     valorTotal += parseFloat(this.state.pdfContent[0].governmentTaxes);
@@ -5737,7 +5737,7 @@ class AddOsOrcamento extends Component {
                         }
 
                         <section>
-                            <Header voltarOS titulo="OS - Orçamento" chave={this.state.codigo != 0 ? this.state.codigo : ''} />
+                            <Header voltarOsOrcamento titulo="OS - Orçamento" chave={this.state.codigo != 0 ? this.state.codigo : ''} />
                             <br />
                         </section>
 
@@ -5981,7 +5981,7 @@ class AddOsOrcamento extends Component {
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10">
-                                                                <Field className="form-control" disabled={!this.state.editavel} type="text" disabled value={this.state.codigo.Proximo ? `TS${this.state.codigo.Proximo}` : this.state.codigo ? this.state.codigo : ''} />
+                                                                <Field className="form-control" disabled={!this.state.editavel} type="text" disabled value={this.state.codigo.Proximo ? `${this.state.codigo.Proximo}` : this.state.centroCusto ? this.state.centroCusto : ''} />
                                                             </div>
                                                             <div className='col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12 labelForm'>
                                                                 {this.state.os? console.log(this.state.os) : null}
@@ -6201,7 +6201,6 @@ class AddOsOrcamento extends Component {
                                                                 <Field className="form-control" type="date" value={this.state.envio} onChange={async e => { this.setState({ envio: e.currentTarget.value }) }} />
                                                             </div>
                                                             <div className="col-1"></div>
-                                                            */}
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 <label>Centro de Custo</label>
                                                             </div>
@@ -6224,6 +6223,7 @@ class AddOsOrcamento extends Component {
                                                             </div>
                                                             <div className="col-1">
                                                             </div>
+                                                            */}
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 <label>R.O.E.</label>
                                                             </div>
