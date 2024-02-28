@@ -4111,10 +4111,9 @@ class AddOsOrcamento extends Component {
 
             await this.salvarOS(validForm, false)
 
-            this.setState({ pdfNome: `PROFORMA INVOICE${this.state.codigo ? ` - ${this.state.codigo}` : ""}` })
-
+            
             console.log(codigo)
-
+            
             await this.setState({ loading: true })
             await apiEmployee.post(`getOrcamentoDataPdf.php`, {
                 token: true,
@@ -4126,6 +4125,8 @@ class AddOsOrcamento extends Component {
                     },
                     async response => { console.log(response) }
                 )
+
+            this.setState({ pdfNome: `PROFORMA INVOICE${this.state.pdfContent?.centro_custo ? ` - ${this.state.pdfContent?.centro_custo}` : ""}` })
             let valorTotal = 0;
             let valorTotalDolar = 0;
             let recebimentoTotal = 0;
