@@ -33,6 +33,7 @@ const estadoInicial = {
     chave: 0,
     descricao: '',
     codigo: '',
+    sequencialOrcamento: '',
     cliente: '',
     navio: '',
     abertura: moment().format('YYYY-MM-DD'),
@@ -1437,6 +1438,18 @@ class AddOsOrcamento extends Component {
         )
     }
 
+    getSequencialOrcamento = async () => {
+        await apiEmployee.post('getCodigos.php', {
+            token: true,
+            tipo: 'SO'
+        }).then(
+            async res => {
+                await this.setState({ sequencialOrcamento: res.data[0] })
+            },
+            async err => console.log(`erro: ` + err)
+        )
+    }
+
     getCentrosCustos = async () => {
         await apiEmployee.post('getCentrosCustosLivres.php', {
             token: true,
@@ -1622,6 +1635,7 @@ class AddOsOrcamento extends Component {
 
         if (parseInt(this.state.chave) === 0 && validForm) {
             await this.getCodigo();
+            await this.getSequencialOrcamento();
             let clienteEncurtado = this.state.clientesOptions.find((cliente) => cliente.value == this.state.cliente)?.label;
             clienteEncurtado = clienteEncurtado.split(" ")[0];
 
@@ -1629,6 +1643,7 @@ class AddOsOrcamento extends Component {
                 token: true,
                 values: `'${this.state.usuarioLogado.codigo}', '${this.state.descricao}', 'ST${this.state.codigo.Proximo}', '${this.state.cliente}', '${this.state.navio}', '${moment(this.state.abertura).format('YYYY-MM-DD')}', '${moment(this.state.chegada).format('YYYY-MM-DD')}', '${moment(this.state.data_saida).format('YYYY-MM-DD HH:mm')}', '${this.state.tipoServico}', '${this.state.viagem}', '${this.state.porto}', '${this.state.encerradoPor}', '${this.state.faturadoPor}', '${this.state.empresa}', '${this.state.eta}', '${this.state.atb}', '${this.state.etb}', '${this.state.governmentTaxes ? parseFloat(this.state.governmentTaxes.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.bankCharges ? parseFloat(this.state.bankCharges.replaceAll('.', '').replaceAll(',', '.')) : 0}', '${this.state.operador}', '${this.state.envio}'`,
                 codigo: this.state.codigo.Proximo,
+                sequencial: this.state.sequencialOrcamento.Proximo,
                 tipo: this.state.codigo.Tipo,
                 navio: this.state.naviosOptions.find((navio) => navio.value == this.state.navio)?.label,
                 tipoServico: this.state.tiposServicosOptions.find((tipo) => tipo.value == this.state.tipoServico)?.label,
@@ -4140,7 +4155,7 @@ class AddOsOrcamento extends Component {
                 console.log(this.state.pdfContent)
                 return this.setState({ error: { type: "error", msg: "Sem informações necessárias" }, loading: false })
             }
-            this.setState({ pdfNome: `PROFORMA INVOICE${this.state.pdfContent[0]?.centro_custo ? ` - ${this.state.pdfContent[0]?.centro_custo}` : ""}` })
+            this.setState({ pdfNome: `PROFORMA INVOICE${this.state.pdfContent[0]?.dataEmissao && this.state.pdfContent[0]?.sequencialOrcamento ? ` - ${this.state.pdfContent[0]?.dataEmissao}${this.state.pdfContent[0]?.sequencialOrcamento}` : ""}` })
             
             if (this.state.pdfContent[0]) {
                 if (this.state.pdfContent[0].governmentTaxes > 0) {
