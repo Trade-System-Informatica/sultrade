@@ -1520,7 +1520,7 @@ class OS
             $database->doInsert('templates_relacoes', 'template, grupo', "'$template', '$chave'");
         }
         foreach ($templatesDeletadas as $key => $template) {
-            $database->doDelete('templates_relacoes', "template = '$template' AND grupo = '$template'");
+            $database->doDelete('templates_relacoes', "template = '$template' AND grupo = '$chave'");
         }
 
         $result = $database->doSelect('templates_grupos', "templates_grupos.*", 'chave = ' . $chave);

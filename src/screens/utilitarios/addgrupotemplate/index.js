@@ -185,8 +185,19 @@ class AddGrupoTemplate extends Component {
                 async res => await console.log(`Erro: ${res.data}`)
             )
         } else if (validForm) {
-            const templatesNovas = this.state.templatesEscolhidas.find((e) => !this.state.templatesIniciais.find((g) => e == g));
-            const templatesDeletadas = this.state.templatesIniciais.find((e) => !this.state.templatesEscolhidas.find((g) => e == g));
+            const templatesNovas = this.state.templatesEscolhidas.map((e) => {
+                if (!this.state.templatesIniciais.includes(e)) {
+                  return e;
+                }
+              })
+              .filter((e) => e);
+
+            const templatesDeletadas = this.state.templatesIniciais.map((e) => {
+                if (!this.state.templatesEscolhidas.includes(e)) {
+                  return e;
+                }
+              })
+              .filter((e) => e);
 
             await apiEmployee.post(`updateGrupoTemplate.php`, {
                 token: true,
@@ -316,7 +327,7 @@ class AddGrupoTemplate extends Component {
                                                                     <h4 className='text-center white'>Templates:</h4>
                                                                 </div>
                                                                 <h3 className='text-center white'>Selecionados</h3>
-                                                                {this.state.templatesEscolhidas[0] &&
+                                                                {this.state?.templatesEscolhidas[0] &&
                                                                     <div className="agrupador_eventos_selecionados">
                                                                         <table className='agrupador_lista'>
                                                                             <tr>
