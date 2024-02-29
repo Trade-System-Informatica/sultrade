@@ -1654,7 +1654,7 @@ class AddOsOrcamento extends Component {
                 async res => {
                     if (res.data[0]?.Chave) {
                         await this.setState({ codigo: res.data[0].codigo, chave: res.data[0].Chave, os: res.data[0] })
-                        await this.GerarEtiqueta(res.data[0].codigo);
+                        //await this.GerarEtiqueta(res.data[0].codigo);
                         await loader.salvaLogs('os', this.state.usuarioLogado.codigo, null, "Inclusão", res.data[0].Chave);
 
                         await this.setState({ loading: false, bloqueado: false });
@@ -4364,6 +4364,7 @@ class AddOsOrcamento extends Component {
 
 
     GerarEtiqueta = async (codigo) => {
+
         await apiEmployee.post(`enviaEtiquetaOS.php`, {
             os: codigo,
             navio: this.state.naviosOptions.find((navio) => navio.value == this.state.navio) ? this.state.naviosOptions.find((navio) => navio.value == this.state.navio).label : "",
@@ -4375,8 +4376,8 @@ class AddOsOrcamento extends Component {
             etb: moment(this.state.etb).format("DD/MM/YYYY") != "Invalid date" ? moment(this.state.etb).format("DD/MM/YYYY HH:mm") : "T.B.I.",
             data_saida: moment(this.state.data_saida).format("DD/MM/YYYY") != "Invalid date" ? moment(this.state.data_saida).format("DD/MM/YYYY HH:mm") : "T.B.I."
         })
-    }
-
+    }       
+    
     enviaDocumento = async () => {
         await this.setState({ loading: true })
         let documento = '';
@@ -4633,6 +4634,9 @@ class AddOsOrcamento extends Component {
             async res => {
                 if (res.data === true) {
                     await loader.salvaLogs('os', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `OS: ${this.state.codigo}`);
+                    
+                    await this.GerarEtiqueta(this.state.codigo);
+                    
                     await this.setState({ loading: false, bloqueado: false, governmentTaxes: this.state.governmentTaxes ? this.state.governmentTaxes : false, bankCharges: this.state.bankCharges ? this.state.bankCharges : false })
                     if (reload) {
                         await this.setState({redirectToNewOs: reload})
