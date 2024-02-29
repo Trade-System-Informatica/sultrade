@@ -93,11 +93,32 @@ export default class loader {
 
     static async getOSPesquisa(pesquisa, tipoPesquisa, empresa) {
         const tipo = ["",
-            "os.codigo LIKE '%" + pesquisa + "%'",
-            "os_navios.nome LIKE '%" + pesquisa + "%'",
-            "os_tipos_servicos.descricao LIKE '%" + pesquisa + "%'",
-            "os_portos.descricao LIKE '%" + pesquisa + "%'",
-            "pessoas.nome LIKE '%"+ pesquisa + "%'"
+            "os.orcamento = 0 and os.codigo LIKE '%" + pesquisa + "%'",
+            "os.orcamento = 0 and os_navios.nome LIKE '%" + pesquisa + "%'",
+            "os.orcamento = 0 and os_tipos_servicos.descricao LIKE '%" + pesquisa + "%'",
+            "os.orcamento = 0 and os_portos.descricao LIKE '%" + pesquisa + "%'",
+            "os.orcamento = 0 and pessoas.nome LIKE '%"+ pesquisa + "%'"
+        ][tipoPesquisa];
+        return await apiEmployee.post(`getOSPesquisa.php`, {
+            token: true,
+            where: tipo,
+            empresa: empresa
+        }).then(
+            async res => {
+                return res.data;
+            },
+            err => { alert(err) }
+        )
+    }
+
+    static async getOsOrcamentoPesquisa(pesquisa, tipoPesquisa, empresa) {
+        const tipo = ["",
+            "os.orcamento = 1 and os.codigo LIKE '%" + pesquisa + "%'",
+            "os.orcamento = 1 and os_navios.nome LIKE '%" + pesquisa + "%'",
+            "os.orcamento = 1 and os_tipos_servicos.descricao LIKE '%" + pesquisa + "%'",
+            "os.orcamento = 1 and os_portos.descricao LIKE '%" + pesquisa + "%'",
+            "os.orcamento = 1 and pessoas.nome LIKE '%"+ pesquisa + "%'",
+            "os.orcamento = 1 and os.sequencialOrcamento LIKE '%" + pesquisa + "%'"
         ][tipoPesquisa];
         return await apiEmployee.post(`getOSPesquisa.php`, {
             token: true,
