@@ -177,7 +177,7 @@ class OsOrcamento extends Component {
         clearTimeout(this.state.pesquisaTimer)
 
         const newTimer = setTimeout(async () => {
-            await this.setState({ osPesquisa: await loader.getOSPesquisa(this.state.pesquisa, this.state.tipoPesquisa, this.state.usuarioLogado.empresa) });
+            await this.setState({ osPesquisa: await loader.getOsOrcamentoPesquisa(this.state.pesquisa, this.state.tipoPesquisa, this.state.usuarioLogado.empresa) });
         }, 500)
 
         await this.setState({ pesquisaTimer: newTimer, pesquisa: value })
@@ -255,6 +255,7 @@ class OsOrcamento extends Component {
                                                 <option value={3}>Serviço</option>
                                                 <option value={4}>Porto</option>
                                                 <option value={5}>Cliente</option>
+                                                <option value={6}>Sequencial</option>
                                             </select>
                                             <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={async e => { await this.pesquisa(e.currentTarget.value) }} />
                                             {/*
