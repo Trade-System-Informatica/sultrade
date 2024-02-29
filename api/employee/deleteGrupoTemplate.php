@@ -20,7 +20,7 @@ if($objData != NULL){
    // $result = $employees->checkToken($token);
 
     //if($result == 'true'){
-    $result = $taxas->deleteGrupoTemplate($chave);
+    $result = $os->deleteGrupoTemplate($chave);
     //} else {
        //return 'false';
     //}
