@@ -803,7 +803,7 @@ class OS
         return $result;
     }
     
-    public static function insertOsOrcamento($values, $codigo, $tipo, $navio = null, $tipoServico = null, $cliente = null, $porto = null, $chaveCliente)
+    public static function insertOsOrcamento($values, $codigo, $tipo, $sequencial, $navio = null, $tipoServico = null, $cliente = null, $porto = null, $chaveCliente)
     {
         $database = new Database();
 
@@ -817,8 +817,9 @@ class OS
 
                 $database->doUpdate('codigos', "Proximo = '" . ($codigo + 1) . "'", "Tipo = 'CC'");
             }
-            $cols = 'orcamento, Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio, centro_custo';
-            $result = $database->doInsert('os', $cols, '1, '.$values . ", '" . $centroCusto[0]["Chave"] . "'");
+
+            $cols = 'sequencialOrcamento, orcamento, Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio, centro_custo';
+            $result = $database->doInsert('os', $cols, $sequencial.', 1, '.$values . ", '" . $centroCusto[0]["Chave"] . "'");
         // ATE AQ
         } else { 
             $cols = 'orcamento, Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio';
@@ -827,6 +828,8 @@ class OS
 
 
         if ($result) {
+            $database->doUpdate('codigos', "Proximo = '" . ($sequencial + 1) . "'", "Tipo = 'SO'");
+
             $query = "Proximo = '" . ($codigo + 1) . "'";
             $database->doUpdate('codigos', $query, "Tipo = '" . $tipo . "'");
         }

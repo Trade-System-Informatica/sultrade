@@ -116,6 +116,7 @@ class Navios
             os.codigo,
             os.encerradoPor,
             os.etb,
+            os.sequencialOrcamento,
             os_navios.nome as nomeNavio,
             os_navios.bandeira AS bandeira,
             os_portos.descricao as nomePorto,
@@ -144,7 +145,10 @@ class Navios
             /*            "(os_taxas.tipo='R' OR os_servicos_itens.repasse= 1 OR (os_servicos_itens.fornecedor_custeio != '0' AND os_servicos_itens.fornecedor_custeio != '')) AND os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0
             ORDER BY os_servicos_itens.ordem ASC"*/
         );
-
+        $datenow = new DateTime();
+        $datenowformat = $datenow->format('dmY');
+        $result[0]['dataEmissao'] = $datenowformat;
+        
 
         $database->closeConection();
         return $result;

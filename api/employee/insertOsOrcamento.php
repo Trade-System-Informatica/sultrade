@@ -14,6 +14,7 @@ if($objData != NULL){
     $token = prepareInput($objData->token);
     $values = prepareInput($objData->values);
     $codigo = prepareInput($objData->codigo);
+    $sequencial = prepareInput($objData->sequencial);
     $tipo = prepareInput($objData->tipo);
     $navio = prepareInput($objData->navio);
     $tipoServico = prepareInput($objData->tipoServico);
@@ -25,7 +26,7 @@ if($objData != NULL){
 
     //$result = $employees->checkToken($token);
     //if($result == 'true'){
-    $result = $os->insertOsOrcamento($values, $codigo, $tipo, $navio, $tipoServico, $cliente, $porto);
+    $result = $os->insertOsOrcamento($values, $codigo, $tipo, $sequencial, $navio, $tipoServico, $cliente, $porto);
     //}
 } else {
     $result = "false";
