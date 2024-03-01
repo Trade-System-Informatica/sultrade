@@ -1592,13 +1592,13 @@ class AddOsOrcamento extends Component {
             )
         })
 
-        /*
+        
         if (validForm) {
             this.salvarOS(validForm);
         } else {
             this.setState({ recarregaPagina: true });
         }
-         */
+        
     }
 
     salvarOS = async (validForm, reload = true) => {
