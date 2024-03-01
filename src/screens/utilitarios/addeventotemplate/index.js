@@ -495,9 +495,21 @@ class AddEventoTemplate extends Component {
                 async res => await console.log(`Erro: ${res.data}`)
             )
         } else if (validForm) {
-            const gruposNovos = this.state.gruposEscolhidos.filter((e) => !this.state.gruposIniciais.find((g) => g == e));
-            const gruposDeletados = this.state.gruposIniciais.filter((e) => !this.state.gruposEscolhidos.find((g) => g == e));
             
+            const gruposNovos = this.state.gruposEscolhidos.map((e) => {
+                if (!this.state.gruposIniciais.includes(e)) {
+                  return e;
+                }
+              })
+              .filter((e) => e);
+
+            const gruposDeletados = this.state.gruposIniciais.map((e) => {
+                if (!this.state.gruposEscolhidos.includes(e)) {
+                  return e;
+                }
+              })
+              .filter((e) => e);
+
             await apiEmployee.post(`updateEventoTemplate.php`, {
                 token: true,
                 chave: this.state.chave,
