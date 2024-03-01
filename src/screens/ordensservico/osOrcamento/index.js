@@ -126,7 +126,7 @@ class OsOrcamento extends Component {
                 return (
                     <div className='custom-ui text-center'>
                         <h1>{NOME_EMPRESA}</h1>
-                        <p>Cancelar esta OS? </p>
+                        <p>Cancelar este orçamento? </p>
                         <button
                             style={{ marginRight: 5 }}
                             className="btn btn-danger w-25"

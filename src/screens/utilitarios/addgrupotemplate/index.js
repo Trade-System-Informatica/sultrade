@@ -68,11 +68,11 @@ class AddGrupoTemplate extends Component {
         if (parseInt(id) != 0) {
             const grupo = await loader.getBody(`getGrupoTemplate.php`, { chave: this.state.chave, token: true });
             await this.setState({ grupo: grupo[0] });
-
+            
             await this.setState({
                 nome: this.state.grupo.nome,
                 templatesIniciais: this.state.grupo.templatesChaves?.split('@.@'),
-                templatesEscolhidas: this.state.grupo.templatesChaves?.split('@.@')
+                templatesEscolhidas: this.state.grupo.templatesChaves != null ? this.state.grupo.templatesChaves?.split('@.@') : []
             })
         }
         await this.carregaTiposAcessos()
