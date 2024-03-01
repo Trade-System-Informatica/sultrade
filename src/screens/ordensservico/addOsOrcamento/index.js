@@ -1713,7 +1713,7 @@ class AddOsOrcamento extends Component {
             }).then(
                 async res => {
                     if (res.data === true) {
-                        await loader.salvaLogs('os', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `OS-Orçamento: ${this.state.codigo}`);
+                        await loader.salvaLogs('os', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `Orçamento: ${this.state.chave}`);
                         await this.setState({ loading: false, bloqueado: false, governmentTaxes: this.state.governmentTaxes ? this.state.governmentTaxes : false, bankCharges: this.state.bankCharges ? this.state.bankCharges : false })
                         if (reload) {
                             window.location.reload();
@@ -4236,6 +4236,11 @@ class AddOsOrcamento extends Component {
                                     <td className='pdf_money_col' style={{ backgroundColor: "#CDCDCD" }}>VALUE (USD)</td>
                                     <td className='pdf_money_col' style={{ backgroundColor: "#CDCDCD" }}>VALUE (R$)</td>
                                 </tr>
+                                <tr>
+                                    <td colSpan='7' className="pdf_large_col" style={{ backgroundColor: "white" }}>&nbsp;</td>
+                                    <td className='pdf_money_col' style={{ backgroundColor: "white" }}>&nbsp;</td>
+                                    <td className='pdf_money_col' style={{ backgroundColor: "white" }}>&nbsp;</td>
+                                </tr>
                                 {this.state.pdfContent.map((e, index) => {
                                     if (e.tipo == 0 || e.tipo == 1) {
                                         if (e.moeda == 5) {
@@ -4265,11 +4270,18 @@ class AddOsOrcamento extends Component {
 
                                     if (e.tipo == 0 || e.tipo == 1) {
                                         return (
-                                            <tr style={{ background: index % 2 == 0 ? "white" : "#dddddd" }}>
-                                                <td colSpan='7' className='pdf_large_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.descos}</td>
-                                                <td className='pdf_money_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.moeda == 5 ? util.formataDinheiroBrasileiro(parseFloat(e.valor / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5))) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
-                                                <td className='pdf_money_col reduce_font' style={{ background: index % 2 == 0 ? "white" : "#ccc" }}>{e.moeda == 6 ? util.formataDinheiroBrasileiro(parseFloat(e.valor * (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5))) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
-                                            </tr>
+                                            <>
+                                                <tr style={{ background: "#dddddd" }}>
+                                                    <td colSpan='7' className='pdf_large_col reduce_font' style={{ background: "#ccc" }}>{e.descos}</td>
+                                                    <td className='pdf_money_col reduce_font' style={{ background: "#ccc" }}>{e.moeda == 5 ? util.formataDinheiroBrasileiro(parseFloat(e.valor / (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5))) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
+                                                    <td className='pdf_money_col reduce_font' style={{ background: "#ccc" }}>{e.moeda == 6 ? util.formataDinheiroBrasileiro(parseFloat(e.valor * (this.state.pdfContent[0].roe ? this.state.pdfContent[0].roe : 5))) : util.formataDinheiroBrasileiro(parseFloat(e.valor))}</td>
+                                                </tr>
+                                                <tr style={{ background: "white" }}>
+                                                    <td colSpan='7' className='pdf_large_col reduce_font' style={{ background: "white"}}>&nbsp;</td>
+                                                    <td className='pdf_money_col reduce_font' style={{ background: "white"  }}>&nbsp;</td>
+                                                    <td className='pdf_money_col reduce_font' style={{ background: "white"  }}>&nbsp;</td>
+                                                </tr>
+                                            </>
                                         )
                                     }
                                 })}
@@ -4636,7 +4648,7 @@ class AddOsOrcamento extends Component {
         }).then(
             async res => {
                 if (res.data === true) {
-                    await loader.salvaLogs('os', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `OS: ${this.state.codigo}`);
+                    await loader.salvaLogs('os', this.state.usuarioLogado.codigo, this.state.dadosIniciais, this.state.dadosFinais, this.state.chave, `Orçamento -> OS: ${this.state.codigo}`);
                     
                     await this.GerarEtiqueta(this.state.codigo);
                     
@@ -6003,7 +6015,7 @@ class AddOsOrcamento extends Component {
                                                             </div>
                                                             <div className="col-1"></div>
                                                             <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10">
-                                                                <Field className="form-control" disabled={!this.state.editavel} type="text" disabled value={this.state.codigo.Proximo ? `${this.state.codigo.Proximo}` : this.state.centroCusto ? this.state.centroCusto : ''} />
+                                                                <Field className="form-control" disabled={!this.state.editavel} type="text" disabled value={this.state.chave? this.state.chave : ''} />
                                                             </div>
                                                             <div className='col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12 labelForm'>
                                                                 <div className="centerDiv">
