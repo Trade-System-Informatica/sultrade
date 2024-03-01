@@ -188,8 +188,8 @@ class AddEventoTemplate extends Component {
                 vlrc: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.evento.valor1),
                 repasse: this.state.evento.repasse == 1 ? true : false,
                 fornecedorCusteio: this.state.evento.Fornecedor_Custeio,
-                gruposIniciais: this.state.evento.gruposChaves?.split('@.@'),
-                gruposEscolhidos: this.state.evento.gruposChaves?.split('@.@')
+                gruposIniciais: this.state.evento.gruposChaves != null ? this.state.evento.gruposChaves?.split('@.@') : [],
+                gruposEscolhidos: this.state.evento.gruposChaves != null ? this.state.evento.gruposChaves?.split('@.@') : []
             })
 
             if (this.state.repasse) {
