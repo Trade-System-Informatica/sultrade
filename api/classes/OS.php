@@ -630,7 +630,7 @@ class OS
 
         if ($empresa == 0) {
             if ($offset || $offset === "0" || $offset === 0) {
-                $where = "os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 101 OFFSET " . $offset;
+                $where = "os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 1000 OFFSET " . $offset;
             } else if ($offset !== "0" && $offset !== 0) {
                 $where = "os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY chave DESC";
             }
@@ -645,7 +645,7 @@ class OS
             );
         } else {
             if ($offset || $offset === "0" || $offset === 0) {
-                $where = "  os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 101 OFFSET " . $offset;
+                $where = "  os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 1000 OFFSET " . $offset;
             } else if ($offset !== "0" && $offset !== 0) {
                 $where = "os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY chave DESC";
             }

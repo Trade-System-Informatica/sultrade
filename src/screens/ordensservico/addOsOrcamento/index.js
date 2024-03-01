@@ -1566,9 +1566,10 @@ class AddOsOrcamento extends Component {
 
     criarGrupoTemplates = async (validForm) => {
         const { grupoTemplate } = this.state;
-        const templates = grupoTemplate.templatesChaves?.split('@.@')?.map((e) => (
+
+        const templates = grupoTemplate.templatesChaves?.split('@.@')?.map((e) =>
             this.state.templates.find((t) => t.chave == e)
-        ));
+        );
 
         templates.forEach(async (template, index) => {
             let ordem;
@@ -1591,11 +1592,13 @@ class AddOsOrcamento extends Component {
             )
         })
 
+        /*
         if (validForm) {
             this.salvarOS(validForm);
         } else {
             this.setState({ recarregaPagina: true });
         }
+         */
     }
 
     salvarOS = async (validForm, reload = true) => {
@@ -6003,7 +6006,6 @@ class AddOsOrcamento extends Component {
                                                                 <Field className="form-control" disabled={!this.state.editavel} type="text" disabled value={this.state.codigo.Proximo ? `${this.state.codigo.Proximo}` : this.state.centroCusto ? this.state.centroCusto : ''} />
                                                             </div>
                                                             <div className='col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12 labelForm'>
-                                                                {this.state.os? console.log(this.state.os) : null}
                                                                 <div className="centerDiv">
                                                                     <button
                                                                         disabled={!validForm}
