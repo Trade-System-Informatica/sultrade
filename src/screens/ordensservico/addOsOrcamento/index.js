@@ -7648,7 +7648,7 @@ class AddOsOrcamento extends Component {
             );
                */
           await console.log(`FOI: ${res.data}`);
-          //window.location.reload();
+          
           await this.setState({ redirectAfterInsertEventsInOs: true });
           window.location.reload();
         },
