@@ -1582,7 +1582,14 @@ class OS
     {
         $database = new Database();
 
-        $query = "orcamento = 1";
+        $ordem_servico = $database->doSelect('os', 'os.*', 'Chave = ' . $Chave);
+        if ($ordem_servico[0]['sequencialOrcamento'] == 0){
+            $codigo = $database->doSelect('codigos', 'codigos.Proximo', 'Tipo = SO');
+            $query = "orcamento = 1, sequencialOrcamento = ".$codigo;
+            $database->doUpdate('codigos', 'Proximo = '.$codigo+1, 'Tipo = SO');
+        }else{
+            $query = "orcamento = 1";
+        }
 
         $result = $database->doUpdate('os', $query, 'Chave = ' . $Chave);
         $database->closeConection();
