@@ -71,7 +71,7 @@ class AddGrupoTemplate extends Component {
             
             await this.setState({
                 nome: this.state.grupo.nome,
-                templatesIniciais: this.state.grupo.templatesChaves?.split('@.@'),
+                templatesIniciais: this.state.grupo.templatesChaves != null ? this.state.grupo.templatesChaves.split('@.@') : [],
                 templatesEscolhidas: this.state.grupo.templatesChaves != null ? this.state.grupo.templatesChaves?.split('@.@') : []
             })
         }
@@ -186,7 +186,7 @@ class AddGrupoTemplate extends Component {
             )
         } else if (validForm) {
             const templatesNovas = this.state.templatesEscolhidas.map((e) => {
-                if (!this.state.templatesIniciais.includes(e)) {
+                if (!this.state.templatesIniciais?.includes(e)) {
                   return e;
                 }
               })
