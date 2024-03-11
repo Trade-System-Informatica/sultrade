@@ -6884,20 +6884,29 @@ class AddOsOrcamento extends Component {
 
                   if (e.tipo == 0 || e.tipo == 1) {
                     return (
-                      <>
-                        <tr style={{ background: "#dddddd" }}>
-                          <td
-                            colSpan="7"
-                            className="pdf_large_col reduce_font"
-                            style={{ background: "#ccc" }}
-                          >
-                            {e.descos}
-                          </td>
-                          <td
-                            className="pdf_money_col reduce_font"
-                            style={{ background: "#ccc" }}
-                          >
-                            {e.moeda == 5
+                      <tr
+                        style={{
+                          background: index % 2 == 0 ? "white" : "#dddddd",
+                        }}
+                      >
+                        <td
+                          colSpan="7"
+                          className="pdf_large_col reduce_font"
+                          style={{
+                            background: index % 2 == 0 ? "white" : "#ccc",
+                          }}
+                        >
+                          {e.descos != "LINHA VAZIA" ? e.descos : null}
+                          &nbsp;
+                        </td>
+                        <td
+                          className="pdf_money_col reduce_font"
+                          style={{
+                            background: index % 2 == 0 ? "white" : "#ccc",
+                          }}
+                        >
+                          {e.descos != "LINHA VAZIA"
+                            ? e.moeda == 5
                               ? util.formataDinheiroBrasileiro(
                                   parseFloat(
                                     e.valor /
@@ -6908,13 +6917,18 @@ class AddOsOrcamento extends Component {
                                 )
                               : util.formataDinheiroBrasileiro(
                                   parseFloat(e.valor)
-                                )}
-                          </td>
-                          <td
-                            className="pdf_money_col reduce_font"
-                            style={{ background: "#ccc" }}
-                          >
-                            {e.moeda == 6
+                                )
+                            : null}
+                          &nbsp;
+                        </td>
+                        <td
+                          className="pdf_money_col reduce_font"
+                          style={{
+                            background: index % 2 == 0 ? "white" : "#ccc",
+                          }}
+                        >
+                          {e.descos != "LINHA VAZIA"
+                            ? e.moeda == 6
                               ? util.formataDinheiroBrasileiro(
                                   parseFloat(
                                     e.valor *
@@ -6925,31 +6939,11 @@ class AddOsOrcamento extends Component {
                                 )
                               : util.formataDinheiroBrasileiro(
                                   parseFloat(e.valor)
-                                )}
-                          </td>
-                        </tr>
-                        <tr style={{ background: "white" }}>
-                          <td
-                            colSpan="7"
-                            className="pdf_large_col reduce_font"
-                            style={{ background: "white" }}
-                          >
-                            &nbsp;
-                          </td>
-                          <td
-                            className="pdf_money_col reduce_font"
-                            style={{ background: "white" }}
-                          >
-                            &nbsp;
-                          </td>
-                          <td
-                            className="pdf_money_col reduce_font"
-                            style={{ background: "white" }}
-                          >
-                            &nbsp;
-                          </td>
-                        </tr>
-                      </>
+                                )
+                            : null}
+                          &nbsp;
+                        </td>
+                      </tr>
                     );
                   }
                 })}
@@ -7648,7 +7642,7 @@ class AddOsOrcamento extends Component {
             );
                */
           await console.log(`FOI: ${res.data}`);
-          
+
           await this.setState({ redirectAfterInsertEventsInOs: true });
           window.location.reload();
         },
@@ -7863,7 +7857,11 @@ class AddOsOrcamento extends Component {
         )}
         {this.state.redirectAfterInsertEventsInOs && (
           <>
-            <Redirect to={{ pathname: `/ordensservico/addos/${this.state.os_escolhida.value}` }} />
+            <Redirect
+              to={{
+                pathname: `/ordensservico/addos/${this.state.os_escolhida.value}`,
+              }}
+            />
           </>
         )}
 
