@@ -1584,9 +1584,11 @@ class OS
 
         $ordem_servico = $database->doSelect('os', 'os.*', 'Chave = ' . $Chave);
         if ($ordem_servico[0]['sequencialOrcamento'] == 0){
-            $codigo = $database->doSelect('codigos', 'codigos.Proximo', 'Tipo = SO');
+            $codigo = $database->doSelect('codigos', 'codigos.Proximo', "codigos.Tipo = 'SO'");
+            $codigo = $codigo[0]['Proximo'];
             $query = "orcamento = 1, sequencialOrcamento = ".$codigo;
-            $database->doUpdate('codigos', 'Proximo = '.$codigo+1, 'Tipo = SO');
+            $codigo = $codigo + 1;
+            $database->doUpdate('codigos', "codigos.Proximo = $codigo", "codigos.Tipo = 'SO'");
         }else{
             $query = "orcamento = 1";
         }

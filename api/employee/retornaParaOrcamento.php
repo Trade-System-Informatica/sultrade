@@ -2,7 +2,7 @@
 header("Access-Control-Allow-Origin:*");
 header("Content-Type: application/x-www-form-urlencoded");
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
-
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING );
 //application/x-httpd-php updateSeaport.php ( PHP script, ASCII text, with CRLF line terminators )
 include_once '../classes/OS.php';
 include_once '../libraries/utils.php';
