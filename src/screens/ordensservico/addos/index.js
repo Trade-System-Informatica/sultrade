@@ -6953,6 +6953,28 @@ class AddOS extends Component {
     });
   };
 
+  RetornaParaOrcamento = async (reload = false) => {
+    await apiEmployee
+      .post(`retornaParaOrcamento.php`, {
+        token: true,
+        Chave: this.state.chave,
+      })
+      .then(
+        async (res) => {
+          if (res.data === true) {
+            if (reload) {
+              await this.setState({ redirectReturnOrcamento: reload });
+              window.location.reload();
+            }
+          } else {
+            await alert(`Erro ${JSON.stringify(res)}`);
+          }
+        },
+        async (res) => await console.log(`Erro: ${res}`)
+      );
+    console.log("oi");
+  };
+
   handleExportWithComponent = (event) => {
     this.pdfExportComponent.current.save();
     this.setState({ loading: false });
@@ -7120,6 +7142,20 @@ class AddOS extends Component {
             />
             {window.location.reload()}
           </>
+        )}
+        {this.state.redirectReturnOrcamento && (
+          <>
+          <Redirect
+            to={{
+              pathname: `/ordensservico/addOsOrcamento/${this.state.chave}`,
+              state: {
+                ...this.props.location.state,
+                os: { ...this.state.os },
+              },
+            }}
+          />
+          {window.location.reload()}
+        </>
         )}
         {this.state.redirectEventos && (
           <>
@@ -11059,6 +11095,14 @@ class AddOS extends Component {
                           onClick={() => this.getCamposVoucher()}
                         >
                           Campos de Voucher
+                        </button>
+                      </div>
+                      <div className="relatorioButton">
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => this.RetornaParaOrcamento(true)}
+                        >
+                          Retroceder para orçamento
                         </button>
                       </div>
                       <div className="relatorioButton">
