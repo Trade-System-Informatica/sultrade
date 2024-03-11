@@ -1330,6 +1330,31 @@ class OS
         }
     }
 
+    public static function insertServicoItemOS($chave_os, $chave_orcamento, $canceladaPor)
+    {
+        $database = new Database();
+
+        $query = "chave_os = " . $chave_os;
+
+        $eventos = $database->doSelect("os_servicos_itens", "os_servicos_itens.*", "chave_os = $chave_orcamento");
+
+        foreach ($eventos as $evento) {
+            $database->doUpdate("os_servicos_itens", $query, "chave = ". $evento["chave"]);
+        }
+
+        $result = $database->doSelect('os_servicos_itens', "os_servicos_itens.*", 'chave_os = ' . $chave_os);
+        
+        if ($result == NULL) {
+            $database->closeConection();
+            return 'false';
+        } else {
+            $resultdelete = $database->doUpdate('os', "cancelada = 1, canceladoPor = '" . $canceladaPor . "'", 'Chave = ' . $chave_orcamento);
+            $database->closeConection();
+            return $result;
+        }
+    }
+
+
     public static function updateServicoItemFinanceiro($chave, $Moeda, $valor, $valor1, $repasse, $emissao, $vencimento, $documento, $tipo_documento, $desconto_valor, $desconto_cpl, $desconto_conta, $retencao_inss_valor, $retencao_inss_cpl, $retencao_inss_conta, $retencao_ir_valor, $retencao_ir_cpl, $retencao_ir_conta, $retencao_iss_valor, $retencao_iss_cpl, $retencao_iss_conta, $retencao_pis_valor, $retencao_pis_cpl, $retencao_pis_conta, $retencao_cofins_valor, $retencao_cofins_cpl, $retencao_cofins_conta, $retencao_csll_valor, $retencao_csll_cpl, $retencao_csll_conta, $complemento)
     {
         $database = new Database();
