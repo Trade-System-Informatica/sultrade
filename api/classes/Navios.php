@@ -190,6 +190,7 @@ class Navios
             os.eta AS data_chegada,
             os.data_saida,
             os.data_faturamento,
+            os.Data_Encerramento as data_encerramento,
             os_taxas.descricao as descTaxa,
             os_subgrupos_taxas.codigo as chavTaxa,
             os_subgrupos_taxas.descricao as descSubgrupo,

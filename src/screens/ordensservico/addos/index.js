@@ -3216,6 +3216,17 @@ class AddOS extends Component {
           ),
           2
         );
+      } else {
+        if (Util.verificaDatas(this.state.pdfContent[0].data_encerramento, this.state.pdfContent[0].GT)) {
+          totalFinal += parseFloat(this.state.pdfContent[0].governmentTaxes);
+          totalFinalDolar += Util.toFixed(
+          parseFloat(
+            this.state.pdfContent[0].governmentTaxes /
+              this.state.pdfContent[0].roe
+          ),
+          2
+        );
+        }
       }
 
       if (
@@ -3229,7 +3240,18 @@ class AddOS extends Component {
           ),
           2
         );
+      } else {
+        if (Util.verificaDatas(this.state.pdfContent[0].data_encerramento, this.state.pdfContent[0].BK)) {
+          totalFinal += parseFloat(this.state.pdfContent[0].bankCharges);
+          totalFinalDolar += Util.toFixed(
+          parseFloat(
+            this.state.pdfContent[0].bankCharges / this.state.pdfContent[0].roe
+          ),
+          2
+        );
+        }
       }
+    
 
       if (this.state.pdfContent[0]) {
         pdf = (
@@ -3511,9 +3533,9 @@ class AddOS extends Component {
                     );
                   })}
                   {this.state.pdfContent[0].GT &&
-                    ["SIM", "S"].includes(
+                    (["SIM", "S"].includes(
                       this.state.pdfContent[0].GT.toUpperCase()
-                    ) && (
+                    ) || Util.verificaDatas(this.state.pdfContent[0].data_encerramento, this.state.pdfContent[0].GT)) && (
                       <tr>
                         <td></td>
                         <td
@@ -3550,9 +3572,9 @@ class AddOS extends Component {
                       </tr>
                     )}
                   {this.state.pdfContent[0].BK &&
-                    ["SIM", "S"].includes(
+                    (["SIM", "S"].includes(
                       this.state.pdfContent[0].BK.toUpperCase()
-                    ) && (
+                    ) || Util.verificaDatas(this.state.pdfContent[0].data_encerramento, this.state.pdfContent[0].BK)) && (
                       <tr>
                         <td></td>
                         <td
