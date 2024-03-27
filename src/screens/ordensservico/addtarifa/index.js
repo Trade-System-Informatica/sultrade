@@ -427,7 +427,6 @@ class AddTarifa extends Component {
         validations.push(this.state.portos[0])
         validations.push(this.state.servico)
         validations.push(this.state.vencimento)
-        validations.push(this.state.observacao)
         validations.push(!this.state.bloqueado)
         //validations.push(this.state.porto && this.state.porto > 0)
         //o formulário só será válido se todas as validações forem verdadeiras, com este reduce implementado
@@ -697,7 +696,7 @@ class AddTarifa extends Component {
                                                 </div>
                                                 <div className='col-1 errorMessage'>
                                                     {!this.state.observacao &&
-                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                        <div />
                                                     }
                                                 </div>
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
