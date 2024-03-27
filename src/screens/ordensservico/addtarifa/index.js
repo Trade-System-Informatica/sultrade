@@ -52,6 +52,7 @@ const estadoInicial = {
     vencimento: "",
     preferencial: false,
     modalInsertAnexo: false,
+    observacao: "",
 
     email: {
         endereco: "",
@@ -96,6 +97,7 @@ class AddTarifa extends Component {
                 fornecedor: this.props.location.state.tarifa.fornecedor,
                 portos: this.props.location.state.tarifa.porto ? this.props.location.state.tarifa.porto.split("@") : [],
                 servico: this.props.location.state.tarifa.servico,
+                observacao: this.props.location.state.tarifa.observacao,
                 anexo: this.props.location.state.tarifa.anexo,
                 vencimento: this.props.location.state.tarifa.vencimento,
                 preferencial: this.props.location.state.tarifa.preferencial != 0
@@ -135,7 +137,8 @@ class AddTarifa extends Component {
                     { titulo: 'Portos', valor: this.state.portos.map((p) => util.formatForLogs(p, 'options', '', '', this.state.portosOptions)).join(", ") },
                     { titulo: 'Servico', valor: util.formatForLogs(this.state.servico) },
                     { titulo: 'Anexo', valor: util.formatForLogs(this.state.anexo) },
-                    { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') }
+                    { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') },
+                    { titulo: 'Observacao', valor: util.formatForLogs(this.state.observacao)}
                 ]
             })
         }
@@ -211,7 +214,8 @@ class AddTarifa extends Component {
                 { titulo: 'Portos', valor: this.state.portos.map((p) => util.formatForLogs(p, 'options', '', '', this.state.portosOptions)).join(", ") },
                 { titulo: 'Servico', valor: util.formatForLogs(this.state.servico) },
                 { titulo: 'Anexo', valor: util.formatForLogs(this.state.anexo) },
-                { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') }
+                { titulo: 'Vencimento', valor: util.formatForLogs(this.state.vencimento, 'date') },
+                { titulo: 'Observacao', valor: util.formatForLogs(this.state.observacao) }
             ],
             loading: true
         })
@@ -224,14 +228,13 @@ class AddTarifa extends Component {
             format = this.state.anexo[0].type;
             ext = this.state.anexoNome.split('.')[this.state.anexoNome.split('.').length - 1];
         }
-
         const nome = `anexo_forn-${this.state.fornecedor}_port-${this.state.portos[0]}`;
 
         if (parseInt(this.state.chave) === 0 && validForm) {
             //$cols = 'data, titulo, texto, imagem, link, inativo';
             await apiEmployee.post(`insertTarifa.php`, { // ALTERAÇÃO
                 token: true,
-                values: `'${this.state.fornecedor}', '${this.state.servico}', '${this.state.vencimento}', '${this.state.preferencial ? 1 : 0}'`,
+                values: `'${this.state.fornecedor}', '${this.state.servico}', '${this.state.vencimento}', '${this.state.preferencial ? 1 : 0}', '${this.state.observacao}'`,
                 portos: this.state.portos,
                 nome,
                 documento,
@@ -262,6 +265,7 @@ class AddTarifa extends Component {
                 servico: this.state.servico,
                 vencimento: this.state.vencimento,
                 preferencial: this.state.preferencial ? 1 : 0,
+                observacao: this.state.observacao,
             }).then(
                 async res => {
                     console.log(res.data);
@@ -423,6 +427,7 @@ class AddTarifa extends Component {
         validations.push(this.state.portos[0])
         validations.push(this.state.servico)
         validations.push(this.state.vencimento)
+        validations.push(this.state.observacao)
         validations.push(!this.state.bloqueado)
         //validations.push(this.state.porto && this.state.porto > 0)
         //o formulário só será válido se todas as validações forem verdadeiras, com este reduce implementado
@@ -686,6 +691,17 @@ class AddTarifa extends Component {
                                                 </div>
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                     <Field className="form-control" type="text" value={this.state.servico} onChange={async e => { this.setState({ servico: e.currentTarget.value }) }} />
+                                                </div>
+                                                <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
+                                                    <label>Observação</label>
+                                                </div>
+                                                <div className='col-1 errorMessage'>
+                                                    {!this.state.observacao &&
+                                                        <FontAwesomeIcon title='Preencha o campo' icon={faExclamationTriangle} />
+                                                    }
+                                                </div>
+                                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                                    <Field className="form-control" rows="4" component="textarea" type="text" value={this.state.observacao} onChange={async e => { this.setState({ observacao: e.currentTarget.value }) }} />
                                                 </div>
                                                 <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
                                                     <label>Vencimento</label>

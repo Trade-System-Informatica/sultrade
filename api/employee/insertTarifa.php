@@ -22,7 +22,7 @@ if($objData != NULL){
     
 	$result = $pessoas->insertTarifa($values, $portos);
 
-    if ($nome != NULL && $nome != ""){
+    if ($format != NULL && $format != ""){
         $keyTarifa = intval($pessoas->getTarifasLen()[0]['chave']);
 
         $valuesAnexoTarifa = "'', $keyTarifa";
@@ -32,10 +32,10 @@ if($objData != NULL){
         $fullname = $nome.'_AN-'.$keyAnexosTarifas.'.'.$ext;
 
         $resultAnexosTarifas = $pessoas->updateTarifasAnexos($fullname, $keyAnexosTarifas);
+        savePicture($documento, $nome, $format, $ext, $keyAnexosTarifas);
     }
     //$result = $pessoas->insertAnexo($values, $portos); função nao existe!
     
-	savePicture($documento, $nome, $format, $ext, $keyAnexosTarifas);
     
 } else {
     $result = "false";
