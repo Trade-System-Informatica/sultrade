@@ -163,7 +163,7 @@ class Pessoas
     {
         $database = new Database();
 
-        $result = $database->doSelect("tarifas LEFT JOIN pessoas ON tarifas.fornecedor = pessoas.chave LEFT JOIN os_portos ON tarifas.porto = os_portos.chave", "tarifas.fornecedor, tarifas.chave, GROUP_CONCAT(tarifas.porto SEPARATOR '@') as porto, tarifas.anexo, tarifas.vencimento, tarifas.servico, tarifas.email_enviado, tarifas.preferencial, tarifas.anexo2, pessoas.nome AS fornecedorNome, GROUP_CONCAT(os_portos.descricao SEPARATOR '@') AS portoNome", "1=1 GROUP BY tarifas.fornecedor, tarifas.vencimento, tarifas.servico, tarifas.preferencial ORDER BY tarifas.preferencial DESC");
+        $result = $database->doSelect("tarifas LEFT JOIN pessoas ON tarifas.fornecedor = pessoas.chave LEFT JOIN os_portos ON tarifas.porto = os_portos.chave", "tarifas.fornecedor, tarifas.chave, GROUP_CONCAT(tarifas.porto SEPARATOR '@') as porto, tarifas.anexo, tarifas.vencimento, tarifas.servico, tarifas.observacao, tarifas.email_enviado, tarifas.preferencial, tarifas.anexo2, pessoas.nome AS fornecedorNome, GROUP_CONCAT(os_portos.descricao SEPARATOR '@') AS portoNome", "1=1 GROUP BY tarifas.fornecedor, tarifas.vencimento, tarifas.servico, tarifas.preferencial ORDER BY tarifas.preferencial DESC");
 
         $database->closeConection();
         return $result;
@@ -327,7 +327,7 @@ class Pessoas
     public static function insertTarifa($values, $portos)
     {
         $database = new Database();
-        $cols = 'fornecedor, servico, vencimento, preferencial, porto'; #ALTERAÇÃO
+        $cols = 'fornecedor, servico, vencimento, preferencial, observacao, porto'; #ALTERAÇÃO
 
         foreach ($portos as $porto) {
             $baseValues = $values . ", $porto";
@@ -449,7 +449,7 @@ class Pessoas
         }
     }
 
-    public static function updateTarifa($chave, $fornecedor, $portos, $servico, $vencimento, $preferencial, $portosDeletados)
+    public static function updateTarifa($chave, $fornecedor, $portos, $servico, $vencimento, $preferencial, $portosDeletados, $observacao)
     {
         $database = new Database();
 
@@ -457,13 +457,13 @@ class Pessoas
             $itemExists = $database->doSelect('tarifas', "tarifas.chave", "porto = '$porto' AND fornecedor = '$fornecedor'");
 
             if ($itemExists[0]) {
-                $query = "fornecedor = '" . $fornecedor . "', porto = '" . $porto . "', servico = '" . $servico . "', vencimento = '$vencimento', email_enviado = 0, preferencial = $preferencial";
+                $query = "fornecedor = '" . $fornecedor . "', porto = '" . $porto . "', servico = '" . $servico . "', observacao = '" . $observacao . "', vencimento = '$vencimento', email_enviado = 0, preferencial = $preferencial";
 
                 $result = $database->doUpdate('tarifas', $query, 'chave = ' . $chave);
             } else {
-                $values = "'$fornecedor', '$porto', '$servico', '$vencimento', $preferencial";
+                $values = "'$fornecedor', '$porto', '$servico', '$observacao', '$vencimento', $preferencial";
 
-                $cols = "fornecedor, porto, servico, vencimento, preferencial";
+                $cols = "fornecedor, porto, servico, observacao, vencimento, preferencial";
 
                 $result = $database->doInsert('tarifas', $cols, $values);
             }

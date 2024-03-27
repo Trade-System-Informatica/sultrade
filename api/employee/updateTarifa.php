@@ -16,6 +16,7 @@ if($objData != NULL){
     $fornecedor = prepareInput($objData->fornecedor);
     $portos = $objData->portos;
     $servico = prepareInput($objData->servico);
+    $observacao = prepareInput($objData->observacao);
     $vencimento = prepareInput($objData->vencimento);
     $preferencial = prepareInput($objData->preferencial);
     $portosDeletados = prepareInput($objData->portosDeletados);
@@ -23,7 +24,7 @@ if($objData != NULL){
 
     $pessoas = new Pessoas();
 
-    $result = $pessoas->updateTarifa($chave, $fornecedor, $portos, $servico, $vencimento, $preferencial, $portosDeletados);
+    $result = $pessoas->updateTarifa($chave, $fornecedor, $portos, $servico, $vencimento, $preferencial, $portosDeletados, $observacao);
     
 } else {
     $result = "false";
