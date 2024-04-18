@@ -302,11 +302,14 @@ input[type=number] {
 }
 
 .invoices_info_data_sultrade {
-    min-width: 50%;
-    max-width: 50%;
+    min-width: 70%;
+    max-width: 70%;
 }
 
-.invoices_info_data_sultrade:nth-child(even) {
+
+.invoices_info_data_sultrade2 {
+    max-width: 30%;
+    min-width: 30%;
     text-align: right;
 }
 
@@ -397,7 +400,7 @@ input[type=number] {
 
 .invoices_info_data_porto {
     min-width: 40%;
-    max-width: 40%;
+    max-width: 100%;
 }
 
 .invoices_content_header_porto {
@@ -479,7 +482,7 @@ input[type=number] {
 
 .invoices_info_data_coast {
     min-width: 40%;
-    max-width: 40%;
+    max-width: 100%;
 }
 
 .invoices_content_header_coast {
