@@ -5185,7 +5185,7 @@ class AddOS extends Component {
                     : pdfContent.clienteNome}
                 </b>
               </div>
-              <div className="invoices_info_data_sultrade">
+              <div className="invoices_info_data_sultrade2">
                 INVOICE NUMBER: <b>{pdfContent.invoice}</b>
               </div>
               {cabecalho?.CO && (
@@ -5194,7 +5194,7 @@ class AddOS extends Component {
                     {cabecalho?.CO ? `C/O: ` : ""}
                     <b>{cabecalho?.CO ? cabecalho.CO : ""}</b>
                   </div>
-                  <div className="invoices_info_data_sultrade">
+                  <div className="invoices_info_data_sultrade2">
                     DATE OF BILLING:{" "}
                     <b>
                       {moment(pdfContent.data_emissao).isValid()
@@ -5224,7 +5224,7 @@ class AddOS extends Component {
                         : pdfContent.address}
                     </b>
                   </div>
-                  <div className="invoices_info_data_sultrade">
+                  <div className="invoices_info_data_sultrade2">
                     DATE OF BILLING:{" "}
                     <b>
                       {moment(pdfContent.data_emissao).isValid()
@@ -5730,13 +5730,13 @@ class AddOS extends Component {
                       <table style={{ width: "100%" }}>
                         <tr>
                           {company && (
-                            <td colSpan={4} className="pdf_large_column">
+                            <td colSpan={CO ? 4 : 6} className="pdf_large_column">
                               <b>Company:</b> {company}
                             </td>
                           )}
                           {CO && (
                             <td
-                              colSpan={2}
+                              colSpan={CO ? 2 : 0}
                               className={
                                 company ? "pdf_money_col" : "pdf_small_col"
                               }
