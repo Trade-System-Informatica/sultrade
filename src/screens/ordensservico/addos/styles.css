@@ -302,14 +302,26 @@ input[type=number] {
 }
 
 .invoices_info_data_sultrade {
-    min-width: 70%;
-    max-width: 70%;
+    min-width: 70% !important;
+    width: 70% !important;
+    display: flex;
+    flex-direction: row;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    word-break: normal; 
+    flex: 1;
 }
 
 
 .invoices_info_data_sultrade2 {
-    max-width: 30%;
-    min-width: 30%;
+    min-width: 30% !important;
+    width: 30% !important;
+    display: flex;
+    flex-direction: row;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    word-break: normal; 
+    flex: 1;
     text-align: right;
 }
 
@@ -396,11 +408,18 @@ input[type=number] {
 .invoices_info_porto {
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .invoices_info_data_porto {
-    min-width: 40%;
-    max-width: 100%;
+    min-width: 100% !important;
+    width: 100% !important;
+    display: flex;
+    flex-direction: row;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    word-break: normal; 
+    flex: 1;
 }
 
 .invoices_content_header_porto {
@@ -478,11 +497,18 @@ input[type=number] {
 .invoices_info_coast {
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .invoices_info_data_coast {
-    min-width: 40%;
-    max-width: 100%;
+    min-width: 100% !important;
+    width: 100% !important;
+    display: flex;
+    flex-direction: row;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    word-break: normal; 
+    flex: 1;
 }
 
 .invoices_content_header_coast {
