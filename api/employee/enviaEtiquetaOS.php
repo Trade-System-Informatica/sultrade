@@ -26,6 +26,14 @@ $porto = prepareInput($objData->porto);
 $eta = prepareInput($objData->eta);
 $etb = prepareInput($objData->etb);
 $data_saida = prepareInput($objData->data_saida);
+$criacao = prepareInput(($objData-> criacao));
+
+$TitleEmail = '';
+if($criacao){
+    $TitleEmail = "Abertura de OS: $os $navio - $porto";
+} else{
+    $TitleEmail = "Etiqueta atualizada OS: $os $navio - $porto";
+}
 
 if ($os) {
 
@@ -91,7 +99,7 @@ if ($os) {
 
         //Content
         $mail->isHTML(true);                                  //Set email format to HTML
-        $mail->Subject = "Abertura de OS: $os $navio - $porto";
+        $mail->Subject = $TitleEmail;
         $mail->Body    = " ";
         $mail->addStringAttachment($pdfdoc, "OS_$os.pdf");
 

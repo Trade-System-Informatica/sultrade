@@ -7163,7 +7163,7 @@ class AddOsOrcamento extends Component {
     }
   };
 
-  GerarEtiqueta = async (codigo) => {
+  GerarEtiqueta = async (codigo, criacao=false) => {
     await apiEmployee.post(`enviaEtiquetaOS.php`, {
       os: codigo,
       navio: this.state.naviosOptions.find(
@@ -7213,6 +7213,7 @@ class AddOsOrcamento extends Component {
         moment(this.state.data_saida).format("DD/MM/YYYY") != "Invalid date"
           ? moment(this.state.data_saida).format("DD/MM/YYYY HH:mm")
           : "T.B.I.",
+      criacao: criacao,
     });
   };
 
@@ -7668,7 +7669,7 @@ class AddOsOrcamento extends Component {
               `Orçamento -> OS: ${this.state.codigo}`
             );
 
-            await this.GerarEtiqueta(this.state.codigo);
+            await this.GerarEtiqueta(this.state.codigo, true);
 
             await this.setState({
               loading: false,
