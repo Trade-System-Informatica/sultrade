@@ -2494,7 +2494,7 @@ class AddOS extends Component {
                 chave: res.data[0].Chave,
                 os: res.data[0],
               });
-              await this.GerarEtiqueta(res.data[0].codigo);
+              await this.GerarEtiqueta(res.data[0].codigo, true);
               await loader.salvaLogs(
                 "os",
                 this.state.usuarioLogado.codigo,
@@ -6591,7 +6591,7 @@ class AddOS extends Component {
   };
   //
 
-  GerarEtiqueta = async (codigo) => {
+  GerarEtiqueta = async (codigo, criacao=false) => {
     await apiEmployee.post(`enviaEtiquetaOS.php`, {
       os: codigo,
       navio: this.state.naviosOptions.find(
@@ -6641,6 +6641,7 @@ class AddOS extends Component {
         moment(this.state.data_saida).format("DD/MM/YYYY") != "Invalid date"
           ? moment(this.state.data_saida).format("DD/MM/YYYY HH:mm")
           : "T.B.I.",
+        criacao: criacao,
     });
   };
 
@@ -11064,7 +11065,7 @@ class AddOS extends Component {
                         <button
                           className="btn btn-danger"
                           onClick={() =>
-                            this.GerarEtiqueta(this.state.os.codigo)
+                            this.GerarEtiqueta(this.state.os.codigo, false)
                           }
                         >
                           Enviar Etiqueta
