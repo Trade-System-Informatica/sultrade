@@ -103,13 +103,12 @@ class ContasReceber extends Component {
         }).then(
             async response => {
                 await this.setState({ pessoas: response.data })
-
                 let pessoa = "";
-                const contas = this.state.contas.map((e) => {
-                    pessoa = this.state.pessoas.find((el) => el.Chave == e.Pessoa);
+                const contas = this?.state?.contas?.map((e) => {
+                    pessoa = this?.state?.pessoas?.find((el) => el?.Chave == e?.Pessoa);
                     if (pessoa) {
                         return (
-                            { ...e, pessoaNome: pessoa.Nome }
+                            { ...e, pessoaNome: pessoa?.Nome }
                         )
                     } else {
                         return (
