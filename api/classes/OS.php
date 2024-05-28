@@ -744,7 +744,7 @@ class OS
                 pessoas.Nome AS pessoaNome,
                 pessoas.Nome_Fantasia AS pessoaNomeFantasia,
                 os_tipos_servicos.descricao AS tipoServicoNome",
-                "$where GROUP BY os.chave"
+                "$where AND os.orcamento != 1 GROUP BY os.chave"
             );
             $database->closeConection();
         } else {
