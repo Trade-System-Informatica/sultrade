@@ -2162,7 +2162,6 @@ class AddOS extends Component {
             .map((e) => {
               return { label: e.Nome, value: e.Codigo };
             });
-          options.unshift({ label: "NENHUM", value: "" });
 
           await this.setState({ operadoresOptions: options });
         },
@@ -7025,10 +7024,11 @@ class AddOS extends Component {
 
   render() {
     const validations = [];
-    validations.push(this.state.abertura);
+    validations.push(this.state.abertura);  
     validations.push(this.state.chegada);
     validations.push(this.state.cliente);
     validations.push(this.state.navio);
+    validations.push(this.state.operador);
     validations.push(this.state.tipoServico);
     validations.push(this.state.empresa);
     validations.push(
@@ -10129,7 +10129,14 @@ class AddOS extends Component {
                               <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                 <label>Operador</label>
                               </div>
-                              <div className="col-1 errorMessage"></div>
+                              <div className="col-1 errorMessage">
+                              {!this.state.operador && (
+                                  <FontAwesomeIcon
+                                    title="Preencha o campo"
+                                    icon={faExclamationTriangle}
+                                  />
+                                )}
+                              </div>
                               <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
                                 <Select
                                   className="SearchSelect"
@@ -10262,7 +10269,6 @@ class AddOS extends Component {
                               <div className="col-xl-2 col-lg-2 col-md-3 col-sm-10 col-10">
                                 <Field
                                   className="form-control"
-                                  disabled={!this.state.editavel}
                                   type="text"
                                   disabled
                                   value={
@@ -10322,7 +10328,6 @@ class AddOS extends Component {
                               <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                 <Field
                                   className="form-control"
-                                  disabled={!this.state.editavel}
                                   type="date"
                                   disabled
                                   value={this.state.abertura}
@@ -10724,7 +10729,6 @@ class AddOS extends Component {
                                   <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                     <Field
                                       className="form-control text-right"
-                                      disabled={!this.state.editavel}
                                       type="text"
                                       step="0.1"
                                       value={this.state.governmentTaxes}
@@ -10743,7 +10747,6 @@ class AddOS extends Component {
                                   <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                     <Field
                                       className="form-control text-right"
-                                      disabled={!this.state.editavel}
                                       type="text"
                                       step="0.1"
                                       value={this.state.bankCharges}
