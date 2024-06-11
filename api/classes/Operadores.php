@@ -188,8 +188,14 @@ class Operadores {
     }
     */
     public static function getLogsOS($chaveOS, $chaveSI){
+        $condicoes = "";
+        foreach ($chaveSI as $chave) {
+            $condicoes .= "(Tabela = 'os_servicos_itens' AND ChaveAux = '".$chave."') OR ";
+        }
+
+        $condicoes = rtrim($condicoes, " OR ");
         $database = new Database();
-        if (!isset($chaveSI) || $chaveSI == ''){
+        if (!isset($condicoes) || $condicoes == ''){
             $result = $database->doSelect('logs 
                                     LEFT JOIN operadores ON operadores.Codigo = logs.Operador',
                                     'logs.*, operadores.Nome as operadorNome',
@@ -199,7 +205,7 @@ class Operadores {
             $result = $database->doSelect('logs 
                                         LEFT JOIN operadores ON operadores.Codigo = logs.Operador',
                                         'logs.*, operadores.Nome as operadorNome',
-                                        "(Tabela = 'os' AND ChaveAux = '".$chaveOS."') OR (Tabela = 'os_servicos_itens' AND ChaveAux = '".$chaveSI."') ORDER BY Data ASC"
+                                        "(Tabela = 'os' AND ChaveAux = '".$chaveOS."') OR ".$condicoes." ORDER BY Data ASC"
         );
         };
 

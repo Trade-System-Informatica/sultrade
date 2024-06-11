@@ -12,7 +12,7 @@ $objData = json_decode($data);
 if($objData != NULL){
     $token = prepareInput($objData->token);
     $chaveOS = prepareInput($objData->chaveOS);
-    $chaveSI = prepareInput($objData->chaveSI);
+    $chaveSI = ($objData->chaveSI);
     
     $operadores = new Operadores();
     
