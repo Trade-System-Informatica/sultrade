@@ -560,7 +560,7 @@ export default class loader {
         return await apiEmployee.post('getLogsOS.php', {
             token: true,
             chaveOS,
-            chaveSI: chaveSI.join(', ')
+            chaveSI: chaveSI
         }).then(
             async res => {
                 return res.data
