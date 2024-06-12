@@ -118,8 +118,8 @@ class RelatorioOS extends Component {
         const navio = this.state.navio ? `os.chave_navio = '${this.state.navio}'` : '';
         const centroCusto = this.state.centroCusto ? `os.centro_custo = '${this.state.centroCusto}'` : '';
         const porto = this.state.porto ? `os.porto = '${this.state.porto}'` : '';
-        const periodoInicial = this.state.periodoInicial ? `os.Data_Abertura >= '${moment(this.state.periodoInicial).format('YYYY-MM-DD')}'` : '';
-        const periodoFinal = this.state.periodoFinal ? `os.Data_Abertura <= '${moment(this.state.periodoFinal).format('YYYY-MM-DD')}'` : '';
+        const periodoInicial = this.state.periodoInicial ? `os.${this.state.situacao == "F" ? "Data_Encerramento" : "Data_Abertura"} >= '${moment(this.state.periodoInicial).format('YYYY-MM-DD')}'` : '';
+        const periodoFinal = this.state.periodoFinal ? `os.${this.state.situacao == "F" ? "Data_Encerramento" : "Data_Abertura"} <= '${moment(this.state.periodoFinal).format('YYYY-MM-DD')}'` : '';
 
         let where = [empresa, situacao, navio, centroCusto, porto, periodoInicial, periodoFinal];
         where = where.filter((e) => e.trim() != "");
@@ -152,7 +152,7 @@ class RelatorioOS extends Component {
 
     relatorio = async () => {
         this.setState({ loading: true });
-        const relatorio = this.state.relatorio;
+        const relatorio = this?.state?.relatorio;
 
         console.log(relatorio);
         let pdf =
@@ -177,7 +177,7 @@ class RelatorioOS extends Component {
                             <th colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Cliente</th>
                             <th colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Tipo de Serviço</th>
                         </tr>
-                    {relatorio.map((e) => {
+                    {relatorio?.map((e) => {
                         return (
                         <tr style={{padding: "10px", fontSize: "0.8em"}}>
                             <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.codigo}</td>
@@ -321,7 +321,7 @@ class RelatorioOS extends Component {
                                                             <Select className='SearchSelect' options={this.state.portosOptions.filter(e => this.filterSearch(e, this.state.portosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ portosOptionsTexto: e }) }} value={this.state.portosOptions.find(option => option.value == this.state.porto)} search={true} onChange={(e) => { this.setState({ porto: e.value, }) }} />
                                                         </div>
                                                         <div className="col-12">
-                                                            <label className="center relatorioLabelTitulo">Abertura</label>
+                                                            <label className="center relatorioLabelTitulo">{this.state.situacao == "F" ? "Data faturamento" : "Abertura"}</label>
                                                         </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Data Inicial</label>
