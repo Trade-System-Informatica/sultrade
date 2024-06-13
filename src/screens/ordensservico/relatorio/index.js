@@ -118,8 +118,8 @@ class RelatorioOS extends Component {
         const navio = this.state.navio ? `os.chave_navio = '${this.state.navio}'` : '';
         const centroCusto = this.state.centroCusto ? `os.centro_custo = '${this.state.centroCusto}'` : '';
         const porto = this.state.porto ? `os.porto = '${this.state.porto}'` : '';
-        const periodoInicial = this.state.periodoInicial ? `os.${this.state.situacao == "F" ? "Data_Encerramento" : "Data_Abertura"} >= '${moment(this.state.periodoInicial).format('YYYY-MM-DD')}'` : '';
-        const periodoFinal = this.state.periodoFinal ? `os.${this.state.situacao == "F" ? "Data_Encerramento" : "Data_Abertura"} <= '${moment(this.state.periodoFinal).format('YYYY-MM-DD')}'` : '';
+        const periodoInicial = this.state.periodoInicial ? `os.${this.state.situacao == "F" ? "Data_Faturamento" : "Data_Abertura"} >= '${moment(this.state.periodoInicial).format('YYYY-MM-DD')}'` : '';
+        const periodoFinal = this.state.periodoFinal ? `os.${this.state.situacao == "F" ? "Data_Faturamento" : "Data_Abertura"} <= '${moment(this.state.periodoFinal).format('YYYY-MM-DD')}'` : '';
 
         let where = [empresa, situacao, navio, centroCusto, porto, periodoInicial, periodoFinal];
         where = where.filter((e) => e.trim() != "");
