@@ -347,7 +347,7 @@ class Navios
                 left join pessoas on pessoas.chave = os_servicos_itens.fornecedor_custeio",
                 "os_servicos_itens.*, 
                 pessoas.nome as fornecedorCusteioNome",
-                "os_servicos_itens.chave IN (" . implode(',', $eventos) . ") ORDER BY os_servicos_itens.ordem ASC"
+                "os_servicos_itens.cancelada = 0 AND os_servicos_itens.chave IN (" . implode(',', $eventos) . ") ORDER BY os_servicos_itens.ordem ASC"
             );
         }
 /*
