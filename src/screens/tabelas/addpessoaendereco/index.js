@@ -288,7 +288,7 @@ class AddPessoaEndereco extends Component {
         if (parseInt(this.state.chave) === 0 && validForm) {
             await apiEmployee.post(`insertEndereco.php`, {
                 token: true,
-                values: `'${this.state.tipo}', '${this.state.endereco}', '${this.state.numero}', '${this.state.complemento}', '${this.state.cidade}', '${this.state.cepLimpo}', ${this.state.uf}, '${this.state.bairro}', '${this.state.cidade_descricao}', '${this.state.pais}', ${this.state.chave_pessoa}`,
+                values: `'${this.state.tipo}', '${this.state.endereco}', '${this.state.numero}', '${this.state.complemento}', '${this.state.cidade}', '${this.state.cepLimpo}', ${this.state.uf}, '${this.state.bairro.replaceAll('\'', " ")}', '${this.state.cidade_descricao}', '${this.state.pais}', '${this.state.chave_pessoa}'`,
                 Tipo: this.state.tipo,
                 Chave_Pessoa: this.state.chave_pessoa
             }).then(
@@ -578,7 +578,7 @@ class AddPessoaEndereco extends Component {
                                                     }
                                                 </div>
                                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                    <Select className='SearchSelect' value={this.state.tipo} options={this.state.tipos} onChange={(e) => { this.setState({ tipo: e.value, tipoNome: e.label }) }} placeholder={this.state.tipoNome} />
+                                                    <Select className='SearchSelect' value={this.state.tipo} options={this.state.tipos} onChange={(e) => {console.log(e); this.setState({ tipo: e.value, tipoNome: e.label }) }} placeholder={this.state.tipoNome} />
                                                 </div>
                                             </div>
 
