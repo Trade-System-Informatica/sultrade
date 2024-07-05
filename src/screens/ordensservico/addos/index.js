@@ -5608,6 +5608,8 @@ class AddOS extends Component {
       const pdfContent = this.state.pdfContent.itens;
       const pdfChaves = this.state.pdfContent.chaves;
       const pdfCampos = this.state.pdfContent.campos;
+      // alert(JSON.stringify(pdfCampos))
+      // alert(JSON.stringify(pdfContent))
       //console.log(pdfChaves)
 
       const getDescricaoItem = (item) => {
@@ -5831,6 +5833,7 @@ class AddOS extends Component {
                     <br />
                     <div className="voucherContent">
                       <div className="center">{chave.subgrupos}</div>
+                      {/* <div className="center">{JSON.stringify(chave)}</div> */}
                       <table>
                         <tr>
                           <th className="pdf_large_col" colSpan={7}>
@@ -5842,7 +5845,7 @@ class AddOS extends Component {
                         {pdfContent
                           .filter(
                             (e) =>
-                              e.codsubgrupo_taxas == chave.codsubgrupo_taxas
+                              e.codsubgrupo_taxas == chave.codsubgrupo_taxas 
                           )
                           .map((e, i) => {
                             valorTotalReais += Util.toFixed(
@@ -5855,7 +5858,7 @@ class AddOS extends Component {
                             );
 
                             pdfCampos
-                              .filter((campo) => campo.chaveEvento == e.chsub)
+                              .filter((campo) => campo.chaveEvento == e.chsub && campo.chaveSubgrupo == chave.codsubgrupo_taxas)
                               .map((campo) => {
                                 if (
                                   !camposTitulos.find(
@@ -5939,6 +5942,10 @@ class AddOS extends Component {
                     </div>
 
                     <div className="voucherFooter">Comments:</div>
+                    {/* <div>
+                      {JSON.stringify(camposTitulos)}
+                      {JSON.stringify(campos)}
+                    </div> */}
                     {camposTitulos.map((titulo) => {
                       if (titulo.tipo == "LISTA") {
                         return (
@@ -5948,7 +5955,7 @@ class AddOS extends Component {
                             </div>
                             <ul className="voucherLiListaCampos">
                               {campos
-                                .filter((campo) => campo.campo == titulo.titulo)
+                                .filter((campo) => campo.campo == titulo.titulo && campo.chaveSubgrupo == chave.codsubgrupo_taxas)
                                 .map((campo) => (
                                   <li>{campo.complemento}</li>
                                 ))}
