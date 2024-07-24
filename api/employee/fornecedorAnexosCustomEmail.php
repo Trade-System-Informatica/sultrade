@@ -32,16 +32,8 @@ $return = ['successes' => [], 'failures' => [], 'warnings' => []];
 try {
     //Server settings
     //$mail->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
-    $mail->isSMTP();       //Send using SMTP
-    $mail->SMTPOptions = [
-        'ssl' => [
-            'verify_peer' => false,
-            'verify_peer_name' => false,
-            'allow_self_signed' => true
-        ]
-    ];
-
-    $mail->Host       = 'Smtp.office365.com';                             //'mail.vetorial.com';                     //Set the SMTP server to send through
+        $mail->isSMTP();       //Send using SMTP
+        $mail->Host       = 'Smtp.office365.com';                             //'mail.vetorial.com';                     //Set the SMTP server to send through
         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
         $mail->Username   = 'soa@sultradeagency.com';                     //SMTP username
         $mail->Password   =  'C&773531409775un';                                            //'Trade@2023#';                               //SMTP password
