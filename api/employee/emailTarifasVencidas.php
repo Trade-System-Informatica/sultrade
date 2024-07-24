@@ -54,7 +54,7 @@ foreach ($chaves as $chave) {
             ]
         ];
 
-        $mail->Host       = 'soa@sultradeagency.com';                             //'mail.vetorial.com';                     //Set the SMTP server to send through
+        $mail->Host       = 'Smtp.office365.com';                             //'mail.vetorial.com';                     //Set the SMTP server to send through
         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
         $mail->Username   = 'soa@sultradeagency.com';                     //SMTP username
         $mail->Password   =  'C&773531409775un';                                            //'Trade@2023#';                               //SMTP password
