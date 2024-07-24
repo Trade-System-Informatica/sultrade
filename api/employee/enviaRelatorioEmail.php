@@ -65,13 +65,13 @@ if ($emails[0]) {
         //Server settings
         //$mail->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
         $mail->isSMTP();       //Send using SMTP
-        $mail->SMTPOptions = [
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true
-            ]
-        ];
+        // $mail->SMTPOptions = [
+        //     'ssl' => [
+        //         'verify_peer' => false,
+        //         'verify_peer_name' => false,
+        //         'allow_self_signed' => true
+        //     ]
+        // ];
     
 
         $mail->Host       = 'smtp.office365.com';                   //'mail.vetorial.com';                                               //Set the SMTP server to send through
