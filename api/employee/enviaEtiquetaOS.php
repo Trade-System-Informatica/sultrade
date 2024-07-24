@@ -70,14 +70,14 @@ if ($os) {
     //for ($i=0; $i<count($emails); $i++) {
     try {
         //Server settings
-        $mail->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
+        //$mail->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
         $mail->isSMTP();       //Send using SMTP
-        $mail->Host       = 'Smtp.office365.com';                             //'mail.vetorial.com';                     //Set the SMTP server to send through
+        $mail->Host       = 'mail.vetorial.com';                             //'mail.vetorial.com';                     //Set the SMTP server to send through
         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
         $mail->Username   = 'soa@sultradeagency.com';                     //SMTP username
-        $mail->Password   =  'C&773531409775un';                                            //'Trade@2023#';                               //SMTP password
-        $mail->SMTPSecure =  'tls';                                 //'ssl'; //PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
-        $mail->Port  =     587;                                    // 465;
+        $mail->Password   = 'Trade@2023#';                               //SMTP password
+        $mail->SMTPSecure = 'ssl'; //PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
+        $mail->Port  = 465;
 
         //Recipients
         $mail->setFrom('soa@sultradeagency.com', 'Sultrade Agency');

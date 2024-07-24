@@ -21,10 +21,8 @@ $objData = json_decode($data);
 $pessoas = new Pessoas();
 $chaves = $objData->chaves;
 $corpo = "Prezados,
-
 Gentileza notar que detectamos em nosso banco de dados que o tarifário/tabela de preços fornecido está preste a vencer. 
 Gentileza encaminhar tarifas atualizadas para nova vigência ou confirmar a prorrogação da vigência.
-
 Atenciosamente,
 Sultrade Shipping Agency
 Phone: +55 (53) 32353500
@@ -44,14 +42,22 @@ foreach ($chaves as $chave) {
 
     try {
         //Server settings
-        $mail->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
+        //$mail->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
         $mail->isSMTP();       //Send using SMTP
-        $mail->Host       = 'Smtp.office365.com';                             //'mail.vetorial.com';                     //Set the SMTP server to send through
+        $mail->SMTPOptions = [
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            ]
+        ];
+
+        $mail->Host       = 'mail.vetorial.com';                     //Set the SMTP server to send through
         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
         $mail->Username   = 'soa@sultradeagency.com';                     //SMTP username
-        $mail->Password   =  'C&773531409775un';                                            //'Trade@2023#';                               //SMTP password
-        $mail->SMTPSecure =  'tls';                                 //'ssl'; //PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
-        $mail->Port  =     587;                                    // 465;
+        $mail->Password   = 'Trade@2023#';                               //SMTP password
+        $mail->SMTPSecure = 'ssl'; //PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
+        $mail->Port  = 465;
 
         //Recipients
         $mail->setFrom('soa@sultradeagency.com', 'Sultrade Agency');
@@ -67,7 +73,7 @@ foreach ($chaves as $chave) {
         $mail->Body    = "<div>
                 <pre>" . $corpo . "</pre>
                 </div><div style='width: 100%; display: flex; align-items: center;'><img src='https://i.ibb.co/G5Z8qmT/logo.png' alt='logo' border='0'></div>";
-                
+
         if (!PHPMailer::validateAddress($item["email"])) {
             array_push($return['failures'], $item["email"]);
         } else {
