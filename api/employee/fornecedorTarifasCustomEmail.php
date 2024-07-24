@@ -41,7 +41,7 @@ try {
             'allow_self_signed' => true
         ]
     ];
-
+//bug
     $mail->Host       = 'soa@sultradeagency.com';                             //'mail.vetorial.com';                     //Set the SMTP server to send through
         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
         $mail->Username   = 'soa@sultradeagency.com';                     //SMTP username
