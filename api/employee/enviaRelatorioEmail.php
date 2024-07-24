@@ -66,7 +66,7 @@ if ($emails[0]) {
         //$mail->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
         $mail->isSMTP();       //Send using SMTP
         $mail->SMTPOptions = [
-            'tsl' => [
+            'ssl' => [
                 'verify_peer' => false,
                 'verify_peer_name' => false,
                 'allow_self_signed' => true
@@ -78,7 +78,7 @@ if ($emails[0]) {
         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
         $mail->Username   = 'soa@sultradeagency.com';                     //SMTP username
         $mail->Password   = 'C&773531409775un';                               //SMTP password
-        $mail->SMTPSecure = 'tsl'; //PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
         $mail->Port  = 587;
 
         //Recipients
