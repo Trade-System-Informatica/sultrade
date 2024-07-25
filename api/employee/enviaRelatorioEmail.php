@@ -72,13 +72,13 @@ if ($emails[0]) {
         //         'allow_self_signed' => true
         //     ]
         // ];
-    
+        //$mail->SMTPDebug = 4;
 
-        $mail->Host       = 'smtp.office365.com';                   //'mail.vetorial.com';                                               //Set the SMTP server to send through
+        $mail->Host       = 'smtp.office365.com';                  //'mail.vetorial.com';                                               //Set the SMTP server to send through
         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
         $mail->Username   = 'soa@sultradeagency.com';                     //SMTP username
         $mail->Password   = 'C&773531409775un';                               //SMTP password
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
+        $mail->SMTPSecure =  'tls';                                         //PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
         $mail->Port  = 587;
 
         //Recipients
