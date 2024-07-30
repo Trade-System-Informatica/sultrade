@@ -7029,6 +7029,34 @@ class AddOS extends Component {
     await this.setState({ logs, modalLog: true });
   };
 
+  validateDates() {
+    const { encerramento, faturamento, envio } = this.state;
+    const encerramentoDate = new Date(encerramento);
+    const faturamentoDate = new Date(faturamento);
+    const envioDate = new Date(envio);
+
+    // Verifica se as datas são válidas
+    const isEncerramentoValid = !isNaN(encerramentoDate.getTime()) || encerramento === 'T.B.I.';
+    const isFaturamentoValid = !isNaN(faturamentoDate.getTime()) || faturamento === 'T.B.I.';
+    const isEnvioValid = !isNaN(envioDate.getTime()) || envio === 'T.B.I.';
+
+    // Permitir salvar se todas as datas estiverem vazias
+    if (encerramento === 'T.B.I.' && faturamento === 'T.B.I.' && envio === 'T.B.I.') {
+        return true;
+    }
+
+    // Validar que todas as datas sejam válidas ou vazias
+    if (!isEncerramentoValid || !isFaturamentoValid || !isEnvioValid) {
+        return false;
+    }
+
+    // Validar a ordem das datas
+    const isFaturamentoAfterEncerramento = faturamento === 'T.B.I.' || faturamentoDate >= encerramentoDate;
+    const isEnvioAfterFaturamento = envio === 'T.B.I.' || envioDate >= faturamentoDate;
+
+    return isFaturamentoAfterEncerramento && isEnvioAfterFaturamento;
+}
+
   render() {
     const validations = [];
     validations.push(this.state.abertura);  
@@ -7043,7 +7071,9 @@ class AddOS extends Component {
     );
     validations.push(!this.state.bloqueado);
 
-    const validForm = validations.reduce((t, a) => t && a);
+    const validDateCheck = this.validateDates();
+
+    const validForm = validations.reduce((t, a) => t && a) && validDateCheck;
 
     const validationsContabiliza = [];
     validationsContabiliza.push(this.state.meioPagamento);
@@ -10175,7 +10205,6 @@ class AddOS extends Component {
                               <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12"></div>
                               <div className="col-1"></div>
 
-                              <div className="col-1"></div>
                               <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                 <label>E.T.A.</label>
                               </div>
