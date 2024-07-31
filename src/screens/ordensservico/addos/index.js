@@ -7031,30 +7031,61 @@ class AddOS extends Component {
 
   validateDates() {
     const { encerramento, faturamento, envio } = this.state;
-    const encerramentoDate = new Date(encerramento);
-    const faturamentoDate = new Date(faturamento);
-    const envioDate = new Date(envio);
 
-    // Verifica se as datas são válidas
-    const isEncerramentoValid = !isNaN(encerramentoDate.getTime()) || encerramento === 'T.B.I.';
-    const isFaturamentoValid = !isNaN(faturamentoDate.getTime()) || faturamento === 'T.B.I.';
-    const isEnvioValid = !isNaN(envioDate.getTime()) || envio === 'T.B.I.';
-
-    // Permitir salvar se todas as datas estiverem vazias
-    if (encerramento === 'T.B.I.' && faturamento === 'T.B.I.' && envio === 'T.B.I.') {
+    // Se todas as datas forem vazias, permitimos salvar
+    if (!encerramento && !faturamento && !envio) {
         return true;
     }
 
-    // Validar que todas as datas sejam válidas ou vazias
+    // Verifica se as datas são válidas ou "T.B.I."
+    const encerramentoDate = encerramento && encerramento !== 'T.B.I.' ? new Date(encerramento) : null;
+    const faturamentoDate = faturamento && faturamento !== 'T.B.I.' ? new Date(faturamento) : null;
+    const envioDate = envio && envio !== 'T.B.I.' ? new Date(envio) : null;
+
+    const isEncerramentoValid = !encerramento || encerramento === 'T.B.I.' || !isNaN(encerramentoDate.getTime());
+    const isFaturamentoValid = !faturamento || faturamento === 'T.B.I.' || !isNaN(faturamentoDate.getTime());
+    const isEnvioValid = !envio || envio === 'T.B.I.' || !isNaN(envioDate.getTime());
+
+    // Validar que todas as datas sejam válidas ou 'T.B.I.'
     if (!isEncerramentoValid || !isFaturamentoValid || !isEnvioValid) {
         return false;
     }
 
-    // Validar a ordem das datas
-    const isFaturamentoAfterEncerramento = faturamento === 'T.B.I.' || faturamentoDate >= encerramentoDate;
-    const isEnvioAfterFaturamento = envio === 'T.B.I.' || envioDate >= faturamentoDate;
+    // Se não houver data de encerramento, faturamento não deve ser permitido
+    if (!encerramento || encerramento === 'T.B.I.') {
+        if (faturamento && faturamento !== 'T.B.I.') {
+            return false;  // Faturamento não deve ser permitido sem data de encerramento
+        }
+        if (envio && envio !== 'T.B.I.') {
+            return false;  // Envio não deve ser permitido sem data de encerramento
+        }
+    }
 
-    return isFaturamentoAfterEncerramento && isEnvioAfterFaturamento;
+    // Se não houver data de faturamento, envio não deve ser permitido
+    if (!faturamento || faturamento === 'T.B.I.') {
+      if (envio && envio !== 'T.B.I.') {
+          return false;  // Envio não deve ser permitido sem data de faturamento
+      }
+  }
+
+  // Se a data de encerramento não for 'T.B.I.', faturamento deve ser após encerramento
+  if (encerramento && encerramento !== 'T.B.I.') {
+      if (faturamento && faturamento !== 'T.B.I.' && faturamentoDate < encerramentoDate) {
+          return false;  // Faturamento deve ser após encerramento
+      }
+      if (envio && envio !== 'T.B.I.' && envioDate < (faturamento ? faturamentoDate : encerramentoDate)) {
+          return false;  // Envio deve ser após faturamento ou encerramento se faturamento não estiver definido
+      }
+  }
+
+    // Se a data de faturamento não for 'T.B.I.', envio deve ser após faturamento
+    if (faturamento && faturamento !== 'T.B.I.') {
+        if (envio && envio !== 'T.B.I.' && envioDate < faturamentoDate) {
+            return false;  // Envio deve ser após faturamento
+        }
+    }
+
+    return true;
 }
 
   render() {
