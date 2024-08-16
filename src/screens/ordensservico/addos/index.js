@@ -1117,7 +1117,7 @@ class AddOS extends Component {
               };
             });
 
-            options.unshift({ label: "Nenhum", value: "" });
+            options.unshift({ label: "Nenhum", value: "0" });
 
             await this.setState({ fornecedoresOptions: options });
           }
