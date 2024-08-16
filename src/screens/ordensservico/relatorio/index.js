@@ -23,6 +23,7 @@ const estadoInicial = {
     porto: '',
     centroCusto: '',
     navio: '',
+    cliente: '',
     periodoInicial: moment('2000-01-01').format('YYYY-MM-DD'),
     periodoFinal: moment().format('YYYY-MM-DD'),
     lancamentoInicial: moment('1900-1-1').format('YYYY-MM-DD'),
@@ -43,6 +44,8 @@ const estadoInicial = {
     
     naviosOptions: [],
     naviosOptionsTexto: '',
+    clientesOptions: [],
+    clientesOptionsTexto: '',
     centrosCustos: [],
     centrosCustosOptions: [],
     centrosCustosOptionsTexto: '',
@@ -88,21 +91,29 @@ class RelatorioOS extends Component {
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php'),
             naviosOptions: await loader.getBaseOptions("getNavios.php", "nome", "chave"),
+            clientesOptions: await loader.getBaseOptionsCustomLabel(
+                "getClientes.php",
+                "Nome",
+                "Cnpj_Cpf",
+                "Chave"
+              ),
             portosOptions: await loader.getBaseOptions("getPortos.php", "Descricao", "Chave"),
             centrosCustosOptions: await loader.getBaseOptions("getCentrosCustos.php", "Descricao", "Chave")
         })
 
-        const {naviosOptions, portosOptions, centrosCustosOptions} = this.state;
+        const {naviosOptions, portosOptions, centrosCustosOptions, clientesOptions} = this.state;
 
         naviosOptions.unshift({value: "", label: "Todos"});
         portosOptions.unshift({value: "", label: "Todos"});
         centrosCustosOptions.unshift({value: "", label: "Todos"});
+        clientesOptions.unshift({value: "", label: "Todos"});
 
         await this.setState({
             acessosPermissoes: await loader.testaAcesso(this.state.acessos, this.state.permissoes, this.state.usuarioLogado),
             naviosOptions,
             portosOptions,
             centrosCustosOptions,
+            clientesOptions,
             loading: false,
         })
     }
@@ -116,12 +127,13 @@ class RelatorioOS extends Component {
         const empresa = `os.Empresa = ${this.state.empresa}`;
         const situacao = this.state.situacao == 'A' ? `os.cancelada != 1 AND (os.Data_Encerramento = "" OR os.Data_Encerramento = "0000-00-00 00:00:00")` : this.state.situacao == "E" ? `os.cancelada != 1 AND (os.Data_Encerramento != "" AND os.Data_Encerramento != "0000-00-00 00:00:00" AND (os.Data_Faturamento = "" OR os.Data_Faturamento = "0000-00-00 00:00:00"))` : this.state.situacao == "F" ? `os.cancelada != 1 AND (os.Data_Faturamento != "" AND os.Data_Faturamento != "0000-00-00 00:00:00")` : this.state.situacao == "C" ? `os.cancelada = 1` : ``;
         const navio = this.state.navio ? `os.chave_navio = '${this.state.navio}'` : '';
+        const cliente = this.state.cliente ? `os.chave_cliente = '${this.state.cliente}'` : '';
         const centroCusto = this.state.centroCusto ? `os.centro_custo = '${this.state.centroCusto}'` : '';
         const porto = this.state.porto ? `os.porto = '${this.state.porto}'` : '';
         const periodoInicial = this.state.periodoInicial ? `os.${this.state.situacao == "F" ? "Data_Faturamento" : "Data_Abertura"} >= '${moment(this.state.periodoInicial).format('YYYY-MM-DD')}'` : '';
         const periodoFinal = this.state.periodoFinal ? `os.${this.state.situacao == "F" ? "Data_Faturamento" : "Data_Abertura"} <= '${moment(this.state.periodoFinal).format('YYYY-MM-DD')}'` : '';
 
-        let where = [empresa, situacao, navio, centroCusto, porto, periodoInicial, periodoFinal];
+        let where = [empresa, situacao, navio, centroCusto, porto, periodoInicial, periodoFinal, cliente];
         where = where.filter((e) => e.trim() != "");
 
         await apiEmployee.post(`gerarRelatorioOS.php`, {
@@ -312,6 +324,16 @@ class RelatorioOS extends Component {
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Select className='SearchSelect' options={this.state.naviosOptions.filter(e => this.filterSearch(e, this.state.naviosOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ naviosOptionsTexto: e }) }} value={this.state.naviosOptions.find(option => option.value == this.state.navio)} search={true} onChange={(e) => { this.setState({ navio: e.value, }) }} />
                                                         </div>
+
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Cliente</label>
+                                                        </div>
+                                                        <div className='col-1 errorMessage'>
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Select className='SearchSelect' options={this.state.clientesOptions.filter(e => this.filterSearch(e, this.state.clientesOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ clientesOptionsTexto: e }) }} value={this.state.clientesOptions.find(option => option.value == this.state.cliente)} search={true} onChange={(e) => { this.setState({ cliente: e.value, }) }} />
+                                                        </div>
+
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <label>Porto</label>
                                                         </div>
