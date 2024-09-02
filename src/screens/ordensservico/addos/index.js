@@ -1435,6 +1435,7 @@ class AddOS extends Component {
                 maximumFractionDigits: 2,
               }).format(template.qntd * template.valor),
               tipo: "text",
+              onChange: () => {} 
             },
             {
               titulo: "VCP",
@@ -1736,6 +1737,7 @@ class AddOS extends Component {
                   maximumFractionDigits: 2,
                 }).format(evento.qntd * evento.valor),
                 tipo: "text",
+                onChange: () => {} 
               },
               {
                 titulo: "VCP",
