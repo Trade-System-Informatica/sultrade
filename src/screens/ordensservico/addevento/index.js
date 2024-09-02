@@ -44,6 +44,7 @@ const estadoInicial = {
     tipo: 0,
     ordem: '',
     remarks: '',
+    qntd: 1,
     contatos: [],
     editavel: '',
     habilitado: true,
@@ -205,6 +206,7 @@ class AddEvento extends Component {
                 tipo: this.state.evento.tipo_sub,
                 ordem: this.state.evento.ordem,
                 remarks: this.state.evento.remarks,
+                qntd: this.state.evento.qntd,
                 valor: this.state.evento.valor,
                 valor: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.evento.valor),
                 vlrc: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.evento.valor1),
@@ -262,7 +264,8 @@ class AddEvento extends Component {
                     { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tiposSubOptions) },
                     { titulo: 'Ordem', valor: util.formatForLogs(this.state.ordem) },
                     { titulo: 'Remarks', valor: util.formatForLogs(this.state.remarks) },
-                    { titulo: 'Fornecedor Custeio', valor: util.formatForLogs(this.state.fornecedorCusteio, 'options', '', '', this.state.fornecedoresOptions) }
+                    { titulo: 'Fornecedor Custeio', valor: util.formatForLogs(this.state.fornecedorCusteio, 'options', '', '', this.state.fornecedoresOptions) },
+                    { titulo: 'Quantidade', valor: util.formatForLogs(this.state.qntd) }
                 ]
             })
         }
@@ -383,6 +386,7 @@ class AddEvento extends Component {
             descricao: evento.descricao || this.state.descricao,
             tipo: evento.tipo_sub || this.state.tipo,
             remarks: evento.remarks || this.state.remarks,
+            qntd: evento.qntd || this.state.qntd,
             valor: evento.valor || this.state.valor,
             valor: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(evento.valor || this.state.valor),
             vlrc: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(evento.valor1 || this.state.vlrc),
@@ -812,6 +816,7 @@ class AddEvento extends Component {
                     tipo: this.state.evento.tipo_sub,
                     ordem: this.state.evento.ordem,
                     remarks: this.state.evento.remarks,
+                    qntd: this.state.evento.qntd,
                     fornecedorCusteio: this.state.evento.Fornecedor_Custeio,
                     ordemBloqueado: false,
                     emailEnviado: this.state.evento.email_enviado ? this.state.evento.email_enviado.split(';') : [],
@@ -1016,7 +1021,8 @@ class AddEvento extends Component {
                 { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tiposSubOptions) },
                 { titulo: 'Ordem', valor: util.formatForLogs(this.state.ordem) },
                 { titulo: 'Remarks', valor: util.formatForLogs(this.state.remarks) },
-                { titulo: 'Fornecedor Custeio', valor: util.formatForLogs(this.state.fornecedorCusteio, 'options', '', '', this.state.fornecedoresOptions) }
+                { titulo: 'Fornecedor Custeio', valor: util.formatForLogs(this.state.fornecedorCusteio, 'options', '', '', this.state.fornecedoresOptions) },
+                { titulo: 'Quantidade', valor: util.formatForLogs(this.state.qntd) }
             ],
             loading: true
         })
@@ -1030,7 +1036,7 @@ class AddEvento extends Component {
         if (parseInt(this.state.chave) === 0 && validForm) {
             await apiEmployee.post(`insertServicoItemBasico.php`, {
                 token: true,
-                values: `'${this.state.chave_os}', '${this.state.data}', '${this.state.fornecedor}', '${this.state.taxa}', '${this.state.descricao}', '${this.state.tipo}', '${this.state.fornecedorCusteio}', '${this.state.remarks}', '${this.state.moeda}', '${parseFloat(this.state.valor == "" ? 0 : this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.vlrc == "" ? 0 : this.state.vlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.repasse ? 1 : 0}'`,
+                values: `'${this.state.chave_os}', '${this.state.data}', '${this.state.fornecedor}', '${this.state.taxa}', '${this.state.descricao}', '${this.state.tipo}', '${this.state.fornecedorCusteio}', '${this.state.remarks}', '${this.state.moeda}', '${parseFloat(this.state.valor == "" ? 0 : this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.vlrc == "" ? 0 : this.state.vlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.repasse ? 1 : 0}', '${this.state.qntd}'`,
                 chave_os: this.state.chave_os,
                 ordem: this.state.ordem.replaceAll(',', '.')
             }).then(
@@ -1091,7 +1097,7 @@ class AddEvento extends Component {
                 tipo_sub: this.state.tipo,
                 Fornecedor_Custeio: this.state.fornecedorCusteio,
                 remarks: this.state.remarks,
-
+                qntd: this.state.qntd
             }).then(
                 async res => {
                     if (res.data[0]) {
@@ -2090,6 +2096,16 @@ class AddEvento extends Component {
                                                             <Field className="form-control fieldDividido_2 text-right " type="text" onClick={(e) => e.target.select()} value={this.state.valor} onChange={async e => { this.setState({ valor: e.currentTarget.valur }); if (this.state.repasse) { this.setState({ vlrc: e.currentTarget.value }) } }} onBlur={async e => { this.setState({ valor: e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.') ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }); if (this.state.repasse) { this.setState({ vlrc: Number(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }) } }} />
                                                         </div>
 
+                                                        <div className='col-1'></div>
+
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Quantidade</label>
+                                                        </div>
+                                                        <div className='col-1 errorMessage'>
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Field className="form-control text-right" type="text" step="0.1" value={this.state.qntd} onChange={async e => { this.setState({ qntd: e.currentTarget.value }) }} />
+                                                        </div>
                                                         <div className='col-1'></div>
 
                                                         {!this.state.repasse &&

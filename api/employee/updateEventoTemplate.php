@@ -27,13 +27,14 @@ if($objData != NULL){
     $repasse = prepareInput($objData->repasse);
     $gruposNovos = $objData->gruposNovos;
     $gruposDeletados = $objData->gruposDeletados;
+    $qntd = prepareInput($objData->qntd);
     
     $os = new OS();
 
     //$result = $employees->checkToken($token);
     //if($result == 'true'){
         //$result = "'" . $id_seaport . "'";
-        $result = $os->updateEventoTemplate($chave, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks, $Moeda, $valor, $valor1, $repasse, $gruposNovos, $gruposDeletados);
+        $result = $os->updateEventoTemplate($chave, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks, $Moeda, $valor, $valor1, $repasse, $gruposNovos, $gruposDeletados, $qntd);
     //}
 } else {
     $result = "false";

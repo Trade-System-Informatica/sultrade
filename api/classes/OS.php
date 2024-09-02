@@ -841,7 +841,7 @@ class OS
     {
         $database = new Database();
 
-        $cols = 'chave_os, data, fornecedor, taxa, descricao, ordem, tipo_sub, Fornecedor_Custeio, remarks, Moeda, valor, valor1, repasse';
+        $cols = 'chave_os, data, fornecedor, taxa, descricao, ordem, tipo_sub, Fornecedor_Custeio, remarks, Moeda, valor, valor1, repasse, qntd';
 
         $result = $database->doInsert('os_servicos_itens', $cols, $values);
 
@@ -853,7 +853,7 @@ class OS
     {
         $database = new Database();
 
-        $cols = 'chave_os, data, fornecedor, taxa, descricao, tipo_sub, Fornecedor_Custeio, remarks, Moeda, valor, valor1, repasse, ordem';
+        $cols = 'chave_os, data, fornecedor, taxa, descricao, tipo_sub, Fornecedor_Custeio, remarks, Moeda, valor, valor1, repasse, qntd, ordem';
         $values .= ", '$ordem'";
 
         if ($chave_os) {
@@ -1073,7 +1073,7 @@ class OS
     {
         $database = new Database();
 
-        $cols = 'data, fornecedor, taxa, descricao, tipo_sub, Fornecedor_Custeio, remarks, Moeda, valor, valor1, repasse, template';
+        $cols = 'data, fornecedor, taxa, descricao, tipo_sub, Fornecedor_Custeio, remarks, Moeda, valor, valor1, repasse, template, qntd';
 
         $result = $database->doInsert('os_servicos_itens', $cols, $values);
 
@@ -1305,11 +1305,11 @@ class OS
         }
     }
 
-    public static function updateServicoItem($chave, $chave_os, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks, $Moeda, $valor, $valor1, $repasse)
+    public static function updateServicoItem($chave, $chave_os, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks, $Moeda, $valor, $valor1, $repasse, $qntd)
     {
         $database = new Database();
 
-        $query = "chave_os = '" . $chave_os . "', data = '" . $data . "', fornecedor = '" . $fornecedor . "', taxa = '" . $taxa . "', descricao = '" . $descricao . "', ordem = '" . $ordem . "', tipo_sub = '" . $tipo_sub . "', Fornecedor_Custeio = '" . $Fornecedor_Custeio . "', remarks = '" . $remarks . "', Moeda = '$Moeda', valor = '$valor', valor1 = '$valor1', repasse = '$repasse'";
+        $query = "chave_os = '" . $chave_os . "', data = '" . $data . "', fornecedor = '" . $fornecedor . "', taxa = '" . $taxa . "', descricao = '" . $descricao . "', ordem = '" . $ordem . "', tipo_sub = '" . $tipo_sub . "', Fornecedor_Custeio = '" . $Fornecedor_Custeio . "', remarks = '" . $remarks . "', qntd = '$qntd', Moeda = '$Moeda', valor = '$valor', valor1 = '$valor1', repasse = '$repasse'";
 
         $eventos = $database->doSelect("os_servicos_itens", "os_servicos_itens.*", "chave_os = $chave_os AND chave != $chave");
 
@@ -1514,11 +1514,11 @@ class OS
         }
     }
 
-    public static function updateEventoTemplate($chave, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks, $Moeda, $valor, $valor1, $repasse, $gruposNovos, $gruposDeletados)
+    public static function updateEventoTemplate($chave, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks, $Moeda, $valor, $valor1, $repasse, $gruposNovos, $gruposDeletados, $qntd)
     {
         $database = new Database();
 
-        $query = "data = '" . $data . "', fornecedor = '" . $fornecedor . "', taxa = '" . $taxa . "', descricao = '" . $descricao . "', ordem = '" . $ordem . "', tipo_sub = '" . $tipo_sub . "', Fornecedor_Custeio = '" . $Fornecedor_Custeio . "', remarks = '" . $remarks . "', Moeda = '$Moeda', valor = '$valor', valor1 = '$valor1', repasse = '$repasse'";
+        $query = "data = '" . $data . "', fornecedor = '" . $fornecedor . "', taxa = '" . $taxa . "', descricao = '" . $descricao . "', ordem = '" . $ordem . "', tipo_sub = '" . $tipo_sub . "', Fornecedor_Custeio = '" . $Fornecedor_Custeio . "', remarks = '" . $remarks . "', qntd = '$qntd', Moeda = '$Moeda', valor = '$valor', valor1 = '$valor1', repasse = '$repasse'";
 
         $result = $database->doUpdate('os_servicos_itens', $query, 'template = 1 AND chave = ' . $chave);
 

@@ -29,6 +29,7 @@ if($objData != NULL){
     $valor = prepareInput($objData->valor);
     $valor1 = prepareInput($objData->valor1);
     $repasse = prepareInput($objData->repasse);
+    $qntd = prepareInput($objData->qntd);
     
     $os = new OS();
 
@@ -37,7 +38,7 @@ if($objData != NULL){
     //$result = $employees->checkToken($token);
     //if($result == 'true'){
         //$result = "'" . $id_seaport . "'";
-        $result = $os->updateServicoItem($chave, $chave_os, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks, $Moeda, $valor, $valor1, $repasse);
+        $result = $os->updateServicoItem($chave, $chave_os, $data, $fornecedor, $taxa, $descricao, $ordem, $tipo_sub, $Fornecedor_Custeio, $remarks, $Moeda, $valor, $valor1, $repasse, $qntd);
     //}
 } else {
     $result = "false";

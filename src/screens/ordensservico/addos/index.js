@@ -242,6 +242,7 @@ const estadoInicial = {
   eventoVlrc: "",
   eventoRepasse: "",
   eventoFornecedorCusteio: "",
+  eventoQntd: "",
 
   taxas: [],
   taxasOptions: [],
@@ -1178,8 +1179,8 @@ class AddOS extends Component {
         Fornecedor_Custeio:
           evento.Fornecedor_Custeio || this.state.eventoFornecedorCusteio,
         chave: this.state.eventoChave,
+        qntd: evento.qntd || this.state.eventoQntd,
       };
-
       await this.setState({
         eventoData: template.data,
         eventoFornecedor: template.fornecedor,
@@ -1206,6 +1207,7 @@ class AddOS extends Component {
         eventoRepasse: template.repasse,
         eventoFornecedorCusteio: template.Fornecedor_Custeio,
         eventoChave: template.chave,
+        eventoQntd: Number(template.qntd),
 
         modalItemAberto: true,
         itemNome: template.descricao,
@@ -1289,6 +1291,10 @@ class AddOS extends Component {
               "",
               this.state.fornecedoresOptions
             ),
+          },
+          {
+            titulo: "Quantidade",
+            valor: util.formatForLogs(this.state.eventoQntd),
           },
         ],
 
@@ -1414,6 +1420,23 @@ class AddOS extends Component {
               },
             },
             {
+              titulo: "Quantidade",
+              valor: Number(template.qntd),
+              tipo: "text",
+              onChange: async (valor) => {
+                await this.setState({ eventoQntd: Number(valor) });
+              },
+            },
+            {
+              titulo: "Valor total",
+              valor: new Intl.NumberFormat("pt-BR", {
+                style: "decimal",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(template.qntd * template.valor),
+              tipo: "text",
+            },
+            {
               titulo: "VCP",
               valor: Number(template.valor1)
                 ? new Intl.NumberFormat("pt-BR", {
@@ -1462,6 +1485,7 @@ class AddOS extends Component {
           eventoTipo: evento.tipo_sub,
           eventoOrdem: evento.ordem,
           eventoRemarks: evento.remarks,
+          eventoQntd: evento.qntd,
           eventoValor: Number(evento.valor)
             ? new Intl.NumberFormat("pt-BR", {
                 style: "decimal",
@@ -1566,6 +1590,10 @@ class AddOS extends Component {
                 "",
                 this.state.fornecedoresOptions
               ),
+            },
+            {
+              titulo: "Quantidade",
+              valor: util.formatForLogs(this.state.eventoQntd),
             },
           ],
 
@@ -1693,6 +1721,23 @@ class AddOS extends Component {
                 },
               },
               {
+                titulo: "Quantidade",
+                valor: Number(evento.qntd),
+                tipo: "text",
+                onChange: async (valor) => {
+                  await this.setState({ eventoQntd: Number(valor) });
+                },
+              },
+              {
+                titulo: "Valor total",
+                valor: new Intl.NumberFormat("pt-BR", {
+                  style: "decimal",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(evento.qntd * evento.valor),
+                tipo: "text",
+              },
+              {
                 titulo: "VCP",
                 valor: Number(evento.valor1)
                   ? new Intl.NumberFormat("pt-BR", {
@@ -1746,6 +1791,7 @@ class AddOS extends Component {
             ) + 1
           }`,
           eventoRemarks: "",
+          eventoQntd: 1,
           eventoValor: "0,00",
           eventoVlrc: "0,00",
           eventoRepasse: false,
@@ -1879,6 +1925,14 @@ class AddOS extends Component {
                         )
                       : "",
                   });
+                },
+              },
+              {
+                titulo: "Quantidade",
+                valor: 1,
+                tipo: "text",
+                onChange: async (valor) => {
+                  await this.setState({ eventoQntd: Number(valor) });
                 },
               },
               {
@@ -2268,7 +2322,7 @@ class AddOS extends Component {
       await apiEmployee
         .post(`insertServicoItemBasico.php`, {
           token: true,
-          values: `'${this.state.chave}', '', '${template.fornecedor}', '${template.taxa}', '${template.descricao}', '${template.tipo_sub}', '${template.Fornecedor_Custeio}', '${template.remarks}', '${template.Moeda}', '${template.valor}', '${template.valor1}', '${template.repasse}'`,
+          values: `'${this.state.chave}', '', '${template.fornecedor}', '${template.taxa}', '${template.descricao}', '${template.tipo_sub}', '${template.Fornecedor_Custeio}', '${template.remarks}', '${template.Moeda}', '${template.valor}', '${template.valor1}', '${template.repasse}', '${template.qntd}'`,
           chave_os: this.state.chave,
           ordem,
         })
@@ -6787,6 +6841,7 @@ class AddOS extends Component {
       eventoFornecedorCusteio: itemEdit.valores.find(
         (e) => e.titulo === "Fornecedor Custeio"
       )?.valor,
+      eventoQntd: itemEdit.valores.find((e) => e.titulo === "Quantidade")?.valor,
     });
   };
 
@@ -6870,6 +6925,10 @@ class AddOS extends Component {
             this.state.fornecedoresOptions
           ),
         },
+        {
+          titulo: "Quantidade",
+          valor: util.formatForLogs(this.state.eventoQntd),
+        },
       ],
       loading: true,
     });
@@ -6882,13 +6941,7 @@ class AddOS extends Component {
       await apiEmployee
         .post(`insertServicoItemBasico.php`, {
           token: true,
-          values: `'${this.state.chave}', '${this.state.eventoData}', '${
-            this.state.eventoFornecedor
-          }', '${this.state.eventoTaxa}', '${this.state.eventoDescricao}', '${
-            this.state.eventoTipo
-          }', '${this.state.eventoFornecedorCusteio}', '${
-            this.state.eventoRemarks
-          }', '${this.state.eventoMoeda}', '${parseFloat(
+          values: `'${this.state.chave}', '${this.state.eventoData}', '${this.state.eventoFornecedor}', '${this.state.eventoTaxa}', '${this.state.eventoDescricao}', '${this.state.eventoTipo}', '${this.state.eventoFornecedorCusteio}', '${this.state.eventoRemarks}', '${this.state.eventoMoeda}', '${parseFloat(
             this.state.eventoValor == ""
               ? 0
               : this.state.eventoValor.replaceAll(".", "").replaceAll(",", ".")
@@ -6898,7 +6951,7 @@ class AddOS extends Component {
               : this.state.eventoVlrc.replaceAll(".", "").replaceAll(",", ".")
           )}', '${
             this.state.eventoRepasse && this.state.eventoRepasse != "0" ? 1 : 0
-          }'`,
+          }', '${this.state.eventoQntd}'`,
           chave_os: this.state.chave,
           ordem: this.state.eventoOrdem.replaceAll(",", "."),
         })
@@ -6945,6 +6998,7 @@ class AddOS extends Component {
           tipo_sub: this.state.eventoTipo,
           Fornecedor_Custeio: this.state.eventoFornecedorCusteio,
           remarks: this.state.eventoRemarks,
+          qntd: this.state.eventoQntd,
         })
         .then(
           async (res) => {
