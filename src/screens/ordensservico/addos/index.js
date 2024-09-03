@@ -3521,53 +3521,53 @@ class AddOS extends Component {
                             //console.log(e);
                             if (e.tipo != 3) {
                               if (e.moeda == 5) {
-                                valorTotal += parseFloat((e.valor * e.qntd));
-                                totalFinal += parseFloat((e.valor * e.qntd));
+                                valorTotal += parseFloat((e.valor));
+                                totalFinal += parseFloat((e.valor));
                                 totalFinalDolar += Util.toFixed(
                                   parseFloat(
-                                    (e.valor * e.qntd) / this.state.pdfContent[0].roe
+                                    (e.valor) / this.state.pdfContent[0].roe
                                   ),
                                   2
                                 );
                               } else {
                                 valorTotal += Util.toFixed(
                                   parseFloat(
-                                    (e.valor * e.qntd) * this.state.pdfContent[0].roe
+                                    (e.valor) * this.state.pdfContent[0].roe
                                   ),
                                   2
                                 );
                                 totalFinal += Util.toFixed(
                                   parseFloat(
-                                    (e.valor * e.qntd) * this.state.pdfContent[0].roe
+                                    (e.valor) * this.state.pdfContent[0].roe
                                   ),
                                   2
                                 );
-                                totalFinalDolar += parseFloat((e.valor * e.qntd));
+                                totalFinalDolar += parseFloat((e.valor));
                               }
                             } else {
                               if (e.moeda == 5) {
-                                valorTotal -= parseFloat((e.valor * e.qntd));
-                                descontoFinal += parseFloat((e.valor * e.qntd));
+                                valorTotal -= parseFloat((e.valor));
+                                descontoFinal += parseFloat((e.valor));
                                 descontoFinalDolar += Util.toFixed(
                                   parseFloat(
-                                    (e.valor * e.qntd) / this.state.pdfContent[0].roe
+                                    (e.valor) / this.state.pdfContent[0].roe
                                   ),
                                   2
                                 );
                               } else {
                                 valorTotal -= Util.toFixed(
                                   parseFloat(
-                                    (e.valor * e.qntd) * this.state.pdfContent[0].roe
+                                    (e.valor) * this.state.pdfContent[0].roe
                                   ),
                                   2
                                 );
                                 descontoFinal += Util.toFixed(
                                   parseFloat(
-                                    (e.valor * e.qntd) * this.state.pdfContent[0].roe
+                                    (e.valor) * this.state.pdfContent[0].roe
                                   ),
                                   2
                                 );
-                                descontoFinalDolar += parseFloat((e.valor * e.qntd));
+                                descontoFinalDolar += parseFloat((e.valor));
                               }
                             }
                           })}
@@ -3700,18 +3700,18 @@ class AddOS extends Component {
                       //console.log(e);
                       if (e.moeda == 5) {
                         //valorTotal -= parseFloat(e.valor);
-                        descontoFinal += parseFloat((e.valor * e.qntd));
+                        descontoFinal += parseFloat((e.valor));
                         descontoFinalDolar += Util.toFixed(
-                          parseFloat((e.valor * e.qntd) / this.state.pdfContent[0].roe),
+                          parseFloat((e.valor) / this.state.pdfContent[0].roe),
                           2
                         );
                       } else {
                         //valorTotal -= Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
                         descontoFinal += Util.toFixed(
-                          parseFloat((e.valor * e.qntd) * this.state.pdfContent[0].roe),
+                          parseFloat((e.valor) * this.state.pdfContent[0].roe),
                           2
                         );
-                        descontoFinalDolar += parseFloat((e.valor * e.qntd));
+                        descontoFinalDolar += parseFloat((e.valor));
                       }
                     })}
                   {this.state.pdfContent
@@ -3720,18 +3720,18 @@ class AddOS extends Component {
                       //console.log(e);
                       if (e.moeda == 5) {
                         //valorTotal -= parseFloat(e.valor);
-                        recebimentoFinal += parseFloat((e.valor * e.qntd));
+                        recebimentoFinal += parseFloat((e.valor));
                         recebimentoFinalDolar += Util.toFixed(
-                          parseFloat((e.valor * e.qntd) / this.state.pdfContent[0].roe),
+                          parseFloat((e.valor) / this.state.pdfContent[0].roe),
                           2
                         );
                       } else {
                         //valorTotal -= Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
                         recebimentoFinal += Util.toFixed(
-                          parseFloat((e.valor * e.qntd) * this.state.pdfContent[0].roe),
+                          parseFloat((e.valor) * this.state.pdfContent[0].roe),
                           2
                         );
-                        recebimentoFinalDolar += parseFloat((e.valor * e.qntd));
+                        recebimentoFinalDolar += parseFloat((e.valor));
                       }
                     })}
                 </table>
