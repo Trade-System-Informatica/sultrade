@@ -4098,7 +4098,7 @@ class AddOS extends Component {
               pdfContent
                 .filter((content) => content.fornecedor_custeio == custeio)
                 .map((content, index) => {
-                  let valor_cobrar = content.valor_cobrar;
+                  let valor_cobrar = (content.valor_cobrar * content.qntd);
                   let valor_pago = content.valor_pago;
 
                   if(content?.fornecedor_custeioCodigo == 269 || content?.fornecedor_custeioCodigo == 32) 
@@ -4173,7 +4173,7 @@ class AddOS extends Component {
               // ESTE TRECHO CARREGA OS DADOS CASO CUSTEIO SEJA SULTRADE
               pdfContent.map((content, index) => {
                 if (content.fornecedor_custeio == custeio) {
-                  let valor_cobrar = content.valor_cobrar;
+                  let valor_cobrar = (content.valor_cobrar * content.qntd);
                   let valor_pago = content.valor_pago;
 
                   if (content.moeda == 6) {
@@ -4401,7 +4401,7 @@ class AddOS extends Component {
             valorTotal = 0;
 
             const fields = [];
-            let valor_cobrar = repasse.valor_cobrar;
+            let valor_cobrar = (repasse.valor_cobrar * repasse.qntd);
             let valor_pago = repasse.valor_pago;
 
             if (repasse.moeda == 6) {
