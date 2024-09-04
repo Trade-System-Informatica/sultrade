@@ -558,20 +558,20 @@ class AddOS extends Component {
     this.state.eventos.map((evento) => {
       if (evento.tipo_sub == 0 || evento.tipo_sub == 1) {
         if (evento.Moeda == 5) {
-          eventosTotal += parseFloat(evento.valor);
+          eventosTotal += parseFloat(evento.valor*evento.qntd);
         } else if (evento.Moeda == 6) {
           eventosTotal +=
-            parseFloat(evento.valor) *
+            parseFloat(evento.valor*evento.qntd) *
             (parseFloat(this.state.os.ROE) == 0
               ? 5
               : parseFloat(this.state.os.ROE));
         }
       } else {
         if (evento.Moeda == 5) {
-          eventosTotal -= parseFloat(evento.valor);
+          eventosTotal -= parseFloat(evento.valor *evento.qntd);
         } else if (evento.Moeda == 6) {
           eventosTotal -=
-            parseFloat(evento.valor) *
+            parseFloat(evento.valor *evento.qntd) *
             (parseFloat(this.state.os.ROE) == 0
               ? 5
               : parseFloat(this.state.os.ROE));
@@ -1418,7 +1418,7 @@ class AddOS extends Component {
                 : "0,00",
               tipo2: "text",
               onChange2: async (valor) => {
-                await this.setState({ eventoValor: valor }, updateValorTotal());
+                await this.setState({ eventoValor: valor }, updateValorTotal);
               },
               onBlur2: async (valor) => {
                 await this.setState({
@@ -1431,7 +1431,7 @@ class AddOS extends Component {
                         maximumFractionDigits: 2,
                       }).format(valor.replaceAll(".", "").replaceAll(",", "."))
                     : "0,00",
-                }, updateValorTotal());
+                }, updateValorTotal);
               },
             },
             {
@@ -1439,7 +1439,7 @@ class AddOS extends Component {
               valor: Number(template.qntd),
               tipo: "text",
               onChange: async (valor) => {
-                await this.setState({ eventoQntd: Number(valor) }, updateValorTotal());
+                await this.setState({ eventoQntd: Number(valor) }, updateValorTotal);
               },
             },
             {
@@ -1731,7 +1731,7 @@ class AddOS extends Component {
                   : "0,00",
                 tipo2: "text",
                 onChange2: async (valor) => {
-                  await this.setState({ eventoValor: valor }, updateValorTotal());
+                  await this.setState({ eventoValor: valor }, updateValorTotal);
                 },
                 onBlur2: async (valor) => {
                   await this.setState({
@@ -1746,7 +1746,7 @@ class AddOS extends Component {
                           valor.replaceAll(".", "").replaceAll(",", ".")
                         )
                       : "0,00",
-                  }, updateValorTotal());
+                  }, updateValorTotal);
                 },
               },
               {
@@ -1754,7 +1754,7 @@ class AddOS extends Component {
                 valor: Number(evento.qntd),
                 tipo: "text",
                 onChange: async (valor) => {
-                  await this.setState({ eventoQntd: Number(valor) }, updateValorTotal());
+                  await this.setState({ eventoQntd: Number(valor) }, updateValorTotal);
                 },
               },
               {
@@ -3521,53 +3521,56 @@ class AddOS extends Component {
                             //console.log(e);
                             if (e.tipo != 3) {
                               if (e.moeda == 5) {
-                                valorTotal += parseFloat((e.valor));
-                                totalFinal += parseFloat((e.valor));
+                                valorTotal += parseFloat((e.valor * e.qntd));
+                                console.log(valorTotal);
+                                totalFinal += parseFloat((e.valor * e.qntd));
+                                console.log(totalFinal);
                                 totalFinalDolar += Util.toFixed(
                                   parseFloat(
-                                    (e.valor) / this.state.pdfContent[0].roe
+                                    (e.valor * e.qntd) / this.state.pdfContent[0].roe
                                   ),
                                   2
                                 );
+                                console.log(totalFinalDolar);
                               } else {
                                 valorTotal += Util.toFixed(
                                   parseFloat(
-                                    (e.valor) * this.state.pdfContent[0].roe
+                                    ((e.valor * e.qntd)) * this.state.pdfContent[0].roe
                                   ),
                                   2
                                 );
                                 totalFinal += Util.toFixed(
                                   parseFloat(
-                                    (e.valor) * this.state.pdfContent[0].roe
+                                    (e.valor * e.qntd) * this.state.pdfContent[0].roe
                                   ),
                                   2
                                 );
-                                totalFinalDolar += parseFloat((e.valor));
+                                totalFinalDolar += parseFloat((e.valor * e.qntd));
                               }
                             } else {
                               if (e.moeda == 5) {
-                                valorTotal -= parseFloat((e.valor));
-                                descontoFinal += parseFloat((e.valor));
+                                valorTotal -= parseFloat((e.valor * e.qntd));
+                                descontoFinal += parseFloat((e.valor * e.qntd));
                                 descontoFinalDolar += Util.toFixed(
                                   parseFloat(
-                                    (e.valor) / this.state.pdfContent[0].roe
+                                    (e.valor * e.qntd) / this.state.pdfContent[0].roe
                                   ),
                                   2
                                 );
                               } else {
                                 valorTotal -= Util.toFixed(
                                   parseFloat(
-                                    (e.valor) * this.state.pdfContent[0].roe
+                                    (e.valor * e.qntd) * this.state.pdfContent[0].roe
                                   ),
                                   2
                                 );
                                 descontoFinal += Util.toFixed(
                                   parseFloat(
-                                    (e.valor) * this.state.pdfContent[0].roe
+                                    (e.valor * e.qntd) * this.state.pdfContent[0].roe
                                   ),
                                   2
                                 );
-                                descontoFinalDolar += parseFloat((e.valor));
+                                descontoFinalDolar += parseFloat((e.valor * e.qntd));
                               }
                             }
                           })}
@@ -3700,18 +3703,18 @@ class AddOS extends Component {
                       //console.log(e);
                       if (e.moeda == 5) {
                         //valorTotal -= parseFloat(e.valor);
-                        descontoFinal += parseFloat((e.valor));
+                        descontoFinal += parseFloat((e.valor * e.qntd));
                         descontoFinalDolar += Util.toFixed(
-                          parseFloat((e.valor) / this.state.pdfContent[0].roe),
+                          parseFloat((e.valor * e.qntd) / this.state.pdfContent[0].roe),
                           2
                         );
                       } else {
                         //valorTotal -= Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
                         descontoFinal += Util.toFixed(
-                          parseFloat((e.valor) * this.state.pdfContent[0].roe),
+                          parseFloat((e.valor * e.qntd) * this.state.pdfContent[0].roe),
                           2
                         );
-                        descontoFinalDolar += parseFloat((e.valor));
+                        descontoFinalDolar += parseFloat((e.valor * e.qntd));
                       }
                     })}
                   {this.state.pdfContent
@@ -3720,18 +3723,18 @@ class AddOS extends Component {
                       //console.log(e);
                       if (e.moeda == 5) {
                         //valorTotal -= parseFloat(e.valor);
-                        recebimentoFinal += parseFloat((e.valor));
+                        recebimentoFinal += parseFloat((e.valor * e.qntd));
                         recebimentoFinalDolar += Util.toFixed(
-                          parseFloat((e.valor) / this.state.pdfContent[0].roe),
+                          parseFloat((e.valor * e.qntd) / this.state.pdfContent[0].roe),
                           2
                         );
                       } else {
                         //valorTotal -= Util.toFixed(parseFloat(e.valor * this.state.pdfContent[0].roe), 2);
                         recebimentoFinal += Util.toFixed(
-                          parseFloat((e.valor) * this.state.pdfContent[0].roe),
+                          parseFloat((e.valor * e.qntd) * this.state.pdfContent[0].roe),
                           2
                         );
-                        recebimentoFinalDolar += parseFloat((e.valor));
+                        recebimentoFinalDolar += parseFloat((e.valor * e.qntd));
                       }
                     })}
                 </table>
@@ -5342,9 +5345,9 @@ class AddOS extends Component {
                 let valor;
 
                 if (event.Moeda == 5) {
-                  valor = Util.toFixed(parseFloat(event.valor / roe), 2);
+                  valor = Util.toFixed(parseFloat((event.valor*event.qntd) / roe), 2);
                 } else {
-                  valor = parseFloat(event.valor);
+                  valor = parseFloat((event.valor*event.qntd));
                 }
 
                 const total = valor * quantity;
@@ -5454,9 +5457,9 @@ class AddOS extends Component {
                 let valor;
 
                 if (event.Moeda == 5) {
-                  valor = Util.toFixed(parseFloat(event.valor / roe), 2);
+                  valor = Util.toFixed(parseFloat((event.valor*event.qntd) / roe), 2);
                 } else {
-                  valor = parseFloat(event.valor);
+                  valor = parseFloat((event.valor*event.qntd));
                 }
 
                 const total = valor * quantity;
@@ -5559,9 +5562,9 @@ class AddOS extends Component {
                 let valor;
 
                 if (event.Moeda == 5) {
-                  valor = Util.toFixed(parseFloat(event.valor / roe), 2);
+                  valor = Util.toFixed(parseFloat((event.valor*event.qntd) / roe), 2);
                 } else {
-                  valor = parseFloat(event.valor);
+                  valor = parseFloat((event.valor*event.qntd));
                 }
 
                 const total = valor * quantity;
@@ -7689,8 +7692,8 @@ class AddOS extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 6
-                                                          ? feed.valor
-                                                          : feed.valor /
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) /
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -7715,8 +7718,8 @@ class AddOS extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 5
-                                                          ? feed.valor
-                                                          : feed.valor *
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) *
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -7796,8 +7799,8 @@ class AddOS extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 6
-                                                          ? feed.valor
-                                                          : feed.valor /
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) /
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -7822,8 +7825,8 @@ class AddOS extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 5
-                                                          ? feed.valor
-                                                          : feed.valor *
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) *
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -7991,8 +7994,8 @@ class AddOS extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 6
-                                                          ? feed.valor
-                                                          : feed.valor /
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) /
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -8017,8 +8020,8 @@ class AddOS extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 5
-                                                          ? feed.valor
-                                                          : feed.valor *
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) *
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -8134,8 +8137,8 @@ class AddOS extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 6
-                                                          ? feed.valor
-                                                          : feed.valor /
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) /
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -8160,8 +8163,8 @@ class AddOS extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 5
-                                                          ? feed.valor
-                                                          : feed.valor *
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) *
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -8388,8 +8391,8 @@ class AddOS extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 6
-                                                          ? feed.valor
-                                                          : feed.valor /
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) /
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -8414,8 +8417,8 @@ class AddOS extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 5
-                                                          ? feed.valor
-                                                          : feed.valor *
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) *
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -8478,8 +8481,8 @@ class AddOS extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 6
-                                                          ? feed.valor
-                                                          : feed.valor /
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) /
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -8504,8 +8507,8 @@ class AddOS extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 5
-                                                          ? feed.valor
-                                                          : feed.valor *
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) *
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -12266,7 +12269,7 @@ class AddOS extends Component {
                                                           minimumFractionDigits: 2,
                                                           maximumFractionDigits: 2,
                                                         }
-                                                      ).format(feed.valor)}
+                                                      ).format((feed.valor * feed.qntd))}
                                                     </p>
                                                   </td>
                                                   <td>
@@ -12341,7 +12344,7 @@ class AddOS extends Component {
                                                           minimumFractionDigits: 2,
                                                           maximumFractionDigits: 2,
                                                         }
-                                                      ).format(feed.valor)}
+                                                      ).format((feed.valor * feed.qntd))}
                                                     </p>
                                                   </td>
                                                   <td>

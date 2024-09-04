@@ -198,7 +198,7 @@ class Navios
             os_grupos_taxas.descricao as descGrupo,
             os_servicos_itens.descricao as descos,
             os_servicos_itens.valor as valor,
-            os_servicos_itens.valor as qntd,
+            os_servicos_itens.qntd as qntd,
             os_servicos_itens.moeda,
             os_servicos_itens.tipo_sub AS tipo,
             os_servicos_itens.repasse AS repasse,

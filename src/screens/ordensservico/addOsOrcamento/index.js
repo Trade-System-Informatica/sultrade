@@ -11060,7 +11060,6 @@ class AddOsOrcamento extends Component {
                                   className="form-control"
                                   disabled={!this.state.editavel}
                                   type="text"
-                                  disabled
                                   value={
                                     this.state.chave ? this.state.chave : ""
                                   }
@@ -11116,7 +11115,6 @@ class AddOsOrcamento extends Component {
                                   className="form-control"
                                   disabled={!this.state.editavel}
                                   type="date"
-                                  disabled
                                   value={this.state.abertura}
                                 />
                               </div>
@@ -11520,7 +11518,6 @@ class AddOsOrcamento extends Component {
                                       type="text"
                                       step="0.1"
                                       value={this.state.governmentTaxes}
-                                      disabled
                                     />
                                   </div>
                                   <div className="col-1 errorMessage"></div>
@@ -11539,7 +11536,6 @@ class AddOsOrcamento extends Component {
                                       type="text"
                                       step="0.1"
                                       value={this.state.bankCharges}
-                                      disabled
                                     />
                                   </div>
                                   <div className="col-1 errorMessage"></div>
