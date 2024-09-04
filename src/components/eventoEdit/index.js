@@ -208,22 +208,22 @@ class EventoEdit extends Component {
             }
         }
 
-        if (itemEdit.valores.find((e, i) => i === index)?.titulo == "Valor" && itemEdit.valores.find((e) => e.titulo == "Repasse")?.valor) {
+        if (itemEdit.valores.find((e, i) => i === index)?.titulo == "Valor unitário" && itemEdit.valores.find((e) => e.titulo == "Repasse")?.valor) {
             itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "VCP" ? ({ ...e, valor: value }) : ({ ...e }));
             if (blur) {
-                itemEdit.valores.find((e) => e.titulo == "Valor").onChange2(value);
+                itemEdit.valores.find((e) => e.titulo == "Valor unitário").onChange2(value);
                 itemEdit.valores.find((e) => e.titulo == "VCP").onChange(value);
             }
         } else if (itemEdit.valores.find((e, i) => i === index)?.titulo == "Taxa" && !itemEdit.valores.find((e) => e.titulo == "Repasse")?.valor) {
             const newValue = itemEdit.valores.find((e, i) => i === index)?.options.find((e) => e.value == value)?.money;
 
-            itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Valor" ? ({ ...e, valor2: newValue ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(newValue) : '0,00' }) : ({ ...e }))
+            itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Valor unitário" ? ({ ...e, valor2: newValue ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(newValue) : '0,00' }) : ({ ...e }))
         } else if (itemEdit.valores.find((e, i) => i === index)?.titulo == "Repasse") {
             if (value) {
                 const VCP = itemEdit.valores.find((e) => e.titulo == "VCP")?.valor;
-                itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Valor" ? ({ ...e, valor2: VCP }) : ({ ...e }))
+                itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "Valor unitário" ? ({ ...e, valor2: VCP }) : ({ ...e }))
                 itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "VCP" ? ({ ...e, hidden: true }) : ({ ...e }))
-                itemEdit.valores.find((e) => e.titulo == "Valor").onChange2(itemEdit.valores.find((e) => e.titulo == "Valor")?.valor2);
+                itemEdit.valores.find((e) => e.titulo == "Valor unitário").onChange2(itemEdit.valores.find((e) => e.titulo == "Valor unitário")?.valor2);
             } else {
                 itemEdit.valores = itemEdit.valores.map((e) => e.titulo == "VCP" ? ({ ...e, hidden: false }) : ({ ...e }))
             }

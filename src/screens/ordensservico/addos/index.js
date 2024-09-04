@@ -1264,7 +1264,7 @@ class AddOS extends Component {
             ),
           },
           {
-            titulo: "Valor",
+            titulo: "Valor unitário",
             valor: util.formatForLogs(this.state.eventoValor, "money", "0,00"),
           },
           {
@@ -1401,7 +1401,7 @@ class AddOS extends Component {
             },
             {
               half: true,
-              titulo: "Valor",
+              titulo: "Valor unitário",
               obrigatorio: true,
               valor1: template.Moeda,
               tipo1: "select",
@@ -1573,7 +1573,7 @@ class AddOS extends Component {
               ),
             },
             {
-              titulo: "Valor",
+              titulo: "Valor unitário",
               valor: util.formatForLogs(
                 this.state.eventoValor,
                 "money",
@@ -1714,7 +1714,7 @@ class AddOS extends Component {
               },
               {
                 half: true,
-                titulo: "Valor",
+                titulo: "Valor unitário",
                 obrigatorio: true,
                 valor1: evento.Moeda,
                 tipo1: "select",
@@ -1928,7 +1928,7 @@ class AddOS extends Component {
               },
               {
                 half: true,
-                titulo: "Valor",
+                titulo: "Valor unitário",
                 obrigatorio: true,
                 valor1: 6,
                 tipo1: "select",
@@ -6860,8 +6860,8 @@ class AddOS extends Component {
       eventoFornecedor: itemEdit.valores.find((e) => e.titulo === "Fornecedor")
         ?.valor,
       eventoTaxa: itemEdit.valores.find((e) => e.titulo === "Taxa")?.valor,
-      eventoMoeda: itemEdit.valores.find((e) => e.titulo === "Valor")?.valor1,
-      eventoValor: itemEdit.valores.find((e) => e.titulo === "Valor")?.valor2,
+      eventoMoeda: itemEdit.valores.find((e) => e.titulo === "Valor unitário")?.valor1,
+      eventoValor: itemEdit.valores.find((e) => e.titulo === "Valor unitário")?.valor2,
       eventoVlrc: itemEdit.valores.find((e) => e.titulo === "VCP")?.valor,
       eventoRepasse: itemEdit.valores.find((e) => e.titulo === "Repasse")
         ?.valor,
@@ -6918,7 +6918,7 @@ class AddOS extends Component {
           ),
         },
         {
-          titulo: "Valor",
+          titulo: "Valor unitário",
           valor: util.formatForLogs(this.state.eventoValor, "money", "0,00"),
         },
         {
