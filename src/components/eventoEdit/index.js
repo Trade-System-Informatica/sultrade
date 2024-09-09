@@ -18,6 +18,7 @@ const estadoInicial = {
     optionsTexto: "",
     itemEdit: {},
     habilitado: false,
+    editavelDataFaturamento: true,
 
     modalAberto: false,
     modal: '',
@@ -43,6 +44,11 @@ class EventoEdit extends Component {
         ...estadoInicial,
     }
 
+    componentDidMount() {
+        this.setState({
+            editavelDataFaturamento: this.props.EventoEdit?.editavelDataFaturamento
+        });
+    }
 
     componentDidUpdate = async (prevProps, prevState) => {
         if ((this.props.itemEdit?.valores) && ((!prevProps.itemEdit?.valores) || (!prevProps.aberto && this.props.aberto))) {
@@ -408,19 +414,40 @@ class EventoEdit extends Component {
                                                 <div className="row">
                                                     <div className="col-2"></div>
                                                     <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                        {!this.props.chave? 
-                                                            this.props.editavel ?
-                                                                <button type="submit" disabled={!this.props.valid} style={this.props.valid ? { width: 300, backgroundColor: "white" } : { width: 300 }} >Salvar</button>
-                                                            :
-                                                                <button type="submit" disabled={!this.props.valid && this.state.habilitado} style={this.props.valid && this.state.habilitado ? { width: 300, backgroundColor: "white" } : { width: 300 }} >Salvar</button>
-                                                            
-                                                        : <button type="submit" disabled={!this.props.valid} style={this.props.valid ? { width: 300, backgroundColor: "white" } : { width: 300 }} >Salvar</button>
-                                                        }
-                                                    </div>
+                                                    {
+                                                        !this.props.chave ? 
+                                                            (this.props.editavel && this.props.editavelDataFaturamento ?
+                                                                <button 
+                                                                    type="submit" 
+                                                                    disabled={!this.props.valid} 
+                                                                    style={this.props.valid ? { width: 300, backgroundColor: "white" } : { width: 300 }}
+                                                                >
+                                                                    Salvar
+                                                                </button>
+                                                                :
+                                                                <button 
+                                                                    type="submit" 
+                                                                    disabled={!this.props.valid || !this.props.editavelDataFaturamento} 
+                                                                    style={this.props.valid && this.props.editavelDataFaturamento ? { width: 300, backgroundColor: "white" } : { width: 300 }}
+                                                                >
+                                                                    Salvar
+                                                                </button>
+                                                            )
+                                                        :
+                                                        <button 
+                                                            type="submit" 
+                                                            disabled={!this.props.valid || !this.props.editavelDataFaturamento} 
+                                                            style={this.props.valid && this.props.editavelDataFaturamento ? { width: 300, backgroundColor: "white" } : { width: 300 }}
+                                                        >
+                                                            Salvar
+                                                        </button>
+                                                    }
+                                                </div>
                                                     <div className="col-2"></div>
                                                 </div>
                                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
-                                                {!this.props.chave? !this.props.editavel? !this.state.habilitado? <p style={{ display: 'flex', justifyContent: 'center', margin: 'auto' , color: 'white'}}>Os encerrada, somente eventos do tipo: Desconto ou Recebimento de Remessas</p> : null : null : null}
+                                                {!this.props.chave? !this.props.editavel? !this.state.habilitado? <p style={{ display: 'flex', justifyContent: 'center', margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>Os encerrada, somente eventos do tipo: Desconto ou Recebimento de Remessas</p> : null : null : null}
+                                                {!this.props.editavelDataFaturamento? <p style={{ display: 'flex', justifyContent: 'center', margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>Os faturada, não é possível editar o evento.</p> : null}
                                             </div>
                                         </div>
                                     </div>

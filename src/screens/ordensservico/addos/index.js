@@ -73,6 +73,7 @@ const estadoInicial = {
   empresa: "",
   operador: "",
   editavel: true,
+  editavelDataFaturamento: true,
 
   deleteSolicitao: false,
 
@@ -356,6 +357,15 @@ class AddOS extends Component {
         await this.setState({ editavel: false });
       } else {
         await this.setState({ editavel: true });
+      }
+
+      if (
+        moment(this.state.os.Data_Faturamento).format("YYYY-MM-DD") !=
+        "Invalid date"
+      ) {
+        await this.setState({ editavelDataFaturamento: false });
+      } else {
+        await this.setState({ editavelDataFaturamento: true });
       }
 
       if (this.state.cabecalho) {
@@ -11356,6 +11366,7 @@ class AddOS extends Component {
                                                 state: {
                                                   os: { ...this.state.os },
                                                   editavel: this.state.editavel,
+                                                  editavelDataFaturamento: this.state.editavelDataFaturamento,
                                                 },
                                               }}
                                             >
@@ -12188,6 +12199,7 @@ class AddOS extends Component {
                     setItemEdit={(itemEdit) => this.revertItemEdit(itemEdit)}
                     itemEdit={this.state.itemEdit}
                     editavel={this.state.editavel}
+                    editavelDataFaturamento={this.state.editavelDataFaturamento}
                     onSubmit={this.salvarEvento}
                     valid={validFormEvento}
                     aberto={this.state.modalItemAberto}

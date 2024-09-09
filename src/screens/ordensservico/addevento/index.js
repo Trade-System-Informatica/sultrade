@@ -47,6 +47,7 @@ const estadoInicial = {
     qntd: 1,
     contatos: [],
     editavel: '',
+    editavelDataFaturamento: true,
     habilitado: true,
 
     campos: [],
@@ -186,6 +187,9 @@ class AddEvento extends Component {
         if(this.props.location?.state?.editavel == true || this.props.location?.state?.editavel == false){
             this.setState({editavel: this.props.location.state.editavel})
         }
+        if(this.props.location?.state?.editavelDataFaturamento == true || this.props.location?.state?.editavelDataFaturamento == false){
+            this.setState({editavelDataFaturamento: this.props.location.state.editavelDataFaturamento})
+        }
         if (parseInt(id) != 0) {
             if (!this.props.location || !this.props.location.state || !this.props.location.state.evento) {
                 const evento = await loader.getBody(`getSolicitacao.php`, { chave: this.state.chave });
@@ -286,6 +290,9 @@ class AddEvento extends Component {
                     this.setState({habilitado: true})
                 }
             }
+            if(this.props.location?.state?.editavelDataFaturamento == false){
+                this.setState({habilitado: false})
+            } 
         }
         console.log(this.state.habilitado)
         console.log(this.props.location.state.editavel)
@@ -305,6 +312,9 @@ class AddEvento extends Component {
                     }
                 }else {
                     this.setState({habilitado: true})
+                }
+                if(this.props.location?.state?.editavelDataFaturamento == false){
+                    this.setState({habilitado: false})
                 }
             }
             setTimeout(() => {
@@ -2143,13 +2153,16 @@ class AddEvento extends Component {
 
                                             {/* ALERTA */}
                                             {this.state.chave == 0 ?
+                                                !this.state.editavelDataFaturamento?
+                                                <p style={{display: 'flex', justifyContent: 'center', margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>Os faturada, não é possível adicionar um evento.</p>
+                                                :
                                                 !this.state.editavel?
                                                     !this.state.habilitado?
-                                                        <p style={{maxWidth: 600, margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>Os encerrada, somente eventos do tipo: Desconto ou Recebimento de Remessas</p>
+                                                        <p style={{display: 'flex', justifyContent: 'center', margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>Os encerrada, somente eventos do tipo: Desconto ou Recebimento de Remessas</p>
                                                     :
-                                                        null
-                                                :
                                                     null
+                                                :
+                                                null
                                             :
                                                 null}
                                             <div className="row">
