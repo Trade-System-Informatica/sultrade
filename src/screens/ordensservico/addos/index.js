@@ -793,7 +793,7 @@ class AddOS extends Component {
                 permissaoImprime: permissao ? permissao.Liberacao.split(``)[4] : 0
             }*/
     });
-    console.log(this.state.acessosPermissoes);
+    console.log('permissoes', this.state.acessosPermissoes);
   };
 
   checkOsClosed = () => {
@@ -802,6 +802,26 @@ class AddOS extends Component {
         this.state.acessosPermissoes
           .filter((e) => {
             if (e.acessoAcao == "OS_ENCERRADA") {
+              return e;
+            }
+          })
+          .map((e) => e.permissaoEdita)[0] == 1
+      ) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return false;
+    }
+  };
+
+  checkOsFaturada = () => {
+    if (!this.state.editavelDataFaturamento) {
+      if (
+        this.state.acessosPermissoes
+          .filter((e) => {
+            if (e.acessoAcao == "OS_FATURADA") {
               return e;
             }
           })
@@ -10954,6 +10974,7 @@ class AddOS extends Component {
                               <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                 <Field
                                   className="form-control"
+                                  disabled={this.checkOsFaturada()}
                                   type="date"
                                   value={this.state.faturamento}
                                   onChange={async (e) => {
