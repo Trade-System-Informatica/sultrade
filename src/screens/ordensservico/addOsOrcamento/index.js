@@ -77,6 +77,7 @@ const estadoInicial = {
   empresa: "",
   operador: "",
   editavel: true,
+  editavelDataFaturamento: true,
 
   deleteSolicitao: false,
 
@@ -11858,6 +11859,7 @@ class AddOsOrcamento extends Component {
                                                 state: {
                                                   os: { ...this.state.os },
                                                   editavel: this.state.editavel,
+                                                  editavelDataFaturamento: this.state.editavelDataFaturamento,
                                                 },
                                               }}
                                             >
@@ -12690,6 +12692,7 @@ class AddOsOrcamento extends Component {
                     setItemEdit={(itemEdit) => this.revertItemEdit(itemEdit)}
                     itemEdit={this.state.itemEdit}
                     editavel={this.state.editavel}
+                    editavelDataFaturamento={this.state.editavelDataFaturamento}
                     onSubmit={this.salvarEvento}
                     valid={validFormEvento}
                     aberto={this.state.modalItemAberto}
