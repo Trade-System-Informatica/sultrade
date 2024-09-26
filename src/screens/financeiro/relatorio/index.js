@@ -1072,7 +1072,7 @@ class Relatorio extends Component {
                       saldo: e.saldo.split("@.@")[index],
                       index,
                       moeda: this.state.moeda,
-                      evento_moeda: e.evento_moeda.split("@.@")[index],
+                      evento_moeda: (e.evento_moeda.split("@.@")[index]) * (e.evento_qntd.split("@.@")[index]),
                       roe: e.ROE.split("@.@")[index],
                       FDA,
                     });
@@ -1086,15 +1086,15 @@ class Relatorio extends Component {
                           this.state.moeda ==
                           e.evento_moeda.split("@.@")[eventIndex]
                         ) {
-                          FDA += e.evento_valor.split("@.@")[eventIndex]
+                          FDA += (e.evento_valor.split("@.@")[eventIndex]) * (e.evento_qntd.split("@.@")[eventIndex])
                             ? parseFloat(
-                                e.evento_valor.split("@.@")[eventIndex]
+                              (e.evento_valor.split("@.@")[eventIndex]) * (e.evento_qntd.split("@.@")[eventIndex])
                               )
                             : 0;
                         } else if (this.state.moeda == 5) {
-                          FDA += e.evento_valor.split("@.@")[eventIndex]
+                          FDA += (e.evento_valor.split("@.@")[eventIndex]) * (e.evento_qntd.split("@.@")[eventIndex])
                             ? parseFloat(
-                                e.evento_valor.split("@.@")[eventIndex]
+                              (e.evento_valor.split("@.@")[eventIndex]) * (e.evento_qntd.split("@.@")[eventIndex])
                               ) *
                               parseFloat(
                                 e.ROE &&
@@ -1105,9 +1105,9 @@ class Relatorio extends Component {
                               )
                             : 0;
                         } else if (this.state.moeda == 6) {
-                          FDA += e.evento_valor.split("@.@")[eventIndex]
+                          FDA += (e.evento_valor.split("@.@")[eventIndex]) * (e.evento_qntd.split("@.@")[eventIndex])
                             ? parseFloat(
-                                e.evento_valor.split("@.@")[eventIndex]
+                              (e.evento_valor.split("@.@")[eventIndex]) * (e.evento_qntd.split("@.@")[eventIndex])
                               ) /
                               parseFloat(
                                 e.ROE &&
@@ -1131,19 +1131,15 @@ class Relatorio extends Component {
                           this.state.moeda ==
                           e.evento_moeda_received.split("@.@")[eventIndex]
                         ) {
-                          received += e.evento_valor_received.split("@.@")[
-                            eventIndex
-                          ]
+                          received += (e.evento_valor_received.split("@.@")[eventIndex]) * (e.evento_qntd_received.split("@.@")[eventIndex])
                             ? parseFloat(
-                                e.evento_valor_received.split("@.@")[eventIndex]
+                              (e.evento_valor_received.split("@.@")[eventIndex]) * (e.evento_qntd_received.split("@.@")[eventIndex])
                               )
                             : 0;
                         } else if (this.state.moeda == 5) {
-                          received += e.evento_valor_received.split("@.@")[
-                            eventIndex
-                          ]
+                          received += (e.evento_valor_received.split("@.@")[eventIndex]) * (e.evento_qntd_received.split("@.@")[eventIndex])
                             ? parseFloat(
-                                e.evento_valor_received.split("@.@")[eventIndex]
+                              (e.evento_valor_received.split("@.@")[eventIndex]) * (e.evento_qntd_received.split("@.@")[eventIndex])
                               ) *
                               parseFloat(
                                 e.ROE &&
@@ -1154,11 +1150,9 @@ class Relatorio extends Component {
                               )
                             : 0;
                         } else if (this.state.moeda == 6) {
-                          received += e.evento_valor_received.split("@.@")[
-                            eventIndex
-                          ]
+                          received += (e.evento_valor_received.split("@.@")[eventIndex]) * (e.evento_qntd_received.split("@.@")[eventIndex])
                             ? parseFloat(
-                                e.evento_valor_received.split("@.@")[eventIndex]
+                              (e.evento_valor_received.split("@.@")[eventIndex]) * (e.evento_qntd_received.split("@.@")[eventIndex])
                               ) /
                               parseFloat(
                                 e.ROE &&
@@ -1182,19 +1176,15 @@ class Relatorio extends Component {
                           this.state.moeda ==
                           e.evento_moeda_discount.split("@.@")[eventIndex]
                         ) {
-                          discount += e.evento_valor_discount.split("@.@")[
-                            eventIndex
-                          ]
+                          discount += (e.evento_valor_discount.split("@.@")[eventIndex]) * (e.evento_qntd_discount.split("@.@")[eventIndex])
                             ? parseFloat(
-                                e.evento_valor_discount.split("@.@")[eventIndex]
+                              (e.evento_valor_discount.split("@.@")[eventIndex]) * (e.evento_qntd_discount.split("@.@")[eventIndex])
                               )
                             : 0;
                         } else if (this.state.moeda == 5) {
-                          discount += e.evento_valor_discount.split("@.@")[
-                            eventIndex
-                          ]
+                          discount += (e.evento_valor_discount.split("@.@")[eventIndex]) * (e.evento_qntd_discount.split("@.@")[eventIndex])
                             ? parseFloat(
-                                e.evento_valor_discount.split("@.@")[eventIndex]
+                              (e.evento_valor_discount.split("@.@")[eventIndex]) * (e.evento_qntd_discount.split("@.@")[eventIndex])
                               ) *
                               parseFloat(
                                 e.ROE &&
@@ -1205,11 +1195,9 @@ class Relatorio extends Component {
                               )
                             : 0;
                         } else if (this.state.moeda == 6) {
-                          discount += e.evento_valor_discount.split("@.@")[
-                            eventIndex
-                          ]
+                          discount += (e.evento_valor_discount.split("@.@")[eventIndex]) * (e.evento_qntd_discount.split("@.@")[eventIndex])
                             ? parseFloat(
-                                e.evento_valor_discount.split("@.@")[eventIndex]
+                              (e.evento_valor_discount.split("@.@")[eventIndex]) * (e.evento_qntd_discount.split("@.@")[eventIndex])
                               ) /
                               parseFloat(
                                 e.ROE &&
