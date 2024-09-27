@@ -2741,20 +2741,20 @@ class AddOS extends Component {
     this.state.eventos.map((evento) => {
       if (evento.tipo_sub == 3 && evento.cancelada == 0) {
         if (evento.Moeda == 5) {
-          valorDesconto += parseFloat(evento.valor);
+          valorDesconto += parseFloat(evento.valor * evento.qntd);
         } else if (evento.Moeda == 6) {
           valorDesconto +=
-            parseFloat(evento.valor) *
+            parseFloat(evento.valor * evento.qntd) *
             (parseFloat(this.state.roe.replace(",", ".")) == 0
               ? 5
               : parseFloat(this.state.roe.replace(",", ".")));
         }
       } else if (evento.tipo_sub == 2) {
         if (evento.Moeda == 5) {
-          valorRecebido += parseFloat(evento.valor);
+          valorRecebido += parseFloat(evento.valor * evento.qntd);
         } else if (evento.Moeda == 6) {
           valorRecebido +=
-            parseFloat(evento.valor) *
+            parseFloat(evento.valor * evento.qntd) *
             (parseFloat(this.state.roe.replace(",", ".")) == 0
               ? 5
               : parseFloat(this.state.roe.replace(",", ".")));
@@ -2762,10 +2762,10 @@ class AddOS extends Component {
       } else if (![3, 2].includes(evento.tipo_sub) && evento.cancelada == 0) {
         if (evento.repasse != 0 || evento.Fornecedor_Custeio != 0) {
           if (evento.Moeda == 5) {
-            valor += parseFloat(evento.valor);
+            valor += parseFloat(evento.valor * evento.qntd);
           } else if (evento.Moeda == 6) {
             valor +=
-              parseFloat(evento.valor) *
+              parseFloat(evento.valor * evento.qntd) *
               (parseFloat(this.state.roe.replace(",", ".")) == 0
                 ? 5
                 : parseFloat(this.state.roe.replace(",", ".")));

@@ -1072,7 +1072,7 @@ class Relatorio extends Component {
                       saldo: e.saldo.split("@.@")[index],
                       index,
                       moeda: this.state.moeda,
-                      evento_moeda: (e.evento_moeda.split("@.@")[index]) * (e.evento_qntd.split("@.@")[index]),
+                      evento_moeda: e.evento_moeda.split("@.@")[index],
                       roe: e.ROE.split("@.@")[index],
                       FDA,
                     });
