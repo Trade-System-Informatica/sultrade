@@ -857,7 +857,7 @@ class OS
                 WHERE eventos.chave_os = os.chave
                     AND subgrupos.descricao LIKE '%Crew Change%'
                     AND campos.nome LIKE '%OFF/S%'
-            ) AS quantidadeOff,
+            ) AS quantidadeOff
         WHERE $where
         AND EXISTS (
             SELECT 1

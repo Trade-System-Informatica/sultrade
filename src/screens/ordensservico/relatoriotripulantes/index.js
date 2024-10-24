@@ -157,7 +157,6 @@ class RelatorioTripulantes extends Component {
                             <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ETA</th>
                             <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ETB</th>
                             <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ETS</th>
-                            <th colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Tipo de Serviço</th>
                         </tr>
                     {relatorio?.map((e) => {
                         return (
@@ -171,7 +170,6 @@ class RelatorioTripulantes extends Component {
                             <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{moment(e.ETA).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.ETA).format("DD/MM/YYYY")}</td>
                             <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{moment(e.ETB).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.ETB).format("DD/MM/YYYY")}</td>
                             <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{moment(e.ETS).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.ETS).format("DD/MM/YYYY")}</td>
-                            <td colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.tipoServicoNome}</td>
                         </tr>
                         )
                     })}
