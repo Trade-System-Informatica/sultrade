@@ -44,7 +44,6 @@ const estadoInicial = {
     ordem: '',
     remarks: '',
     contatos: [],
-    qntd: 1,
 
     campos: [],
     eventoComplementar: [],
@@ -185,7 +184,6 @@ class AddEventoTemplate extends Component {
                 descricao: this.state.evento.descricao,
                 tipo: this.state.evento.tipo_sub,
                 remarks: this.state.evento.remarks,
-                qntd: this.state.evento.qntd,
                 valor: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.evento.valor),
                 vlrc: new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(this.state.evento.valor1),
                 repasse: this.state.evento.repasse == 1 ? true : false,
@@ -223,7 +221,6 @@ class AddEventoTemplate extends Component {
                     { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tiposSubOptions) },
                     { titulo: 'Ordem', valor: util.formatForLogs(this.state.ordem) },
                     { titulo: 'Remarks', valor: util.formatForLogs(this.state.remarks) },
-                    { titulo: 'Quantidade', valor: util.formatForLogs(this.state.qntd) },
                     { titulo: 'Fornecedor Custeio', valor: util.formatForLogs(this.state.fornecedorCusteio, 'options', '', '', this.state.fornecedoresOptions) }
                 ]
             })
@@ -470,7 +467,6 @@ class AddEventoTemplate extends Component {
                 { titulo: 'Tipo', valor: util.formatForLogs(this.state.tipo, 'options', '', '', this.state.tiposSubOptions) },
                 { titulo: 'Ordem', valor: util.formatForLogs(this.state.ordem) },
                 { titulo: 'Remarks', valor: util.formatForLogs(this.state.remarks) },
-                { titulo: 'Quantidade', valor: util.formatForLogs(this.state.qntd) },
                 { titulo: 'Fornecedor Custeio', valor: util.formatForLogs(this.state.fornecedorCusteio, 'options', '', '', this.state.fornecedoresOptions) }
             ],
             loading: true
@@ -481,7 +477,7 @@ class AddEventoTemplate extends Component {
         if (parseInt(this.state.chave) === 0 && validForm) {
             await apiEmployee.post(`insertEventoTemplate.php`, {
                 token: true,
-                values: `'${this.state.data}', '${this.state.fornecedor}', '${this.state.taxa}', '${this.state.descricao}', '${this.state.tipo}', '${this.state.fornecedorCusteio}', '${this.state.remarks}', '${this.state.qntd}', '${this.state.moeda}', '${parseFloat(this.state.valor == "" ? 0 : this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.vlrc == "" ? 0 : this.state.vlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.repasse ? 1 : 0}', 1`,
+                values: `'${this.state.data}', '${this.state.fornecedor}', '${this.state.taxa}', '${this.state.descricao}', '${this.state.tipo}', '${this.state.fornecedorCusteio}', '${this.state.remarks}', '${this.state.moeda}', '${parseFloat(this.state.valor == "" ? 0 : this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.vlrc == "" ? 0 : this.state.vlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.repasse ? 1 : 0}', 1`,
                 grupos: this.state.gruposEscolhidos
             }).then(
                 async res => {
@@ -851,16 +847,6 @@ class AddEventoTemplate extends Component {
                                                             </select>
                                                             <Field disabled={this.state.repasse} className="form-control fieldDividido_2 text-right " type="text" onClick={(e) => e.target.select()} value={this.state.valor} onChange={async e => { if (!this.state.repasse) { this.setState({ valor: e.currentTarget.value }) } }} onBlur={async e => { this.setState({ valor: e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.') ? new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(e.currentTarget.value.replaceAll('.', '').replaceAll(',', '.')) : '0,00' }) }} />
                                                         </div>
-
-                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Quantidade</label>
-                                                        </div>
-                                                        <div className='col-1 errorMessage'>
-                                                        </div>
-                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                            <Field className="form-control text-right" type="text" step="0.1" value={this.state.qntd} onChange={async e => { this.setState({ qntd: e.currentTarget.value }) }} />
-                                                        </div>
-                                                        <div className='col-1'></div>
 
                                                         <div className='col-1'></div>
 

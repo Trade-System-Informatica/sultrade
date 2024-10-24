@@ -257,8 +257,14 @@ class OS extends Component {
                                                 <option value={5}>Cliente</option>
                                             </select>
                                             <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={async e => { await this.pesquisa(e.currentTarget.value) }} />
-                                            <div>
-                                                <Link to={{ pathname: `/ordensservico/relatorio` }}><button className="btn btn-success">Relatorio</button></Link>
+                                            <div className="dropdown" style={{ marginLeft: 15 }}>
+                                                <button className="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Relatório
+                                                </button>
+                                                <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                    <Link className="dropdown-item" to={{ pathname: `/ordensservico/relatorio` }}>OS</Link>
+                                                    <Link className="dropdown-item" to={{ pathname: `/ordensservico/relatoriotripulantes` }}>Tripulantes</Link>
+                                                </div>
                                             </div>
                                             <div style={{ marginLeft: 15 }}>
                                                 <Link to={{pathname: "/ordensservico/addos/0"}}><button className="btn btn-success">+</button></Link>
