@@ -778,13 +778,7 @@ class OS
 
     if ($where != "") {
         $result = $database->doSelect(
-            "os
-            LEFT JOIN os_navios ON os.chave_navio = os_navios.chave
-            LEFT JOIN os_portos ON os.porto = os_portos.chave
-            LEFT JOIN pessoas ON os.Chave_Cliente = pessoas.chave
-            LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os",
-
-            "os.codigo,
+            "SELECT os.codigo,
             os_navios.nome AS navioNome,
             os_portos.Descricao AS portoNome,
             os.eta AS ETA,
@@ -858,6 +852,11 @@ class OS
                     AND subgrupos.descricao LIKE '%Crew Change%'
                     AND campos.nome LIKE '%OFF/S%'
             ) AS quantidadeOff
+        FROM os
+        LEFT JOIN os_navios ON os.chave_navio = os_navios.chave
+        LEFT JOIN os_portos ON os.porto = os_portos.chave
+        LEFT JOIN pessoas ON os.Chave_Cliente = pessoas.chave
+        LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os
         WHERE $where
         AND EXISTS (
             SELECT 1
