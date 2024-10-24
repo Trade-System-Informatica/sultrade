@@ -783,7 +783,7 @@ class OS
             LEFT JOIN os_portos ON os.porto = os_portos.chave
             LEFT JOIN pessoas ON os.Chave_Cliente = pessoas.chave
             LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os",
-                 
+
             "os.codigo,
             os_navios.nome AS navioNome,
             os_portos.Descricao AS portoNome,
@@ -858,7 +858,7 @@ class OS
                     AND subgrupos.descricao LIKE '%Crew Change%'
                     AND campos.nome LIKE '%OFF/S%'
             ) AS quantidadeOff,
-        $where
+        WHERE $where
         AND EXISTS (
             SELECT 1
             FROM os_servicos_itens AS eventos
