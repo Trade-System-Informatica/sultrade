@@ -776,112 +776,99 @@ class OS
 {
     $database = new Database();
 
-    $subqueryOn = "(SELECT 
-                      GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',')
-                    FROM os_subgrupos_taxas_campos AS campos
-                    LEFT JOIN os_subgrupos_taxas AS subgrupos ON subgrupos.chave = campos.subgrupo
-                    LEFT JOIN os_taxas AS taxas ON taxas.sub_grupo = subgrupos.chave
-                    LEFT JOIN os_servicos_itens AS eventos ON eventos.taxa = taxas.chave
-                    LEFT JOIN os_servicos_itens_complementar AS eventos_complementar ON eventos_complementar.evento = eventos.chave
-                      AND eventos_complementar.subgrupo_campo = campos.chave
-                    WHERE eventos.chave_os = os.chave
-                      AND subgrupos.descricao LIKE '%Crew Change%'
-                      AND campos.nome LIKE '%ON/S%') AS eventoCampoValorOn";
-
-    $subqueryQuantidadeOn = "(SELECT 
-                                CASE 
-                                  WHEN GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',') IS NOT NULL THEN
-                                      LENGTH(GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',')) 
-                                      - LENGTH(REPLACE(GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ','), ',', '')) + 1
-                                  ELSE 0
-                                END
-                              FROM os_subgrupos_taxas_campos AS campos
-                              LEFT JOIN os_subgrupos_taxas AS subgrupos ON subgrupos.chave = campos.subgrupo
-                              LEFT JOIN os_taxas AS taxas ON taxas.sub_grupo = subgrupos.chave
-                              LEFT JOIN os_servicos_itens AS eventos ON eventos.taxa = taxas.chave
-                              LEFT JOIN os_servicos_itens_complementar AS eventos_complementar ON eventos_complementar.evento = eventos.chave
-                                AND eventos_complementar.subgrupo_campo = campos.chave
-                              WHERE eventos.chave_os = os.chave
-                                AND subgrupos.descricao LIKE '%Crew Change%'
-                                AND campos.nome LIKE '%ON/S%') AS quantidadeOn";
-
-    $subqueryOff = "(SELECT 
-                      GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',')
-                    FROM os_subgrupos_taxas_campos AS campos
-                    LEFT JOIN os_subgrupos_taxas AS subgrupos ON subgrupos.chave = campos.subgrupo
-                    LEFT JOIN os_taxas AS taxas ON taxas.sub_grupo = subgrupos.chave
-                    LEFT JOIN os_servicos_itens AS eventos ON eventos.taxa = taxas.chave
-                    LEFT JOIN os_servicos_itens_complementar AS eventos_complementar ON eventos_complementar.evento = eventos.chave
-                      AND eventos_complementar.subgrupo_campo = campos.chave
-                    WHERE eventos.chave_os = os.chave
-                      AND subgrupos.descricao LIKE '%Crew Change%'
-                      AND campos.nome LIKE '%OFF/S%') AS eventoCampoValorOff";
-
-    $subqueryQuantidadeOff = "(SELECT 
-                                 CASE 
-                                   WHEN GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',') IS NOT NULL THEN
-                                       LENGTH(GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',')) 
-                                       - LENGTH(REPLACE(GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ','), ',', '')) + 1
-                                   ELSE 0
-                                 END
-                               FROM os_subgrupos_taxas_campos AS campos
-                               LEFT JOIN os_subgrupos_taxas AS subgrupos ON subgrupos.chave = campos.subgrupo
-                               LEFT JOIN os_taxas AS taxas ON taxas.sub_grupo = subgrupos.chave
-                               LEFT JOIN os_servicos_itens AS eventos ON eventos.taxa = taxas.chave
-                               LEFT JOIN os_servicos_itens_complementar AS eventos_complementar ON eventos_complementar.evento = eventos.chave
-                                 AND eventos_complementar.subgrupo_campo = campos.chave
-                               WHERE eventos.chave_os = os.chave
-                                 AND subgrupos.descricao LIKE '%Crew Change%'
-                                 AND campos.nome LIKE '%OFF/S%') AS quantidadeOff";
-
     if ($where != "") {
         $result = $database->doSelect(
             "os
-             LEFT JOIN os_navios ON os.chave_navio = os_navios.chave
-             LEFT JOIN os_portos ON os.porto = os_portos.chave
-             LEFT JOIN pessoas ON os.Chave_Cliente = pessoas.chave
-             LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os",
+            LEFT JOIN os_navios ON os.chave_navio = os_navios.chave
+            LEFT JOIN os_portos ON os.porto = os_portos.chave
+            LEFT JOIN pessoas ON os.Chave_Cliente = pessoas.chave
+            LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os",
+                 
             "os.codigo,
-             os_navios.nome AS navioNome,
-             os_portos.Descricao AS portoNome,
-             os.eta AS ETA,
-             os.etb AS ETB,
-             os.data_saida AS ETS,
-             pessoas.Nome AS pessoaNome,
-             pessoas.Nome_Fantasia AS pessoaNomeFantasia,
-             $subqueryOn,
-             $subqueryQuantidadeOn,
-             $subqueryOff,
-             $subqueryQuantidadeOff",
-            "$where AND os.orcamento != 1 AND EXISTS (
-                SELECT 1
-                FROM os_servicos_itens AS eventos
-                LEFT JOIN os_taxas AS taxas ON eventos.taxa = taxas.chave
-                LEFT JOIN os_subgrupos_taxas AS subgrupos ON subgrupos.chave = taxas.sub_grupo
+            os_navios.nome AS navioNome,
+            os_portos.Descricao AS portoNome,
+            os.eta AS ETA,
+            os.etb AS ETB,
+            os.data_saida AS ETS,
+            pessoas.Nome AS pessoaNome,
+            pessoas.Nome_Fantasia AS pessoaNomeFantasia,	
+            (
+                SELECT 
+                    GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',')
+                FROM os_subgrupos_taxas_campos AS campos
+                LEFT JOIN os_subgrupos_taxas AS subgrupos ON subgrupos.chave = campos.subgrupo
+                LEFT JOIN os_taxas AS taxas ON taxas.sub_grupo = subgrupos.chave
+                LEFT JOIN os_servicos_itens AS eventos ON eventos.taxa = taxas.chave
+                LEFT JOIN os_servicos_itens_complementar AS eventos_complementar 
+                    ON eventos_complementar.evento = eventos.chave
+                    AND eventos_complementar.subgrupo_campo = campos.chave
                 WHERE eventos.chave_os = os.chave
-                  AND subgrupos.descricao LIKE '%Crew Change%'
-            ) GROUP BY os.chave"
-        );
-    } else {
-        $result = $database->doSelect(
-            "os
-             LEFT JOIN os_navios ON os.chave_navio = os_navios.chave
-             LEFT JOIN os_portos ON os.porto = os_portos.chave
-             LEFT JOIN pessoas ON os.Chave_Cliente = pessoas.chave
-             LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os",
-            "os.codigo,
-             os_navios.nome AS navioNome,
-             os_portos.Descricao AS portoNome,
-             os.eta AS ETA,
-             os.etb AS ETB,
-             os.data_saida AS ETS,
-             pessoas.Nome AS pessoaNome,
-             pessoas.Nome_Fantasia AS pessoaNomeFantasia,
-             $subqueryOn,
-             $subqueryQuantidadeOn,
-             $subqueryOff,
-             $subqueryQuantidadeOff",
-            "GROUP BY os.chave"
+                    AND subgrupos.descricao LIKE '%Crew Change%'
+                    AND campos.nome LIKE '%ON/S%'
+            ) AS eventoCampoValorOn,
+            (
+                SELECT 
+                    CASE 
+                        WHEN GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',') IS NOT NULL THEN
+                            LENGTH(GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',')) 
+                            - LENGTH(REPLACE(GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ','), ',', '')) + 1
+                        ELSE 0
+                    END
+                FROM os_subgrupos_taxas_campos AS campos
+                LEFT JOIN os_subgrupos_taxas AS subgrupos ON subgrupos.chave = campos.subgrupo
+                LEFT JOIN os_taxas AS taxas ON taxas.sub_grupo = subgrupos.chave
+                LEFT JOIN os_servicos_itens AS eventos ON eventos.taxa = taxas.chave
+                LEFT JOIN os_servicos_itens_complementar AS eventos_complementar 
+                    ON eventos_complementar.evento = eventos.chave
+                    AND eventos_complementar.subgrupo_campo = campos.chave
+                WHERE eventos.chave_os = os.chave
+                    AND subgrupos.descricao LIKE '%Crew Change%'
+                    AND campos.nome LIKE '%ON/S%'
+            ) AS quantidadeOn,
+            (
+                SELECT 
+                    GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',')
+                FROM os_subgrupos_taxas_campos AS campos
+                LEFT JOIN os_subgrupos_taxas AS subgrupos ON subgrupos.chave = campos.subgrupo
+                LEFT JOIN os_taxas AS taxas ON taxas.sub_grupo = subgrupos.chave
+                LEFT JOIN os_servicos_itens AS eventos ON eventos.taxa = taxas.chave
+                LEFT JOIN os_servicos_itens_complementar AS eventos_complementar 
+                    ON eventos_complementar.evento = eventos.chave
+                    AND eventos_complementar.subgrupo_campo = campos.chave
+                WHERE eventos.chave_os = os.chave
+                    AND subgrupos.descricao LIKE '%Crew Change%'
+                    AND campos.nome LIKE '%OFF/S%'
+            ) AS eventoCampoValorOff,
+            (
+                SELECT 
+                    CASE 
+                        WHEN GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',') IS NOT NULL THEN
+                            LENGTH(GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',')) 
+                            - LENGTH(REPLACE(GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ','), ',', '')) + 1
+                        ELSE 0
+                    END
+                FROM os_subgrupos_taxas_campos AS campos
+                LEFT JOIN os_subgrupos_taxas AS subgrupos ON subgrupos.chave = campos.subgrupo
+                LEFT JOIN os_taxas AS taxas ON taxas.sub_grupo = subgrupos.chave
+                LEFT JOIN os_servicos_itens AS eventos ON eventos.taxa = taxas.chave
+                LEFT JOIN os_servicos_itens_complementar AS eventos_complementar 
+                    ON eventos_complementar.evento = eventos.chave
+                    AND eventos_complementar.subgrupo_campo = campos.chave
+                WHERE eventos.chave_os = os.chave
+                    AND subgrupos.descricao LIKE '%Crew Change%'
+                    AND campos.nome LIKE '%OFF/S%'
+            ) AS quantidadeOff,
+        $where
+        AND EXISTS (
+            SELECT 1
+            FROM os_servicos_itens AS eventos
+            LEFT JOIN os_taxas AS taxas ON eventos.taxa = taxas.chave
+            LEFT JOIN os_subgrupos_taxas AS subgrupos ON subgrupos.chave = taxas.sub_grupo
+            WHERE eventos.chave_os = os.chave
+                AND subgrupos.descricao LIKE '%Crew Change%'
+        )
+        AND os.orcamento != 1
+        GROUP BY os.chave"
         );
     }
 
