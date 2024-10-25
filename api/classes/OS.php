@@ -777,7 +777,7 @@ class OS
     $database = new Database();
 
     if ($where != "") {
-        $result = $database->doSelect(
+        $result = $database->doRawSelect(
             "SELECT os.codigo,
             os_navios.nome AS navioNome,
             os_portos.Descricao AS portoNome,

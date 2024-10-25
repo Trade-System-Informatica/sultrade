@@ -57,6 +57,13 @@ class Database {
 
         return $this->doQuery($query);
     }
+
+    public function doRawSelect($query) {
+        if (empty($query)) {
+            throw new InvalidArgumentException("A consulta SQL não pode estar vazia.");
+        }
+        return $this->doQuery($query);
+    }
     
     public function doInsert( $table_name, 
                               $cols_insert, 
