@@ -146,33 +146,43 @@ class RelatorioTripulantes extends Component {
                 </div>
                 <hr />
                 <div className='pdfContent'>
-                    <table style={{width: "100%"}}>
-                    <tr style={{padding: "10px", fontSize: "1.2em"}}>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Navio</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>OS</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Porto</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ON/S</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>OFF/S</th>
-                            <th colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Cliente</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ETA</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ETB</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ETS</th>
-                        </tr>
-                    {relatorio?.map((e) => {
-                        return (
-                        <tr style={{padding: "10px", fontSize: "0.8em"}}>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.navioNome}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.codigo}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.portoNome}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.quantidadeOn}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.quantidadeOff}</td>
-                            <td colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.pessoaNomeFantasia ? e.pessoaNomeFantasia : e.pessoaNome}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{moment(e.ETA).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.ETA).format("DD/MM/YYYY")}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{moment(e.ETB).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.ETB).format("DD/MM/YYYY")}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{moment(e.ETS).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.ETS).format("DD/MM/YYYY")}</td>
-                        </tr>
-                        )
-                    })}
+                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                        <thead>
+                            <tr style={{ backgroundColor: "#f2f2f2", padding: "10px", fontSize: "1.2em" }}>
+                                <th style={{ borderBottom: "2px solid black", padding: "15px" }}>Navio</th>
+                                <th style={{ borderBottom: "2px solid black", padding: "15px" }}>OS</th>
+                                <th style={{ borderBottom: "2px solid black", padding: "15px" }}>Porto</th>
+                                <th style={{ borderBottom: "2px solid black", padding: "15px" }}>ON/S</th>
+                                <th style={{ borderBottom: "2px solid black", padding: "15px" }}>OFF/S</th>
+                                <th colSpan={2} style={{ borderBottom: "2px solid black", padding: "15px" }}>Cliente</th>
+                                <th style={{ borderBottom: "2px solid black", padding: "15px" }}>ETA</th>
+                                <th style={{ borderBottom: "2px solid black", padding: "15px" }}>ETB</th>
+                                <th style={{ borderBottom: "2px solid black", padding: "15px" }}>ETS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {relatorio?.map((e, index) => (
+                                <tr key={index} style={{ backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9", fontSize: "0.9em" }}>
+                                    <td style={{ borderBottom: "1px solid #ddd", padding: "10px" }}>{e.navioNome}</td>
+                                    <td style={{ borderBottom: "1px solid #ddd", padding: "10px" }}>{e.codigo}</td>
+                                    <td style={{ borderBottom: "1px solid #ddd", padding: "10px" }}>{e.portoNome}</td>
+                                    <td style={{ borderBottom: "1px solid #ddd", padding: "10px" }}>{e.quantidadeOn}</td>
+                                    <td style={{ borderBottom: "1px solid #ddd", padding: "10px" }}>{e.quantidadeOff}</td>
+                                    <td colSpan={2} style={{ borderBottom: "1px solid #ddd", padding: "10px" }}>
+                                        {e.pessoaNomeFantasia ? e.pessoaNomeFantasia : e.pessoaNome}
+                                    </td>
+                                    <td style={{ borderBottom: "1px solid #ddd", padding: "10px" }}>
+                                        {moment(e.ETA).isValid() ? moment(e.ETA).format("DD/MM/YYYY") : ""}
+                                    </td>
+                                    <td style={{ borderBottom: "1px solid #ddd", padding: "10px" }}>
+                                        {moment(e.ETB).isValid() ? moment(e.ETB).format("DD/MM/YYYY") : ""}
+                                    </td>
+                                    <td style={{ borderBottom: "1px solid #ddd", padding: "10px" }}>
+                                        {moment(e.ETS).isValid() ? moment(e.ETS).format("DD/MM/YYYY") : ""}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
                     </table>
                 </div>
             </div >

@@ -803,7 +803,7 @@ class OS
             (
                 SELECT 
                     CASE 
-                        WHEN GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',') IS NOT NULL THEN
+                        WHEN LENGTH(GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',')) > 0 THEN
                             LENGTH(GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',')) 
                             - LENGTH(REPLACE(GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ','), ',', '')) + 1
                         ELSE 0
@@ -836,7 +836,7 @@ class OS
             (
                 SELECT 
                     CASE 
-                        WHEN GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',') IS NOT NULL THEN
+                        WHEN LENGTH(GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',')) > 0 THEN
                             LENGTH(GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ',')) 
                             - LENGTH(REPLACE(GROUP_CONCAT(DISTINCT eventos_complementar.valor SEPARATOR ','), ',', '')) + 1
                         ELSE 0
