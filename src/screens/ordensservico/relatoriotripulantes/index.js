@@ -19,7 +19,7 @@ import Modal from '@material-ui/core/Modal';
 
 
 const estadoInicial = {
-    situacao: 'A',
+    situacao: 'T',
     porto: '',
     periodoInicial: moment('2000-01-01').format('YYYY-MM-DD'),
     periodoFinal: moment().format('YYYY-MM-DD'),
@@ -182,6 +182,16 @@ class RelatorioTripulantes extends Component {
                                     </td>
                                 </tr>
                             ))}
+                        <tr style={{ backgroundColor: "#f2f2f2", fontWeight: "bold" }}>
+                            <td colSpan={3} style={{ borderTop: "2px solid black", padding: "10px" }}>Total:</td>
+                            <td style={{ borderTop: "2px solid black", padding: "10px" }}>
+                                {relatorio?.reduce((sum, e) => sum + (Number(e.quantidadeOn) || 0), 0)}
+                            </td>
+                            <td style={{ borderTop: "2px solid black", padding: "10px" }}>
+                                {relatorio?.reduce((sum, e) => sum + (Number(e.quantidadeOff) || 0), 0)}
+                            </td>
+                            <td colSpan={5} style={{ borderTop: "2px solid black", padding: "10px" }}></td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
