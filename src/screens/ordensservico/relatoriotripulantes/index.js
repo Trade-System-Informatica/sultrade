@@ -19,9 +19,9 @@ import Modal from '@material-ui/core/Modal';
 
 
 const estadoInicial = {
-    situacao: 'T',
+    situacao: 'E',
     porto: '',
-    periodoInicial: moment('2000-01-01').format('YYYY-MM-DD'),
+    periodoInicial: moment('2024-10-25').format('YYYY-MM-DD'),
     periodoFinal: moment().format('YYYY-MM-DD'),
     lancamentoInicial: moment('1900-1-1').format('YYYY-MM-DD'),
     lancamentoFinal: moment('2100-12-31').format('YYYY-MM-DD'),
