@@ -24,29 +24,19 @@ $assunto = prepareInput($objData->assunto);
 $corpo = prepareInput($objData->corpo);
 $anexos = $objData->anexos;
 $anexosNomes = $objData->anexosNomes;
-$mail = new PHPMailer;
+$mail = new PHPMailer(true);
 $mail->CharSet = "UTF-8";
 
 $return = ['successes' => [], 'failures' => [], 'warnings' => []];
 
 try {
-    //Server settings
-    //$mail->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
-    $mail->isSMTP();       //Send using SMTP
-    $mail->SMTPOptions = [
-        'ssl' => [
-            'verify_peer' => false,
-            'verify_peer_name' => false,
-            'allow_self_signed' => true
-        ]
-    ];
-
-    $mail->Host       = 'mail.vetorial.com';                     //Set the SMTP server to send through
-    $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-    $mail->Username   = 'soa@sultradeagency.com';                     //SMTP username
-    $mail->Password   = 'Trade@2023#';                               //SMTP password
-    $mail->SMTPSecure = 'ssl'; //PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
-    $mail->Port  = 465;
+    $mail->isSMTP();  
+    $mail->Host       = 'smtp.office365.com';
+    $mail->SMTPAuth   = true;
+    $mail->Username   = 'soa@sultradeagency.com';
+    $mail->Password   = 'sgdccrwfstwhnkmr';
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port  = 587;
 
     //Recipients
     $mail->setFrom('soa@sultradeagency.com', 'Sultrade Agency');

@@ -65,19 +65,17 @@ if ($os) {
 
 
     //Create an instance; passing `true` enables exceptions
-    $mail = new PHPMailer;
+    $mail = new PHPMailer(true);
     $mail->CharSet="UTF-8";
     //for ($i=0; $i<count($emails); $i++) {
     try {
-        //Server settings
-        //$mail->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
-        $mail->isSMTP();       //Send using SMTP
-        $mail->Host       = 'mail.vetorial.com';                             //'mail.vetorial.com';                     //Set the SMTP server to send through
-        $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-        $mail->Username   = 'soa@sultradeagency.com';                     //SMTP username
-        $mail->Password   = 'Trade@2023#';                               //SMTP password
-        $mail->SMTPSecure = 'ssl'; //PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
-        $mail->Port  = 465;
+        $mail->isSMTP();  
+        $mail->Host       = 'smtp.office365.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'soa@sultradeagency.com';
+        $mail->Password   = 'sgdccrwfstwhnkmr';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port  = 587;
 
         //Recipients
         $mail->setFrom('soa@sultradeagency.com', 'Sultrade Agency');
