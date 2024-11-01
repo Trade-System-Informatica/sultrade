@@ -1434,6 +1434,23 @@ class OS
         }
     }
 
+    public static function updateServicoItemOrdem($chave, $ordem)
+    {
+        $database = new Database();
+
+        $query = 'ordem = ' . $ordem;
+
+        $result = $database->doUpdate('os_servicos_itens', $query, 'chave = ' . $chave);
+
+        $result = $database->doSelect('os_servicos_itens', "os_servicos_itens.*", 'chave = ' . $chave);
+        $database->closeConection();
+        if ($result == NULL) {
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+
     public static function insertServicoItemOS($chave_os, $chave_orcamento, $canceladaPor)
     {
         $database = new Database();
