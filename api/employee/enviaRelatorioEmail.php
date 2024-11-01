@@ -62,16 +62,23 @@ $mail->CharSet = "UTF-8";
 
 if ($emails[0]) {
     try {
-        $mail->isSMTP();  
-        $mail->Host       = 'smtp.office365.com';
+        $mail->isSMTP();
+        $mail->SMTPOptions = [
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            ]
+        ];  
+        $mail->Host       = 'smtp.tradesystem.com.br';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'soa@sultradeagency.com';
-        $mail->Password   = 'sgdccrwfstwhnkmr';
+        $mail->Username   = 'no-reply@tradesystem.com.br';
+        $mail->Password   = 'Trade@1697';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port  = 587;
 
         //Recipients
-        $mail->setFrom('soa@sultradeagency.com', 'Sultrade Agency');
+        $mail->setFrom('no-reply@tradesystem.com.br', 'Sultrade Agency');
 
         foreach ($emails as $email) {
             $mail->addAddress($email);     //Add a recipient
@@ -85,6 +92,7 @@ if ($emails[0]) {
         $mail->addAddress('disbursements@sultradeagency.com');
         $mail->addCC('soa@sultradeagency.com');
         $mail->addBCC('soa@sultradeagency.com');
+        $mail->addReplyTo('soa@sultradeagency.com', 'Sultrade Agency');
 
         //Content
         $mail->isHTML(true);                                  //Set email format to HTML
