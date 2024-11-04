@@ -11,6 +11,18 @@
     cursor: pointer;
 }
 
+th.ordem-column{
+    min-width: 70px;
+}
+
+th.plus-column{
+    min-width: 45px;
+}
+
+th.desc-column {
+    width: 750px;
+}
+
 .insideFormButton:active {
     opacity: 0.8;
 }

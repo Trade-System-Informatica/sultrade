@@ -27,6 +27,9 @@ import {
   faTimes,
   faChevronRight,
   faChevronLeft,
+  faArrowUp, 
+  faArrowDown, 
+  faSave
 } from "@fortawesome/free-solid-svg-icons";
 import moment from "moment";
 import Select from "react-select";
@@ -276,6 +279,8 @@ const estadoInicial = {
 
   modalCamposOS: false,
   camposOS: [],
+
+  ordemModificada: false,
 };
 
 class AddOsOrcamento extends Component {
@@ -558,6 +563,22 @@ class AddOsOrcamento extends Component {
     }
   };
 
+  moveUp(index) {
+    if (index > 0) {
+      const eventos = [...this.state.eventos];
+      [eventos[index - 1], eventos[index]] = [eventos[index], eventos[index - 1]];
+      this.setState({ eventos, ordemModificada: true });
+    }
+  }
+
+  moveDown(index) {
+    if (index < this.state.eventos.length - 1) {
+      const eventos = [...this.state.eventos];
+      [eventos[index + 1], eventos[index]] = [eventos[index], eventos[index + 1]];
+      this.setState({ eventos, ordemModificada: true });
+    }
+  }
+
   calculaTotal = () => {
     let eventosTotal = 0;
 
@@ -608,6 +629,31 @@ class AddOsOrcamento extends Component {
 
     this.setState({ eventosTotal });
     return eventosTotal;
+  };
+
+  salvarOrdem = async () => {
+    this.setState({ loading: true });
+  
+    // Mapear eventos e criar as requisições para salvar a ordem no backend
+    const promises = this.state.eventos.map((evento, index) => {
+      return apiEmployee.post(`updateServicoItemOrdem.php`, {
+        token: true,
+        chave: evento.chave, // Identificador do evento a ser atualizado
+        ordem: index + 1,    // Define a nova ordem baseada na posição do array
+      });
+    });
+  
+    // Executa todas as requisições e espera elas terminarem
+    try {
+      await Promise.all(promises);
+      console.log("Ordem dos eventos salva com sucesso.");
+      
+      this.setState({ loading: false });
+      window.location.reload();
+    } catch (error) {
+      console.error("Erro ao salvar ordem dos eventos: ", error);
+      this.setState({ loading: false });
+    }
   };
 
   getDadosCliente = async () => {
@@ -11834,11 +11880,11 @@ class AddOsOrcamento extends Component {
                                             <span>Tipo</span>
                                           </th>
                                         )}
-                                        <th className="text-center">
+                                        <th className="text-center ordem-column">
                                           <span>Ordem</span>
                                         </th>
                                         {window.innerWidth >= 500 && (
-                                          <th className="text-center">
+                                          <th className="text-center desc-column">
                                             <span>Descrição</span>
                                           </th>
                                         )}
@@ -11850,7 +11896,7 @@ class AddOsOrcamento extends Component {
                                         </th>
                                         <th className="text-center">
                                           <span
-                                            className="iconelixo giveMargin"
+                                            className="iconelixo plus-column"
                                             type="button"
                                           >
                                             <Link
@@ -11891,12 +11937,18 @@ class AddOsOrcamento extends Component {
                                                   <td className="text-center pseudo_link">
                                                     <p>{feed.chave}</p>
                                                   </td>
-                                                  <td className="text-center pseudo_link">
+                                                  <td className="text-center" onClick={(e) => e.preventDefault()}>
                                                     <p>
                                                       {feed.ordem.replaceAll(
                                                         ",",
                                                         "."
-                                                      )}
+                                                      )}{' '}
+                                                      <span type="button" className="iconelixo giveMargin" onClick={(e) => {e.stopPropagation(); this.moveUp(index);}} disabled={index === 0}>
+                                                        <FontAwesomeIcon icon={faArrowUp} />
+                                                      </span>
+                                                      <span type="button" className="iconelixo" onClick={(e) => {e.stopPropagation(); this.moveDown(index);}} disabled={index === this.state.eventos.length - 1}>
+                                                        <FontAwesomeIcon icon={faArrowDown} />
+                                                      </span>
                                                     </p>
                                                   </td>
                                                   <td className="text-center pseudo_link">
@@ -12041,12 +12093,18 @@ class AddOsOrcamento extends Component {
                                                       }
                                                     </p>
                                                   </td>
-                                                  <td className="text-center pseudo_link">
+                                                  <td className="text-center" onClick={(e) => e.preventDefault()}>
                                                     <p>
                                                       {feed.ordem.replaceAll(
                                                         ",",
                                                         "."
-                                                      )}
+                                                      )}{' '}
+                                                      <span type="button" className="iconelixo giveMargin" onClick={(e) => {e.stopPropagation(); this.moveUp(index);}} disabled={index === 0}>
+                                                        <FontAwesomeIcon icon={faArrowUp} />
+                                                      </span>
+                                                      <span type="button" className="iconelixo" onClick={(e) => {e.stopPropagation(); this.moveDown(index);}} disabled={index === this.state.eventos.length - 1}>
+                                                        <FontAwesomeIcon icon={faArrowDown} />
+                                                      </span>
                                                     </p>
                                                   </td>
                                                   <td className="text-center pseudo_link">
@@ -12673,6 +12731,17 @@ class AddOsOrcamento extends Component {
                                         </>
                                       )}
                                     </table>
+                                    {this.state.ordemModificada && (
+                                      <button onClick={this.salvarOrdem} disabled={this.state.loading}>
+                                        {this.state.loading ? (
+                                          "Salvando..."
+                                        ) : (
+                                          <>
+                                            <FontAwesomeIcon icon={faSave} /> Salvar Ordem
+                                          </>
+                                        )}
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
                               </div>
