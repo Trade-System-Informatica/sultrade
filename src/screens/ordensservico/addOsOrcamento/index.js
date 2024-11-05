@@ -11006,7 +11006,6 @@ class AddOsOrcamento extends Component {
                               <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12"></div>
                               <div className="col-1"></div>
 
-                              <div className="col-1"></div>
                               <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                 <label>E.T.A.</label>
                               </div>
@@ -11015,6 +11014,7 @@ class AddOsOrcamento extends Component {
                                 <Field
                                   className="form-control"
                                   type="date"
+                                  max="9999-12-31"
                                   value={this.state.eta}
                                   onChange={async (e) => {
                                     this.setState({
@@ -11032,6 +11032,7 @@ class AddOsOrcamento extends Component {
                                 <Field
                                   className="form-control"
                                   type="datetime-local"
+                                  max="9999-12-31T23:59"
                                   value={this.state.etb}
                                   onChange={async (e) => {
                                     this.setState({
@@ -11049,6 +11050,7 @@ class AddOsOrcamento extends Component {
                                 <Field
                                   className="form-control"
                                   type="datetime-local"
+                                  max="9999-12-31T23:59"
                                   value={this.state.data_saida}
                                   onChange={async (e) => {
                                     this.setState({
@@ -11509,6 +11511,7 @@ class AddOsOrcamento extends Component {
                                   className="form-control"
                                   disabled={!this.state.editavel}
                                   type="date"
+                                  max="9999-12-31"
                                   value={this.state.eta}
                                   onChange={async (e) => {
                                     this.setState({
@@ -11527,6 +11530,7 @@ class AddOsOrcamento extends Component {
                                   className="form-control"
                                   disabled={!this.state.editavel}
                                   type="datetime-local"
+                                  max="9999-12-31T23:59"
                                   value={this.state.etb}
                                   onChange={async (e) => {
                                     this.setState({
@@ -11545,6 +11549,7 @@ class AddOsOrcamento extends Component {
                                   className="form-control"
                                   disabled={!this.state.editavel}
                                   type="datetime-local"
+                                  max="9999-12-31T23:59"
                                   value={this.state.data_saida}
                                   onChange={async (e) => {
                                     this.setState({

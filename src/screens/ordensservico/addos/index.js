@@ -10409,6 +10409,7 @@ class AddOS extends Component {
                                 <Field
                                   className="form-control"
                                   type="date"
+                                  max="9999-12-31"
                                   value={this.state.eta}
                                   onChange={async (e) => {
                                     this.setState({
@@ -10426,6 +10427,7 @@ class AddOS extends Component {
                                 <Field
                                   className="form-control"
                                   type="datetime-local"
+                                  max="9999-12-31T23:59"
                                   value={this.state.etb}
                                   onChange={async (e) => {
                                     this.setState({
@@ -10443,6 +10445,7 @@ class AddOS extends Component {
                                 <Field
                                   className="form-control"
                                   type="datetime-local"
+                                  max="9999-12-31T23:59"
                                   value={this.state.data_saida}
                                   onChange={async (e) => {
                                     this.setState({
@@ -10907,6 +10910,7 @@ class AddOS extends Component {
                                   className="form-control"
                                   disabled={!this.state.editavel}
                                   type="date"
+                                  max="9999-12-31"
                                   value={this.state.eta}
                                   onChange={async (e) => {
                                     this.setState({
@@ -10925,6 +10929,7 @@ class AddOS extends Component {
                                   className="form-control"
                                   disabled={!this.state.editavel}
                                   type="datetime-local"
+                                  max="9999-12-31T23:59"
                                   value={this.state.etb}
                                   onChange={async (e) => {
                                     this.setState({
@@ -10943,6 +10948,7 @@ class AddOS extends Component {
                                   className="form-control"
                                   disabled={!this.state.editavel}
                                   type="datetime-local"
+                                  max="9999-12-31T23:59"
                                   value={this.state.data_saida}
                                   onChange={async (e) => {
                                     this.setState({
