@@ -1092,6 +1092,8 @@ class OS
     {
         $database = new Database();
 
+        $cols = 'nome';
+
         $result = $database->doInsert('templates_grupos', $cols, $values);
         $chave = $result[0]['chave'];
 
