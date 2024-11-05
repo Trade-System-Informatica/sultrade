@@ -19,7 +19,7 @@ if($objData != NULL){
 
     //$result = $employees->checkToken($token);
     //if($result == 'true'){
-    $result = $os->insertGrupoTemplate($values, $templates, $ordem);
+    $result = $os->insertGrupoTemplate($values, $ordem, $templates);
     //}
 } else {
     $result = "false";
