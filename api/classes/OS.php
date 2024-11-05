@@ -1092,21 +1092,7 @@ class OS
     {
         $database = new Database();
 
-        $maxOrdemResult = $database->doSelect(
-            'templates_grupos',
-            'MAX(ordem) as max_ordem',
-            '1=1'
-        );
-    
-        $novaOrdem = 1;
-        if (!empty($maxOrdemResult) && isset($maxOrdemResult[0]['max_ordem'])) {
-            $novaOrdem = $maxOrdemResult[0]['max_ordem'] + 1;
-        }
-
-        $cols = 'nome, ordem';
-        $valores = "'$values', $novaOrdem";
-
-        $result = $database->doInsert('templates_grupos', $cols, $valores);
+        $result = $database->doInsert('templates_grupos', $cols, $values);
         $chave = $result[0]['chave'];
 
         if ($chave) {
