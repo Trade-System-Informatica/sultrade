@@ -165,10 +165,14 @@ class AddGrupoTemplate extends Component {
         })
 
         if (parseInt(this.state.chave) === 0 && validForm) {
+            let ordem = 1;
+            if (this.props.location.state && this.props.location.state.grupo) {
+                ordem = this.props.location.state.grupo.ordem;
+            }
             await apiEmployee.post(`insertGrupoTemplate.php`, {
                 token: true,
                 values: `'${this.state.nome}'`,
-                ordem: `'${this.grupo.ordem}'`,
+                ordem: ordem,
                 templates: this.state.templatesEscolhidas
             }).then(
                 async res => {

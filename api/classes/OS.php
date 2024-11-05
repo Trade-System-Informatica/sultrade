@@ -1088,7 +1088,7 @@ class OS
         return $result;
     }
 
-    public static function insertGrupoTemplate($values, $templates)
+    public static function insertGrupoTemplate($values, $templates, $ordem)
     {
         $database = new Database();
 
@@ -1693,7 +1693,7 @@ class OS
         $result = $database->doUpdate('templates_grupos', $query, 'chave = ' . $chave);
 
         $result = $database->doSelect('templates_grupos', "templates_grupos.*", 'chave = ' . $chave);
-        
+
         $database->closeConection();
         if ($result == NULL) {
             return 'false';

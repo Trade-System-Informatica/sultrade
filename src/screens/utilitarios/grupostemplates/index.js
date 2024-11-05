@@ -37,7 +37,8 @@ class GruposTemplates extends Component {
 
     state = {
         ...estadoInicial,
-        usuarioLogado: this.props.user
+        usuarioLogado: this.props.user,
+        maxOrdem: 1
     }
 
     componentDidMount = async () => {
@@ -71,6 +72,11 @@ class GruposTemplates extends Component {
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php'),
         })
+
+        // Determinar a maior ordem encontrada nos grupos
+        this.setState(prevState => ({
+            maxOrdem: this.state.grupos.reduce((max, grupo) => Math.max(max, grupo.ordem), 1)
+        }));
 
         if (this.props.location.state && this.props.location.state.chave) {
             await this.setState({ chaveFocus: this.props.location.state.chave });
@@ -266,7 +272,7 @@ class GruposTemplates extends Component {
 
                             <AddButton addLink={{
                                 pathname: `/utilitarios/addgrupotemplate/0`,
-                                state: { grupo: { ordem: Math.max(...this.state.grupos.map(grupo => grupo.ordem)) + 1 } }
+                                state: { grupo: { ordem: this.state.maxOrdem + 1}}
                             }} />
 
                             <div className="row deleteMargin" id="product-list">
