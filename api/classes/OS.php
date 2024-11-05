@@ -1088,7 +1088,7 @@ class OS
         return $result;
     }
 
-    public static function insertGrupoTemplate($values, $templates, $ordem)
+    public static function insertGrupoTemplate($values, $ordem, $templates)
     {
         $database = new Database();
 
