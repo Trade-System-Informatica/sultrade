@@ -1092,15 +1092,21 @@ class OS
     {
         $database = new Database();
 
-        // Obter o maior valor de ordem existente
-        $maxOrdem = ($database->doSelect(
+        $maxOrdemResult = $database->doSelect(
             'templates_grupos',
-            'MAX(ordem) as max_ordem'
-        )[0]['max_ordem']) + 1;
+            'MAX(ordem) as max_ordem',
+            '1=1'
+        );
+    
+        $novaOrdem = 1;
+        if (!empty($maxOrdemResult) && isset($maxOrdemResult[0]['max_ordem'])) {
+            $novaOrdem = $maxOrdemResult[0]['max_ordem'] + 1;
+        }
 
         $cols = 'nome, ordem';
+        $valores = "'$values', $novaOrdem";
 
-        $result = $database->doInsert('templates_grupos', $cols, "'$values', $maxOrdem");
+        $result = $database->doInsert('templates_grupos', $cols, $valores);
         $chave = $result[0]['chave'];
 
         if ($chave) {
