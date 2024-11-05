@@ -1088,13 +1088,22 @@ class OS
         return $result;
     }
 
-    public static function insertGrupoTemplate($values, $ordem, $templates)
+    public static function insertGrupoTemplate($values, $templates)
     {
         $database = new Database();
 
+        // Obter o maior valor de ordem existente
+        $maxOrdem = $database->doSelect(
+            'templates_grupos',
+            'MAX(ordem) as max_ordem'
+        )[0]['max_ordem'];
+
+        // Incrementar o maior valor de ordem para obter a nova ordem
+        $values['ordem'] = $maxOrdem + 1;
+
         $cols = 'nome, ordem';
 
-        $result = $database->doInsert('templates_grupos', $cols, "'$values', '$ordem'");
+        $result = $database->doInsert('templates_grupos', $cols, $values);
         $chave = $result[0]['chave'];
 
         if ($chave) {
