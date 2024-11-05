@@ -669,9 +669,9 @@ class OS
         $database = new Database();
 
         if ($offset || $offset === "0" || $offset === 0) {
-            $where = "1=1 GROUP BY templates_grupos.chave ORDER BY templates_grupos.chave DESC LIMIT 101 OFFSET " . $offset;
+            $where = "1=1 GROUP BY templates_grupos.chave ORDER BY templates_grupos.ordem ASC LIMIT 101 OFFSET " . $offset;
         } else if ($offset !== "0" && $offset !== 0) {
-            $where = "1=1 GROUP BY templates_grupos.chave ORDER BY templates_grupos.chave DESC";
+            $where = "1=1 GROUP BY templates_grupos.chave ORDER BY templates_grupos.ordem ASC";
         }
 
         $result = $database->doSelect(
@@ -1092,9 +1092,9 @@ class OS
     {
         $database = new Database();
 
-        $cols = 'nome';
+        $cols = 'nome, ordem';
 
-        $result = $database->doInsert('templates_grupos', $cols, $values);
+        $result = $database->doInsert('templates_grupos', $cols, "'$values', '$ordem'");
         $chave = $result[0]['chave'];
 
         if ($chave) {
@@ -1676,6 +1676,24 @@ class OS
         }
 
         $result = $database->doSelect('templates_grupos', "templates_grupos.*", 'chave = ' . $chave);
+        $database->closeConection();
+        if ($result == NULL) {
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+
+    public static function updateGrupoTemplateOrdem($chave, $ordem)
+    {
+        $database = new Database();
+
+        $query = "ordem = '" . $ordem . "'";
+
+        $result = $database->doUpdate('templates_grupos', $query, 'chave = ' . $chave);
+
+        $result = $database->doSelect('templates_grupos', "templates_grupos.*", 'chave = ' . $chave);
+        
         $database->closeConection();
         if ($result == NULL) {
             return 'false';

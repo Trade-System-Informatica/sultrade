@@ -564,19 +564,21 @@ class AddOsOrcamento extends Component {
   };
 
   moveUp(index) {
-    if (index > 0) {
-      const eventos = [...this.state.eventos];
-      [eventos[index - 1], eventos[index]] = [eventos[index], eventos[index - 1]];
-      this.setState({ eventos, ordemModificada: true });
-    }
+    const eventos = [...this.state.eventos];
+    const length = eventos.length;
+    // Usando módulo para calcular o índice anterior de forma circular
+    const previousIndex = (index - 1 + length) % length;
+    [eventos[previousIndex], eventos[index]] = [eventos[index], eventos[previousIndex]];
+    this.setState({ eventos, ordemModificada: true });
   }
-
+  
   moveDown(index) {
-    if (index < this.state.eventos.length - 1) {
-      const eventos = [...this.state.eventos];
-      [eventos[index + 1], eventos[index]] = [eventos[index], eventos[index + 1]];
-      this.setState({ eventos, ordemModificada: true });
-    }
+    const eventos = [...this.state.eventos];
+    const length = eventos.length;
+    // Usando módulo para calcular o próximo índice de forma circular
+    const nextIndex = (index + 1) % length;
+    [eventos[nextIndex], eventos[index]] = [eventos[index], eventos[nextIndex]];
+    this.setState({ eventos, ordemModificada: true });
   }
 
   calculaTotal = () => {
@@ -12731,8 +12733,9 @@ class AddOsOrcamento extends Component {
                                         </>
                                       )}
                                     </table>
+                                  </div>
                                     {this.state.ordemModificada && (
-                                      <button onClick={this.salvarOrdem} disabled={this.state.loading}>
+                                      <button className='salvarOrdem' onClick={this.salvarOrdem} disabled={this.state.loading}>
                                         {this.state.loading ? (
                                           "Salvando..."
                                         ) : (
@@ -12742,7 +12745,6 @@ class AddOsOrcamento extends Component {
                                         )}
                                       </button>
                                     )}
-                                  </div>
                                 </div>
                               </div>
                             </div>

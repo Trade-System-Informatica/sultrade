@@ -168,6 +168,7 @@ class AddGrupoTemplate extends Component {
             await apiEmployee.post(`insertGrupoTemplate.php`, {
                 token: true,
                 values: `'${this.state.nome}'`,
+                ordem: `'${this.grupo.ordem}'`,
                 templates: this.state.templatesEscolhidas
             }).then(
                 async res => {
