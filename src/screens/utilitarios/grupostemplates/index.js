@@ -10,7 +10,7 @@ import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { PRECISA_LOGAR, NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPen, faPlus, faChevronDown, faChevronUp, faTimes , faArrowUp, faArrowDown, faSave} from '@fortawesome/free-solid-svg-icons'
+import { faPen, faPlus, faChevronDown, faChevronUp, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 
@@ -30,7 +30,6 @@ const estadoInicial = {
     acessos: [],
     permissoes: [],
     acessosPermissoes: [],
-    ordemModificada: false,
 }
 
 class GruposTemplates extends Component {
@@ -165,47 +164,7 @@ class GruposTemplates extends Component {
 
     }
 
-    moveUp(index) {
-        const grupos = [...this.state.grupos];
-        const length = grupos.length;
-        // Usando módulo para calcular o índice anterior de forma circular
-        const previousIndex = (index - 1 + length) % length;
-        [grupos[previousIndex], grupos[index]] = [grupos[index], grupos[previousIndex]];
-        this.setState({ grupos, ordemModificada: true });
-      }
-      
-      moveDown(index) {
-        const grupos = [...this.state.grupos];
-        const length = grupos.length;
-        // Usando módulo para calcular o próximo índice de forma circular
-        const nextIndex = (index + 1) % length;
-        [grupos[nextIndex], grupos[index]] = [grupos[index], grupos[nextIndex]];
-        this.setState({ grupos, ordemModificada: true });
-      }
 
-    salvarOrdem = async () => {
-        this.setState({ loading: true });
-      
-        // Mapear grupos e criar as requisições para salvar a ordem no backend
-        const promises = this.state.grupos.map((grupo, index) => {
-          return apiEmployee.post(`updateGruposTemplateOrdem.php`, {
-            chave: grupo.chave, // Identificador do grupo a ser atualizado
-            ordem: index + 1,    // Define a nova ordem baseada na posição do array
-          });
-        });
-      
-        // Executa todas as requisições e espera elas terminarem
-        try {
-          await Promise.all(promises);
-          console.log("Ordem dos grupos salva com sucesso.");
-          
-          this.setState({ loading: false });
-          window.location.reload();
-        } catch (error) {
-          console.error("Erro ao salvar ordem dos grupos: ", error);
-          this.setState({ loading: false });
-        }
-      };
 
     render() {
 
@@ -266,7 +225,7 @@ class GruposTemplates extends Component {
 
                             <AddButton addLink={{
                                 pathname: `/utilitarios/addgrupotemplate/0`,
-                                state: { grupo: { }}
+                                state: { grupo: {} }
                             }} />
 
                             <div className="row deleteMargin" id="product-list">
@@ -274,13 +233,10 @@ class GruposTemplates extends Component {
                                 <div className="col-lg-8 col-md-8 col-sm-12 col-12 mix all dresses bags">
                                     <div className="single-product-item">
                                         <div className="row subtitulosTabela">
-                                            <div className="col-2 text-left">
-                                                <span className="subtituloships">Chave</span>
-                                            </div>
-                                            <div className="col-2 text-left">
-                                                    <span className="subtituloships">Ordem</span>
-                                            </div>
-                                            <div className="col-6 text-left">
+                                                <div className="col-2 text-left">
+                                                    <span className="subtituloships">Chave</span>
+                                                </div>
+                                            <div className="col-8 text-left">
                                                 <span className="subtituloships">Nome</span>
                                             </div>
                                             <div className="col-2 text-right revertItem" onClick={() => this.reverterItens()}>
@@ -301,16 +257,7 @@ class GruposTemplates extends Component {
                                                 <div className="col-2 text-left">
                                                     <p>{feed.chave}</p>
                                                 </div>
-                                                <div className="col-2 text-left">
-                                                    <p>{feed.ordem}{' '}
-                                                      <span type="button" className="iconelixo giveMargin" onClick={(e) => {this.moveUp(index);}}>
-                                                        <FontAwesomeIcon icon={faArrowUp} />
-                                                      </span>
-                                                      <span type="button" className="iconelixo" onClick={(e) => {this.moveDown(index);}}>
-                                                        <FontAwesomeIcon icon={faArrowDown} />
-                                                      </span></p>
-                                                </div>
-                                                <div className="col-6 text-left">
+                                                <div className="col-8 text-left">
                                                     <p>{feed.nome}</p>
                                                 </div>
                                                 <div className="col-2 text-left mobileajuster4 icones">
@@ -348,17 +295,6 @@ class GruposTemplates extends Component {
                                         <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
                                     </div>
                                 ))}
-                                {this.state.ordemModificada && (
-                                      <button className='salvarOrdem' onClick={this.salvarOrdem} disabled={this.state.loading}>
-                                        {this.state.loading ? (
-                                          "Salvando..."
-                                        ) : (
-                                          <>
-                                            <FontAwesomeIcon icon={faSave} /> Salvar Ordem
-                                          </>
-                                        )}
-                                      </button>
-                                    )}
                             </div>
                         </div>
                     }
