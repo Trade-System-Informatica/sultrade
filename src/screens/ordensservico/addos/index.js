@@ -8674,7 +8674,7 @@ class AddOS extends Component {
                                     <table className="agrupador_lista">
                                       <tr>
                                         <th className="text-center">
-                                          <span>Ordem</span>
+                                          <span>Chave</span>
                                         </th>
                                         <th className="text-center">
                                           <span>Nome</span>
@@ -8694,7 +8694,7 @@ class AddOS extends Component {
                                                 if (
                                                   this.state.grupoTemplate &&
                                                   this.state.grupoTemplate
-                                                    .ordem != feed.ordem
+                                                    .chave != feed.chave
                                                 ) {
                                                   this.setState({
                                                     grupoTemplate: feed,
@@ -8707,14 +8707,14 @@ class AddOS extends Component {
                                               }}
                                               style={{
                                                 filter:
-                                                  feed.ordem ==
-                                                  this.state.grupoTemplate.ordem
+                                                  feed.chave ==
+                                                  this.state.grupoTemplate.chave
                                                     ? "brightness(0.5)"
                                                     : undefined,
                                               }}
                                             >
                                               <td className="text-center">
-                                                <p>{feed.ordem}</p>
+                                                <p>{feed.chave}</p>
                                               </td>
                                               <td className="text-center">
                                                 <p>{feed.nome}</p>
