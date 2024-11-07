@@ -261,7 +261,7 @@ class AddEvento extends Component {
                     { titulo: 'Fornecedor', valor: util.formatForLogs(this.state.fornecedor, 'options', '', '', this.state.pessoasOptions) },
                     { titulo: 'Taxa', valor: util.formatForLogs(this.state.taxa, 'options', '', '', this.state.taxasOptions) },
                     { titulo: 'Moeda', valor: util.formatForLogs(this.state.moeda, 'options', '', '', this.state.moedas, 'Chave', 'Sigla') },
-                    { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, 'money', '0,00') },
+                    { titulo: 'Valor unitário', valor: util.formatForLogs(this.state.valor, 'money', '0,00') },
                     { titulo: 'VCP', valor: util.formatForLogs(this.state.vlrc, 'money', '0,00') },
                     { titulo: 'Repasse', valor: util.formatForLogs(this.state.repasse, 'bool') },
                     { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
@@ -1024,7 +1024,7 @@ class AddEvento extends Component {
                 { titulo: 'Fornecedor', valor: util.formatForLogs(this.state.fornecedor, 'options', '', '', this.state.pessoasOptions) },
                 { titulo: 'Taxa', valor: util.formatForLogs(this.state.taxa, 'options', '', '', this.state.taxasOptions) },
                 { titulo: 'Moeda', valor: util.formatForLogs(this.state.moeda, 'options', '', '', this.state.moedas, 'Chave', 'Sigla') },
-                { titulo: 'Valor', valor: util.formatForLogs(this.state.valor, 'money', '0,00') },
+                { titulo: 'Valor unitário', valor: util.formatForLogs(this.state.valor, 'money', '0,00') },
                 { titulo: 'VCP', valor: util.formatForLogs(this.state.vlrc, 'money', '0,00') },
                 { titulo: 'Repasse', valor: util.formatForLogs(this.state.repasse, 'bool') },
                 { titulo: 'Descrição', valor: util.formatForLogs(this.state.descricao) },
@@ -2090,7 +2090,7 @@ class AddEvento extends Component {
                                                         </div>
 
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                            <label>Valor</label>
+                                                            <label>Valor unitário</label>
                                                         </div>
                                                         <div className='col-1 errorMessage'>
                                                             {!this.state.valor || !this.state.moeda &&
