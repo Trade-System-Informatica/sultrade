@@ -598,3 +598,15 @@ input[type=number] {
     font-size: 16px;
     z-index: 999;
 }
+
+th.ordem-column{
+    min-width: 70px;
+}
+
+th.plus-column{
+    min-width: 45px;
+}
+
+th.desc-column {
+    width: 750px;
+}

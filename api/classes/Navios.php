@@ -131,6 +131,7 @@ class Navios
             os_subgrupos_taxas.descricao as descSubgrupo,
             os_servicos_itens.descricao as descos,
             os_servicos_itens.valor,
+            os_servicos_itens.qntd,
             os_servicos_itens.moeda,
             os_servicos_itens.tipo_sub AS tipo,
             pessoas_enderecos.endereco AS rua,

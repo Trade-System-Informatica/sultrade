@@ -254,6 +254,8 @@ const estadoInicial = {
   eventoVlrc: "",
   eventoRepasse: "",
   eventoFornecedorCusteio: "",
+  eventoQntd: "",
+  eventoValorTotal: "0,00",
 
   taxas: [],
   taxasOptions: [],
@@ -587,20 +589,20 @@ class AddOsOrcamento extends Component {
     this.state.eventos.map((evento) => {
       if (evento.tipo_sub == 0 || evento.tipo_sub == 1) {
         if (evento.Moeda == 5) {
-          eventosTotal += parseFloat(evento.valor);
+          eventosTotal += parseFloat((evento.valor*evento.qntd));
         } else if (evento.Moeda == 6) {
           eventosTotal +=
-            parseFloat(evento.valor) *
+            parseFloat((evento.valor*evento.qntd)) *
             (parseFloat(this.state.os.ROE) == 0
               ? 5
               : parseFloat(this.state.os.ROE));
         }
       } else {
         if (evento.Moeda == 5) {
-          eventosTotal -= parseFloat(evento.valor);
+          eventosTotal -= parseFloat((evento.valor*evento.qntd));
         } else if (evento.Moeda == 6) {
           eventosTotal -=
-            parseFloat(evento.valor) *
+            parseFloat((evento.valor*evento.qntd)) *
             (parseFloat(this.state.os.ROE) == 0
               ? 5
               : parseFloat(this.state.os.ROE));
@@ -1259,6 +1261,20 @@ class AddOsOrcamento extends Component {
         Fornecedor_Custeio:
           evento.Fornecedor_Custeio || this.state.eventoFornecedorCusteio,
         chave: this.state.eventoChave,
+        qntd: evento.qntd || this.state.eventoQntd,
+      };
+
+      let valorTotalInicial = evento.qntd * evento.valor;
+
+      const updateValorTotal = () => {
+        const valor = parseFloat(this.state.eventoValor.replace(",", ".").replace(".", "")) || 0;
+        const qntd = parseInt(this.state.eventoQntd) || 1;
+        const valorTotal = valor * qntd;
+        let valorTotalInicial = new Intl.NumberFormat("pt-BR", {
+            style: "decimal",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }).format(valorTotal)
       };
 
       await this.setState({
@@ -1287,6 +1303,7 @@ class AddOsOrcamento extends Component {
         eventoRepasse: template.repasse,
         eventoFornecedorCusteio: template.Fornecedor_Custeio,
         eventoChave: template.chave,
+        eventoQntd: Number(template.qntd),
 
         modalItemAberto: true,
         itemNome: template.descricao,
@@ -1328,7 +1345,7 @@ class AddOsOrcamento extends Component {
             ),
           },
           {
-            titulo: "Valor",
+            titulo: "Valor unitário",
             valor: util.formatForLogs(this.state.eventoValor, "money", "0,00"),
           },
           {
@@ -1370,6 +1387,10 @@ class AddOsOrcamento extends Component {
               "",
               this.state.fornecedoresOptions
             ),
+          },
+          {
+            titulo: "Quantidade",
+            valor: util.formatForLogs(this.state.eventoQntd),
           },
         ],
 
@@ -1461,7 +1482,7 @@ class AddOsOrcamento extends Component {
             },
             {
               half: true,
-              titulo: "Valor",
+              titulo: "Valor unitário",
               obrigatorio: true,
               valor1: template.Moeda,
               tipo1: "select",
@@ -1478,7 +1499,7 @@ class AddOsOrcamento extends Component {
                 : "0,00",
               tipo2: "text",
               onChange2: async (valor) => {
-                await this.setState({ eventoValor: valor });
+                await this.setState({ eventoValor: valor }, updateValorTotal);
               },
               onBlur2: async (valor) => {
                 await this.setState({
@@ -1491,8 +1512,26 @@ class AddOsOrcamento extends Component {
                         maximumFractionDigits: 2,
                       }).format(valor.replaceAll(".", "").replaceAll(",", "."))
                     : "0,00",
-                });
+                }, updateValorTotal);
               },
+            },
+            {
+              titulo: "Quantidade",
+              valor: Number(template.qntd),
+              tipo: "text",
+              onChange: async (valor) => {
+                await this.setState({ eventoQntd: Number(valor) }, updateValorTotal);
+              },
+            },
+            {
+              titulo: "Valor total",
+              valor: new Intl.NumberFormat("pt-BR", {
+                style: "decimal",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(valorTotalInicial),
+              tipo: "text",
+              disabled: true,
             },
             {
               titulo: "VCP",
@@ -1534,6 +1573,19 @@ class AddOsOrcamento extends Component {
       });
     } else {
       if (evento) {
+        let valorTotalInicial = evento.qntd * evento.valor;
+
+        const updateValorTotal = () => {
+          const valor = parseFloat(this.state.eventoValor.replace(",", ".").replace(".", "")) || 0;
+          const qntd = parseInt(this.state.eventoQntd) || 1;
+          const valorTotal = valor * qntd;
+          let valorTotalInicial = new Intl.NumberFormat("pt-BR", {
+              style: "decimal",
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }).format(valorTotal)
+        };
+
         await this.setState({
           eventoData: evento.data || this.state.eventoData,
           eventoFornecedor: evento.fornecedor,
@@ -1543,6 +1595,7 @@ class AddOsOrcamento extends Component {
           eventoTipo: evento.tipo_sub,
           eventoOrdem: evento.ordem,
           eventoRemarks: evento.remarks,
+          eventoQntd: evento.qntd,
           eventoValor: Number(evento.valor)
             ? new Intl.NumberFormat("pt-BR", {
                 style: "decimal",
@@ -1601,7 +1654,7 @@ class AddOsOrcamento extends Component {
               ),
             },
             {
-              titulo: "Valor",
+              titulo: "Valor unitário",
               valor: util.formatForLogs(
                 this.state.eventoValor,
                 "money",
@@ -1647,6 +1700,10 @@ class AddOsOrcamento extends Component {
                 "",
                 this.state.fornecedoresOptions
               ),
+            },
+            {
+              titulo: "Quantidade",
+              valor: util.formatForLogs(this.state.eventoQntd),
             },
           ],
 
@@ -1738,7 +1795,7 @@ class AddOsOrcamento extends Component {
               },
               {
                 half: true,
-                titulo: "Valor",
+                titulo: "Valor unitário",
                 obrigatorio: true,
                 valor1: evento.Moeda,
                 tipo1: "select",
@@ -1755,7 +1812,7 @@ class AddOsOrcamento extends Component {
                   : "0,00",
                 tipo2: "text",
                 onChange2: async (valor) => {
-                  await this.setState({ eventoValor: valor });
+                  await this.setState({ eventoValor: valor }, updateValorTotal);
                 },
                 onBlur2: async (valor) => {
                   await this.setState({
@@ -1770,8 +1827,26 @@ class AddOsOrcamento extends Component {
                           valor.replaceAll(".", "").replaceAll(",", ".")
                         )
                       : "0,00",
-                  });
+                  }, updateValorTotal);
                 },
+              },
+              {
+                titulo: "Quantidade",
+                valor: Number(evento.qntd),
+                tipo: "text",
+                onChange: async (valor) => {
+                  await this.setState({ eventoQntd: Number(valor) }, updateValorTotal);
+                },
+              },
+              {
+                titulo: "Valor total",
+                valor: new Intl.NumberFormat("pt-BR", {
+                  style: "decimal",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(valorTotalInicial),
+                tipo: "text",
+                disabled: true, 
               },
               {
                 titulo: "VCP",
@@ -1827,6 +1902,7 @@ class AddOsOrcamento extends Component {
             ) + 1
           }`,
           eventoRemarks: "",
+          eventoQntd: 1,
           eventoValor: "0,00",
           eventoVlrc: "0,00",
           eventoRepasse: false,
@@ -1933,7 +2009,7 @@ class AddOsOrcamento extends Component {
               },
               {
                 half: true,
-                titulo: "Valor",
+                titulo: "Valor unitário",
                 obrigatorio: true,
                 valor1: 6,
                 tipo1: "select",
@@ -1960,6 +2036,14 @@ class AddOsOrcamento extends Component {
                         )
                       : "",
                   });
+                },
+              },
+              {
+                titulo: "Quantidade",
+                valor: 1,
+                tipo: "text",
+                onChange: async (valor) => {
+                  await this.setState({ eventoQntd: Number(valor) });
                 },
               },
               {
@@ -2365,7 +2449,7 @@ class AddOsOrcamento extends Component {
       await apiEmployee
         .post(`insertServicoItemBasico.php`, {
           token: true,
-          values: `'${this.state.chave}', '', '${template.fornecedor}', '${template.taxa}', '${template.descricao}', '${template.tipo_sub}', '${template.Fornecedor_Custeio}', '${template.remarks}', '${template.Moeda}', '${template.valor}', '${template.valor1}', '${template.repasse}'`,
+          values: `'${this.state.chave}', '', '${template.fornecedor}', '${template.taxa}', '${template.descricao}', '${template.tipo_sub}', '${template.Fornecedor_Custeio}', '${template.remarks}', '${template.Moeda}', '${template.valor}', '${template.valor1}', '${template.repasse}', '${template.qntd}'`,
           chave_os: this.state.chave,
           ordem,
         })
@@ -2726,20 +2810,20 @@ class AddOsOrcamento extends Component {
     this.state.eventos.map((evento) => {
       if (evento.tipo_sub == 3 && evento.cancelada == 0) {
         if (evento.Moeda == 5) {
-          valorDesconto += parseFloat(evento.valor);
+          valorDesconto += parseFloat((evento.valor*evento.qntd));
         } else if (evento.Moeda == 6) {
           valorDesconto +=
-            parseFloat(evento.valor) *
+            parseFloat((evento.valor*evento.qntd)) *
             (parseFloat(this.state.roe.replace(",", ".")) == 0
               ? 5
               : parseFloat(this.state.roe.replace(",", ".")));
         }
       } else if (evento.tipo_sub == 2) {
         if (evento.Moeda == 5) {
-          valorRecebido += parseFloat(evento.valor);
+          valorRecebido += parseFloat((evento.valor*evento.qntd));
         } else if (evento.Moeda == 6) {
           valorRecebido +=
-            parseFloat(evento.valor) *
+            parseFloat((evento.valor*evento.qntd)) *
             (parseFloat(this.state.roe.replace(",", ".")) == 0
               ? 5
               : parseFloat(this.state.roe.replace(",", ".")));
@@ -2747,10 +2831,10 @@ class AddOsOrcamento extends Component {
       } else if (![3, 2].includes(evento.tipo_sub) && evento.cancelada == 0) {
         if (evento.repasse != 0 || evento.Fornecedor_Custeio != 0) {
           if (evento.Moeda == 5) {
-            valor += parseFloat(evento.valor);
+            valor += parseFloat((evento.valor*evento.qntd));
           } else if (evento.Moeda == 6) {
             valor +=
-              parseFloat(evento.valor) *
+              parseFloat((evento.valor*evento.qntd)) *
               (parseFloat(this.state.roe.replace(",", ".")) == 0
                 ? 5
                 : parseFloat(this.state.roe.replace(",", ".")));
@@ -6823,16 +6907,35 @@ class AddOsOrcamento extends Component {
                     DESCRIPTION:
                   </td>
                   <td
-                    className="pdf_money_col"
+                    className="pdf_money_header"
                     style={{ backgroundColor: "#CDCDCD" }}
                   >
-                    VALUE (USD)
+                    UNITARY VALUE (USD)
                   </td>
                   <td
-                    className="pdf_money_col"
+                    className="pdf_money_header"
                     style={{ backgroundColor: "#CDCDCD" }}
                   >
-                    VALUE (R$)
+                    UNITARY VALUE (R$)
+                  </td>
+                  <td
+                    colSpan="1"
+                    className="pdf_qntd_col"
+                    style={{ backgroundColor: "#CDCDCD" }}
+                  >
+                    QTY
+                  </td>
+                  <td
+                    className="pdf_money_header"
+                    style={{ backgroundColor: "#CDCDCD" }}
+                  >
+                    TOTAL VALUE (USD)
+                  </td>
+                  <td
+                    className="pdf_money_header"
+                    style={{ backgroundColor: "#CDCDCD" }}
+                  >
+                    TOTAL VALUE (R$)
                   </td>
                 </tr>
                 <tr>
@@ -6855,14 +6958,35 @@ class AddOsOrcamento extends Component {
                   >
                     &nbsp;
                   </td>
+                  <td
+                    className="pdf_qntd_col"
+                    style={{ backgroundColor: "white" }}
+                  >
+                    &nbsp;
+                  </td>
+                  <td
+                    className="pdf_money_col"
+                    style={{ backgroundColor: "white" }}
+                  >
+                    &nbsp;
+                  </td>
+                  <td
+                    className="pdf_money_col"
+                    style={{ backgroundColor: "white" }}
+                  >
+                    &nbsp;
+                  </td>
                 </tr>
                 {this.state.pdfContent.map((e, index) => {
+                  const isZeroQuantity = e.qntd === 0;
+                  const backgroundColor = isZeroQuantity ? "red" : index % 2 === 0 ? "white" : "#ccc";
+
                   if (e.tipo == 0 || e.tipo == 1) {
                     if (e.moeda == 5) {
-                      valorTotal += parseFloat(e.valor);
+                      valorTotal += parseFloat(e.valor * e.qntd);
                       valorTotalDolar += Util.toFixed(
                         parseFloat(
-                          e.valor /
+                          (e.valor * e.qntd) /
                             (this.state.pdfContent[0].roe
                               ? this.state.pdfContent[0].roe
                               : 5)
@@ -6872,21 +6996,21 @@ class AddOsOrcamento extends Component {
                     } else {
                       valorTotal += Util.toFixed(
                         parseFloat(
-                          e.valor *
+                          (e.valor * e.qntd) *
                             (this.state.pdfContent[0].roe
                               ? this.state.pdfContent[0].roe
                               : 5)
                         ),
                         2
                       );
-                      valorTotalDolar += parseFloat(e.valor);
+                      valorTotalDolar += parseFloat((e.valor * e.qntd));
                     }
                   } else if (e.tipo == 2) {
                     if (e.moeda == 5) {
-                      recebimentoTotal += parseFloat(e.valor);
+                      recebimentoTotal += parseFloat((e.valor * e.qntd));
                       recebimentoTotalDolar += Util.toFixed(
                         parseFloat(
-                          e.valor /
+                          (e.valor * e.qntd) /
                             (this.state.pdfContent[0].roe
                               ? this.state.pdfContent[0].roe
                               : 5)
@@ -6896,21 +7020,21 @@ class AddOsOrcamento extends Component {
                     } else {
                       recebimentoTotal += Util.toFixed(
                         parseFloat(
-                          e.valor *
+                          (e.valor * e.qntd) *
                             (this.state.pdfContent[0].roe
                               ? this.state.pdfContent[0].roe
                               : 5)
                         ),
                         2
                       );
-                      recebimentoTotalDolar += parseFloat(e.valor);
+                      recebimentoTotalDolar += parseFloat((e.valor * e.qntd));
                     }
                   } else if (e.tipo == 3) {
                     if (e.moeda == 5) {
-                      descontoTotal += parseFloat(e.valor);
+                      descontoTotal += parseFloat((e.valor * e.qntd));
                       descontoTotalDolar += Util.toFixed(
                         parseFloat(
-                          e.valor /
+                          (e.valor * e.qntd) /
                             (this.state.pdfContent[0].roe
                               ? this.state.pdfContent[0].roe
                               : 5)
@@ -6920,14 +7044,14 @@ class AddOsOrcamento extends Component {
                     } else {
                       descontoTotal += Util.toFixed(
                         parseFloat(
-                          e.valor *
+                          (e.valor * e.qntd) *
                             (this.state.pdfContent[0].roe
                               ? this.state.pdfContent[0].roe
                               : 5)
                         ),
                         2
                       );
-                      descontoTotalDolar += parseFloat(e.valor);
+                      descontoTotalDolar += parseFloat((e.valor * e.qntd));
                     }
                   }
 
@@ -6935,14 +7059,14 @@ class AddOsOrcamento extends Component {
                     return (
                       <tr
                         style={{
-                          background: index % 2 == 0 ? "white" : "#dddddd",
+                          background: backgroundColor,
                         }}
                       >
                         <td
                           colSpan="7"
                           className="pdf_large_col reduce_font"
                           style={{
-                            background: index % 2 == 0 ? "white" : "#ccc",
+                            background: backgroundColor,
                           }}
                         >
                           {e.descos != "LINHA VAZIA" ? e.descos : null}
@@ -6951,21 +7075,21 @@ class AddOsOrcamento extends Component {
                         <td
                           className="pdf_money_col reduce_font"
                           style={{
-                            background: index % 2 == 0 ? "white" : "#ccc",
+                            backgroundColor,
                           }}
                         >
                           {e.descos != "LINHA VAZIA"
                             ? e.moeda == 5
                               ? util.formataDinheiroBrasileiro(
                                   parseFloat(
-                                    e.valor /
+                                    (e.valor) /
                                       (this.state.pdfContent[0].roe
                                         ? this.state.pdfContent[0].roe
                                         : 5)
                                   )
                                 )
                               : util.formataDinheiroBrasileiro(
-                                  parseFloat(e.valor)
+                                  parseFloat((e.valor))
                                 )
                             : null}
                           &nbsp;
@@ -6973,21 +7097,72 @@ class AddOsOrcamento extends Component {
                         <td
                           className="pdf_money_col reduce_font"
                           style={{
-                            background: index % 2 == 0 ? "white" : "#ccc",
+                            background: backgroundColor,
                           }}
                         >
                           {e.descos != "LINHA VAZIA"
                             ? e.moeda == 6
                               ? util.formataDinheiroBrasileiro(
                                   parseFloat(
-                                    e.valor *
+                                    (e.valor) *
                                       (this.state.pdfContent[0].roe
                                         ? this.state.pdfContent[0].roe
                                         : 5)
                                   )
                                 )
                               : util.formataDinheiroBrasileiro(
-                                  parseFloat(e.valor)
+                                  parseFloat((e.valor))
+                                )
+                            : null}
+                          &nbsp;
+                        </td>
+                        <td
+                          className="pdf_qntd_col reduce_font"
+                          style={{ backgroundColor }}
+                        >
+                          {e.descos !== "LINHA VAZIA" ? e.qntd : null}
+                          &nbsp;
+                        </td>
+                        <td
+                          className="pdf_money_col reduce_font"
+                          style={{
+                            backgroundColor,
+                          }}
+                        >
+                          {e.descos != "LINHA VAZIA"
+                            ? e.moeda == 5
+                              ? util.formataDinheiroBrasileiro(
+                                  parseFloat(
+                                    (e.valor * e.qntd) /
+                                      (this.state.pdfContent[0].roe
+                                        ? this.state.pdfContent[0].roe
+                                        : 5)
+                                  )
+                                )
+                              : util.formataDinheiroBrasileiro(
+                                  parseFloat((e.valor * e.qntd))
+                                )
+                            : null}
+                          &nbsp;
+                        </td>
+                        <td
+                          className="pdf_money_col reduce_font"
+                          style={{
+                            background: backgroundColor,
+                          }}
+                        >
+                          {e.descos != "LINHA VAZIA"
+                            ? e.moeda == 6
+                              ? util.formataDinheiroBrasileiro(
+                                  parseFloat(
+                                    (e.valor * e.qntd) *
+                                      (this.state.pdfContent[0].roe
+                                        ? this.state.pdfContent[0].roe
+                                        : 5)
+                                  )
+                                )
+                              : util.formataDinheiroBrasileiro(
+                                  parseFloat((e.valor * e.qntd))
                                 )
                             : null}
                           &nbsp;
@@ -6998,7 +7173,7 @@ class AddOsOrcamento extends Component {
                 })}
                 {this.state.pdfContent[0].governmentTaxes > 0 && (
                   <tr>
-                    <td colSpan="7" className="pdf_large_col reduce_font">
+                    <td colSpan="10" className="pdf_large_col reduce_font">
                       <b>GOVERNMENT TAXES</b>
                     </td>
                     <td className="pdf_money_col reduce_font">
@@ -7024,7 +7199,7 @@ class AddOsOrcamento extends Component {
                 )}
                 {this.state.pdfContent[0].bankCharges > 0 && (
                   <tr styles={{ padding: "37px 0px 37px 0px" }}>
-                    <td colSpan="7" className="pdf_large_col reduce_font">
+                    <td colSpan="10" className="pdf_large_col reduce_font">
                       <b>BANK CHARGES</b>
                     </td>
                     <td className="pdf_money_col reduce_font">
@@ -7049,7 +7224,7 @@ class AddOsOrcamento extends Component {
                   </tr>
                 )}
                 <tr>
-                  <td colSpan="7" className="pdf_large_col pdfTitle">
+                  <td colSpan="10" className="pdf_large_col pdfTitle">
                     Total
                   </td>
                   <td className="pdf_money_col">
@@ -7067,7 +7242,7 @@ class AddOsOrcamento extends Component {
                 </tr>
                 {parseFloat(descontoTotal) > 0 && (
                   <tr>
-                    <td colSpan="7" className="pdf_large_col pdfTitle">
+                    <td colSpan="10" className="pdf_large_col pdfTitle">
                       Discount
                     </td>
                     <td className="pdf_money_col">
@@ -7088,7 +7263,7 @@ class AddOsOrcamento extends Component {
                 )}
                 {parseFloat(recebimentoTotal) > 0 && (
                   <tr>
-                    <td colSpan="7" className="pdf_large_col pdfTitle">
+                    <td colSpan="10" className="pdf_large_col pdfTitle">
                       Received
                     </td>
                     <td className="pdf_money_col">
@@ -7108,7 +7283,7 @@ class AddOsOrcamento extends Component {
                   </tr>
                 )}
                 <tr>
-                  <td colSpan="7" className="pdf_large_col pdfTitle">
+                  <td colSpan="10" className="pdf_large_col pdfTitle">
                     Balance
                   </td>
                   <td className="pdf_money_col">
@@ -7388,8 +7563,8 @@ class AddOsOrcamento extends Component {
       eventoFornecedor: itemEdit.valores.find((e) => e.titulo === "Fornecedor")
         ?.valor,
       eventoTaxa: itemEdit.valores.find((e) => e.titulo === "Taxa")?.valor,
-      eventoMoeda: itemEdit.valores.find((e) => e.titulo === "Valor")?.valor1,
-      eventoValor: itemEdit.valores.find((e) => e.titulo === "Valor")?.valor2,
+      eventoMoeda: itemEdit.valores.find((e) => e.titulo === "Valor unitário")?.valor1,
+      eventoValor: itemEdit.valores.find((e) => e.titulo === "Valor unitário")?.valor2,
       eventoVlrc: itemEdit.valores.find((e) => e.titulo === "VCP")?.valor,
       eventoRepasse: itemEdit.valores.find((e) => e.titulo === "Repasse")
         ?.valor,
@@ -7402,6 +7577,7 @@ class AddOsOrcamento extends Component {
       eventoFornecedorCusteio: itemEdit.valores.find(
         (e) => e.titulo === "Fornecedor Custeio"
       )?.valor,
+      eventoQntd: itemEdit.valores.find((e) => e.titulo === "Quantidade")?.valor,
     });
   };
 
@@ -7485,6 +7661,10 @@ class AddOsOrcamento extends Component {
             this.state.fornecedoresOptions
           ),
         },
+        {
+          titulo: "Quantidade",
+          valor: util.formatForLogs(this.state.eventoQntd),
+        },
       ],
       loading: true,
     });
@@ -7493,13 +7673,7 @@ class AddOsOrcamento extends Component {
       await apiEmployee
         .post(`insertServicoItemBasico.php`, {
           token: true,
-          values: `'${this.state.chave}', '${this.state.eventoData}', '${
-            this.state.eventoFornecedor
-          }', '${this.state.eventoTaxa}', '${this.state.eventoDescricao}', '${
-            this.state.eventoTipo
-          }', '${this.state.eventoFornecedorCusteio}', '${
-            this.state.eventoRemarks
-          }', '${this.state.eventoMoeda}', '${parseFloat(
+          values: `'${this.state.chave}', '${this.state.eventoData}', '${this.state.eventoFornecedor}', '${this.state.eventoTaxa}', '${this.state.eventoDescricao}', '${this.state.eventoTipo}', '${this.state.eventoFornecedorCusteio}', '${this.state.eventoRemarks}', '${this.state.eventoMoeda}', '${parseFloat(
             this.state.eventoValor == ""
               ? 0
               : this.state.eventoValor.replaceAll(".", "").replaceAll(",", ".")
@@ -7509,7 +7683,7 @@ class AddOsOrcamento extends Component {
               : this.state.eventoVlrc.replaceAll(".", "").replaceAll(",", ".")
           )}', '${
             this.state.eventoRepasse && this.state.eventoRepasse != "0" ? 1 : 0
-          }'`,
+          }', '${this.state.eventoQntd}'`,
           chave_os: this.state.chave,
           ordem: this.state.eventoOrdem.replaceAll(",", "."),
         })
@@ -7552,6 +7726,7 @@ class AddOsOrcamento extends Component {
           tipo_sub: this.state.eventoTipo,
           Fornecedor_Custeio: this.state.eventoFornecedorCusteio,
           remarks: this.state.eventoRemarks,
+          qntd: this.state.eventoQntd,
         })
         .then(
           async (res) => {
@@ -8382,8 +8557,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 6
-                                                          ? feed.valor
-                                                          : feed.valor /
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) /
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -8408,8 +8583,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 5
-                                                          ? feed.valor
-                                                          : feed.valor *
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) *
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -8489,8 +8664,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 6
-                                                          ? feed.valor
-                                                          : feed.valor /
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) /
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -8515,8 +8690,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 5
-                                                          ? feed.valor
-                                                          : feed.valor *
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) *
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -8684,8 +8859,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 6
-                                                          ? feed.valor
-                                                          : feed.valor /
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) /
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -8710,8 +8885,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 5
-                                                          ? feed.valor
-                                                          : feed.valor *
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) *
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -8827,8 +9002,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 6
-                                                          ? feed.valor
-                                                          : feed.valor /
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) /
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -8853,8 +9028,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 5
-                                                          ? feed.valor
-                                                          : feed.valor *
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) *
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -9081,8 +9256,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 6
-                                                          ? feed.valor
-                                                          : feed.valor /
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) /
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -9107,8 +9282,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 5
-                                                          ? feed.valor
-                                                          : feed.valor *
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) *
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -9171,8 +9346,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 6
-                                                          ? feed.valor
-                                                          : feed.valor /
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) /
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -9197,8 +9372,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 5
-                                                          ? feed.valor
-                                                          : feed.valor *
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) *
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -9286,7 +9461,7 @@ class AddOsOrcamento extends Component {
                                     <table className="agrupador_lista">
                                       <tr>
                                         <th className="text-center">
-                                          <span>Chave</span>
+                                          <span>Ordem</span>
                                         </th>
                                         <th className="text-center">
                                           <span>Nome</span>
@@ -9306,7 +9481,7 @@ class AddOsOrcamento extends Component {
                                                 if (
                                                   this.state.grupoTemplate &&
                                                   this.state.grupoTemplate
-                                                    .chave != feed.chave
+                                                    .ordem != feed.ordem
                                                 ) {
                                                   this.setState({
                                                     grupoTemplate: feed,
@@ -9319,14 +9494,14 @@ class AddOsOrcamento extends Component {
                                               }}
                                               style={{
                                                 filter:
-                                                  feed.chave ==
-                                                  this.state.grupoTemplate.chave
+                                                  feed.ordem ==
+                                                  this.state.grupoTemplate.ordem
                                                     ? "brightness(0.5)"
                                                     : undefined,
                                               }}
                                             >
                                               <td className="text-center">
-                                                <p>{feed.chave}</p>
+                                                <p>{feed.ordem}</p>
                                               </td>
                                               <td className="text-center">
                                                 <p>{feed.nome}</p>
@@ -11970,8 +12145,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 6
-                                                          ? feed.valor
-                                                          : feed.valor /
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) /
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -11996,8 +12171,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 5
-                                                          ? feed.valor
-                                                          : feed.valor *
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) *
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -12129,8 +12304,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 6
-                                                          ? feed.valor
-                                                          : feed.valor /
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) /
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -12155,8 +12330,8 @@ class AddOsOrcamento extends Component {
                                                         }
                                                       ).format(
                                                         feed.Moeda == 5
-                                                          ? feed.valor
-                                                          : feed.valor *
+                                                          ? (feed.valor * feed.qntd)
+                                                          : (feed.valor * feed.qntd) *
                                                               (parseFloat(
                                                                 this.state.os
                                                                   .ROE
@@ -12850,7 +13025,7 @@ class AddOsOrcamento extends Component {
                                                           minimumFractionDigits: 2,
                                                           maximumFractionDigits: 2,
                                                         }
-                                                      ).format(feed.valor)}
+                                                      ).format((feed.valor * feed.qntd))}
                                                     </p>
                                                   </td>
                                                   <td>
@@ -12925,7 +13100,7 @@ class AddOsOrcamento extends Component {
                                                           minimumFractionDigits: 2,
                                                           maximumFractionDigits: 2,
                                                         }
-                                                      ).format(feed.valor)}
+                                                      ).format((feed.valor * feed.qntd))}
                                                     </p>
                                                   </td>
                                                   <td>

@@ -271,6 +271,16 @@ input[type=number] {
     text-align: right;
 }
 
+.pdf_money_header {
+    padding-right: 3px;
+    text-align: center;
+}
+
+.pdf_qntd_col {
+    padding-right: 1px;
+    text-align: center;
+}
+
 .pdf_large_col {
     padding: 0px 10px 0px 3px;
 }

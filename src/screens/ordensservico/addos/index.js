@@ -8410,11 +8410,11 @@ class AddOS extends Component {
                                             <span>Tipo</span>
                                           </th>
                                         )}
-                                        <th className="text-center">
+                                        <th className="text-center ordem-column">
                                           <span>Ordem</span>
                                         </th>
                                         {window.innerWidth >= 500 && (
-                                          <th className="text-center">
+                                          <th className="text-center desc-column">
                                             <span>Descrição</span>
                                           </th>
                                         )}
@@ -8674,7 +8674,7 @@ class AddOS extends Component {
                                     <table className="agrupador_lista">
                                       <tr>
                                         <th className="text-center">
-                                          <span>Chave</span>
+                                          <span>Ordem</span>
                                         </th>
                                         <th className="text-center">
                                           <span>Nome</span>
@@ -8694,7 +8694,7 @@ class AddOS extends Component {
                                                 if (
                                                   this.state.grupoTemplate &&
                                                   this.state.grupoTemplate
-                                                    .chave != feed.chave
+                                                    .ordem != feed.ordem
                                                 ) {
                                                   this.setState({
                                                     grupoTemplate: feed,
@@ -8707,14 +8707,14 @@ class AddOS extends Component {
                                               }}
                                               style={{
                                                 filter:
-                                                  feed.chave ==
-                                                  this.state.grupoTemplate.chave
+                                                  feed.ordem ==
+                                                  this.state.grupoTemplate.ordem
                                                     ? "brightness(0.5)"
                                                     : undefined,
                                               }}
                                             >
                                               <td className="text-center">
-                                                <p>{feed.chave}</p>
+                                                <p>{feed.ordem}</p>
                                               </td>
                                               <td className="text-center">
                                                 <p>{feed.nome}</p>
@@ -11416,11 +11416,11 @@ class AddOS extends Component {
                                             <span>Tipo</span>
                                           </th>
                                         )}
-                                        <th className="text-center">
+                                        <th className="text-center ordem-column">
                                           <span>Ordem</span>
                                         </th>
                                         {window.innerWidth >= 500 && (
-                                          <th className="text-center">
+                                          <th className="text-center desc-column">
                                             <span>Descrição</span>
                                           </th>
                                         )}
@@ -11432,7 +11432,7 @@ class AddOS extends Component {
                                         </th>
                                         <th className="text-center">
                                           <span
-                                            className="iconelixo giveMargin"
+                                            className="iconelixo giveMargin plus-column"
                                             type="button"
                                           >
                                             <Link
