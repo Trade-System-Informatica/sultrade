@@ -6978,8 +6978,9 @@ class AddOsOrcamento extends Component {
                   </td>
                 </tr>
                 {this.state.pdfContent.map((e, index) => {
-                  const isZeroQuantity = e.qntd === 0;
-                  const backgroundColor = isZeroQuantity ? "red" : index % 2 === 0 ? "white" : "#ccc";
+                  const isZeroQuantity = e.qntd == 0;
+                  const textColor = isZeroQuantity ? "red" : "black";
+                  const backgroundColor = index % 2 === 0 ? "white" : "#ccc";
 
                   if (e.tipo == 0 || e.tipo == 1) {
                     if (e.moeda == 5) {
@@ -7060,6 +7061,7 @@ class AddOsOrcamento extends Component {
                       <tr
                         style={{
                           background: backgroundColor,
+                          color: textColor,
                         }}
                       >
                         <td
@@ -7067,6 +7069,7 @@ class AddOsOrcamento extends Component {
                           className="pdf_large_col reduce_font"
                           style={{
                             background: backgroundColor,
+                            color: textColor,
                           }}
                         >
                           {e.descos != "LINHA VAZIA" ? e.descos : null}
@@ -7075,7 +7078,8 @@ class AddOsOrcamento extends Component {
                         <td
                           className="pdf_money_col reduce_font"
                           style={{
-                            backgroundColor,
+                            background: backgroundColor,
+                            color: textColor,
                           }}
                         >
                           {e.descos != "LINHA VAZIA"
@@ -7098,6 +7102,7 @@ class AddOsOrcamento extends Component {
                           className="pdf_money_col reduce_font"
                           style={{
                             background: backgroundColor,
+                            color: textColor,
                           }}
                         >
                           {e.descos != "LINHA VAZIA"
@@ -7118,7 +7123,8 @@ class AddOsOrcamento extends Component {
                         </td>
                         <td
                           className="pdf_qntd_col reduce_font"
-                          style={{ backgroundColor }}
+                          style={{ background: backgroundColor,
+                            color: textColor, }}
                         >
                           {e.descos !== "LINHA VAZIA" ? e.qntd : null}
                           &nbsp;
@@ -7126,7 +7132,8 @@ class AddOsOrcamento extends Component {
                         <td
                           className="pdf_money_col reduce_font"
                           style={{
-                            backgroundColor,
+                            background: backgroundColor,
+                            color: textColor,
                           }}
                         >
                           {e.descos != "LINHA VAZIA"
@@ -7149,6 +7156,7 @@ class AddOsOrcamento extends Component {
                           className="pdf_money_col reduce_font"
                           style={{
                             background: backgroundColor,
+                            color: textColor,
                           }}
                         >
                           {e.descos != "LINHA VAZIA"
@@ -7227,14 +7235,14 @@ class AddOsOrcamento extends Component {
                   <td colSpan="10" className="pdf_large_col pdfTitle">
                     Total
                   </td>
-                  <td className="pdf_money_col">
+                  <td className="pdf_money_col reduce-font">
                     <b>
                       {util.formataDinheiroBrasileiro(
                         parseFloat(valorTotalDolar)
                       )}
                     </b>
                   </td>
-                  <td className="pdf_money_col">
+                  <td className="pdf_money_col reduce-font">
                     <b>
                       {util.formataDinheiroBrasileiro(parseFloat(valorTotal))}
                     </b>
@@ -7286,7 +7294,7 @@ class AddOsOrcamento extends Component {
                   <td colSpan="10" className="pdf_large_col pdfTitle">
                     Balance
                   </td>
-                  <td className="pdf_money_col">
+                  <td className="pdf_money_col reduce-font">
                     <b>
                       {util.formataDinheiroBrasileiro(
                         parseFloat(valorTotalDolar) -
@@ -7295,7 +7303,7 @@ class AddOsOrcamento extends Component {
                       )}
                     </b>
                   </td>
-                  <td className="pdf_money_col">
+                  <td className="pdf_money_col reduce-font">
                     <b>
                       {util.formataDinheiroBrasileiro(
                         parseFloat(valorTotal) -
