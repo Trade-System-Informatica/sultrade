@@ -596,7 +596,14 @@ class Relatorio extends Component {
                       port: f?.port || "",
                       moeda: f?.moeda || 5,
                       sailed: f?.sailed || moment().format("YYYY-MM-DD"),
-                      billing:  moment(f?.billing).format('DD/MM/YY') || moment().format('DD/MM/YY'),
+                      billing: (() => {
+                        const date = moment(f?.billing);
+                        return date.isValid()
+                          ? date.format("YY") === "99" // Verifica se o ano é 99
+                            ? "N/A" // Se o ano for 99, define como "N/A"
+                            : date.format("DD/MM/YY") // Caso contrário, formata normalmente
+                          : moment().format("DD/MM/YY"); // Caso f.billing seja inválido, usa a data atual
+                      })(),
                       roe: f?.roe || 5,
                       fda: FDA2,
                       discount: DISCONT2,
@@ -642,7 +649,14 @@ class Relatorio extends Component {
                       port: f?.port || "",
                       moeda: f?.moeda || 5,
                       sailed: f?.sailed || moment().format("YYYY-MM-DD"),
-                      billing:  moment(f?.billing).format('DD/MM/YY') || moment().format('DD/MM/YY'),
+                      billing: (() => {
+                        const date = moment(f?.billing);
+                        return date.isValid()
+                          ? date.format("YY") === "99" // Verifica se o ano é 99
+                            ? "N/A" // Se o ano for 99, define como "N/A"
+                            : date.format("DD/MM/YY") // Caso contrário, formata normalmente
+                          : moment().format("DD/MM/YY"); // Caso f.billing seja inválido, usa a data atual
+                      })(),
                       roe: f?.roe || 5,
                       fda: FDA2,
                       discount: DISCONT2,
@@ -1034,12 +1048,15 @@ class Relatorio extends Component {
                         ? e.sailed_manual.split("@.@")[index]
                         : "",
                       billing: e.envio_manual
-                        ? moment(e.envio_manual.split("@.@")[index]).isValid()
-                          ? moment(e.envio_manual.split("@.@")[index]).format(
-                              "DD/MM/YY"
-                            )
-                          : ""
-                        : "",
+                      ? (() => {
+                          const date = moment(e.envio_manual.split("@.@")[index]);
+                          return date.isValid()
+                            ? date.format("YY") === "99" // Verifica se o ano é 99
+                              ? "N/A" // Se o ano for 99, define como "N/A"
+                              : date.format("DD/MM/YY") // Caso contrário, formata normalmente
+                            : "";
+                        })()
+                      : "",
                       roe: e.roe_manual ? e.roe_manual.split("@.@")[index] : "",
                       fda: FDA,
                       discount,
@@ -1293,11 +1310,14 @@ class Relatorio extends Component {
                         : "",
                       sailed: e.sailed ? e.sailed.split("@.@")[index] : "",
                       billing: e.envio
-                        ? moment(e.envio.split("@.@")[index]).isValid()
-                          ? moment(e.envio.split("@.@")[index]).format(
-                              "DD/MM/YY"
-                            )
-                          : ""
+                        ? (() => {
+                            const date = moment(e.envio.split("@.@")[index]);
+                            return date.isValid()
+                              ? date.format("YY") == "99" // Verifica se o ano é 99
+                                ? "N/A" // Se o ano for 99, define como "N/A"
+                                : date.format("DD/MM/YY") // Caso contrário, formata normalmente
+                              : "";
+                          })()
                         : "",
                       roe: e.ROE ? e.ROE.split("@.@")[index] : "",
                       fda: FDA,
