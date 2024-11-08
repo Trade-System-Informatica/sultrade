@@ -3512,7 +3512,7 @@ class AddOsOrcamento extends Component {
                         ).format("MMMM DD, YYYY")
                       : "T.B.I."}
                   </td>
-                  <td colSpan={2} className="pdf_money_col">
+                  <td colSpan={2} className="pdf_total_col">
                     <b>PO:</b>{" "}
                     {util.returnIfExists(
                       this.state.pdfContent[0],
@@ -3651,27 +3651,27 @@ class AddOsOrcamento extends Component {
 
                         <tr>
                           <td
-                            className="pdf_small_col reduce_font"
+                            className="pdf_small_col reduce-font"
                             style={{ backgroundColor: backgroundColor }}
                           >
                             {voucherInfo.chavTaxa}
                           </td>
                           <td
                             colSpan="3"
-                            className="pdf_large_col reduce_font"
+                            className="pdf_large_col reduce-font"
                             style={{ backgroundColor: backgroundColor }}
                           >
                             {voucherInfo.descSubgrupo}
                           </td>
                           <td
                             colSpan="2"
-                            className="pdf_small_col reduce_font"
+                            className="pdf_small_col reduce-font"
                             style={{ backgroundColor: backgroundColor }}
                           >
                             {voucherInfo.descGrupo}
                           </td>
                           <td
-                            className="pdf_money_col reduce_font"
+                            className="pdf_money_col reduce-font"
                             style={{ backgroundColor: backgroundColor }}
                           >
                             {util.formataDinheiroBrasileiro(
@@ -3681,7 +3681,7 @@ class AddOsOrcamento extends Component {
                             )}
                           </td>
                           <td
-                            className="pdf_money_col reduce_font"
+                            className="pdf_money_col reduce-font"
                             style={{ backgroundColor: backgroundColor }}
                           >
                             {util.formataDinheiroBrasileiro(
@@ -6396,7 +6396,7 @@ class AddOsOrcamento extends Component {
                       >
                         <td
                           colSpan="7"
-                          className="pdf_large_col reduce_font"
+                          className="pdf_large_col reduce-font"
                           style={{
                             background: index % 2 == 0 ? "white" : "#ccc",
                           }}
@@ -6404,7 +6404,7 @@ class AddOsOrcamento extends Component {
                           {e.descos}
                         </td>
                         <td
-                          className="pdf_money_col reduce_font"
+                          className="pdf_money_col reduce-font"
                           style={{
                             background: index % 2 == 0 ? "white" : "#ccc",
                           }}
@@ -6423,7 +6423,7 @@ class AddOsOrcamento extends Component {
                               )}
                         </td>
                         <td
-                          className="pdf_money_col reduce_font"
+                          className="pdf_money_col reduce-font"
                           style={{
                             background: index % 2 == 0 ? "white" : "#ccc",
                           }}
@@ -6447,10 +6447,10 @@ class AddOsOrcamento extends Component {
                 })}
                 {this.state.pdfContent[0].governmentTaxes > 0 && (
                   <tr>
-                    <td colSpan="7" className="pdf_large_col reduce_font">
+                    <td colSpan="7" className="pdf_large_col reduce-font">
                       <b>GOVERNMENT TAXES</b>
                     </td>
-                    <td className="pdf_money_col reduce_font">
+                    <td className="pdf_money_col reduce-font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(
@@ -6462,7 +6462,7 @@ class AddOsOrcamento extends Component {
                         )}
                       </b>
                     </td>
-                    <td className="pdf_money_col reduce_font">
+                    <td className="pdf_money_col reduce-font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(this.state.pdfContent[0].governmentTaxes)
@@ -6473,10 +6473,10 @@ class AddOsOrcamento extends Component {
                 )}
                 {this.state.pdfContent[0].bankCharges > 0 && (
                   <tr styles={{ padding: "37px 0px 37px 0px" }}>
-                    <td colSpan="7" className="pdf_large_col reduce_font">
+                    <td colSpan="7" className="pdf_large_col reduce-font">
                       <b>BANK CHARGES</b>
                     </td>
-                    <td className="pdf_money_col reduce_font">
+                    <td className="pdf_money_col reduce-font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(
@@ -6488,7 +6488,7 @@ class AddOsOrcamento extends Component {
                         )}
                       </b>
                     </td>
-                    <td className="pdf_money_col reduce_font">
+                    <td className="pdf_money_col reduce-font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(this.state.pdfContent[0].bankCharges)
@@ -6815,7 +6815,7 @@ class AddOsOrcamento extends Component {
                       moment(
                         this.state.pdfContent[0].data_chegada
                       ).isValid() && (
-                        <td className="pdf_money_col" colSpan="2">
+                        <td className="pdf_total_col" colSpan="2">
                           <b style={{ paddingRight: 5 }}>ETA:</b>{" "}
                           {moment(
                             util.returnIfExists(
@@ -6836,7 +6836,7 @@ class AddOsOrcamento extends Component {
                     </td>
                     {this.state.pdfContent[0].etb &&
                       moment(this.state.pdfContent[0].etb).isValid() && (
-                        <td className="pdf_money_col" colSpan="2">
+                        <td className="pdf_total_col" colSpan="2">
                           <b style={{ paddingRight: 5 }}>ETB:</b>{" "}
                           {moment(
                             util.returnIfExists(
@@ -6871,7 +6871,7 @@ class AddOsOrcamento extends Component {
                             this.state.pdfContent[0].data_chegada &&
                             moment(this.state.pdfContent[0].data_chegada)
                               .isValid
-                              ? "pdf_money_col"
+                              ? "pdf_total_col"
                               : "pdf_small_col"
                           }`}
                           colSpan="2"
@@ -6901,80 +6901,40 @@ class AddOsOrcamento extends Component {
                 <tr>
                   <td
                     colSpan="7"
-                    className="pdf_large_col"
+                    className="pdf_padding"
                     style={{ backgroundColor: "#CDCDCD" }}
                   >
                     DESCRIPTION:
                   </td>
                   <td
-                    className="pdf_money_header"
-                    style={{ backgroundColor: "#CDCDCD" }}
+                    className="pdf_money_header reduce-font"
+                    style={{ backgroundColor: "#CDCDCD", width: "10%", fontSize: '13px'}}
                   >
-                    UNITARY VALUE (USD)
+                    VALUE(USD)
                   </td>
                   <td
-                    className="pdf_money_header"
-                    style={{ backgroundColor: "#CDCDCD" }}
+                    className="pdf_money_header reduce-font"
+                    style={{ width: "10%", backgroundColor: "#CDCDCD", fontSize: '13px' }}
                   >
-                    UNITARY VALUE (R$)
+                    VALUE(R$)
                   </td>
                   <td
-                    colSpan="1"
-                    className="pdf_qntd_col"
-                    style={{ backgroundColor: "#CDCDCD" }}
+                    className="pdf_qntd_col reduce-font"
+                    style={{ width: "5%", backgroundColor: "#CDCDCD", fontSize: '13px' }}
                   >
                     QTY
                   </td>
                   <td
-                    className="pdf_money_header"
-                    style={{ backgroundColor: "#CDCDCD" }}
+                    className="pdf_money_header reduce-font"
+                    style={{ width: "10%", backgroundColor: "#CDCDCD", fontSize: '13px' }}
                   >
-                    TOTAL VALUE (USD)
+                    TOTAL(USD)
                   </td>
                   <td
-                    className="pdf_money_header"
-                    style={{ backgroundColor: "#CDCDCD" }}
+                    className="pdf_money_header reduce-font"
+                    style={{ width: "10%", backgroundColor: "#CDCDCD", fontSize: '13px' }}
                   >
-                    TOTAL VALUE (R$)
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    colSpan="7"
-                    className="pdf_large_col"
-                    style={{ backgroundColor: "white" }}
-                  >
-                    &nbsp;
-                  </td>
-                  <td
-                    className="pdf_money_col"
-                    style={{ backgroundColor: "white" }}
-                  >
-                    &nbsp;
-                  </td>
-                  <td
-                    className="pdf_money_col"
-                    style={{ backgroundColor: "white" }}
-                  >
-                    &nbsp;
-                  </td>
-                  <td
-                    className="pdf_qntd_col"
-                    style={{ backgroundColor: "white" }}
-                  >
-                    &nbsp;
-                  </td>
-                  <td
-                    className="pdf_money_col"
-                    style={{ backgroundColor: "white" }}
-                  >
-                    &nbsp;
-                  </td>
-                  <td
-                    className="pdf_money_col"
-                    style={{ backgroundColor: "white" }}
-                  >
-                    &nbsp;
+                    TOTAL(R$)
                   </td>
                 </tr>
                 {this.state.pdfContent.map((e, index) => {
@@ -7062,11 +7022,12 @@ class AddOsOrcamento extends Component {
                         style={{
                           background: backgroundColor,
                           color: textColor,
+                          marginBottom: "10px",
                         }}
                       >
                         <td
                           colSpan="7"
-                          className="pdf_large_col reduce_font"
+                          className="pdf_padding reduce-font"
                           style={{
                             background: backgroundColor,
                             color: textColor,
@@ -7076,7 +7037,7 @@ class AddOsOrcamento extends Component {
                           &nbsp;
                         </td>
                         <td
-                          className="pdf_money_col reduce_font"
+                          className="pdf_money_col reduce-font"
                           style={{
                             background: backgroundColor,
                             color: textColor,
@@ -7099,7 +7060,7 @@ class AddOsOrcamento extends Component {
                           &nbsp;
                         </td>
                         <td
-                          className="pdf_money_col reduce_font"
+                          className="pdf_money_col reduce-font"
                           style={{
                             background: backgroundColor,
                             color: textColor,
@@ -7122,7 +7083,7 @@ class AddOsOrcamento extends Component {
                           &nbsp;
                         </td>
                         <td
-                          className="pdf_qntd_col reduce_font"
+                          className="pdf_qntd_col reduce-font"
                           style={{ background: backgroundColor,
                             color: textColor, }}
                         >
@@ -7130,7 +7091,7 @@ class AddOsOrcamento extends Component {
                           &nbsp;
                         </td>
                         <td
-                          className="pdf_money_col reduce_font"
+                          className="pdf_money_col reduce-font"
                           style={{
                             background: backgroundColor,
                             color: textColor,
@@ -7153,7 +7114,7 @@ class AddOsOrcamento extends Component {
                           &nbsp;
                         </td>
                         <td
-                          className="pdf_money_col reduce_font"
+                          className="pdf_money_col reduce-font"
                           style={{
                             background: backgroundColor,
                             color: textColor,
@@ -7181,10 +7142,10 @@ class AddOsOrcamento extends Component {
                 })}
                 {this.state.pdfContent[0].governmentTaxes > 0 && (
                   <tr>
-                    <td colSpan="10" className="pdf_large_col reduce_font">
+                    <td colSpan="10" className="pdf_large_col reduce-font" style={{ textAlign: "right" }}>
                       <b>GOVERNMENT TAXES</b>
                     </td>
-                    <td className="pdf_money_col reduce_font">
+                    <td className="pdf_total_col reduce-font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(
@@ -7196,7 +7157,7 @@ class AddOsOrcamento extends Component {
                         )}
                       </b>
                     </td>
-                    <td className="pdf_money_col reduce_font">
+                    <td className="pdf_total_col reduce-font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(this.state.pdfContent[0].governmentTaxes)
@@ -7207,10 +7168,10 @@ class AddOsOrcamento extends Component {
                 )}
                 {this.state.pdfContent[0].bankCharges > 0 && (
                   <tr styles={{ padding: "37px 0px 37px 0px" }}>
-                    <td colSpan="10" className="pdf_large_col reduce_font">
+                    <td colSpan="10" className="pdf_large_col reduce-font" style={{ textAlign: "right" }}>
                       <b>BANK CHARGES</b>
                     </td>
-                    <td className="pdf_money_col reduce_font">
+                    <td className="pdf_total_col reduce-font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(
@@ -7222,7 +7183,7 @@ class AddOsOrcamento extends Component {
                         )}
                       </b>
                     </td>
-                    <td className="pdf_money_col reduce_font">
+                    <td className="pdf_total_col reduce-font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(this.state.pdfContent[0].bankCharges)
@@ -7232,17 +7193,17 @@ class AddOsOrcamento extends Component {
                   </tr>
                 )}
                 <tr>
-                  <td colSpan="10" className="pdf_large_col pdfTitle">
+                  <td colSpan="10" className="pdf_large_col pdfTitle reduce-font" style={{ textAlign: "right" }}>
                     Total
                   </td>
-                  <td className="pdf_money_col reduce-font">
+                  <td className="pdf_total_col reduce-font">
                     <b>
                       {util.formataDinheiroBrasileiro(
                         parseFloat(valorTotalDolar)
                       )}
                     </b>
                   </td>
-                  <td className="pdf_money_col reduce-font">
+                  <td className="pdf_total_col reduce-font">
                     <b>
                       {util.formataDinheiroBrasileiro(parseFloat(valorTotal))}
                     </b>
@@ -7250,17 +7211,17 @@ class AddOsOrcamento extends Component {
                 </tr>
                 {parseFloat(descontoTotal) > 0 && (
                   <tr>
-                    <td colSpan="10" className="pdf_large_col pdfTitle">
+                    <td colSpan="10" className="pdf_large_col pdfTitle reduce-font" style={{ textAlign: "right" }}>
                       Discount
                     </td>
-                    <td className="pdf_money_col">
+                    <td className="pdf_total_col reduce-font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(descontoTotalDolar)
                         )}
                       </b>
                     </td>
-                    <td className="pdf_money_col">
+                    <td className="pdf_total_col reduce-font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(descontoTotal)
@@ -7271,17 +7232,17 @@ class AddOsOrcamento extends Component {
                 )}
                 {parseFloat(recebimentoTotal) > 0 && (
                   <tr>
-                    <td colSpan="10" className="pdf_large_col pdfTitle">
+                    <td colSpan="10" className="pdf_large_col pdfTitle reduce-font" style={{ textAlign: "right" }}>
                       Received
                     </td>
-                    <td className="pdf_money_col">
+                    <td className="pdf_total_col reduce-font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(recebimentoTotalDolar)
                         )}
                       </b>
                     </td>
-                    <td className="pdf_money_col">
+                    <td className="pdf_total_col reduce-font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(recebimentoTotal)
@@ -7291,10 +7252,10 @@ class AddOsOrcamento extends Component {
                   </tr>
                 )}
                 <tr>
-                  <td colSpan="10" className="pdf_large_col pdfTitle">
+                  <td colSpan="10" className="pdf_large_col pdfTitle reduce-font" style={{ textAlign: "right" }}>
                     Balance
                   </td>
-                  <td className="pdf_money_col reduce-font">
+                  <td className="pdf_total_col reduce-font">
                     <b>
                       {util.formataDinheiroBrasileiro(
                         parseFloat(valorTotalDolar) -
@@ -7303,7 +7264,7 @@ class AddOsOrcamento extends Component {
                       )}
                     </b>
                   </td>
-                  <td className="pdf_money_col reduce-font">
+                  <td className="pdf_total_col reduce-font">
                     <b>
                       {util.formataDinheiroBrasileiro(
                         parseFloat(valorTotal) -
