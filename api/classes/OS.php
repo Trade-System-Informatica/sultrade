@@ -1451,6 +1451,23 @@ class OS
         }
     }
 
+    public static function updateDescricaoOs($chave, $descricao)
+    {
+        $database = new Database();
+
+        $query = 'Descricao = ' . $descricao;
+
+        $result = $database->doUpdate('os', $query, 'chave = ' . $chave);
+
+        $result = $database->doSelect('os', "os.*", 'chave = ' . $chave);
+        $database->closeConection();
+        if ($result == NULL) {
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+
     public static function insertServicoItemOS($chave_os, $chave_orcamento, $canceladaPor)
     {
         $database = new Database();

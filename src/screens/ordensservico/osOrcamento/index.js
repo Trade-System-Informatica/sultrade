@@ -8,7 +8,7 @@ import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTimes, faPen, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faTimes, faPen, faPlus, faSave } from '@fortawesome/free-solid-svg-icons'
 import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import moment from 'moment'
@@ -49,6 +49,9 @@ const estadoInicial = {
 
     load: 200,
     offset: 0,
+
+    descricaoModificada: false,
+    os: []
 }
 
 class OsOrcamento extends Component {
@@ -205,6 +208,63 @@ class OsOrcamento extends Component {
         }
     }
 
+    handleDescricaoChange = (e, feed) => {
+        const novaDescricao = e.target.value;
+    
+        this.setState((prevState) => {
+            const osAtualizados = prevState.os.map((osItem) => {
+                if (osItem.Chave === feed.Chave) {
+                    return { 
+                        ...osItem,
+                        chave: feed.Chave,
+                        Descricao: novaDescricao 
+                    };
+                }
+                return osItem;
+            });
+    
+            return {
+                os: osAtualizados,
+                descricaoModificada: true, 
+            };
+        });
+    };
+
+    salvarDescricao = async () => {
+        this.setState({ loading: true });
+
+        // Filtrando apenas os itens que foram modificados
+        const itensParaSalvar = this.state.os.filter((os) => os.chave && os.Descricao && this.state.descricaoModificada);
+
+        console.log("Itens a serem salvos:", itensParaSalvar);
+
+        // Verificar se há itens para salvar
+        if (itensParaSalvar.length === 0) {
+            console.log("Nenhuma descrição modificada para salvar.");
+            this.setState({ loading: false });
+            return;
+        }
+      
+        const promises = itensParaSalvar.map((os) => {
+          return apiEmployee.post(`updateDescricaoOs.php`, {
+            token: true,
+            chave: os.chave,
+            descricao: os.descricao,
+          });
+        });
+
+        try {
+          await Promise.all(promises);
+          console.log("Descrição salva com sucesso.");
+          
+          this.setState({ loading: false, descricaoModificada: false });
+          window.location.reload();
+        } catch (error) {
+          console.error("Erro ao salvar descrição: ", error);
+          this.setState({ loading: false });
+        }
+      };
+
 
     render() {
 
@@ -252,7 +312,7 @@ class OsOrcamento extends Component {
                                             <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={async (e) => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
                                                 <option value={1}>Codigo</option>
                                                 <option value={2}>Navio</option>
-                                                <option value={3}>Serviço</option>
+                                                <option value={3}>Descrição</option>
                                                 <option value={4}>Porto</option>
                                                 <option value={5}>Cliente</option>
                                                 <option value={6}>Sequencial</option>
@@ -311,7 +371,7 @@ class OsOrcamento extends Component {
                                                     <span className="subtituloships">Cliente</span>
                                                 </div>
                                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
-                                                    <span className="subtituloships">Serviço</span>
+                                                    <span className="subtituloships">Descrição</span>
                                                 </div>
                                                 <div style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}} className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-right">
                                                     <span className="subtituloships"><Link to={{ pathname: `/ordensservico/addOsOrcamento/0` }}><FontAwesomeIcon icon={faPlus} /></Link></span>
@@ -330,7 +390,7 @@ class OsOrcamento extends Component {
                                                     <span className="subtituloships">Cliente</span>
                                                 </div>
                                                 <div className="col-3 text-left">
-                                                    <span className="subtituloships">Serviço</span>
+                                                    <span className="subtituloships">Descrição</span>
                                                 </div>
                                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-right">
                                                     <span className="subtituloships"></span>
@@ -381,8 +441,25 @@ class OsOrcamento extends Component {
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
                                                                 <p>{feed.clienteNome?.length > 30 ? `${feed.clienteNome.substring(0, 28)}...` : feed.clienteNome}</p>
                                                             </div>
-                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left" style={{ overflowWrap: 'anywhere ' }}>
-                                                                <p>{feed.tipoServicoNome}</p>
+                                                            <div 
+                                                                className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left"
+                                                                style={{ overflowWrap: 'anywhere ' }}
+                                                            >
+                                                                <input 
+                                                                    type='text'
+                                                                    value={feed.Descricao || ''}
+                                                                    placeholder="Sem descrição"
+                                                                    onChange={(e) => this.handleDescricaoChange(e, feed)} 
+                                                                    style={{
+                                                                        width: '100%',
+                                                                        padding: '2px 5px',     
+                                                                        border: '1px solid #ced4da', 
+                                                                        borderRadius: '4px',
+                                                                        height: '40px', // Definindo uma altura menor
+                                                                        lineHeight: 'normal',
+                                                                        backgroundColor: '#f9f9f9'
+                                                                    }}
+                                                                />
                                                             </div>
                                                             <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones">
                                                                 <div className='iconelixo giveMargin' type='button' >
@@ -431,7 +508,7 @@ class OsOrcamento extends Component {
                                                                 <p>{feed.clienteNome?.length > 30 ? `${feed.clienteNome.substring(0,28)}...` : feed.clienteNome}</p>
                                                             </div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-left" style={{ overflowWrap: 'anywhere ' }}>
-                                                                <p>{feed.tipoServicoNome}</p>
+                                                                <p>{feed.Descricao}</p>
                                                             </div>
                                                             <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones">
                                                                 <div className='iconelixo giveMargin' type='button' >
@@ -480,7 +557,7 @@ class OsOrcamento extends Component {
                                                                         { titulo: 'Navio', valor: feed.navioNome },
                                                                         { titulo: 'Porto', valor: feed.portoNome },
                                                                         { titulo: 'Centro de Custo', valor: feed.centroCustoNome },
-                                                                        { titulo: 'Tipo de Serviço', valor: feed.tipoServicoNome },
+                                                                        { titulo: 'Descrição', valor: feed.Descricao },
                                                                         { titulo: 'Data de Abertura', valor: moment(feed.Data_Abertura).format('DD/MM/YYYY') }
                                                                     ],
                                                                     itemPermissao: 'OS',
@@ -568,8 +645,25 @@ class OsOrcamento extends Component {
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
                                                                 <p>{feed.clienteNome?.length > 30 ? `${feed.clienteNome.substring(0, 28)}...` : feed.clienteNome}</p>
                                                             </div>
-                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left" style={{ overflowWrap: 'anywhere ' }}>
-                                                                <p>{feed.tipoServicoNome}</p>
+                                                            <div 
+                                                                className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left"
+                                                                style={{ overflowWrap: 'anywhere ' }}
+                                                            >
+                                                                <input 
+                                                                    type='text'
+                                                                    value={feed.Descricao || ''}
+                                                                    placeholder="Sem descrição"
+                                                                    onChange={(e) => this.handleDescricaoChange(e, feed)} 
+                                                                    style={{
+                                                                        width: '100%',
+                                                                        padding: '2px 5px',     
+                                                                        border: '1px solid #ced4da', 
+                                                                        borderRadius: '4px',
+                                                                        height: '40px', // Definindo uma altura menor
+                                                                        lineHeight: 'normal',
+                                                                        backgroundColor: '#f9f9f9'
+                                                                    }}
+                                                                />
                                                             </div>
                                                             <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones">
                                                                 <div className='iconelixo giveMargin' type='button' >
@@ -617,8 +711,25 @@ class OsOrcamento extends Component {
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-left">
                                                                 <p>{feed.clienteNome?.length > 30 ? `${feed.clienteNome.substring(0, 28)}...` : feed.clienteNome}</p>
                                                             </div>
-                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-left" style={{ overflowWrap: 'anywhere ' }}>
-                                                                <p>{feed.tipoServicoNome}</p>
+                                                            <div 
+                                                                className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left"
+                                                                style={{ overflowWrap: 'anywhere ' }}
+                                                            >
+                                                                <input 
+                                                                    type='text'
+                                                                    value={feed.Descricao || ''}
+                                                                    placeholder="Sem descrição"
+                                                                    onChange={(e) => this.handleDescricaoChange(e, feed)} 
+                                                                    style={{
+                                                                        width: '100%',
+                                                                        padding: '2px 5px',     
+                                                                        border: '1px solid #ced4da', 
+                                                                        borderRadius: '4px',
+                                                                        height: '40px', // Definindo uma altura menor
+                                                                        lineHeight: 'normal',
+                                                                        backgroundColor: '#f9f9f9'
+                                                                    }}
+                                                                />
                                                             </div>
                                                             <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones">
                                                                 <div className='iconelixo giveMargin' type='button' >
@@ -667,7 +778,7 @@ class OsOrcamento extends Component {
                                                                         { titulo: 'Navio', valor: feed.navioNome },
                                                                         { titulo: 'Porto', valor: feed.portoNome },
                                                                         { titulo: 'Centro de Custo', valor: feed.centroCustoNome },
-                                                                        { titulo: 'Tipo de Serviço', valor: feed.tipoServicoNome },
+                                                                        { titulo: 'Descrição', valor: feed.Descricao },
                                                                         { titulo: 'Data de Abertura', valor: moment(feed.Data_Abertura).format('DD/MM/YYYY') }
                                                                     ],
                                                                     itemPermissao: 'OS',
@@ -731,6 +842,17 @@ class OsOrcamento extends Component {
                                         <div className='loadMore' onClick={async () => { await this.setState({ offset: this.state.load, load: this.state.load + 50 }); await this.getOS() }}>Carregar Mais...</div>
                                     </div>
                                 }
+                                {this.state.descricaoModificada && (
+                                      <button className='salvarDescricao' onClick={this.salvarDescricao} disabled={this.state.loading}>
+                                        {this.state.loading ? (
+                                          "Salvando..."
+                                        ) : (
+                                          <>
+                                            <FontAwesomeIcon icon={faSave} /> Salvar Descrição
+                                          </>
+                                        )}
+                                      </button>
+                                )}
                                 <br />
                             </div>
                         </div>
