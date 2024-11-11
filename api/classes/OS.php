@@ -1455,7 +1455,7 @@ class OS
     {
         $database = new Database();
 
-        $query = "Descricao = '" . $descricao . "'";
+        $query = "Descricao = '$descricao'";
 
         $result = $database->doUpdate('os', $query, 'Chave = ' . $chave);
 

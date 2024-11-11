@@ -15,7 +15,7 @@ $objData = json_decode($data);
 
 if($objData != NULL){
     $chave = prepareInput($objData->chave);
-    $descricao = $objData->descricao;
+    $descricao = prepareInput($objData->descricao);
     
     $os = new OS();
 
