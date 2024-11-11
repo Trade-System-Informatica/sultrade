@@ -3488,7 +3488,7 @@ class AddOS extends Component {
                         ).format("MMMM DD, YYYY")
                       : "T.B.I."}
                   </td>
-                  <td colSpan={2} className="pdf_money_col">
+                  <td colSpan={2} className="pdf_money_colOS">
                     <b>PO:</b>{" "}
                     {util.returnIfExists(
                       this.state.pdfContent[0],
@@ -3650,7 +3650,7 @@ class AddOS extends Component {
                             {voucherInfo.descGrupo}
                           </td>
                           <td
-                            className="pdf_money_col reduce_font"
+                            className="pdf_money_colOS reduce_font"
                             style={{ backgroundColor: backgroundColor }}
                           >
                             {util.formataDinheiroBrasileiro(
@@ -3660,7 +3660,7 @@ class AddOS extends Component {
                             )}
                           </td>
                           <td
-                            className="pdf_money_col reduce_font"
+                            className="pdf_money_colOS reduce_font"
                             style={{ backgroundColor: backgroundColor }}
                           >
                             {util.formataDinheiroBrasileiro(
@@ -3690,7 +3690,7 @@ class AddOS extends Component {
                           style={{ fontWeight: "bold" }}
                         ></td>
                         <td
-                          className="pdf_money_col"
+                          className="pdf_money_colOS"
                           style={{ fontWeight: "bold" }}
                         >
                           {util.formataDinheiroBrasileiro(
@@ -3701,7 +3701,7 @@ class AddOS extends Component {
                           )}
                         </td>
                         <td
-                          className="pdf_money_col"
+                          className="pdf_money_colOS"
                           style={{ fontWeight: "bold" }}
                         >
                           {util.formataDinheiroBrasileiro(
@@ -3729,7 +3729,7 @@ class AddOS extends Component {
                           style={{ fontWeight: "bold" }}
                         ></td>
                         <td
-                          className="pdf_money_col"
+                          className="pdf_money_colOS"
                           style={{ fontWeight: "bold" }}
                         >
                           {util.formataDinheiroBrasileiro(
@@ -3740,7 +3740,7 @@ class AddOS extends Component {
                           )}
                         </td>
                         <td
-                          className="pdf_money_col"
+                          className="pdf_money_colOS"
                           style={{ fontWeight: "bold" }}
                         >
                           {util.formataDinheiroBrasileiro(
@@ -3797,12 +3797,12 @@ class AddOS extends Component {
                     <td colSpan="5" className="pdfTitle pdf_small_col">
                       Total Final Costs
                     </td>
-                    <td className="pdfTitle pdf_money_col">
+                    <td className="pdfTitle pdf_money_colOS">
                       {util.formataDinheiroBrasileiro(
                         parseFloat(totalFinalDolar)
                       )}
                     </td>
-                    <td className="pdfTitle pdf_money_col">
+                    <td className="pdfTitle pdf_money_colOS">
                       {util.formataDinheiroBrasileiro(parseFloat(totalFinal))}
                     </td>
                   </tr>
@@ -3811,12 +3811,12 @@ class AddOS extends Component {
                       <td colSpan="5" className="pdf_small_col">
                         Funds Received
                       </td>
-                      <td className="pdf_money_col">
+                      <td className="pdf_money_colOS">
                         {util.formataDinheiroBrasileiro(
                           parseFloat(recebimentoFinalDolar)
                         )}
                       </td>
-                      <td className="pdf_money_col">
+                      <td className="pdf_money_colOS">
                         {util.formataDinheiroBrasileiro(
                           parseFloat(recebimentoFinal)
                         )}
@@ -3828,12 +3828,12 @@ class AddOS extends Component {
                       <td colSpan="5" className="pdf_small_col">
                         Discount
                       </td>
-                      <td className="pdf_money_col">
+                      <td className="pdf_money_colOS">
                         {util.formataDinheiroBrasileiro(
                           parseFloat(descontoFinalDolar)
                         )}
                       </td>
-                      <td className="pdf_money_col">
+                      <td className="pdf_money_colOS">
                         {util.formataDinheiroBrasileiro(
                           parseFloat(descontoFinal)
                         )}
@@ -3844,14 +3844,14 @@ class AddOS extends Component {
                     <td colSpan="5" className="pdfTitle pdf_small_col">
                       Final Blce/Debit Customer
                     </td>
-                    <td className="pdfTitle pdf_money_col">
+                    <td className="pdfTitle pdf_money_colOS">
                       {util.formataDinheiroBrasileiro(
                         parseFloat(totalFinalDolar) -
                           parseFloat(descontoFinalDolar) -
                           parseFloat(recebimentoFinalDolar)
                       )}
                     </td>
-                    <td className="pdfTitle pdf_money_col">
+                    <td className="pdfTitle pdf_money_colOS">
                       {util.formataDinheiroBrasileiro(
                         parseFloat(totalFinal) -
                           parseFloat(descontoFinal) -
@@ -5879,7 +5879,7 @@ class AddOS extends Component {
                             <td
                               colSpan={CO ? 2 : 0}
                               className={
-                                company ? "pdf_money_col" : "pdf_small_col"
+                                company ? "pdf_money_colOS" : "pdf_small_col"
                               }
                             >
                               <b>C/O:</b> {CO}
@@ -5896,7 +5896,7 @@ class AddOS extends Component {
                             <td
                               colSpan={1}
                               className={
-                                address ? "pdf_money_col" : "pdf_small_col"
+                                address ? "pdf_money_colOS" : "pdf_small_col"
                               }
                             >
                               <b>PO:</b> {chave.codigo}
@@ -5919,7 +5919,7 @@ class AddOS extends Component {
                               className={
                                 chave.Data_Faturamento &&
                                 moment(chave.Data_Faturamento).isValid()
-                                  ? "pdf_money_col"
+                                  ? "pdf_money_colOS"
                                   : "pdf_small_col"
                               }
                             >
@@ -5940,7 +5940,7 @@ class AddOS extends Component {
                                 colSpan={3}
                                 className={
                                   chave.vessel_name
-                                    ? "pdf_money_col"
+                                    ? "pdf_money_colOS"
                                     : "pdf_small_col"
                                 }
                               >
@@ -5959,7 +5959,7 @@ class AddOS extends Component {
                             colSpan={3}
                             className={
                               chave.name_of_port
-                                ? "pdf_money_col"
+                                ? "pdf_money_colOS"
                                 : "pdf_small_col"
                             }
                           >
@@ -6038,14 +6038,14 @@ class AddOS extends Component {
                                 >
                                   {getDescricaoItem(e)}
                                 </td>
-                                <td className="pdf_money_col reduce-font">
+                                <td className="pdf_money_colOS reduce-font">
                                   {new Intl.NumberFormat("pt-BR", {
                                     style: "decimal",
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
                                   }).format(getValorItemReal(e))}
                                 </td>
-                                <td className="pdf_money_col reduce-font">
+                                <td className="pdf_money_colOS reduce-font">
                                   {new Intl.NumberFormat("pt-BR", {
                                     style: "decimal",
                                     minimumFractionDigits: 2,
@@ -6059,7 +6059,7 @@ class AddOS extends Component {
                           <td colSpan={7} className="pdf_large_col">
                             <b>TOTAL</b>
                           </td>
-                          <td className="pdf_money_col">
+                          <td className="pdf_money_colOS">
                             <b>
                               {new Intl.NumberFormat("pt-BR", {
                                 style: "decimal",
@@ -6068,7 +6068,7 @@ class AddOS extends Component {
                               }).format(valorTotalReais)}
                             </b>
                           </td>
-                          <td className="pdf_money_col">
+                          <td className="pdf_money_colOS">
                             <b>
                               {new Intl.NumberFormat("pt-BR", {
                                 style: "decimal",
@@ -6282,7 +6282,7 @@ class AddOS extends Component {
                         this.state.pdfContent[0].nomeNavio
                       )}
                     </td>
-                    <td className="pdf_money_col" colSpan="2">
+                    <td className="pdf_money_colOS" colSpan="2">
                       <b style={{ paddingRight: 5 }}>Name of Port:</b>{" "}
                       {util.returnIfExists(
                         this.state.pdfContent[0],
@@ -6314,7 +6314,7 @@ class AddOS extends Component {
                             this.state.pdfContent[0].data_chegada &&
                             moment(this.state.pdfContent[0].data_chegada)
                               .isValid
-                              ? "pdf_money_col"
+                              ? "pdf_money_colOS"
                               : "pdf_small_col"
                           }`}
                           colSpan="2"
@@ -6337,7 +6337,7 @@ class AddOS extends Component {
                         this.state.pdfContent[0].codigo
                       )}
                     </td>
-                    <td className="pdf_money_col" colSpan="2">
+                    <td className="pdf_money_colOS" colSpan="2">
                       <b style={{ paddingRight: 5 }}>O.C.C:</b>{" "}
                       {util.returnIfExists(
                         this.state.pdfContent[0],
@@ -6375,13 +6375,13 @@ class AddOS extends Component {
                     DESCRIPTION:
                   </td>
                   <td
-                    className="pdf_money_col"
+                    className="pdf_money_colOS"
                     style={{ backgroundColor: "#CDCDCD" }}
                   >
                     VALUE (USD)
                   </td>
                   <td
-                    className="pdf_money_col"
+                    className="pdf_money_colOS"
                     style={{ backgroundColor: "#CDCDCD" }}
                   >
                     VALUE (R$)
@@ -6479,7 +6479,7 @@ class AddOS extends Component {
                           {e.descos}
                         </td>
                         <td
-                          className="pdf_money_col reduce_font"
+                          className="pdf_money_colOS reduce_font"
                           style={{
                             background: index % 2 == 0 ? "white" : "#ccc",
                           }}
@@ -6498,7 +6498,7 @@ class AddOS extends Component {
                               )}
                         </td>
                         <td
-                          className="pdf_money_col reduce_font"
+                          className="pdf_money_colOS reduce_font"
                           style={{
                             background: index % 2 == 0 ? "white" : "#ccc",
                           }}
@@ -6525,7 +6525,7 @@ class AddOS extends Component {
                     <td colSpan="7" className="pdf_large_col reduce_font">
                       <b>GOVERNMENT TAXES</b>
                     </td>
-                    <td className="pdf_money_col reduce_font">
+                    <td className="pdf_money_colOS reduce_font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(
@@ -6537,7 +6537,7 @@ class AddOS extends Component {
                         )}
                       </b>
                     </td>
-                    <td className="pdf_money_col reduce_font">
+                    <td className="pdf_money_colOS reduce_font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(this.state.pdfContent[0].governmentTaxes)
@@ -6551,7 +6551,7 @@ class AddOS extends Component {
                     <td colSpan="7" className="pdf_large_col reduce_font">
                       <b>BANK CHARGES</b>
                     </td>
-                    <td className="pdf_money_col reduce_font">
+                    <td className="pdf_money_colOS reduce_font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(
@@ -6563,7 +6563,7 @@ class AddOS extends Component {
                         )}
                       </b>
                     </td>
-                    <td className="pdf_money_col reduce_font">
+                    <td className="pdf_money_colOS reduce_font">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(this.state.pdfContent[0].bankCharges)
@@ -6576,14 +6576,14 @@ class AddOS extends Component {
                   <td colSpan="7" className="pdf_large_col pdfTitle">
                     Total
                   </td>
-                  <td className="pdf_money_col">
+                  <td className="pdf_money_colOS">
                     <b>
                       {util.formataDinheiroBrasileiro(
                         parseFloat(valorTotalDolar)
                       )}
                     </b>
                   </td>
-                  <td className="pdf_money_col">
+                  <td className="pdf_money_colOS">
                     <b>
                       {util.formataDinheiroBrasileiro(parseFloat(valorTotal))}
                     </b>
@@ -6594,14 +6594,14 @@ class AddOS extends Component {
                     <td colSpan="7" className="pdf_large_col pdfTitle">
                       Discount
                     </td>
-                    <td className="pdf_money_col">
+                    <td className="pdf_money_colOS">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(descontoTotalDolar)
                         )}
                       </b>
                     </td>
-                    <td className="pdf_money_col">
+                    <td className="pdf_money_colOS">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(descontoTotal)
@@ -6615,14 +6615,14 @@ class AddOS extends Component {
                     <td colSpan="7" className="pdf_large_col pdfTitle">
                       Received
                     </td>
-                    <td className="pdf_money_col">
+                    <td className="pdf_money_colOS">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(recebimentoTotalDolar)
                         )}
                       </b>
                     </td>
-                    <td className="pdf_money_col">
+                    <td className="pdf_money_colOS">
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(recebimentoTotal)
@@ -6635,7 +6635,7 @@ class AddOS extends Component {
                   <td colSpan="7" className="pdf_large_col pdfTitle">
                     Balance
                   </td>
-                  <td className="pdf_money_col">
+                  <td className="pdf_money_colOS">
                     <b>
                       {util.formataDinheiroBrasileiro(
                         parseFloat(valorTotalDolar) -
@@ -6644,7 +6644,7 @@ class AddOS extends Component {
                       )}
                     </b>
                   </td>
-                  <td className="pdf_money_col">
+                  <td className="pdf_money_colOS">
                     <b>
                       {util.formataDinheiroBrasileiro(
                         parseFloat(valorTotal) -

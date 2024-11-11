@@ -254,7 +254,7 @@ input[type=number] {
     padding-right: 3px;
 }
 
-.pdf_money_col {
+.pdf_money_colOS {
     padding-right: 3px;
     text-align: right;
 }
@@ -276,7 +276,7 @@ input[type=number] {
 }
 
 .pdf_padding {
-    margin: 5px;
+    padding: 5px;
 }
 
 .invoices_header_sultrade {
