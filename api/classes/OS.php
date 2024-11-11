@@ -1457,9 +1457,9 @@ class OS
 
         $query = 'Descricao = ' . $descricao;
 
-        $result = $database->doUpdate('os', $query, 'chave = ' . $chave);
+        $result = $database->doUpdate('os', $query, 'Chave = ' . $chave);
 
-        $result = $database->doSelect('os', "os.*", 'chave = ' . $chave);
+        $result = $database->doSelect('os', "os.*", 'Chave = ' . $chave);
         $database->closeConection();
         if ($result == NULL) {
             return 'false';
