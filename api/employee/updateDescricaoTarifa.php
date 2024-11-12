@@ -6,7 +6,7 @@ header("Content-Type: application/x-www-form-urlencoded");
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
 //application/x-httpd-php updateSeaport.php ( PHP script, ASCII text, with CRLF line terminators )
-include_once '../classes/OS.php';
+include_once '../classes/Pessoas.php';
 include_once '../libraries/utils.php';
 
 $data = file_get_contents("php://input");
