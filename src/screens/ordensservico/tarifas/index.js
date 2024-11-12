@@ -11,7 +11,7 @@ import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrashAlt, faPen, faPlus, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
+import { faTrashAlt, faPen, faPlus, faChevronDown, faChevronUp, faSave } from '@fortawesome/free-solid-svg-icons'
 import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import util from '../../../classes/util'
@@ -44,7 +44,10 @@ const estadoInicial = {
     acessos: [],
     permissoes: [],
     direcaoTabela: faChevronDown,
-    acessosPermissoes: []
+    acessosPermissoes: [],
+
+    descricaoModificada: false,
+    tarifas: []
 }
 
 class Tarifas extends Component {
@@ -193,13 +196,69 @@ class Tarifas extends Component {
             }
         }
         if (this.state.pesquisaServico) {
-            if (!item.servico.toLowerCase().includes(this.state.pesquisaServico.toLowerCase())) {
+            if (!item.descricao.toLowerCase().includes(this.state.pesquisaServico.toLowerCase())) {
                 return false;
             }
         }
 
         return true;
     }
+
+    handleDescricaoChange = (e, feed) => {
+        const novaDescricao = e.target.value;
+    
+        this.setState((prevState) => {
+            const tarifaAtualizados = prevState.tarifas.map((tarifaItem) => {
+                if (tarifaItem.chave === feed.chave) {
+                    return { 
+                        ...tarifaItem,
+                        chave: feed.chave,
+                        descricao: novaDescricao 
+                    };
+                }
+                return tarifaItem;
+            });
+    
+            return {
+                tarifas: tarifaAtualizados,
+                descricaoModificada: true, 
+            };
+        });
+    };
+
+    salvarDescricao = async () => {
+        this.setState({ loading: true });
+
+        // Filtrando apenas os itens que foram modificados
+        const itensParaSalvar = this.state.tarifas.filter((tarifas) => tarifas.chave && tarifas.descricao && this.state.descricaoModificada);
+
+        console.log("Itens a serem salvos:", itensParaSalvar);
+
+        // Verificar se há itens para salvar
+        if (itensParaSalvar.length === 0) {
+            console.log("Nenhuma descrição modificada para salvar.");
+            this.setState({ loading: false });
+            return;
+        }
+      
+        const promises = itensParaSalvar.map((tarifas) => {
+          return apiEmployee.post(`updateDescricaoTarifa.php`, {
+            chave: tarifas.chave,
+            descricao: tarifas.descricao,
+          });
+        });
+
+        try {
+          await Promise.all(promises);
+          console.log("Descrição salva com sucesso.");
+          
+          this.setState({ loading: false, descricaoModificada: false });
+          window.location.reload();
+        } catch (error) {
+          console.error("Erro ao salvar descrição: ", error);
+          this.setState({ loading: false });
+        }
+      };
 
     render() {
 
@@ -262,7 +321,7 @@ class Tarifas extends Component {
                                         <input className="form-control " placeholder="Pesquise por porto..." value={this.state.pesquisaPorto} onChange={e => { this.setState({ pesquisaPorto: e.currentTarget.value }) }} />
                                     </div>
                                     <div className='col-4'>
-                                        <input className="form-control" placeholder="Pesquise por servico..." value={this.state.pesquisaServico} onChange={e => { this.setState({ pesquisaServico: e.currentTarget.value }) }} />
+                                        <input className="form-control" placeholder="Pesquise por descrição..." value={this.state.pesquisaServico} onChange={e => { this.setState({ pesquisaServico: e.currentTarget.value }) }} />
                                     </div>
 
                                 </div>
@@ -281,7 +340,7 @@ class Tarifas extends Component {
                                                     <span className="subtituloships">Porto</span>
                                                 </div>
                                                 <div className="col-2 text-left">
-                                                    <span className="subtituloships">Servico</span>
+                                                    <span className="subtituloships">Descrição</span>
                                                 </div>
                                                 <div className="col-2 text-left">
                                                     <span className="subtituloships" style={{ overflowWrap: "anywhere" }}>Preferencial</span>
@@ -342,13 +401,22 @@ class Tarifas extends Component {
                                                             >{feed?.portoNome?.split("@").join(", ")}</Link></h6>
                                                     </div>
                                                     <div className="col-2 text-left">
-                                                        <h6 className="mobileajuster5"><Link to=
-                                                                {{
-                                                                    pathname: `/ordensservico/addtarifa/${feed.chave}`,
-                                                                    state: { tarifa: { ...feed } }
-                                                                }}
-                                                                className="nonLink"
-                                                            >{feed.servico}</Link></h6>
+                                                    <input 
+                                                        type='text'
+                                                        value={feed.descricao || ''}
+                                                        placeholder={feed.servico || "Sem descrição"}
+                                                        onChange={(e) => this.handleDescricaoChange(e, feed)} 
+                                                        style={{
+                                                            width: '100%',
+                                                            padding: '2px 5px',     
+                                                            border: '1px solid #ced4da', 
+                                                            borderRadius: '4px',
+                                                            fontSize: '14px',
+                                                            height: '40px', // Definindo uma altura menor
+                                                            lineHeight: 'normal',
+                                                            backgroundColor: '#f9f9f9'
+                                                        }}
+                                                    />
                                                     </div>
                                                     <div className="col-2 text-center" style={{ justifyContent: "center"}}>
                                                     <p className="mobileajuster5">
@@ -491,6 +559,17 @@ class Tarifas extends Component {
                             </div>
                         </div>
                     }
+                {this.state.descricaoModificada && (
+                    <button className='salvarDescricao' onClick={this.salvarDescricao} disabled={this.state.loading}>
+                      {this.state.loading ? (
+                        "Salvando..."
+                      ) : (
+                        <>
+                          <FontAwesomeIcon icon={faSave} /> Salvar Descrição
+                        </>
+                      )}
+                    </button>
+              )}
                 </div>
                 <Rodape />
             </div>

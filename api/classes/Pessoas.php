@@ -163,7 +163,7 @@ class Pessoas
     {
         $database = new Database();
 
-        $result = $database->doSelect("tarifas LEFT JOIN pessoas ON tarifas.fornecedor = pessoas.chave LEFT JOIN os_portos ON tarifas.porto = os_portos.chave", "tarifas.fornecedor, tarifas.chave, GROUP_CONCAT(tarifas.porto SEPARATOR '@') as porto, tarifas.anexo, tarifas.vencimento, tarifas.servico, tarifas.observacao, tarifas.email_enviado, tarifas.preferencial, tarifas.anexo2, pessoas.nome AS fornecedorNome, GROUP_CONCAT(os_portos.descricao SEPARATOR '@') AS portoNome", "1=1 GROUP BY tarifas.fornecedor, tarifas.vencimento, tarifas.servico, tarifas.preferencial ORDER BY tarifas.preferencial DESC");
+        $result = $database->doSelect("tarifas LEFT JOIN pessoas ON tarifas.fornecedor = pessoas.chave LEFT JOIN os_portos ON tarifas.porto = os_portos.chave", "tarifas.fornecedor, tarifas.chave, GROUP_CONCAT(tarifas.porto SEPARATOR '@') as porto, tarifas.anexo, tarifas.vencimento, tarifas.servico, tarifas.observacao, tarifas.descricao, tarifas.email_enviado, tarifas.preferencial, tarifas.anexo2, pessoas.nome AS fornecedorNome, GROUP_CONCAT(os_portos.descricao SEPARATOR '@') AS portoNome", "1=1 GROUP BY tarifas.fornecedor, tarifas.vencimento, tarifas.servico, tarifas.preferencial ORDER BY tarifas.preferencial DESC");
 
         $database->closeConection();
         return $result;
@@ -474,6 +474,23 @@ class Pessoas
         }
 
 
+        $database->closeConection();
+        if ($result == NULL) {
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+
+    public static function updateDescricaoTarifa($chave, $descricao)
+    {
+        $database = new Database();
+
+        $query = "descricao = '$descricao'";
+
+        $result = $database->doUpdate('tarifa', $query, 'chave = ' . $chave);
+
+        $result = $database->doSelect('tarifa', "tarifa.*", 'chave = ' . $chave);
         $database->closeConection();
         if ($result == NULL) {
             return 'false';
