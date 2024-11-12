@@ -488,9 +488,9 @@ class Pessoas
 
         $query = "descricao = '$descricao'";
 
-        $result = $database->doUpdate('tarifa', $query, 'chave = ' . $chave);
+        $result = $database->doUpdate('tarifas', $query, 'chave = ' . $chave);
 
-        $result = $database->doSelect('tarifa', "tarifa.*", 'chave = ' . $chave);
+        $result = $database->doSelect('tarifas', "tarifas.*", 'chave = ' . $chave);
         $database->closeConection();
         if ($result == NULL) {
             return 'false';

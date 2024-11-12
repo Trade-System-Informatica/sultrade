@@ -213,7 +213,8 @@ class Tarifas extends Component {
                     return { 
                         ...tarifaItem,
                         chave: feed.chave,
-                        descricao: novaDescricao 
+                        descricao: novaDescricao,
+                        modificada: true,
                     };
                 }
                 return tarifaItem;
@@ -227,12 +228,12 @@ class Tarifas extends Component {
     };
 
     salvarDescricao = async () => {
-        this.setState({ loading: true });
+        //this.setState({ loading: true });
 
         // Filtrando apenas os itens que foram modificados
-        const itensParaSalvar = this.state.tarifas.filter((tarifas) => tarifas.chave && tarifas.descricao && this.state.descricaoModificada);
+        const itensParaSalvar = this.state.tarifas.filter((tarifas) => tarifas.chave && tarifas.descricao && tarifas.modificada);
 
-        console.log("Itens a serem salvos:", itensParaSalvar);
+        //console.log("Itens a serem salvos:", itensParaSalvar);
 
         // Verificar se há itens para salvar
         if (itensParaSalvar.length === 0) {
