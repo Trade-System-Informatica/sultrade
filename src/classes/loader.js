@@ -115,7 +115,7 @@ export default class loader {
         const tipo = ["",
             "os.orcamento = 1 and os.codigo LIKE '%" + pesquisa + "%'",
             "os.orcamento = 1 and os_navios.nome LIKE '%" + pesquisa + "%'",
-            "os.orcamento = 1 and os_tipos_servicos.descricao LIKE '%" + pesquisa + "%'",
+            "os.orcamento = 1 and os.Descricao LIKE '%" + pesquisa + "%'",
             "os.orcamento = 1 and os_portos.descricao LIKE '%" + pesquisa + "%'",
             "os.orcamento = 1 and pessoas.nome LIKE '%"+ pesquisa + "%'",
             "os.orcamento = 1 and os.sequencialOrcamento LIKE '%" + pesquisa + "%'"
