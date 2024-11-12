@@ -624,12 +624,14 @@ class OS
         return $result;
     }
 
-    public static function getEventosTemplates($offset, $empresa)
+    public static function getEventosTemplates($offset, $empresa, $ordem)
     {
         $database = new Database();
 
         if ($empresa == 0) {
-            if ($offset || $offset === "0" || $offset === 0) {
+            if ($ordem) {
+                $where = "os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY templates_relacoes.ordem DESC";
+            } else if ($offset || $offset === "0" || $offset === 0) {
                 $where = "os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 1000 OFFSET " . $offset;
             } else if ($offset !== "0" && $offset !== 0) {
                 $where = "os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY chave DESC";
@@ -640,11 +642,14 @@ class OS
                     LEFT JOIN templates_relacoes ON templates_relacoes.template = os_servicos_itens.chave
                     LEFT JOIN templates_grupos ON templates_grupos.chave = templates_relacoes.grupo',
                 "os_servicos_itens.*,
-                GROUP_CONCAT(templates_grupos.chave SEPARATOR '@.@') as gruposChaves",
+                GROUP_CONCAT(templates_grupos.chave SEPARATOR '@.@') as gruposChaves,
+                templates_relacoes.ordem",
                 $where
             );
         } else {
-            if ($offset || $offset === "0" || $offset === 0) {
+            if ($ordem) {
+                $where = "os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY templates_relacoes.ordem DESC";
+            } else if ($offset || $offset === "0" || $offset === 0) {
                 $where = "  os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY chave DESC LIMIT 1000 OFFSET " . $offset;
             } else if ($offset !== "0" && $offset !== 0) {
                 $where = "os_servicos_itens.template = 1 AND os_servicos_itens.cancelada = 0 GROUP BY os_servicos_itens.chave ORDER BY chave DESC";
@@ -655,7 +660,8 @@ class OS
                     LEFT JOIN templates_relacoes ON templates_relacoes.template = os_servicos_itens.chave
                     LEFT JOIN templates_grupos ON templates_grupos.chave = templates_relacoes.grupo',
                 "os_servicos_itens.*,
-                GROUP_CONCAT(templates_grupos.chave SEPARATOR '@.@') as gruposChaves",
+                GROUP_CONCAT(templates_grupos.chave SEPARATOR '@.@') as gruposChaves,
+                templates_relacoes.ordem",
                 $where
             );
         }

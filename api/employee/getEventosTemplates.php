@@ -13,12 +13,13 @@ if($objData != NULL){
     $token = prepareInput($objData->token);
     $offset = prepareInput($objData->offset);
     $empresa = prepareInput($objData->empresa);
+    $ordem = prepareInput($objData->ordem);
 
     $os = new OS();
 
     //$operadores = $operadores->checkToken($token);
     //if($result == 'true'){
-        $result = $os->getEventosTemplates($offset, $empresa);
+        $result = $os->getEventosTemplates($offset, $empresa, $ordem);
 		//$result = 'Entrou aqui';
         //}
     } else {
