@@ -143,7 +143,7 @@ class AddGrupoTemplate extends Component {
 
     getEventosTemplates = async () => {
         this.setState({
-            templates: await loader.getBody(`getEventosTemplates.php`, { empresa: null, offset: null, ordem: true })
+            templates: await loader.getBase(`getEventosTemplates.php`)
         });
     }
 
