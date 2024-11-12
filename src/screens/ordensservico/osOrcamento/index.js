@@ -454,6 +454,7 @@ class OsOrcamento extends Component {
                                                                         padding: '2px 5px',     
                                                                         border: '1px solid #ced4da', 
                                                                         borderRadius: '4px',
+                                                                        fontSize: '14px',
                                                                         height: '40px', // Definindo uma altura menor
                                                                         lineHeight: 'normal',
                                                                         backgroundColor: '#f9f9f9'
@@ -658,6 +659,7 @@ class OsOrcamento extends Component {
                                                                         padding: '2px 5px',     
                                                                         border: '1px solid #ced4da', 
                                                                         borderRadius: '4px',
+                                                                        fontSize: '14px',
                                                                         height: '40px', // Definindo uma altura menor
                                                                         lineHeight: 'normal',
                                                                         backgroundColor: '#f9f9f9'
@@ -724,6 +726,7 @@ class OsOrcamento extends Component {
                                                                         padding: '2px 5px',     
                                                                         border: '1px solid #ced4da', 
                                                                         borderRadius: '4px',
+                                                                        fontSize: '14px',
                                                                         height: '40px', // Definindo uma altura menor
                                                                         lineHeight: 'normal',
                                                                         backgroundColor: '#f9f9f9'
