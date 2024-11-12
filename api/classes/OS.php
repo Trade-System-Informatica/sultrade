@@ -959,6 +959,67 @@ class OS
         return $result;
     }
 
+    public static function copyOsOrcamento($chaveOsOriginal)
+{
+    // Inicializa a conexão com o banco de dados
+    $database = new Database();
+
+    try {
+        // 1. Buscar dados da OS original
+        $osOriginal = $database->doSelect('os', '*', "Chave = '$chaveOsOriginal'");
+
+        // Verificar se a OS original existe
+        if (empty($osOriginal)) {
+            throw new Exception("Ordem de Serviço ou Orçamento não encontrado.");
+        }
+
+        // 2. Preparar os dados para criar uma nova OS
+        $novaChave = uniqid(); // Gera um identificador único para a nova OS
+        $sequencial = $database->doSelect('codigos', 'Proximo', "Tipo = 'SO'")[0]['Proximo'];
+        $codigo = $osOriginal[0]['codigo']; // Utiliza o mesmo código do original
+        
+        // Atualiza o sequencial para a nova OS
+        $sequencialNovo = $sequencial + 1;
+
+        // 3. Definir as colunas e valores para inserir a nova OS
+        $cols = 'Chave, sequencialOrcamento, orcamento, Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio, centro_custo';
+        $values = "'$novaChave', $sequencial, {$osOriginal[0]['orcamento']}, '{$osOriginal[0]['Operador_Inclusao']}', '{$osOriginal[0]['Descricao']}', '{$osOriginal[0]['codigo']}', '{$osOriginal[0]['Chave_Cliente']}', '{$osOriginal[0]['chave_navio']}', '{$osOriginal[0]['Data_Abertura']}', '{$osOriginal[0]['Data_Chegada']}', '{$osOriginal[0]['Data_Saida']}', '{$osOriginal[0]['chave_tipo_servico']}', '{$osOriginal[0]['viagem']}', '{$osOriginal[0]['porto']}', '{$osOriginal[0]['encerradoPor']}', '{$osOriginal[0]['faturadoPor']}', '{$osOriginal[0]['Empresa']}', '{$osOriginal[0]['eta']}', '{$osOriginal[0]['atb']}', '{$osOriginal[0]['etb']}', '{$osOriginal[0]['governmentTaxes']}', '{$osOriginal[0]['bankCharges']}', '{$osOriginal[0]['operador']}', '{$osOriginal[0]['envio']}', '{$osOriginal[0]['centro_custo']}'";
+
+        // Inserir nova OS no banco de dados
+        $result = $database->doInsert('os', $cols, $values);
+
+        if (!$result) {
+            throw new Exception("Erro ao copiar a Ordem de Serviço.");
+        }
+
+        // 4. Copiar itens de serviço da OS original para a nova OS
+        $itensOriginal = $database->doSelect('os_servicos_itens', '*', "chave_os = '$chaveOsOriginal'");
+
+        foreach ($itensOriginal as $item) {
+            $colsItens = 'chave_os, data, fornecedor, taxa, descricao, ordem, tipo_sub, Fornecedor_Custeio, remarks, Moeda, valor, valor1, repasse, qntd';
+            $valuesItens = "'$novaChave', '{$item['data']}', '{$item['fornecedor']}', '{$item['taxa']}', '{$item['descricao']}', '{$item['ordem']}', '{$item['tipo_sub']}', '{$item['Fornecedor_Custeio']}', '{$item['remarks']}', '{$item['Moeda']}', '{$item['valor']}', '{$item['valor1']}', '{$item['repasse']}', '{$item['qntd']}'";
+
+            // Inserir itens copiados na nova OS
+            $database->doInsert('os_servicos_itens', $colsItens, $valuesItens);
+        }
+
+        // 5. Atualizar o próximo número sequencial na tabela 'codigos'
+        $database->doUpdate('codigos', "Proximo = '" . ($sequencialNovo) . "'", "Tipo = 'SO'");
+
+        // Fechar a conexão
+        $database->closeConection();
+
+        // Retornar a chave da nova OS criada
+        return $novaChave;
+
+    } catch (Exception $e) {
+        // Em caso de erro, fecha a conexão e retorna a mensagem de erro
+        $database->closeConection();
+        return "Erro: " . $e->getMessage();
+    }
+}
+
+
     public static function insertServicoItemBasico($values, $codigo, $tipo, $chave_os, $ordem)
     {
         $database = new Database();
