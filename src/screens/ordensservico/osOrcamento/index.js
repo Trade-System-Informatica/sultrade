@@ -442,7 +442,7 @@ class OsOrcamento extends Component {
                                                             </div>
                                                             <div 
                                                                 className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left"
-                                                                style={{ overflowWrap: 'anywhere ' }}
+                                                                style={{ overflowWrap: 'anywhere ', paddingBottom: '5px'  }}
                                                             >
                                                                 <input 
                                                                     type='text'
@@ -451,7 +451,7 @@ class OsOrcamento extends Component {
                                                                     onChange={(e) => this.handleDescricaoChange(e, feed)} 
                                                                     style={{
                                                                         width: '100%',
-                                                                        padding: '2px 5px',     
+                                                                        padding: '2px 5px',      
                                                                         border: '1px solid #ced4da', 
                                                                         borderRadius: '4px',
                                                                         fontSize: '14px',
@@ -647,7 +647,7 @@ class OsOrcamento extends Component {
                                                             </div>
                                                             <div 
                                                                 className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left"
-                                                                style={{ overflowWrap: 'anywhere ' }}
+                                                                style={{ overflowWrap: 'anywhere ', paddingBottom: '5px'  }}
                                                             >
                                                                 <input 
                                                                     type='text'
@@ -714,7 +714,7 @@ class OsOrcamento extends Component {
                                                             </div>
                                                             <div 
                                                                 className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left"
-                                                                style={{ overflowWrap: 'anywhere ' }}
+                                                                style={{ overflowWrap: 'anywhere ', paddingBottom: '5px' }}
                                                             >
                                                                 <input 
                                                                     type='text'
@@ -723,7 +723,7 @@ class OsOrcamento extends Component {
                                                                     onChange={(e) => this.handleDescricaoChange(e, feed)} 
                                                                     style={{
                                                                         width: '100%',
-                                                                        padding: '2px 5px',     
+                                                                        padding: '2px 5px',    
                                                                         border: '1px solid #ced4da', 
                                                                         borderRadius: '4px',
                                                                         fontSize: '14px',
