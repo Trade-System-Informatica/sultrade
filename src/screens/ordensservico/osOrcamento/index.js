@@ -447,7 +447,7 @@ class OsOrcamento extends Component {
                                                                 <input 
                                                                     type='text'
                                                                     value={feed.Descricao || ''}
-                                                                    placeholder="Sem descrição"
+                                                                    placeholder={feed.tipoServicoNome || "Sem descrição"}
                                                                     onChange={(e) => this.handleDescricaoChange(e, feed)} 
                                                                     style={{
                                                                         width: '100%',
