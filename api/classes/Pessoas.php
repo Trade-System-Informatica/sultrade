@@ -486,7 +486,7 @@ class Pessoas
     {
         $database = new Database();
 
-        $query = "descricao = '$descricao'";
+        $query = "Descricao = '" . $descricao . "'";
 
         $result = $database->doUpdate('tarifas', $query, 'chave = ' . $chave);
 
