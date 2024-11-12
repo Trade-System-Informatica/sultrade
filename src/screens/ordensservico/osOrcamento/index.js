@@ -248,7 +248,7 @@ class OsOrcamento extends Component {
         const promises = itensParaSalvar.map((os) => {
           return apiEmployee.post(`updateDescricaoOs.php`, {
             chave: os.chave,
-            descricao: os.descricao,
+            descricao: os.Descricao,
           });
         });
 
