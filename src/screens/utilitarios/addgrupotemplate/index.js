@@ -72,7 +72,8 @@ class AddGrupoTemplate extends Component {
             await this.setState({
                 nome: this.state.grupo.nome,
                 templatesIniciais: this.state.grupo.templatesChaves != null ? this.state.grupo.templatesChaves.split('@.@') : [],
-                templatesEscolhidas: this.state.grupo.templatesChaves != null ? this.state.grupo.templatesChaves?.split('@.@') : []
+                templatesEscolhidas: this.state.grupo.templatesChaves != null ? this.state.grupo.templatesChaves?.split('@.@') : [],
+                ordem: this.state.grupo.ordem != null ? this.state.grupo.ordem?.split('@.@') : []
             })
         }
         await this.carregaTiposAcessos()
@@ -95,6 +96,9 @@ class AddGrupoTemplate extends Component {
         })
 
         await this.setState({ loading: false })
+
+        console.log(this.state.templatesIniciais)
+        console.log('ordem', this.state.ordem)
     }
 
     carregaTiposAcessos = async () => {
