@@ -708,14 +708,19 @@ class OS
     {
         $database = new Database();
 
-        $result = $database->doSelect(
-            'templates_grupos 
+        $result = $database->doRawSelect(
+            "SELECT 
+                templates_grupos.*,
+                GROUP_CONCAT(os_servicos_itens.chave ORDER BY templates_relacoes.ordem SEPARATOR '@.@') AS templatesChaves,
+                GROUP_CONCAT(templates_relacoes.ordem ORDER BY templates_relacoes.ordem SEPARATOR '@.@') AS ordem
+            FROM 
+                templates_grupos
                 LEFT JOIN templates_relacoes ON templates_relacoes.grupo = templates_grupos.chave
-                LEFT JOIN os_servicos_itens ON os_servicos_itens.chave = templates_relacoes.template',
-            "templates_grupos.*,
-                GROUP_CONCAT(os_servicos_itens.chave ORDER BY templates_relacoes.ordem SEPARATOR '@.@') as templatesChaves,
-                GROUP_CONCAT(templates_relacoes.ordem ORDER BY templates_relacoes.ordem SEPARATOR '@.@') as ordem",
-            "templates_grupos.chave = '$chave'"
+                LEFT JOIN os_servicos_itens ON os_servicos_itens.chave = templates_relacoes.template
+            WHERE 
+                templates_grupos.chave = '$chave'
+            GROUP BY 
+                templates_grupos.chave"
         );
 
         $database->closeConection();
