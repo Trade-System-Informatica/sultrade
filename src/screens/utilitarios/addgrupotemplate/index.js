@@ -9,7 +9,7 @@ import { NOME_EMPRESA, CAMINHO_DOCUMENTOS } from '../../../config'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faExclamationTriangle, faTrashAlt, faPaperclip, faPen, faPlus, faDollarSign, faEnvelope } from '@fortawesome/free-solid-svg-icons'
+import { faArrowUp, faArrowDown, faSave } from '@fortawesome/free-solid-svg-icons'
 import { apiEmployee } from '../../../services/apiamrg'
 import Skeleton from '../../../components/skeleton'
 import 'moment-timezone';
@@ -49,6 +49,8 @@ const estadoInicial = {
     bloqueado: false,
     loading: true,
     alert: { type: "", msg: "" },
+
+    ordemModificada: false,
 }
 
 class AddGrupoTemplate extends Component {
@@ -246,6 +248,48 @@ class AddGrupoTemplate extends Component {
         await this.setState({ logs: await loader.getLogs("templates_grupos", this.state.chave) })
         await this.setState({ modalLog: true })
     }
+
+    moveUp(index) {
+        const templatesEscolhidas = [...this.state.templatesEscolhidas];
+        const length = templatesEscolhidas.length;
+        // Usando módulo para calcular o índice anterior de forma circular
+        const previousIndex = (index - 1 + length) % length;
+        [templatesEscolhidas[previousIndex], templatesEscolhidas[index]] = [templatesEscolhidas[index], templatesEscolhidas[previousIndex]];
+        this.setState({ templatesEscolhidas, ordemModificada: true });
+      }
+      
+      moveDown(index) {
+        const templatesEscolhidas = [...this.state.templatesEscolhidas];
+        const length = templatesEscolhidas.length;
+        // Usando módulo para calcular o próximo índice de forma circular
+        const nextIndex = (index + 1) % length;
+        [templatesEscolhidas[nextIndex], templatesEscolhidas[index]] = [templatesEscolhidas[index], templatesEscolhidas[nextIndex]];
+        this.setState({ templatesEscolhidas, ordemModificada: true });
+      }
+
+    salvarOrdem = async () => {
+        this.setState({ loading: true });
+      
+        // Mapear grupos e criar as requisições para salvar a ordem no backend
+        const promises = this.state.templatesEscolhidas.map((templatesEscolhidas, index) => {
+          return apiEmployee.post(`updateGruposTemplateOrdem.php`, {
+            chave: templatesEscolhidas.chave, // Identificador do grupo a ser atualizado
+            ordem: index + 1,    // Define a nova ordem baseada na posição do array
+          });
+        });
+      
+        // Executa todas as requisições e espera elas terminarem
+        try {
+          await Promise.all(promises);
+          console.log("Ordem dos grupos salva com sucesso.");
+          
+          this.setState({ loading: false });
+          window.location.reload();
+        } catch (error) {
+          console.error("Erro ao salvar ordem dos grupos: ", error);
+          this.setState({ loading: false });
+        }
+      };
 
     render() {
         const validations = []
@@ -607,18 +651,42 @@ class AddGrupoTemplate extends Component {
                                                                                 </th>
                                                                             }
                                                                             <th className='text-center'>
+                                                                                <span>Ordem</span>
+                                                                            </th>
+                                                                            <th className='text-center'>
                                                                                 <span>Descrição</span>
                                                                             </th>
                                                                             <th className='text-center'>
                                                                                 <span>Valor</span>
                                                                             </th>
                                                                         </tr>
-                                                                        {this.state.templates[0] != undefined && this.state.templates.filter((e) => this.state.templatesEscolhidas.includes(e.chave)).map((feed, index) => (
+                                                                        {this.state.templates[0] != undefined &&
+                                                                         this.state.templates
+                                                                         .filter((e) => this.state.templatesEscolhidas.includes(e.chave))
+                                                                         .sort((a, b) => {
+                                                                            const ordemA = this.state.templatesIniciais.indexOf(a.chave);
+                                                                            const ordemB = this.state.templatesIniciais.indexOf(b.chave);
+                                                                            return ordemA === -1 ? 1 : ordemB === -1 ? -1 : ordemA - ordemB;
+                                                                        })
+                                                                         .map((feed, index) => {
+
+                                                                            const ordem = this.state.templatesEscolhidas.indexOf(feed.chave) + 1;
+
+                                                                            return(
                                                                             <>
                                                                                 {window.innerWidth < 500 &&
                                                                                     <tr className={index % 2 == 0 ? "parTr" : "imparTr"}>
                                                                                         <td className="text-center">
                                                                                             <p>{feed.chave}</p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
+                                                                                        <p>{ordem}{' '}
+                                                                                        <span type="button" className="iconelixo giveMargin" onClick={(e) => {this.moveUp(index);}}>
+                                                                                            <FontAwesomeIcon icon={faArrowUp} />
+                                                                                        </span>
+                                                                                        <span type="button" className="iconelixo" onClick={(e) => {this.moveDown(index);}}>
+                                                                                            <FontAwesomeIcon icon={faArrowDown} />
+                                                                                        </span></p>
                                                                                         </td>
                                                                                         <td className="text-center">
                                                                                             <p>{feed.descricao}</p>
@@ -637,6 +705,15 @@ class AddGrupoTemplate extends Component {
                                                                                             <p>{this.state.tiposServicosItens[feed.tipo_sub]}</p>
                                                                                         </td>
                                                                                         <td className="text-center">
+                                                                                        <p>{ordem}{' '}
+                                                                                        <span type="button" className="iconelixo giveMargin" onClick={(e) => {this.moveUp(index);}}>
+                                                                                            <FontAwesomeIcon icon={faArrowUp} />
+                                                                                        </span>
+                                                                                        <span type="button" className="iconelixo" onClick={(e) => {this.moveDown(index);}}>
+                                                                                            <FontAwesomeIcon icon={faArrowDown} />
+                                                                                        </span></p>
+                                                                                        </td>
+                                                                                        <td className="text-center">
                                                                                             <p>{feed.descricao}</p>
                                                                                         </td>
                                                                                         <td className="text-center">
@@ -645,7 +722,7 @@ class AddGrupoTemplate extends Component {
                                                                                     </tr>
                                                                                 }
                                                                             </>
-                                                                        )
+                                                                        )}
                                                                         )}
                                                                     </table>
 
@@ -654,6 +731,17 @@ class AddGrupoTemplate extends Component {
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    {this.state.ordemModificada && (
+                                                    <button className='salvarOrdem' onClick={this.salvarOrdem} disabled={this.state.loading}>
+                                                        {this.state.loading ? (
+                                                        "Salvando..."
+                                                        ) : (
+                                                        <>
+                                                            <FontAwesomeIcon icon={faSave} /> Salvar Ordem
+                                                        </>
+                                                        )}
+                                                    </button>
+                                                    )}
 
                                                 </div>
                                             </div>
