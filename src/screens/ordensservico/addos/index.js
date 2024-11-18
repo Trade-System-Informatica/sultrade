@@ -695,13 +695,13 @@ class AddOS extends Component {
             .filter((evento) => evento.Fornecedor_Custeio != 0)
             .map((evento) => {
               if (evento.Moeda == 5) {
-                valor += parseFloat(evento.valor) * 0.05;
+                valor += parseFloat(evento.valor * evento.qntd) * 0.05;
               } else if (evento.Moeda == 6) {
                 let roe = 5;
                 if (this.state.os && parseFloat(this.state.os.ROE) != 0) {
                   roe = parseFloat(this.state.os.ROE);
                 }
-                valor += parseFloat(evento.valor) * roe * 0.05;
+                valor += parseFloat(evento.valor * evento.qntd) * roe * 0.05;
               }
             });
 
@@ -720,13 +720,13 @@ class AddOS extends Component {
               .filter((evento) => evento.Fornecedor_Custeio != 0)
               .map((evento) => {
                 if (evento.Moeda == 5) {
-                  valor += parseFloat(evento.valor) * 0.05;
+                  valor += parseFloat(evento.valor * evento.qntd) * 0.05;
                 } else if (evento.Moeda == 6) {
                   let roe = 5;
                   if (this.state.os && parseFloat(this.state.os.ROE) != 0) {
                     roe = parseFloat(this.state.os.ROE);
                   }
-                  valor += parseFloat(evento.valor) * roe * 0.05;
+                  valor += parseFloat(evento.valor * evento.qntd) * roe * 0.05;
                 }
               });
 
