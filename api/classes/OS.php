@@ -1099,8 +1099,15 @@ class OS
         $chave = $result[0]['chave'];
 
         if ($chave) {
-            foreach ($templates as $key => $template) {
-                $database->doInsert('templates_relacoes', "template, grupo", "'$template', $chave");
+            // Loop para inserir os templates com ordem
+            foreach ($templates as $index => $template) {
+                $ordem = $index + 1;
+    
+                $database->doInsert(
+                    'templates_relacoes', 
+                    'template, grupo, ordem', 
+                    "'$template', $chave, $ordem"
+                );
             }
         }
 
@@ -1686,9 +1693,31 @@ class OS
 
         $result = $database->doUpdate('templates_grupos', $query, 'chave = ' . $chave);
 
-        foreach ($templatesNovas as $key => $template) {
-            $database->doInsert('templates_relacoes', 'template, grupo', "'$template', '$chave'");
+        foreach ($templatesNovas as $template) {
+            $templateChave = $template->chave; // Pega a chave do template
+            $ordem = $template->ordem; // Pega a ordem do template
+    
+            // Verifica se já existe uma relação entre o grupo e o template
+            $existingRelation = $database->doSelect(
+                'templates_relacoes',
+                '*',
+                "template = '$templateChave' AND grupo = '$chave'"
+            );
+    
+            if ($existingRelation) {
+                // Atualizar a ordem se a relação já existir
+                $updateQuery = "ordem = '$ordem'";
+                $database->doUpdate('templates_relacoes', $updateQuery, "template = '$templateChave' AND grupo = '$chave'");
+            } else {
+                // Inserir novo template com a ordem
+                $database->doInsert(
+                    'templates_relacoes',
+                    'template, grupo, ordem',
+                    "'$templateChave', '$chave', '$ordem'"
+                );
+            }
         }
+
         foreach ($templatesDeletadas as $key => $template) {
             $database->doDelete('templates_relacoes', "template = '$template' AND grupo = '$chave'");
         }

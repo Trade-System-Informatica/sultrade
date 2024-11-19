@@ -49,8 +49,6 @@ const estadoInicial = {
     bloqueado: false,
     loading: true,
     alert: { type: "", msg: "" },
-
-    ordemModificada: false,
 }
 
 class AddGrupoTemplate extends Component {
@@ -174,7 +172,10 @@ class AddGrupoTemplate extends Component {
             await apiEmployee.post(`insertGrupoTemplate.php`, {
                 token: true,
                 values: `'${this.state.nome}'`,
-                templates: this.state.templatesEscolhidas
+                templates: this.state.templatesEscolhidas.map((chave, index) => ({
+                    chave,
+                    ordem: index + 1, // Inclui a ordem
+                }))
             }).then(
                 async res => {
                     await this.setState({
@@ -191,11 +192,11 @@ class AddGrupoTemplate extends Component {
                 async res => await console.log(`Erro: ${res.data}`)
             )
         } else if (validForm) {
-            const templatesNovas = this.state.templatesEscolhidas.map((e) => {
-                if (!this.state.templatesIniciais?.includes(e)) {
-                  return e;
+            const templatesNovas = this.state.templatesEscolhidas.map((chave, index) => {
+                if (!this.state.templatesIniciais?.includes(chave)) {
+                    return { chave, ordem: index + 1 };
                 }
-              })
+            })
               .filter((e) => e);
 
             const templatesDeletadas = this.state.templatesIniciais.map((e) => {
@@ -210,7 +211,11 @@ class AddGrupoTemplate extends Component {
                 chave: this.state.chave,
                 nome: this.state.nome,
                 templatesNovas,
-                templatesDeletadas
+                templatesDeletadas,
+                ordemTemplates: this.state.templatesEscolhidas.map((chave, index) => ({
+                    chave,
+                    ordem: index + 1
+                }))
             }).then(
                 async res => {
                     if (res.data[0]) {
@@ -255,7 +260,7 @@ class AddGrupoTemplate extends Component {
         // Usando módulo para calcular o índice anterior de forma circular
         const previousIndex = (index - 1 + length) % length;
         [templatesEscolhidas[previousIndex], templatesEscolhidas[index]] = [templatesEscolhidas[index], templatesEscolhidas[previousIndex]];
-        this.setState({ templatesEscolhidas, ordemModificada: true });
+        this.setState({ templatesEscolhidas });
       }
       
       moveDown(index) {
@@ -264,32 +269,8 @@ class AddGrupoTemplate extends Component {
         // Usando módulo para calcular o próximo índice de forma circular
         const nextIndex = (index + 1) % length;
         [templatesEscolhidas[nextIndex], templatesEscolhidas[index]] = [templatesEscolhidas[index], templatesEscolhidas[nextIndex]];
-        this.setState({ templatesEscolhidas, ordemModificada: true });
+        this.setState({ templatesEscolhidas });
       }
-
-    salvarOrdem = async () => {
-        this.setState({ loading: true });
-      
-        // Mapear grupos e criar as requisições para salvar a ordem no backend
-        const promises = this.state.templatesEscolhidas.map((templatesEscolhidas, index) => {
-          return apiEmployee.post(`updateGruposTemplateOrdem.php`, {
-            chave: templatesEscolhidas.chave, // Identificador do grupo a ser atualizado
-            ordem: index + 1,    // Define a nova ordem baseada na posição do array
-          });
-        });
-      
-        // Executa todas as requisições e espera elas terminarem
-        try {
-          await Promise.all(promises);
-          console.log("Ordem dos grupos salva com sucesso.");
-          
-          this.setState({ loading: false });
-          window.location.reload();
-        } catch (error) {
-          console.error("Erro ao salvar ordem dos grupos: ", error);
-          this.setState({ loading: false });
-        }
-      };
 
     render() {
         const validations = []
@@ -661,14 +642,14 @@ class AddGrupoTemplate extends Component {
                                                                             </th>
                                                                         </tr>
                                                                         {this.state.templates[0] != undefined &&
-                                                                         this.state.templates
-                                                                         .filter((e) => this.state.templatesEscolhidas.includes(e.chave))
-                                                                         .sort((a, b) => {
-                                                                            const ordemA = this.state.templatesIniciais.indexOf(a.chave);
-                                                                            const ordemB = this.state.templatesIniciais.indexOf(b.chave);
-                                                                            return ordemA === -1 ? 1 : ordemB === -1 ? -1 : ordemA - ordemB;
+                                                                        this.state.templates
+                                                                        .filter((e) => this.state.templatesEscolhidas.includes(e.chave))
+                                                                        .sort((a, b) => {
+                                                                            const ordemA = this.state.templatesEscolhidas.indexOf(a.chave);
+                                                                            const ordemB = this.state.templatesEscolhidas.indexOf(b.chave);
+                                                                            return ordemA - ordemB;
                                                                         })
-                                                                         .map((feed, index) => {
+                                                                        .map((feed, index) => {
 
                                                                             const ordem = this.state.templatesEscolhidas.indexOf(feed.chave) + 1;
 
@@ -731,18 +712,6 @@ class AddGrupoTemplate extends Component {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    {this.state.ordemModificada && (
-                                                    <button className='salvarOrdem' onClick={this.salvarOrdem} disabled={this.state.loading}>
-                                                        {this.state.loading ? (
-                                                        "Salvando..."
-                                                        ) : (
-                                                        <>
-                                                            <FontAwesomeIcon icon={faSave} /> Salvar Ordem
-                                                        </>
-                                                        )}
-                                                    </button>
-                                                    )}
-
                                                 </div>
                                             </div>
                                         </div>
