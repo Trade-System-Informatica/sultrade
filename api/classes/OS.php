@@ -679,7 +679,7 @@ class OS
                     LEFT JOIN templates_relacoes ON templates_relacoes.grupo = templates_grupos.chave
                     LEFT JOIN os_servicos_itens ON os_servicos_itens.chave = templates_relacoes.template',
             "templates_grupos.*,
-                GROUP_CONCAT(os_servicos_itens.chave SEPARATOR '@.@') as templatesChaves",
+                GROUP_CONCAT(os_servicos_itens.chave ORDER BY templates_relacoes.ordem SEPARATOR '@.@') as templatesChaves",
             $where
         );
 

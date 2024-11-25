@@ -192,11 +192,10 @@ class AddGrupoTemplate extends Component {
                 async res => await console.log(`Erro: ${res.data}`)
             )
         } else if (validForm) {
-            const templatesNovas = this.state.templatesEscolhidas.map((chave, index) => {
-                if (!this.state.templatesIniciais?.includes(chave)) {
-                    return { chave, ordem: index + 1 };
-                }
-            })
+            const templatesNovas = this.state.templatesEscolhidas.map((chave, index) => ({
+                     chave,
+                     ordem: index + 1,
+            }))
               .filter((e) => e);
 
             const templatesDeletadas = this.state.templatesIniciais.map((e) => {
