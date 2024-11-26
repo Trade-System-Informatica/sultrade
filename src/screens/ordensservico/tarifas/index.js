@@ -196,7 +196,7 @@ class Tarifas extends Component {
             }
         }
         if (this.state.pesquisaServico) {
-            if (!item.descricao.toLowerCase().includes(this.state.pesquisaServico.toLowerCase())) {
+            if (!item.descricao || !item.descricao.toLowerCase().includes(this.state.pesquisaServico.toLowerCase())) {
                 return false;
             }
         }
