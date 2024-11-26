@@ -1481,7 +1481,7 @@ class OS
         $database = new Database();
 
         $query = "chave_os = " . $chave_os;
-        $eventosAtuais = $database->doSelect('os_servicos_itens', "os_servicos_itens.*", "chave_os =  . $chave_os AND cancelada = 0");
+        $eventosAtuais = $database->doSelect('os_servicos_itens', "os_servicos_itens.*", "chave_os = $chave_os AND cancelada = 0");
         if($eventosAtuais != NULL){
             $ordem_nova = end($eventosAtuais)['ordem'] + 1;
         }else{
