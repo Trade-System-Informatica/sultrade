@@ -1487,7 +1487,7 @@ class OS
         }else{
             $ordem_nova = 1;
         }
-        $eventos = $database->doSelect("os_servicos_itens", "os_servicos_itens.*", "chave_os = $chave_orcamento");
+        $eventos = $database->doSelect("os_servicos_itens", "os_servicos_itens.*", "chave_os = $chave_orcamento AND cancelada = 0");
         
         foreach ($eventos as $evento) {
             $database->doUpdate("os_servicos_itens", $query.', ordem = '.$ordem_nova, "chave = ". $evento["chave"]);
