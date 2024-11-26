@@ -312,7 +312,7 @@ class EventosTemplates extends Component {
                                                         </div>
 
                                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteServicoItem(feed.chave, feed.descricao)} >
+                                                            <div type='button' className='iconelixo' onClick={(a) => this.deleteEventoTemplate(feed.chave, feed.descricao)} >
                                                                 <FontAwesomeIcon icon={faTimes} />
                                                             </div>
                                                         }
