@@ -1750,16 +1750,16 @@ class OS
         $database->doUpdate('codigos', "codigos.Proximo = $novoCodigo", "codigos.Tipo = 'OS'");
 
         // Obtém os dados necessários a partir da tabela 'os'
-        $dadosOs = $database->doSelect('os', 'codigo, chave_navio, tipo_servico, cliente, porto, Chave_Cliente', "Chave = '$Chave'");
+        $dadosOs = $database->doSelect('os', 'codigo, chave_navio, tipo_servico, porto, Chave_Cliente', "Chave = '$Chave'");
         if (!$dadosOs || count($dadosOs) == 0) {
             $database->closeConection();
             return 'false'; // Retorna falso se os dados não forem encontrados
         }
 
         $codigoOS = $dadosOs[0]['codigo'];
-        $navio = $dadosOs[0]['navio'];
-        $tipoServico = $dadosOs[0]['tipoServico'];
-        $cliente = $dadosOs[0]['cliente'];
+        $navio = $dadosOs[0]['chave_navio'];
+        $tipoServico = $dadosOs[0]['tipo_servico'];
+        $cliente = $dadosOs[0]['Chave_Cliente'];
         $porto = $dadosOs[0]['porto'];
 
         // Atualiza ou insere no centros_custos
@@ -1798,7 +1798,7 @@ class OS
         $database->doUpdate('codigos', "codigos.Proximo = $novoCodigo", "codigos.Tipo = 'OR'");
 
         // Busca os dados da OS
-        $ordem_servico = $database->doSelect('os', 'codigo, chave_navio, tipo_servico, cliente, porto, Chave_Cliente, sequencialOrcamento', 'Chave = ' . $Chave);
+        $ordem_servico = $database->doSelect('os', 'codigo, chave_navio, tipo_servico, porto, Chave_Cliente, sequencialOrcamento', 'Chave = ' . $Chave);
 
         if (!$ordem_servico || count($ordem_servico) == 0) {
             $database->closeConection();
@@ -1806,9 +1806,9 @@ class OS
         }
 
         $codigoAtual = $ordem_servico[0]['codigo'];
-        $navio = $ordem_servico[0]['navio'];
-        $tipoServico = $ordem_servico[0]['tipoServico'];
-        $cliente = $ordem_servico[0]['cliente'];
+        $navio = $ordem_servico[0]['chave_navio'];
+        $tipoServico = $ordem_servico[0]['tipo_servico'];
+        $cliente = $ordem_servico[0]['Chave_Cliente'];
         $porto = $ordem_servico[0]['porto'];
 
         if ($ordem_servico[0]['sequencialOrcamento'] == 0){
