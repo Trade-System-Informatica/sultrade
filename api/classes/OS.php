@@ -1750,7 +1750,7 @@ class OS
         $database->doUpdate('codigos', "codigos.Proximo = $novoCodigo", "codigos.Tipo = 'OS'");
 
         // Obtém os dados necessários a partir da tabela 'os'
-        $dadosOs = $database->doSelect('os', 'codigo, navio, tipoServico, cliente, porto, chaveCliente', "Chave = '$Chave'");
+        $dadosOs = $database->doSelect('os', 'codigo, chave_navio, tipo_servico, cliente, porto, Chave_Cliente', "Chave = '$Chave'");
         if (!$dadosOs || count($dadosOs) == 0) {
             $database->closeConection();
             return 'false'; // Retorna falso se os dados não forem encontrados
@@ -1798,7 +1798,7 @@ class OS
         $database->doUpdate('codigos', "codigos.Proximo = $novoCodigo", "codigos.Tipo = 'OR'");
 
         // Busca os dados da OS
-        $ordem_servico = $database->doSelect('os', 'codigo, navio, tipoServico, cliente, porto, chaveCliente, sequencialOrcamento', 'Chave = ' . $Chave);
+        $ordem_servico = $database->doSelect('os', 'codigo, chave_navio, tipo_servico, cliente, porto, Chave_Cliente, sequencialOrcamento', 'Chave = ' . $Chave);
 
         if (!$ordem_servico || count($ordem_servico) == 0) {
             $database->closeConection();
