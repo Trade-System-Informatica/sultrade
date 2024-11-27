@@ -886,10 +886,13 @@ class OS
             $centroCusto = $database->doSelect('centros_custos', 'Chave', "Codigo = '$codigo'");
 
             if (!$centroCusto[0]) {
-                $valuesCentroCusto = "'$codigo', 'ST$codigo', 'ST$codigo $navio - $tipoServico - $cliente - $porto', '$chaveCliente'";
+                $codigoData = self::getCodigos('CC');
+                $codigoCC = $codigoData[0]['Proximo'];
+
+                $valuesCentroCusto = "'$codigoCC', 'ST$codigo', 'ST$codigo $navio - $tipoServico - $cliente - $porto', '$chaveCliente'";
                 $centroCusto = $database->doInsert('centros_custos', 'Chave, Codigo, Descricao, Cliente', $valuesCentroCusto);
 
-                $database->doUpdate('codigos', "Proximo = '" . ($codigo + 1) . "'", "Tipo = 'CC'");
+                $database->doUpdate('codigos', "Proximo = '" . ($codigoCC + 1) . "'", "Tipo = 'CC'");
             }
             $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio, centro_custo';
             $result = $database->doInsert('os', $cols, $values . ", '" . $centroCusto[0]["Chave"] . "'");
@@ -917,10 +920,13 @@ class OS
             $centroCusto = $database->doSelect('centros_custos', 'Chave', "Codigo = '$codigo'");
 
             if (!$centroCusto[0]) {
-                $valuesCentroCusto = "'$codigo', 'OR$codigo', 'OR$codigo $navio - $tipoServico - $cliente - $porto', '$chaveCliente'";
+                $codigoData = self::getCodigos('CC');
+                $codigoCC = $codigoData[0]['Proximo'];
+                
+                $valuesCentroCusto = "'$codigoCC', 'OR$codigo', 'OR$codigo $navio - $tipoServico - $cliente - $porto', '$chaveCliente'";
                 $centroCusto = $database->doInsert('centros_custos', 'Chave, Codigo, Descricao, Cliente', $valuesCentroCusto);
 
-                $database->doUpdate('codigos', "Proximo = '" . ($codigo + 1) . "'", "Tipo = 'CC'");
+                $database->doUpdate('codigos', "Proximo = '" . ($codigoCC + 1) . "'", "Tipo = 'CC'");
             }
 
             $cols = 'sequencialOrcamento, orcamento, Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio, centro_custo';
