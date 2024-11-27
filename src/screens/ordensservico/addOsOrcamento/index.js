@@ -2271,7 +2271,7 @@ class AddOsOrcamento extends Component {
     await apiEmployee
       .post("getCodigos.php", {
         token: true,
-        tipo: "OS",
+        tipo: "OR",
       })
       .then(
         async (res) => {
@@ -2626,7 +2626,7 @@ class AddOsOrcamento extends Component {
           token: true,
           values: `'${this.state.usuarioLogado.codigo}', '${
             this.state.descricao
-          }', 'ST${this.state.codigo.Proximo}', '${this.state.cliente}', '${
+          }', 'OR${this.state.codigo.Proximo}', '${this.state.cliente}', '${
             this.state.navio
           }', '${moment(this.state.abertura).format("YYYY-MM-DD")}', '${moment(
             this.state.chegada
