@@ -1750,13 +1750,13 @@ class OS
         $database->doUpdate('codigos', "codigos.Proximo = $novoCodigo", "codigos.Tipo = 'OS'");
 
         // Obtém os dados necessários a partir da tabela 'os'
-        $dadosOs = $database->doSelect('os', 'codigo, chave_navio, tipo_servico, porto, Chave_Cliente', "Chave = '$Chave'");
+        $dadosOs = $database->doSelect('os', 'centro_custo, chave_navio, tipo_servico, porto, Chave_Cliente', "Chave = '$Chave'");
         if (!$dadosOs || count($dadosOs) == 0) {
             $database->closeConection();
             return 'false'; // Retorna falso se os dados não forem encontrados
         }
 
-        $codigoOS = $dadosOs[0]['codigo'];
+        $codigoCC = $dadosOs[0]['centro_custo'];
         $navio = $dadosOs[0]['chave_navio'];
         $tipoServico = $dadosOs[0]['tipo_servico'];
         $cliente = $dadosOs[0]['Chave_Cliente'];
@@ -1764,14 +1764,12 @@ class OS
 
         // Atualiza ou insere no centros_custos
         if ($codigo >= 5850 && $navio && $tipoServico && $cliente && $porto) {
-            $centroCusto = $database->doSelect('centros_custos', 'Chave', "Codigo = '$codigoOS'");
-
-            $chaveCC = $centroCusto[0]['Chave'];
+            $centroCusto = $database->doSelect('centros_custos', 'Codigo, Descricao', "Chave = '$codigoCC'");
 
             if ($centroCusto[0]) {
                 // Atualiza descrição e o codigo do centro de custo existente
                 $descricao = "ST$codigo $navio - $tipoServico - $cliente - $porto";
-                $database->doUpdate('centros_custos', "Descricao = '$descricao', Codigo = 'ST$codigo'", "Chave = '$chaveCC'");
+                $database->doUpdate('centros_custos', "Descricao = '$descricao', Codigo = 'ST$codigo'", "Chave = '$codigoCC'");
             }
         }
 
@@ -1798,14 +1796,14 @@ class OS
         $database->doUpdate('codigos', "codigos.Proximo = $novoCodigo", "codigos.Tipo = 'OR'");
 
         // Busca os dados da OS
-        $ordem_servico = $database->doSelect('os', 'codigo, chave_navio, tipo_servico, porto, Chave_Cliente, sequencialOrcamento', 'Chave = ' . $Chave);
+        $ordem_servico = $database->doSelect('os', 'centro_custo, chave_navio, tipo_servico, porto, Chave_Cliente, sequencialOrcamento', 'Chave = ' . $Chave);
 
         if (!$ordem_servico || count($ordem_servico) == 0) {
             $database->closeConection();
             return 'false'; // Retorna falso se os dados não forem encontrados
         }
 
-        $codigoAtual = $ordem_servico[0]['codigo'];
+        $codigoCC = $ordem_servico[0]['centro_custo'];
         $navio = $ordem_servico[0]['chave_navio'];
         $tipoServico = $ordem_servico[0]['tipo_servico'];
         $cliente = $ordem_servico[0]['Chave_Cliente'];
@@ -1821,15 +1819,15 @@ class OS
             $query = "orcamento = 1, codigo = 'OR$codigoOrcamento'";
         }
 
-        if ($codigoAtual >= 5850 && $navio && $tipoServico && $cliente && $porto) {
-            $centroCusto = $database->doSelect('centros_custos', 'Chave', "Codigo = '$codigoAtual'");
+        if ($codigoCC >= 5850 && $navio && $tipoServico && $cliente && $porto) {
+            $centroCusto = $database->doSelect('centros_custos', 'Codigo, Descricao', "Chave = '$codigoCC'");
     
             if ($centroCusto) {
                 $descricao = "OR$codigoOrcamento $navio - $tipoServico - $cliente - $porto";
                 $database->doUpdate(
                     'centros_custos',
                     "Descricao = '$descricao', Codigo = 'OR$codigoOrcamento'",
-                    "Chave = '" . $centroCusto[0]['Chave'] . "'"
+                    "Chave = '$codigoCC'"
                 );
             }
         }
