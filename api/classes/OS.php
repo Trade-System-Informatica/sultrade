@@ -1775,7 +1775,7 @@ class OS
             }
         }
 
-        $query = "orcamento = 0, codigo = ST$codigo";
+        $query = "orcamento = 0, codigo = 'ST$codigo'";
 
         $result = $database->doUpdate('os', $query, 'Chave = ' . $Chave);
         $database->closeConection();
@@ -1814,11 +1814,11 @@ class OS
         if ($ordem_servico[0]['sequencialOrcamento'] == 0){
             $codigo = $database->doSelect('codigos', 'codigos.Proximo', "codigos.Tipo = 'SO'");
             $codigo = $codigo[0]['Proximo'];
-            $query = "orcamento = 1, codigo = OR$codigoOrcamento, sequencialOrcamento = ".$codigo;
+            $query = "orcamento = 1, codigo = 'OR$codigoOrcamento', sequencialOrcamento = ".$codigo;
             $codigo = $codigo + 1;
             $database->doUpdate('codigos', "codigos.Proximo = $codigo", "codigos.Tipo = 'SO'");
         }else{
-            $query = "orcamento = 1, codigo = OR$codigoOrcamento";
+            $query = "orcamento = 1, codigo = 'OR$codigoOrcamento'";
         }
 
         if ($codigoAtual >= 5850 && $navio && $tipoServico && $cliente && $porto) {
