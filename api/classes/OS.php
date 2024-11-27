@@ -1750,28 +1750,32 @@ class OS
         $database->doUpdate('codigos', "codigos.Proximo = $novoCodigo", "codigos.Tipo = 'OS'");
 
         // Obtém os dados necessários a partir da tabela 'os'
-        $dadosOs = $database->doSelect('os', 'centro_custo, chave_navio, tipo_servico, porto, Chave_Cliente', "Chave = '$Chave'");
+        $dadosOs = $database->doSelect('os', 'centro_custo', "Chave = '$Chave'");
         if (!$dadosOs || count($dadosOs) == 0) {
             $database->closeConection();
             return 'false'; // Retorna falso se os dados não forem encontrados
         }
 
         $codigoCC = $dadosOs[0]['centro_custo'];
-        $navio = $dadosOs[0]['chave_navio'];
-        $tipoServico = $dadosOs[0]['tipo_servico'];
-        $cliente = $dadosOs[0]['Chave_Cliente'];
-        $porto = $dadosOs[0]['porto'];
 
         // Atualiza ou insere no centros_custos
-        if ($codigo >= 5850 && $navio && $tipoServico && $cliente && $porto) {
-            $centroCusto = $database->doSelect('centros_custos', 'Codigo, Descricao', "Chave = '$codigoCC'");
+        if ($codigoCC) {
+            $descricaoAtual = $database->doSelect('centros_custos', 'Descricao', "Chave = '$codigoCC'");
 
-            if ($centroCusto[0]) {
-                // Atualiza descrição e o codigo do centro de custo existente
-                $descricao = "ST$codigo $navio - $tipoServico - $cliente - $porto";
-                $database->doUpdate('centros_custos', "Descricao = '$descricao', Codigo = 'ST$codigo'", "Chave = '$codigoCC'");
+            if ($descricaoAtual && isset($descricaoAtual[0]['Descricao'])) {
+                $novaDescricao = preg_replace('/^\w+\d+/', "ST$codigo", $descricaoAtual[0]['Descricao']);
+                $updateResult = $database->doUpdate(
+                    'centros_custos',
+                    "Descricao = '$novaDescricao', Codigo = 'ST$codigo'",
+                    "Chave = '$codigoCC'"
+                );
+
+                if ($updateResult === NULL) {
+                    $database->closeConection();
+                    return 'false'; // Falha na atualização do centro de custos
+                }
             }
-        }
+        }   
 
         $query = "orcamento = 0, codigo = 'ST$codigo'";
 
@@ -1796,7 +1800,7 @@ class OS
         $database->doUpdate('codigos', "codigos.Proximo = $novoCodigo", "codigos.Tipo = 'OR'");
 
         // Busca os dados da OS
-        $ordem_servico = $database->doSelect('os', 'centro_custo, chave_navio, tipo_servico, porto, Chave_Cliente, sequencialOrcamento', 'Chave = ' . $Chave);
+        $ordem_servico = $database->doSelect('os', 'centro_custo, sequencialOrcamento', 'Chave = ' . $Chave);
 
         if (!$ordem_servico || count($ordem_servico) == 0) {
             $database->closeConection();
@@ -1804,31 +1808,34 @@ class OS
         }
 
         $codigoCC = $ordem_servico[0]['centro_custo'];
-        $navio = $ordem_servico[0]['chave_navio'];
-        $tipoServico = $ordem_servico[0]['tipo_servico'];
-        $cliente = $ordem_servico[0]['Chave_Cliente'];
-        $porto = $ordem_servico[0]['porto'];
 
         if ($ordem_servico[0]['sequencialOrcamento'] == 0){
             $codigo = $database->doSelect('codigos', 'codigos.Proximo', "codigos.Tipo = 'SO'");
             $codigo = $codigo[0]['Proximo'];
+
             $query = "orcamento = 1, codigo = 'OR$codigoOrcamento', sequencialOrcamento = ".$codigo;
             $codigo = $codigo + 1;
+
             $database->doUpdate('codigos', "codigos.Proximo = $codigo", "codigos.Tipo = 'SO'");
         }else{
             $query = "orcamento = 1, codigo = 'OR$codigoOrcamento'";
         }
 
-        if ($codigoCC >= 5850 && $navio && $tipoServico && $cliente && $porto) {
-            $centroCusto = $database->doSelect('centros_custos', 'Codigo, Descricao', "Chave = '$codigoCC'");
+        if ($codigoCC) {
+            $descricaoAtual = $database->doSelect('centros_custos', 'Descricao', "Chave = '$codigoCC'");
     
-            if ($centroCusto) {
-                $descricao = "OR$codigoOrcamento $navio - $tipoServico - $cliente - $porto";
-                $database->doUpdate(
+            if ($descricaoAtual && isset($descricaoAtual[0]['Descricao'])) {
+                $novaDescricao = preg_replace('/^\w+\d+/', "OR$codigoOrcamento", $descricaoAtual[0]['Descricao']);
+                $updateResult = $database->doUpdate(
                     'centros_custos',
-                    "Descricao = '$descricao', Codigo = 'OR$codigoOrcamento'",
+                    "Descricao = '$novaDescricao', Codigo = 'OR$codigoOrcamento'",
                     "Chave = '$codigoCC'"
                 );
+    
+                if ($updateResult === NULL) {
+                    $database->closeConection();
+                    return 'false'; // Falha na atualização do centro de custos
+                }
             }
         }
 
