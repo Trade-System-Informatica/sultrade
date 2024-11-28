@@ -1964,39 +1964,70 @@ class OS
     }
     public static function copyOsOrcamento($chaveOsOriginal)
     {
-        // Inicializa a conexão com o banco de dados
         $database = new Database();
 
         try {
             // 1. Buscar dados da OS original
             $osOriginal = $database->doSelect('os', '*', "Chave = '$chaveOsOriginal'");
 
-            // Verificar se a OS original existe
             if (empty($osOriginal)) {
-                throw new Exception("Ordem de Serviço ou Orçamento não encontrado.");
+                throw new Exception("Orçamento não encontrado.");
             }
 
-            // 2. Preparar os dados para criar uma nova OS
-            $novaChave = uniqid(); // Gera um identificador único para a nova OS
-            $sequencial = $database->doSelect('codigos', 'Proximo', "Tipo = 'SO'")[0]['Proximo'];
-            $codigo = $osOriginal[0]['codigo']; // Utiliza o mesmo código do original
-            
-            // Atualiza o sequencial para a nova OS
-            $sequencialNovo = $sequencial + 1;
+             $codigoData = self::getCodigos('OR');
+             $novoCodigo = $codigoData[0]['Proximo']; 
+ 
+             $codigo = $osOriginal[0]['codigo']; 
+             
+             $sequencial = $database->doSelect('codigos', 'Proximo', "Tipo = 'SO'")[0]['Proximo'];
+             $sequencialNovo = $sequencial + 1;
 
-            // 3. Definir as colunas e valores para inserir a nova OS
-            $cols = 'Chave, sequencialOrcamento, orcamento, Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio, centro_custo';
-            $values = "'$novaChave', $sequencial, {$osOriginal[0]['orcamento']}, '{$osOriginal[0]['Operador_Inclusao']}', '{$osOriginal[0]['Descricao']}', '{$osOriginal[0]['codigo']}', '{$osOriginal[0]['Chave_Cliente']}', '{$osOriginal[0]['chave_navio']}', '{$osOriginal[0]['Data_Abertura']}', '{$osOriginal[0]['Data_Chegada']}', '{$osOriginal[0]['Data_Saida']}', '{$osOriginal[0]['chave_tipo_servico']}', '{$osOriginal[0]['viagem']}', '{$osOriginal[0]['porto']}', '{$osOriginal[0]['encerradoPor']}', '{$osOriginal[0]['faturadoPor']}', '{$osOriginal[0]['Empresa']}', '{$osOriginal[0]['eta']}', '{$osOriginal[0]['atb']}', '{$osOriginal[0]['etb']}', '{$osOriginal[0]['governmentTaxes']}', '{$osOriginal[0]['bankCharges']}', '{$osOriginal[0]['operador']}', '{$osOriginal[0]['envio']}', '{$osOriginal[0]['centro_custo']}'";
+            $values = "$sequencial, {$osOriginal[0]['orcamento']}, '{$osOriginal[0]['Operador_Inclusao']}', '{$osOriginal[0]['Descricao']}', 'OR$novoCodigo', '{$osOriginal[0]['Chave_Cliente']}', '{$osOriginal[0]['chave_navio']}', '{$osOriginal[0]['Data_Abertura']}', '{$osOriginal[0]['Data_Chegada']}', '{$osOriginal[0]['Data_Saida']}', '{$osOriginal[0]['chave_tipo_servico']}', '{$osOriginal[0]['viagem']}', '{$osOriginal[0]['porto']}', '{$osOriginal[0]['encerradoPor']}', '{$osOriginal[0]['faturadoPor']}', '{$osOriginal[0]['Empresa']}', '{$osOriginal[0]['eta']}', '{$osOriginal[0]['atb']}', '{$osOriginal[0]['etb']}', '{$osOriginal[0]['governmentTaxes']}', '{$osOriginal[0]['bankCharges']}', '{$osOriginal[0]['operador']}', '{$osOriginal[0]['envio']}', '{$osOriginal[0]['centro_custo']}'";
+    
+            $chaveCliente = $osOriginal[0]['Chave_Cliente'];
 
-            // Inserir nova OS no banco de dados
-            $result = $database->doInsert('os', $cols, $values);
+            if ($novoCodigo >= 5850) {
+                
+                $centroCusto = $database->doSelect('centros_custos', 'Chave', "Codigo = '$novoCodigo'");
+                $centroCustoAntigo = $database->doSelect('centros_custos', 'Chave', "Codigo = '$codigo'");
+                
+                if (!$centroCusto[0] && $centroCustoAntigo) {
+                    $descricaoAtual = $database->doSelect('centros_custos', 'Descricao', "Chave = '$centroCustoAntigo[0]['Chave']'");
+                    if ($descricaoAtual && isset($descricaoAtual[0]['Descricao'])) {
+                        $novaDescricao = preg_replace('/^\w+\d+/', "OR$novoCodigo", $descricaoAtual[0]['Descricao']);
+                        $codigoData = self::getCodigos('CC');
+                        $codigoCC = $codigoData[0]['Proximo'];
+                        
+                        $valuesCentroCusto = "'$codigoCC', 'OR$codigo', '$novaDescricao', '$chaveCliente'";
+                        $centroCusto = $database->doInsert('centros_custos', 'Chave, Codigo, Descricao, Cliente', $valuesCentroCusto);
+        
+                        $database->doUpdate('codigos', "Proximo = '" . ($codigoCC + 1) . "'", "Tipo = 'CC'");
+                
+                    }
+                }
+    
+                $cols = 'sequencialOrcamento, orcamento, Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio, centro_custo';
+                $result = $database->doInsert('os', $cols, $sequencial.', 1, '.$values . ", '" . $centroCusto[0]["Chave"] . "'");
+            } else { 
+                $cols = 'orcamento, Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio';
+                $result = $database->doInsert('os', $cols, '1, '.$values);
+            }
+    
+    
+            if ($result) {
+                $database->doUpdate('codigos', "Proximo = '" . ($sequencial + 1) . "'", "Tipo = 'SO'");
+    
+                $query = "Proximo = '" . ($novoCodigo + 1) . "'";
+                $database->doUpdate('codigos', $query, "Tipo = 'OR'");
+            }
 
             if (!$result) {
                 throw new Exception("Erro ao copiar a Ordem de Serviço.");
             }
 
-            // 4. Copiar itens de serviço da OS original para a nova OS
+            //Copiar eventos da OS original para a nova OS
             $itensOriginal = $database->doSelect('os_servicos_itens', '*', "chave_os = '$chaveOsOriginal'");
+            $novaChave = $database->doSelect('os', 'Chave', "codigo = 'OR$novoCodigo'")[0]['Chave'];
 
             foreach ($itensOriginal as $item) {
                 $colsItens = 'chave_os, data, fornecedor, taxa, descricao, ordem, tipo_sub, Fornecedor_Custeio, remarks, Moeda, valor, valor1, repasse, qntd';
@@ -2005,9 +2036,6 @@ class OS
                 // Inserir itens copiados na nova OS
                 $database->doInsert('os_servicos_itens', $colsItens, $valuesItens);
             }
-
-            // 5. Atualizar o próximo número sequencial na tabela 'codigos'
-            $database->doUpdate('codigos', "Proximo = '" . ($sequencialNovo) . "'", "Tipo = 'SO'");
 
             // Fechar a conexão
             $database->closeConection();

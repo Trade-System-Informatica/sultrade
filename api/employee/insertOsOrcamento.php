@@ -20,13 +20,14 @@ if($objData != NULL){
     $tipoServico = prepareInput($objData->tipoServico);
     $cliente = prepareInput($objData->cliente);
     $porto = prepareInput($objData->porto);
+    $chaveCliente = prepareInput($objData->clienteChave);
 
     //$employees = new Employees();
     $os = new OS();
 
     //$result = $employees->checkToken($token);
     //if($result == 'true'){
-    $result = $os->insertOsOrcamento($values, $codigo, $tipo, $sequencial, $navio, $tipoServico, $cliente, $porto);
+    $result = $os->insertOsOrcamento($values, $codigo, $tipo, $sequencial, $navio, $tipoServico, $cliente, $porto, $chaveCliente);
     //}
 } else {
     $result = "false";

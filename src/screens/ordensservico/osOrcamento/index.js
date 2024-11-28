@@ -8,7 +8,7 @@ import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTimes, faPen, faPlus, faSave } from '@fortawesome/free-solid-svg-icons'
+import { faTimes, faPen, faPlus, faSave, faCopy } from '@fortawesome/free-solid-svg-icons'
 import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import moment from 'moment'
@@ -32,6 +32,7 @@ const estadoInicial = {
     chaveFocus: '',
 
     deleteOS: false,
+    copyOS:false,
 
     modalItemAberto: false,
     itemPermissao: '',
@@ -83,6 +84,11 @@ class OsOrcamento extends Component {
             await this.setState({
                 modalItemAberto: false,
                 deleteOS: false
+            })
+        }
+        if (this.state.copyOS){
+            await this.setState({
+                copyOS: false
             })
         }
     }
@@ -174,6 +180,62 @@ class OsOrcamento extends Component {
             }
         })
     }
+
+    copyOrcamento = async (chave) => {
+        this.setState({ copyOS: true });
+        confirmAlert({
+          customUI: ({ onClose }) => {
+            return (
+              <div className="custom-ui text-center">
+                <h1>{NOME_EMPRESA}</h1>
+                <p>Deseja copiar este orçamento? </p>
+                <button
+                  style={{ marginRight: 5 }}
+                  className="btn btn-danger w-25"
+                  onClick={async () => {
+                    onClose();
+                  }}
+                >
+                  Não
+                </button>
+                <button
+                  style={{ marginRight: 5 }}
+                  className="btn btn-success w-25"
+                  onClick={async () => {
+                    await apiEmployee
+                      .post(`copyOsOrcamento.php`, {
+                        chave: chave
+                      })
+                      .then(
+                        async (response) => {
+                          if (response.data == true) {
+                            await loader.salvaLogs(
+                              "os",
+                              this.state.usuarioLogado.codigo,
+                              null,
+                              "Copia de Orçamento",
+                              chave
+                            );
+                            await this.setState({
+                              redirectAfterCopyOrcamento: true,
+                            });
+                            window.location.reload();
+                          }
+                        },
+                        async (response) => {
+                          this.erroApi(response);
+                        }
+                      );
+                    onClose();
+                  }}
+                >
+                  Sim
+                </button>
+              </div>
+            );
+          },
+        });
+      };
 
 
     pesquisa = async (value) => {
@@ -486,6 +548,10 @@ class OsOrcamento extends Component {
                                                                     </div>
                                                                 }
 
+                                                                    <div className='iconelixo giveMargin' type='button' onClick={(a) => this.copyOrcamento(feed.Chave, feed.Descricao)}>
+                                                                        <FontAwesomeIcon icon={faCopy} />
+                                                                    </div>
+
                                                                 {feed.cancelada != 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
                                                                     <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.Descricao)} >
                                                                         <FontAwesomeIcon icon={faTimes} />
@@ -534,6 +600,9 @@ class OsOrcamento extends Component {
                                                                         </Link>
                                                                     </div>
                                                                 }
+                                                                <div className='iconelixo giveMargin' type='button' onClick={(a) => this.copyOrcamento(feed.Chave, feed.Descricao)}>
+                                                                    <FontAwesomeIcon icon={faCopy} />
+                                                                </div>
                                                                 {feed.cancelada != 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
                                                                     <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.Descricao)} >
                                                                         <FontAwesomeIcon icon={faTimes} />
@@ -608,6 +677,9 @@ class OsOrcamento extends Component {
                                                                         </Link>
                                                                     </div>
                                                                 }
+                                                                <div className='iconelixo giveMargin' type='button' onClick={(a) => this.copyOrcamento(feed.Chave, feed.Descricao)}>
+                                                                    <FontAwesomeIcon icon={faCopy} />
+                                                                </div>
 
                                                                 {feed.cancelada != 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
                                                                     <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.Descricao)} >
@@ -690,6 +762,9 @@ class OsOrcamento extends Component {
                                                                         </Link>
                                                                     </div>
                                                                 }
+                                                                <div className='iconelixo giveMargin' type='button' onClick={(a) => this.copyOrcamento(feed.Chave, feed.Descricao)}>
+                                                                    <FontAwesomeIcon icon={faCopy} />
+                                                                </div>
 
                                                                 {feed.cancelada != 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
                                                                     <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.Descricao)} >
@@ -757,6 +832,9 @@ class OsOrcamento extends Component {
                                                                         </Link>
                                                                     </div>
                                                                 }
+                                                                <div className='iconelixo giveMargin' type='button' onClick={(a) => this.copyOrcamento(feed.Chave, feed.Descricao)}>
+                                                                    <FontAwesomeIcon icon={faCopy} />
+                                                                </div>
                                                                 {feed.cancelada != 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
                                                                     <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.Descricao)} >
                                                                         <FontAwesomeIcon icon={faTimes} />
@@ -822,6 +900,9 @@ class OsOrcamento extends Component {
                                                                         </Link>
                                                                     </div>
                                                                 }
+                                                                <div className='iconelixo giveMargin' type='button' onClick={(a) => this.copyOrcamento(feed.Chave, feed.Descricao)}>
+                                                                    <FontAwesomeIcon icon={faCopy} />
+                                                                </div>
 
                                                                 {feed.cancelada != 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
                                                                     <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.Descricao)} >
