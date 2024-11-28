@@ -1967,24 +1967,47 @@ class OS
         $database = new Database();
 
         try {
-            // 1. Buscar dados da OS original
+            // Buscar dados da OS original
             $osOriginal = $database->doSelect('os', '*', "Chave = '$chaveOsOriginal'");
 
             if (empty($osOriginal)) {
                 throw new Exception("Orçamento não encontrado.");
             }
 
-             $codigoData = self::getCodigos('OR');
-             $novoCodigo = $codigoData[0]['Proximo']; 
- 
-             $codigo = $osOriginal[0]['codigo']; 
-             
-             $sequencial = $database->doSelect('codigos', 'Proximo', "Tipo = 'SO'")[0]['Proximo'];
-             $sequencialNovo = $sequencial + 1;
+            $codigoData = self::getCodigos('OR');
+            $novoCodigo = $codigoData[0]['Proximo']; 
 
-            $values = "$sequencial, {$osOriginal[0]['orcamento']}, '{$osOriginal[0]['Operador_Inclusao']}', '{$osOriginal[0]['Descricao']}', 'OR$novoCodigo', '{$osOriginal[0]['Chave_Cliente']}', '{$osOriginal[0]['chave_navio']}', '{$osOriginal[0]['Data_Abertura']}', '{$osOriginal[0]['Data_Chegada']}', '{$osOriginal[0]['Data_Saida']}', '{$osOriginal[0]['chave_tipo_servico']}', '{$osOriginal[0]['viagem']}', '{$osOriginal[0]['porto']}', '{$osOriginal[0]['encerradoPor']}', '{$osOriginal[0]['faturadoPor']}', '{$osOriginal[0]['Empresa']}', '{$osOriginal[0]['eta']}', '{$osOriginal[0]['atb']}', '{$osOriginal[0]['etb']}', '{$osOriginal[0]['governmentTaxes']}', '{$osOriginal[0]['bankCharges']}', '{$osOriginal[0]['operador']}', '{$osOriginal[0]['envio']}', '{$osOriginal[0]['centro_custo']}'";
-    
+            $codigo = $osOriginal[0]['codigo']; 
+            
+            $sequencial = $database->doSelect('codigos', 'Proximo', "Tipo = 'SO'")[0]['Proximo'];
+
+            $codigoDataCC = self::getCodigos('CC');
+            $codigoCC = $codigoDataCC[0]['Proximo'];
+
             $chaveCliente = $osOriginal[0]['Chave_Cliente'];
+            $operadorInclusao = $osOriginal[0]['Operador_Inclusao'];
+            $descricao = $osOriginal[0]['Descricao'];
+            $chaveNavio = $osOriginal[0]['chave_navio'];
+            $dataAbertura = $osOriginal[0]['Data_Abertura'];
+            $dataChegada = $osOriginal[0]['Data_Chegada'];
+            $dataSaida = $osOriginal[0]['Data_Saida'];
+            $chaveTipoServico = $osOriginal[0]['chave_tipo_servico'];
+            $viagem = $osOriginal[0]['viagem'];
+            $porto = $osOriginal[0]['porto'];
+            $encerradoPor = $osOriginal[0]['encerradoPor'];
+            $faturadoPor = $osOriginal[0]['faturadoPor'];
+            $empresa = $osOriginal[0]['Empresa'];
+            $eta = $osOriginal[0]['eta'];
+            $atb = $osOriginal[0]['atb'];
+            $etb = $osOriginal[0]['etb'];
+            $governmentTaxes = $osOriginal[0]['governmentTaxes'];
+            $bankCharges = $osOriginal[0]['bankCharges'];
+            $operador = $osOriginal[0]['operador'];
+            $envio = $osOriginal[0]['envio'];
+            $centroCusto = $codigoCC;
+
+            $values = "'$operadorInclusao', '$descricao', 'OR$novoCodigo', '$chaveCliente', '$chaveNavio', '$dataAbertura', '$dataChegada', '$dataSaida', '$chaveTipoServico', '$viagem', '$porto', '$encerradoPor', '$faturadoPor', '$empresa', '$eta', '$atb', '$etb', '$governmentTaxes', '$bankCharges', '$operador', '$envio', '$centroCusto'";
+    
 
             if ($novoCodigo >= 5850) {
                 
@@ -1995,8 +2018,6 @@ class OS
                     $descricaoAtual = $database->doSelect('centros_custos', 'Descricao', "Chave = '$centroCustoAntigo[0]['Chave']'");
                     if ($descricaoAtual && isset($descricaoAtual[0]['Descricao'])) {
                         $novaDescricao = preg_replace('/^\w+\d+/', "OR$novoCodigo", $descricaoAtual[0]['Descricao']);
-                        $codigoData = self::getCodigos('CC');
-                        $codigoCC = $codigoData[0]['Proximo'];
                         
                         $valuesCentroCusto = "'$codigoCC', 'OR$codigo', '$novaDescricao', '$chaveCliente'";
                         $centroCusto = $database->doInsert('centros_custos', 'Chave, Codigo, Descricao, Cliente', $valuesCentroCusto);

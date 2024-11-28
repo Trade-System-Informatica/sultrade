@@ -181,7 +181,7 @@ class OsOrcamento extends Component {
         })
     }
 
-    copyOrcamento = async (chave) => {
+    copyOrcamento = async (chave, nome) => {
         this.setState({ copyOS: true })
         confirmAlert({
             customUI: ({ onClose }) => {
