@@ -182,61 +182,56 @@ class OsOrcamento extends Component {
     }
 
     copyOrcamento = async (chave) => {
-        this.setState({ copyOS: true });
+        this.setState({ copyOS: true })
         confirmAlert({
-          customUI: ({ onClose }) => {
-            return (
-              <div className="custom-ui text-center">
-                <h1>{NOME_EMPRESA}</h1>
-                <p>Deseja copiar este orçamento? </p>
-                <button
-                  style={{ marginRight: 5 }}
-                  className="btn btn-danger w-25"
-                  onClick={async () => {
-                    onClose();
-                  }}
-                >
-                  Não
-                </button>
-                <button
-                  style={{ marginRight: 5 }}
-                  className="btn btn-success w-25"
-                  onClick={async () => {
-                    await apiEmployee
-                      .post(`copyOsOrcamento.php`, {
-                        chave: chave
-                      })
-                      .then(
-                        async (response) => {
-                          if (response.data == true) {
-                            await loader.salvaLogs(
-                              "os",
-                              this.state.usuarioLogado.codigo,
-                              null,
-                              "Copia de Orçamento",
-                              chave
-                            );
-                            await this.setState({
-                              redirectAfterCopyOrcamento: true,
-                            });
-                            window.location.reload();
-                          }
-                        },
-                        async (response) => {
-                          this.erroApi(response);
-                        }
-                      );
-                    onClose();
-                  }}
-                >
-                  Sim
-                </button>
-              </div>
-            );
-          },
-        });
-      };
+            customUI: ({ onClose }) => {
+                return (
+                    <div className='custom-ui text-center'>
+                        <h1>{NOME_EMPRESA}</h1>
+                        <p>Deseja copiar este orçamento? </p>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-danger w-25"
+                            onClick={
+                                async () => {
+                                    onClose()
+                                }
+                            }
+                        >
+                            Não
+                        </button>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-success w-25"
+                            onClick={
+                                async () => {
+                                    await apiEmployee.post(`copyOsOrcamento.php`, {
+                                        token: true,
+                                        chave: chave,
+                                    }).then(
+                                        async response => {
+                                            if (response.data == true) {
+                                                await loader.salvaLogs('os', this.state.usuarioLogado.codigo, null, "Copia de orçamento", chave);
 
+                                                document.location.reload()
+                                            }
+                                        },
+                                        async response => {
+                                            this.erroApi(response)
+                                        }
+                                    )
+                                    onClose()
+                                }
+                            }
+
+                        >
+                            Sim
+                        </button>
+                    </div>
+                )
+            }
+        })
+    }
 
     pesquisa = async (value) => {
         clearTimeout(this.state.pesquisaTimer)

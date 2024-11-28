@@ -10,6 +10,7 @@ $data = file_get_contents("php://input");
 $objData = json_decode($data);
 
 if($objData != NULL){
+    $token = prepareInput($objData->token);
     $chave = prepareInput($objData->chave);
 
     $os = new OS();
