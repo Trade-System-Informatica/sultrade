@@ -2020,7 +2020,7 @@ class OS
                     if ($descricaoAtual && isset($descricaoAtual[0]['Descricao'])) {
                         $novaDescricao = preg_replace('/^\w+\d+/', "OR$novoCodigo", $descricaoAtual[0]['Descricao']);
                         
-                        $valuesCentroCusto = "'$codigoCC', 'OR$codigo', '$novaDescricao', '$chaveCliente'";
+                        $valuesCentroCusto = "'$codigoCC', 'OR$novoCodigo', '$novaDescricao', '$chaveCliente'";
                         $centroCusto = $database->doInsert('centros_custos', 'Chave, Codigo, Descricao, Cliente', $valuesCentroCusto);
         
                         $database->doUpdate('codigos', "Proximo = '" . ($codigoCC + 1) . "'", "Tipo = 'CC'");
