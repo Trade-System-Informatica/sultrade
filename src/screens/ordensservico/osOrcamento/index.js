@@ -182,7 +182,6 @@ class OsOrcamento extends Component {
     }
 
     copyOrcamento = async (chave, nome) => {
-        this.setState({ copyOS: true })
         confirmAlert({
             customUI: ({ onClose }) => {
                 return (
@@ -197,35 +196,30 @@ class OsOrcamento extends Component {
                                     onClose()
                                 }
                             }
-                        >
+                            >
                             Não
                         </button>
                         <button
                             style={{ marginRight: 5 }}
                             className="btn btn-success w-25"
-                            onClick={
-                                async () => {
-                                    await apiEmployee.post(`copyOsOrcamento.php`, {
-                                        token: true,
-                                        chave: chave,
-                                    }).then(
-                                        async response => {
-                                            if (response.data == true) {
-                                                await loader.salvaLogs('os', this.state.usuarioLogado.codigo, null, "Copia de orçamento", chave);
-
-                                                document.location.reload()
-                                            }
-                                        },
-                                        async response => {
-                                            this.erroApi(response)
-                                        }
-                                    )
-                                    onClose()
+                            disabled={this.state.copyOS}
+                            onClick={async () => {
+                                this.setState({ copyOS: true }); // Define o estado de carregamento
+                                try {
+                                    await apiEmployee.post(`copyOsOrcamento.php`, { token: true, chave: chave });
+                                    await loader.salvaLogs('os', this.state.usuarioLogado.codigo, null, "Copia de orçamento", chave);
+                                    document.location.reload();
+                                } catch (error) {
+                                    console.error("Erro na requisição:", error);
+                                    alert("Ocorreu um erro. Tente novamente.");
+                                } finally {
+                                    this.setState({ copyOS: false }); // Reseta o estado de carregamento
+                                    onClose(); // Fecha o modal
                                 }
-                            }
+                            }}
 
                         >
-                            Sim
+                            {this.state.copyOS ? "Copiando..." : "Sim"}
                         </button>
                     </div>
                 )

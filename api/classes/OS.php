@@ -1978,8 +1978,9 @@ class OS
             $novoCodigo = $codigoData[0]['Proximo']; 
 
             $codigo = $osOriginal[0]['codigo']; 
-            
-            $sequencial = $database->doSelect('codigos', 'Proximo', "Tipo = 'SO'")[0]['Proximo'];
+
+            $codigoDataSequencial = self::getCodigos('SO');
+            $sequencial = $codigoDataSequencial[0]['Proximo']; 
 
             $codigoDataCC = self::getCodigos('CC');
             $codigoCC = $codigoDataCC[0]['Proximo'];
@@ -2015,7 +2016,7 @@ class OS
                 $centroCustoAntigo = $database->doSelect('centros_custos', 'Chave', "Codigo = '$codigo'");
                 
                 if (!$centroCusto[0] && $centroCustoAntigo) {
-                    $descricaoAtual = $database->doSelect('centros_custos', 'Descricao', "Chave = '$centroCustoAntigo[0]['Chave']'");
+                    $descricaoAtual = $database->doSelect('centros_custos', 'Descricao', "Chave = '" . $centroCustoAntigo[0]['Chave'] . "'");
                     if ($descricaoAtual && isset($descricaoAtual[0]['Descricao'])) {
                         $novaDescricao = preg_replace('/^\w+\d+/', "OR$novoCodigo", $descricaoAtual[0]['Descricao']);
                         
