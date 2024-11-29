@@ -551,7 +551,10 @@ class Relatorio extends Component {
             ))}
           {this.props.location.state.backTo != "contasPagas" &&
             this.props.location.state.backTo != "contasPagar" && (
+              <>
               <h4>SOA - Statement of Accounts</h4>
+              <p>Issued on {moment().format("MMM Do YYYY")}</p>
+              </>
             )}
         </div>
         <hr />
