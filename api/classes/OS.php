@@ -2007,7 +2007,7 @@ class OS
             $envio = $osOriginal[0]['envio'];
             $centroCusto = $codigoCC;
 
-            $values = "'$operadorInclusao', '$descricao', 'OR$novoCodigo', '$chaveCliente', '$chaveNavio', '$dataAbertura', '$dataChegada', '$dataSaida', '$chaveTipoServico', '$viagem', '$porto', '$encerradoPor', '$faturadoPor', '$empresa', '$eta', '$atb', '$etb', '$governmentTaxes', '$bankCharges', '$operador', '$envio', '$centroCusto'";
+            $values = "'$operadorInclusao', '$descricao', 'OR$novoCodigo', '$chaveCliente', '$chaveNavio', '$dataAbertura', '$dataChegada', '$dataSaida', '$chaveTipoServico', '$viagem', '$porto', '$encerradoPor', '$faturadoPor', '$empresa', '$eta', '$atb', '$etb', '$governmentTaxes', '$bankCharges', '$operador', '$envio'";
     
 
             if ($novoCodigo >= 5850) {
