@@ -706,7 +706,7 @@ class Relatorio extends Component {
                           <th>BALANCE</th>
                         </tr>
                         {rows
-                          .toSorted((a, b) =>
+                          .sort((a, b) =>
                             moment(a.sailed).diff(moment(b.sailed))
                           )
                           .map((row, index) => {
@@ -1376,7 +1376,7 @@ class Relatorio extends Component {
                         <th>BALANCE</th>
                       </tr>
                       {rows
-                        .toSorted((a, b) =>
+                        .sort((a, b) =>
                           moment(a.sailed).diff(moment(b.sailed))
                         )
                         .map((row, index) => {
