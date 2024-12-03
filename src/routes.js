@@ -64,6 +64,7 @@ import OsOrcamento from './screens/ordensservico/osOrcamento'
 import Eventos from './screens/ordensservico/eventos'
 import RelatorioOS from './screens/ordensservico/relatorio'
 import RelatorioTripulantes from './screens/ordensservico/relatoriotripulantes'
+import RelatorioExcel from './screens/ordensservico/relatorioExcel'
 import Tarifas from './screens/ordensservico/tarifas'
 import Anexos from './screens/ordensservico/anexos'
 
@@ -159,6 +160,7 @@ export default function Routes(){
                 <Route path="/ordensservico/eventos" component={Eventos} />
                 <Route path="/ordensservico/relatorio" component={RelatorioOS} />
                 <Route path="/ordensservico/relatoriotripulantes" component={RelatorioTripulantes} />
+                <Route path="/ordensservico/relatorioExcel" component={RelatorioExcel} />
                 <Route path="/ordensservico/tarifas" component={Tarifas} />
                 <Route path="/ordensservico/anexos" component={Anexos} />
                 
