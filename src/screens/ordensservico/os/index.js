@@ -262,7 +262,7 @@ class OS extends Component {
                                                     Relatório
                                                 </button>
                                                 <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                                    <Link className="dropdown-item" to={{ pathname: `/ordensservico/relatorioExcel` }}>OS</Link>
+                                                    <Link className="dropdown-item" to={{ pathname: `/ordensservico/relatorio` }}>OS</Link>
                                                     <Link className="dropdown-item" to={{ pathname: `/ordensservico/relatoriotripulantes` }}>Tripulantes</Link>
                                                 </div>
                                             </div>

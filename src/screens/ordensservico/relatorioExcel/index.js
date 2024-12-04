@@ -150,6 +150,12 @@ class RelatorioExcel extends Component {
     }
     
     gerarPlanilhaExcel = (relatorio) => {
+        const faturamentoDataInicial = moment(this.state.periodoInicial).format('MM/YYYY');
+        const faturamentoDataFinal = moment(this.state.periodoFinal).format('MM/YYYY');
+        const faturamentoData = faturamentoDataInicial === faturamentoDataFinal
+            ? faturamentoDataInicial 
+            : `${faturamentoDataInicial} - ${faturamentoDataFinal}`;
+
         const workbook = XLSX.utils.book_new();
 
         const dadosFormatados = relatorio.map(item => ({
@@ -170,159 +176,135 @@ class RelatorioExcel extends Component {
             'ETS': item.ETS,               
         }));
     
-        const worksheet = XLSX.utils.json_to_sheet(dadosFormatados, {
-            header: [
-                'CLIENTES', 'ST', 'NAVIO', 'PORTOS', 'UND FATURAMENTO', 'NACIONALIDADE', 
-                'STA RIG', 'STA SANTOS', 'PORTO BRASIL', 'COAST', 'TOTAL CUSTEIO', 'SERVIÇO'
-            ],
-            skipHeader: false
-        });
+        // Criar a worksheet manualmente
+        const worksheet = {};
 
-        if (!worksheet['!ref']) {
-            console.error('Worksheet is empty or could not be created');
-            this.setState({ loading: false });
-            return;
-        }
+        // Configurar a linha inicial dos dados
+        const linhaInicialDados = 2;
 
-        try {
-            const range = XLSX.utils.decode_range(worksheet['!ref']);
-            const colWidths = [];
-
-            for (let col = range.s.c; col <= range.e.c; col++) {
-                const cell = worksheet[XLSX.utils.encode_cell({ r: range.s.r, c: col })];
-                if (cell) {
-                    const headerLength = cell.v.toString().length;
-                    colWidths[col] = Math.max(colWidths[col] || 0, (headerLength + 1));
-                }
+        // Adicionar subheaders
+        worksheet[XLSX.utils.encode_cell({ r: 0, c: 0 })] = {
+            v: `FATURAMENTO ${faturamentoData}`,
+            s: {
+                alignment: { horizontal: 'center', vertical: 'center' },
+                fill: { fgColor: { rgb: 'FFFFFF' } },
+                font: { bold: true }
             }
-    
-            // Ajustar larguras com base nos dados
-            for (let R = range.s.r + 1; R <= range.e.r; R++) { // +1 porque já tratamos o header
-                for (let C = range.s.c; C <= range.e.c; C++) {
-                    const cell = worksheet[XLSX.utils.encode_cell({ r: R, c: C })];
-                    if (cell && cell.v) {
-                        const valueLength = (cell.v.toString().length);
-                        colWidths[C] = Math.max(colWidths[C], (valueLength + 1));
+        };
+        worksheet[XLSX.utils.encode_cell({ r: 0, c: 6 })] = {
+            v: 'CUSTEIO',
+            s: {
+                alignment: { horizontal: 'center', vertical: 'center' },
+                fill: { fgColor: { rgb: 'A9D08E' } },
+                font: { bold: true }
+            }
+        };
+        worksheet[XLSX.utils.encode_cell({ r: 0, c: 10 })] = {
+            v: '',
+            s: {
+                alignment: { horizontal: 'center', vertical: 'center' },
+                fill: { fgColor: { rgb: 'FFFFFF' } },
+                font: { bold: true }
+            }
+        };
+
+        // Mesclar células para os subheaders
+        worksheet['!merges'] = [
+            { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }, // "FATURAMENTO" cobre CLIENTES a NACIONALIDADE
+            { s: { r: 0, c: 6 }, e: { r: 0, c: 9 } }, // "CUSTEIO" cobre STA RIG a COAST
+            { s: { r: 0, c: 10 }, e: { r: 0, c: 14 } } // "OUTROS" cobre TOTAL CUSTEIO a ETS
+        ];
+
+        // Adicionar cabeçalhos na linha especificada
+        const headers = [
+            'CLIENTES', 'ST', 'NAVIO', 'PORTOS', 'UND FATURAMENTO', 'NACIONALIDADE',
+            'STA RIG', 'STA SANTOS', 'PORTO BRASIL', 'COAST',
+            'TOTAL CUSTEIO', 'SERVIÇO', 'ETA', 'ETB', 'ETS'
+        ];
+        const headerColors = [
+            '9ED1E1', '9ED1E1', '9ED1E1', '9ED1E1', '9ED1E1', '9ED1E1',
+            '9ED1E1', '9ED1E1', '9ED1E1', '9ED1E1',
+            'FFFF00', // Amarelo para TOTAL CUSTEIO
+            '9ED1E1', '9ED1E1', '9ED1E1', '9ED1E1'
+        ];
+
+        for (let col = 0; col < headers.length; col++) {
+            worksheet[XLSX.utils.encode_cell({ r: linhaInicialDados - 1, c: col })] = {
+                v: headers[col],
+                s: {
+                    fill: { fgColor: { rgb: headerColors[col] } }, // Cores específicas
+                    alignment: { horizontal: 'center', vertical: 'center' },
+                    border: {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
                     }
                 }
-            }
-            
-            worksheet['!cols'] = colWidths.map((width) => ({ wch: width + 2 })); // Adicionar padding
-            
-            // Merge para os cabeçalhos agrupados
-            worksheet['!merges'] = [
-                { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }, // "FATURAMENTO" de CLIENTES a NACIONALIDADE
-                { s: { r: 0, c: 6 }, e: { r: 0, c: 9 } }, // "CUSTEIO" de STA RIG a COAST
-                { s: { r: 0, c: 10 }, e: { r: 0, c: 14 } } // "OUTROS" de TOTAL CUSTEIO a ETS
-            ];
-    
-            // Adicionar texto e estilo para "FATURAMENTO"
-            worksheet[XLSX.utils.encode_cell({ r: 0, c: 0 })] = { 
-                v: 'FATURAMENTO', 
-                s: { 
-                    alignment: { horizontal: 'center', vertical: 'center' }, 
-                    fill: { fgColor: { rgb: 'FFFFFF' } }, // Branco para título do grupo
-                    font: { bold: true }
-                }
             };
-    
-            // Adicionar texto e estilo para "CUSTEIO"
-            worksheet[XLSX.utils.encode_cell({ r: 0, c: 6 })] = { 
-                v: 'CUSTEIO', 
-                s: { 
-                    alignment: { horizontal: 'center', vertical: 'center' }, 
-                    fill: { fgColor: { rgb: 'A9D08E' } }, // Branco para título do grupo
-                    font: { bold: true }
-                }
-            };
-    
-            // Adicionar texto e estilo para "OUTROS"
-            worksheet[XLSX.utils.encode_cell({ r: 0, c: 10 })] = { 
-                v: '', 
-                s: { 
-                    alignment: { horizontal: 'center', vertical: 'center' }, 
-                    fill: { fgColor: { rgb: 'FFFFFF' } }, // Branco para título do grupo
-                    font: { bold: true }
-                }
-            };
-    
-            // Adicionar cabeçalhos individuais com as cores adequadas
-            const headers = [
-                'CLIENTES', 'ST', 'NAVIO', 'PORTOS', 'UND FATURAMENTO', 'NACIONALIDADE', 
-                'STA RIG', 'STA SANTOS', 'PORTO BRASIL', 'COAST', 
-                'TOTAL CUSTEIO', 'SERVIÇO', 'ETA', 'ETB', 'ETS'
-            ];
-            const headerColors = [
-                '9ED1E1', '9ED1E1', '9ED1E1', '9ED1E1', '9ED1E1', '9ED1E1', 
-                '9ED1E1', '9ED1E1', '9ED1E1', '9ED1E1', 
-                'FFFF00', // Amarelo para TOTAL CUSTEIO
-                '9ED1E1', '9ED1E1', '9ED1E1', '9ED1E1'
-            ];
-    
-            for (let col = 0; col < headers.length; col++) {
-                worksheet[XLSX.utils.encode_cell({ r: 1, c: col })] = { 
-                    v: headers[col],
+        }
+
+        // Adicionar dados após os cabeçalhos
+        dadosFormatados.forEach((item, index) => {
+            const row = linhaInicialDados + index; // Define a linha inicial dos dados
+            Object.values(item).forEach((value, col) => {
+                worksheet[XLSX.utils.encode_cell({ r: row, c: col })] = {
+                    v: value,
                     s: {
-                        fill: { fgColor: { rgb: headerColors[col] } }, // Cores específicas
                         alignment: { horizontal: 'center', vertical: 'center' },
-                        border: { 
-                            top: { style: 'thin' }, 
-                            left: { style: 'thin' }, 
-                            bottom: { style: 'thin' }, 
+                        border: {
+                            top: { style: 'thin' },
+                            left: { style: 'thin' },
+                            bottom: { style: 'thin' },
                             right: { style: 'thin' }
                         }
                     }
                 };
-            }
-            
-            // Aplicar bordas no restante das células
-            for (let row = range.s.r + 2; row <= range.e.r; row++) {
-                for (let col = range.s.c; col <= range.e.c; col++) {
-                    const cell = worksheet[XLSX.utils.encode_cell({ r: row, c: col })];
-                    if (cell) {
-                        cell.s = { 
-                            alignment: { horizontal: 'center', vertical: 'center' },
-                            border: { 
-                                top: { style: 'thin' }, 
-                                left: { style: 'thin' }, 
-                                bottom: { style: 'thin' }, 
-                                right: { style: 'thin' }
-                            }
-                        };
-                    }
+            });
+        });
+
+        // Atualizar o range da planilha (!ref)
+        const totalRows = linhaInicialDados + dadosFormatados.length - 1; // Total de linhas, incluindo cabeçalhos e dados
+        worksheet['!ref'] = XLSX.utils.encode_range({
+            s: { r: 0, c: 0 }, // Início (subheader)
+            e: { r: totalRows, c: headers.length - 1 } // Final
+        });
+
+        // Definir larguras de colunas
+        const colWidths = headers.map((header, index) => ({
+            wch: Math.max(header.length + 2, ...dadosFormatados.map(item => (item[headers[index]] || '').toString().length + 2))
+        }));
+        worksheet['!cols'] = colWidths;
+
+        // Adicionar bordas nos grupos
+        const custeioColumns = [6, 10];
+        for (let row = 0; row <= totalRows; row++) {
+            for (let col of custeioColumns) {
+                const cell = worksheet[XLSX.utils.encode_cell({ r: row, c: col })];
+                if (cell) {
+                    cell.s = {
+                        ...cell.s,
+                        border: {
+                            top: { style: 'thin' },
+                            left: { style: 'medium' },
+                            bottom: { style: 'thin' },
+                            right: { style: 'thin' }
+                        }
+                    };
                 }
             }
-
-            const custeioColumns = [6, 10]; 
-            for (let row = range.s.r + 1; row <= range.e.r; row++) {
-                for (let col of custeioColumns) {
-                    const cell = worksheet[XLSX.utils.encode_cell({ r: row, c: col })];
-                    if (cell) {
-                        cell.s = {
-                            ...cell.s,
-                            border: {
-                                top: { style: 'thin' },
-                                left: { style: 'medium' },
-                                bottom: { style: 'thin' },
-                                right: { style: 'thin' }
-                            }
-                        };
-                    }
-                }
-            }
-
-        } catch (error) {
-            console.error('Error processing worksheet:', error);
-            this.setState({ loading: false });
-            return;
         }
-    
+
+        // Adicionar a worksheet ao workbook
         XLSX.utils.book_append_sheet(workbook, worksheet, "Relatório de OS");
-    
-        // Gerando o arquivo Excel
-        XLSX.writeFile(workbook, "relatorio_os.xlsx");
-        this.setState({ loading: false });
-    }
+
+        // Gerar o arquivo Excel
+        try {
+            XLSX.writeFile(workbook, "relatorio_os.xlsx");
+        } catch (error) {
+            console.error('Error writing Excel file:', error);
+        }
+    };
 
     erroApi = async (res) => {
         alert(res);
