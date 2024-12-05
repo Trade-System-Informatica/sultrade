@@ -740,10 +740,124 @@ class OS
                 os.eta AS ETA,
                 os.etb AS ETB,
                 os.data_saida AS ETS,
-                ((IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 269),0)) + IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 269),0) * os.ROE) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 269),0)) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 269),0) * os.ROE) as valorLiquidoCoast,
-                ((IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 16),0)) + IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 16),0) * os.ROE) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 16),0)) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 16),0) * os.ROE) as valorLiquidoStaRig,
-                ((IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 32),0)) + IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 32),0) * os.ROE) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 32),0)) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 32),0) * os.ROE) as valorLiquidoPortoBrasil,
-                ((IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 17),0)) + IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 17),0) * os.ROE) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 17),0)) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 17),0) * os.ROE) as valorLiquidoStaSantos,
+                (
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 269), 0)) 
+                    + 
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 269), 0) * os.ROE)
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 269), 0))
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 269), 0) * os.ROE)
+                ) AS valorLiquidoCoast,
+                (
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 16), 0)) 
+                    + 
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 16), 0) * os.ROE)
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 16), 0))
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 16), 0) * os.ROE)
+                ) AS valorLiquidoStaRig,
+
+                (
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 32), 0)) 
+                    + 
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 32), 0) * os.ROE)
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 32), 0))
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 32), 0) * os.ROE)
+                ) AS valorLiquidoPortoBrasil,
+
+                (
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 17), 0)) 
+                    + 
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 17), 0) * os.ROE)
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 17), 0))
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 17), 0) * os.ROE)
+                ) AS valorLiquidoStaSantos,
                 pessoas.Nome AS pessoaNome,
                 pessoas.Nome_Fantasia AS pessoaNomeFantasia,
                 os_tipos_servicos.descricao AS tipoServicoNome",
@@ -764,10 +878,124 @@ class OS
                 os.eta AS ETA,
                 os.etb AS ETB,
                 os.atb AS ETS,
-                ((IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 269),0)) + IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 269),0) * os.ROE) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 269),0)) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 269),0) * os.ROE) as valorLiquidoCoast,
-                ((IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 16),0)) + IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 16),0) * os.ROE) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 16),0)) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 16),0) * os.ROE) as valorLiquidoStaRig,
-                ((IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 32),0)) + IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 32),0) * os.ROE) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 32),0)) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 32),0) * os.ROE) as valorLiquidoPortoBrasil,
-                ((IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 17),0)) + IFNULL((SELECT SUM(os_servicos_itens.valor * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 17),0) * os.ROE) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 5 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 17),0)) - IFNULL((SELECT SUM(os_servicos_itens.valor1 * os_servicos_itens.qntd) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 AND os_servicos_itens.Fornecedor_Custeio = 17 GROUPBY os.chave),0) * os.ROE) as valorLiquidoStaSantos,
+                (
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 269), 0)) 
+                    + 
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 269), 0) * os.ROE)
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 269), 0))
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 269), 0) * os.ROE)
+                ) AS valorLiquidoCoast,
+                (
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 16), 0)) 
+                    + 
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 16), 0) * os.ROE)
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 16), 0))
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 16), 0) * os.ROE)
+                ) AS valorLiquidoStaRig,
+
+                (
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 32), 0)) 
+                    + 
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 32), 0) * os.ROE)
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 32), 0))
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 32), 0) * os.ROE)
+                ) AS valorLiquidoPortoBrasil,
+
+                (
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 17), 0)) 
+                    + 
+                    (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 17), 0) * os.ROE)
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 5 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 17), 0))
+                    - 
+                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                            FROM os_servicos_itens osi 
+                            WHERE osi.chave_os = os.chave 
+                            AND osi.moeda = 6 
+                            AND osi.cancelada = 0 
+                            AND osi.Fornecedor_Custeio = 17), 0) * os.ROE)
+                ) AS valorLiquidoStaSantos,
                 pessoas.Nome AS pessoaNome,
                 pessoas.Nome_Fantasia AS pessoaNomeFantasia,
                 os_tipos_servicos.descricao AS tipoServicoNome",
