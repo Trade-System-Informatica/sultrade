@@ -773,16 +773,8 @@ class OS
                     (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
                             FROM os_servicos_itens osi 
                             WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 5 
                             AND osi.cancelada = 0 
                             AND osi.Fornecedor_Custeio = 16), 0))
-                    - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
-                            FROM os_servicos_itens osi 
-                            WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 6 
-                            AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 16), 0) * os.ROE)
                 ) AS valorLiquidoStaRig,
 
                 (
@@ -819,16 +811,8 @@ class OS
                     (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
                             FROM os_servicos_itens osi 
                             WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 5 
                             AND osi.cancelada = 0 
                             AND osi.Fornecedor_Custeio = 17), 0))
-                    - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
-                            FROM os_servicos_itens osi 
-                            WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 6 
-                            AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 17), 0) * os.ROE)
                 ) AS valorLiquidoStaSantos,
                 pessoas.Nome AS pessoaNome,
                 pessoas.Nome_Fantasia AS pessoaNomeFantasia,
@@ -883,16 +867,8 @@ class OS
                     (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
                             FROM os_servicos_itens osi 
                             WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 5 
                             AND osi.cancelada = 0 
                             AND osi.Fornecedor_Custeio = 16), 0))
-                    - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
-                            FROM os_servicos_itens osi 
-                            WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 6 
-                            AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 16), 0) * os.ROE)
                 ) AS valorLiquidoStaRig,
 
                 (
@@ -929,16 +905,8 @@ class OS
                     (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
                             FROM os_servicos_itens osi 
                             WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 5 
                             AND osi.cancelada = 0 
                             AND osi.Fornecedor_Custeio = 17), 0))
-                    - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
-                            FROM os_servicos_itens osi 
-                            WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 6 
-                            AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 17), 0) * os.ROE)
                 ) AS valorLiquidoStaSantos,
                 pessoas.Nome AS pessoaNome,
                 pessoas.Nome_Fantasia AS pessoaNomeFantasia,
