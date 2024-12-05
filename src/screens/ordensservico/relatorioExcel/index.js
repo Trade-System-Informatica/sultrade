@@ -158,6 +158,8 @@ class RelatorioExcel extends Component {
 
         const workbook = XLSX.utils.book_new();
 
+        console.log(relatorio)
+
         const dadosFormatados = relatorio.map(item => ({
             'CLIENTES': item.pessoaNome,               
             'ST': item.codigo,                          
