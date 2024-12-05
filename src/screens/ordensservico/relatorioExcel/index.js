@@ -191,8 +191,8 @@ class RelatorioExcel extends Component {
                 item.valorLiquidoCoast
             ].reduce((total, valor) => {
                 const valorNumerico = parseFloat(valor);
-                return !isNaN(valorNumerico) ? total + valorNumerico : total;
-            }, "-").toFixed(2),    
+                return !isNaN(valorNumerico) && valorNumerico >= 0 ? total + valorNumerico : total;
+            }, 0).toFixed(2),    
 
             'SERVIÇO': item.tipoServicoNome,                                 
             'ETA': item.ETA,                        

@@ -754,20 +754,6 @@ class OS
                             AND osi.moeda = 6 
                             AND osi.cancelada = 0 
                             AND osi.Fornecedor_Custeio = 269), 0) * os.ROE)
-                    - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
-                            FROM os_servicos_itens osi 
-                            WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 5 
-                            AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 269), 0))
-                    - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
-                            FROM os_servicos_itens osi 
-                            WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 6 
-                            AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 269), 0) * os.ROE)
                 ) AS valorLiquidoCoast,
                 (
                     (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
@@ -808,20 +794,6 @@ class OS
                             AND osi.Fornecedor_Custeio = 32), 0)) 
                     + 
                     (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
-                            FROM os_servicos_itens osi 
-                            WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 6 
-                            AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 32), 0) * os.ROE)
-                    - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
-                            FROM os_servicos_itens osi 
-                            WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 5 
-                            AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 32), 0))
-                    - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
                             FROM os_servicos_itens osi 
                             WHERE osi.chave_os = os.chave 
                             AND osi.moeda = 6 
@@ -892,20 +864,6 @@ class OS
                             AND osi.moeda = 6 
                             AND osi.cancelada = 0 
                             AND osi.Fornecedor_Custeio = 269), 0) * os.ROE)
-                    - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
-                            FROM os_servicos_itens osi 
-                            WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 5 
-                            AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 269), 0))
-                    - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
-                            FROM os_servicos_itens osi 
-                            WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 6 
-                            AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 269), 0) * os.ROE)
                 ) AS valorLiquidoCoast,
                 (
                     (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
@@ -946,20 +904,6 @@ class OS
                             AND osi.Fornecedor_Custeio = 32), 0)) 
                     + 
                     (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
-                            FROM os_servicos_itens osi 
-                            WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 6 
-                            AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 32), 0) * os.ROE)
-                    - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
-                            FROM os_servicos_itens osi 
-                            WHERE osi.chave_os = os.chave 
-                            AND osi.moeda = 5 
-                            AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 32), 0))
-                    - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
                             FROM os_servicos_itens osi 
                             WHERE osi.chave_os = os.chave 
                             AND osi.moeda = 6 
