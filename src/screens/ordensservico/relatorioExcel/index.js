@@ -25,8 +25,8 @@ const estadoInicial = {
     centroCusto: '',
     navio: '',
     cliente: '',
-    periodoInicial: moment('2000-01-01').format('YYYY-MM-DD'),
-    periodoFinal: moment().format('YYYY-MM-DD'),
+    periodoInicial: moment('2024-09-01').format('YYYY-MM-DD'),
+    periodoFinal: moment('2024-09-30').format('YYYY-MM-DD'),
     lancamentoInicial: moment('1900-1-1').format('YYYY-MM-DD'),
     lancamentoFinal: moment('2100-12-31').format('YYYY-MM-DD'),
     excluirTipos: false,
@@ -164,12 +164,34 @@ class RelatorioExcel extends Component {
             'NAVIO': item.navioNome,                
             'PORTOS': item.portoNome,               
             'UND FATURAMENTO': item.portoNome === 'SANTOS' ? 'SANTOS' : 'RIO GRANDE', 
-            'NACIONALIDADE': '',    
-            'STA RIG': '',                
-            'STA SANTOS': '',           
-            'PORTO BRASIL': '',       
-            'COAST': '',                   
-            'TOTAL CUSTEIO': item.valor && !isNaN(parseFloat(item.valor)) ? parseFloat(item.valor).toFixed(2) : '',     
+            'NACIONALIDADE': '',
+
+            'STA RIG': item.valorLiquidoStaRig !== null && !isNaN(parseFloat(item.valorLiquidoStaRig))
+            ? parseFloat(item.valorLiquidoStaRig).toFixed(2)
+            : "-",
+    
+            'STA SANTOS': item.valorLiquidoStaSantos !== null && !isNaN(parseFloat(item.valorLiquidoStaSantos))
+                ? parseFloat(item.valorLiquidoStaSantos).toFixed(2)
+                : "-",
+        
+            'PORTO BRASIL': item.valorLiquidoPortoBrasil !== null && !isNaN(parseFloat(item.valorLiquidoPortoBrasil))
+                ? parseFloat(item.valorLiquidoPortoBrasil).toFixed(2)
+                : "-",
+        
+            'COAST': item.valorLiquidoCoast !== null && !isNaN(parseFloat(item.valorLiquidoCoast))
+                ? parseFloat(item.valorLiquidoCoast).toFixed(2)
+                : "-",
+        
+            'TOTAL CUSTEIO': [
+                item.valorLiquidoStaRig,
+                item.valorLiquidoStaSantos,
+                item.valorLiquidoPortoBrasil,
+                item.valorLiquidoCoast
+            ].reduce((total, valor) => {
+                const valorNumerico = parseFloat(valor);
+                return !isNaN(valorNumerico) ? total + valorNumerico : total;
+            }, "-").toFixed(2),    
+
             'SERVIÇO': item.tipoServicoNome,                                 
             'ETA': item.ETA,                        
             'ETB': item.ETB,                        
