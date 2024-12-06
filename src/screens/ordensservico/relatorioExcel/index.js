@@ -256,7 +256,7 @@ class RelatorioExcel extends Component {
             worksheet[XLSX.utils.encode_cell({ r: linhaInicialDados - 1, c: col })] = {
                 v: headers[col],
                 s: {
-                    fill: { fgColor: { rgb: headerColors[col] } }, // Cores específicas
+                    fill: { fgColor: { rgb: headerColors[col] } }, 
                     alignment: { horizontal: 'center', vertical: 'center' },
                     border: {
                         top: { style: 'thin' },
@@ -287,20 +287,16 @@ class RelatorioExcel extends Component {
             });
         });
 
-        // Atualizar o range da planilha (!ref)
-        const totalRows = linhaInicialDados + dadosFormatados.length - 1; // Total de linhas, incluindo cabeçalhos e dados
-        worksheet['!ref'] = XLSX.utils.encode_range({
-            s: { r: 0, c: 0 }, // Início (subheader)
-            e: { r: totalRows, c: headers.length - 1 } // Final
-        });
+        const colunasCusteio = ['STA RIG', 'STA SANTOS', 'PORTO BRASIL', 'COAST', 'TOTAL CUSTEIO'];
+        const totaisCusteio = colunasCusteio.map(coluna =>
+            dadosFormatados.reduce((total, item) => {
+                const valor = parseFloat(item[coluna]);
+                return !isNaN(valor) ? total + valor : total;
+            }, 0)
+        );
 
-        // Definir larguras de colunas
-        const colWidths = headers.map((header, index) => ({
-            wch: Math.max(header.length + 2, ...dadosFormatados.map(item => (item[headers[index]] || '').toString().length + 2))
-        }));
-        worksheet['!cols'] = colWidths;
+        const totalRows = linhaInicialDados + dadosFormatados.length;
 
-        // Adicionar bordas nos grupos
         const custeioColumns = [6, 10];
         for (let row = 0; row <= totalRows; row++) {
             for (let col of custeioColumns) {
@@ -318,6 +314,78 @@ class RelatorioExcel extends Component {
                 }
             }
         }
+
+        worksheet[XLSX.utils.encode_cell({ r: totalRows, c: 5 })] = {
+            v: "TOTAL",
+            s: {
+                alignment: { horizontal: 'center', vertical: 'center' },
+                font: { bold: true },
+                border: {
+                    top: { style: 'medium' },
+                    left: { style: 'medium' },
+                    bottom: { style: 'medium' },
+                    right: { style: 'medium' }
+                }
+            }
+        };
+        
+        const quantidadeST = dadosFormatados.filter(item => item['ST']).length;
+
+        worksheet[XLSX.utils.encode_cell({ r: totalRows, c: 0 })] = {
+            v: "TOTAL CUSTEIOS EMITIDOS",
+            s: {
+                alignment: { horizontal: 'center', vertical: 'center' },
+                font: { bold: true },
+                border: {
+                    top: { style: 'medium' },
+                    left: { style: 'medium' },
+                    bottom: { style: 'medium' },
+                    right: { style: 'thin' }
+                }
+            }
+        };
+
+        worksheet[XLSX.utils.encode_cell({ r: totalRows, c: 1 })] = {
+            v: quantidadeST,
+            s: {
+                alignment: { horizontal: 'center', vertical: 'center' },
+                font: { bold: true },
+                border: {
+                    top: { style: 'medium' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'medium' },
+                    right: { style: 'medium' }
+                }
+            }
+        };
+
+        totaisCusteio.forEach((total, index) => {
+            const colunaIndex = 6 + index; // Índice real da coluna (6 é a coluna STA RIG)
+            worksheet[XLSX.utils.encode_cell({ r: totalRows, c: colunaIndex })] = {
+                v: total.toFixed(2), // Valor total formatado com duas casas decimais
+                s: {
+                    alignment: { horizontal: 'center', vertical: 'center' },
+                    font: { bold: true },
+                    border: {
+                        top: { style: 'medium' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'medium' },
+                        right: { style: 'medium' }
+                    }
+                }
+            };
+        });
+
+        worksheet['!ref'] = XLSX.utils.encode_range({
+            s: { r: 0, c: 0 }, // Início (subheader)
+            e: { r: totalRows, c: headers.length - 1 } // Final
+        });
+
+        // Definir larguras de colunas
+        const colWidths = headers.map((header, index) => ({
+            wch: Math.max(header.length + 2, ...dadosFormatados.map(item => (item[headers[index]] || '').toString().length + 2))
+        }));
+        worksheet['!cols'] = colWidths;
 
         // Adicionar a worksheet ao workbook
         XLSX.utils.book_append_sheet(workbook, worksheet, "Relatório de OS");
@@ -341,75 +409,6 @@ class RelatorioExcel extends Component {
 
         const text = state.toUpperCase();
         return (e.label.toUpperCase().includes(text))
-    }
-
-    relatorio = async () => {
-        this.setState({ loading: true });
-        const relatorio = this?.state?.relatorio;
-
-        console.log(relatorio);
-        let pdf =
-            <div style={{ zoom: 1 }} key={546546554654}>
-
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                    <img className="img-fluid" src="https://i.ibb.co/vmKJkx4/logo.png" alt="logo-Strade" border="0" style={{ width: '30%', height: '230px', maxWidth: "100%" }} />
-                    <h3>
-                        Relatório de OS
-                    </h3>
-                </div>
-                <hr />
-                <div className='pdfContent'>
-                    <table style={{width: "100%"}}>
-                    <tr style={{padding: "10px", fontSize: "1.2em"}}>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Código</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Navio</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Porto</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ETA</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ETB</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ETS</th>
-                            <th colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Cliente</th>
-                            <th colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Tipo de Serviço</th>
-                        </tr>
-                    {relatorio?.map((e) => {
-                        return (
-                        <tr style={{padding: "10px", fontSize: "0.8em"}}>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.codigo}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.navioNome}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.portoNome}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{moment(e.ETA).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.ETA).format("DD/MM/YYYY")}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{moment(e.ETB).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.ETB).format("DD/MM/YYYY")}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{moment(e.ETS).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.ETS).format("DD/MM/YYYY")}</td>
-                            <td colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.pessoaNomeFantasia ? e.pessoaNomeFantasia : e.pessoaNome}</td>
-                            <td colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.tipoServicoNome}</td>
-                        </tr>
-                        )
-                    })}
-                    </table>
-                </div>
-            </div >
-
-        await this.setState({ pdfgerado: pdf, pdfView: true, loading: false, pdfEmail: ReactDOMServer.renderToString(pdf) })
-        this.handleExportWithComponent()
-    }
-
-    handleExportWithComponent = event => {
-        this.pdfExportComponent.current.save();
-        this.setState({ loading: false })
-    };
-
-    getPessoaContatos = async (pessoa) => {
-        await apiEmployee.post(`getContatos.php`, {
-            token: true,
-            pessoa: pessoa
-        }).then(
-            async response => {
-                await this.setState({ contatos: response.data, fornecedorEmail: response.data.find((e) => e.Tipo == "EM") ? response.data.find((e) => e.Tipo == "EM").Campo1 : "" })
-                await this.setState({ emails: this.state.fornecedorEmail.split("; ") })
-                await this.setState({ loading: false })
-            },
-            response => { this.erroApi(response) }
-
-        )
     }
 
     render() {
