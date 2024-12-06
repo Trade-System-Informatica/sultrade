@@ -25,8 +25,8 @@ const estadoInicial = {
     centroCusto: '',
     navio: '',
     cliente: '',
-    periodoInicial: moment('2024-09-01').format('YYYY-MM-DD'),
-    periodoFinal: moment('2024-09-30').format('YYYY-MM-DD'),
+    periodoInicial: moment('2024-01-01').format('YYYY-MM-DD'),
+    periodoFinal: moment().format('YYYY-MM-DD'),
     lancamentoInicial: moment('1900-1-1').format('YYYY-MM-DD'),
     lancamentoFinal: moment('2100-12-31').format('YYYY-MM-DD'),
     excluirTipos: false,
@@ -150,6 +150,14 @@ class RelatorioExcel extends Component {
     }
     
     gerarPlanilhaExcel = (relatorio) => {
+        function formatarValor(valor){
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'decimal',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(valor);
+        }
+
         const faturamentoDataInicial = moment(this.state.periodoInicial).format('MM/YYYY');
         const faturamentoDataFinal = moment(this.state.periodoFinal).format('MM/YYYY');
         const faturamentoData = faturamentoDataInicial === faturamentoDataFinal
@@ -169,22 +177,22 @@ class RelatorioExcel extends Component {
             'NACIONALIDADE': '',
 
             'STA RIG': item.valorLiquidoStaRig !== null && !isNaN(parseFloat(item.valorLiquidoStaRig)) && item.valorLiquidoStaRig > 0
-            ? parseFloat(item.valorLiquidoStaRig).toFixed(2)
+            ? formatarValor(item.valorLiquidoStaRig)
             : "-",
     
             'STA SANTOS': item.valorLiquidoStaSantos !== null && !isNaN(parseFloat(item.valorLiquidoStaSantos)) && item.valorLiquidoStaSantos > 0
-                ? parseFloat(item.valorLiquidoStaSantos).toFixed(2)
+                ? formatarValor(item.valorLiquidoStaSantos)
                 : "-",
         
             'PORTO BRASIL': item.valorLiquidoPortoBrasil !== null && !isNaN(parseFloat(item.valorLiquidoPortoBrasil)) && item.valorLiquidoPortoBrasil > 0
-                ? parseFloat(item.valorLiquidoPortoBrasil).toFixed(2)
+                ? formatarValor(item.valorLiquidoPortoBrasil)
                 : "-",
         
             'COAST': item.valorLiquidoCoast !== null && !isNaN(parseFloat(item.valorLiquidoCoast)) && item.valorLiquidoCoast > 0
-                ? parseFloat(item.valorLiquidoCoast).toFixed(2)
+                ? formatarValor(item.valorLiquidoCoast)
                 : "-",
         
-            'TOTAL CUSTEIO': [
+            'TOTAL CUSTEIO': formatarValor([
                 item.valorLiquidoStaRig,
                 item.valorLiquidoStaSantos,
                 item.valorLiquidoPortoBrasil,
@@ -192,7 +200,7 @@ class RelatorioExcel extends Component {
             ].reduce((total, valor) => {
                 const valorNumerico = parseFloat(valor);
                 return !isNaN(valorNumerico) && valorNumerico >= 0 ? total + valorNumerico : total;
-            }, 0).toFixed(2),    
+            }, 0)),    
 
             'SERVIÇO': item.tipoServicoNome,                                 
             'ETA': item.ETA,                        
@@ -290,10 +298,13 @@ class RelatorioExcel extends Component {
         const colunasCusteio = ['STA RIG', 'STA SANTOS', 'PORTO BRASIL', 'COAST', 'TOTAL CUSTEIO'];
         const totaisCusteio = colunasCusteio.map(coluna =>
             dadosFormatados.reduce((total, item) => {
-                const valor = parseFloat(item[coluna]);
-                return !isNaN(valor) ? total + valor : total;
+              const valorLimpo = item[coluna]
+                .replace(/\./g, '')
+                .replace(',', '.');    
+              const valorNumerico = parseFloat(valorLimpo);
+              return !isNaN(valorNumerico) ? total + valorNumerico : total;
             }, 0)
-        );
+          );
 
         const totalRows = linhaInicialDados + dadosFormatados.length;
 
@@ -362,7 +373,7 @@ class RelatorioExcel extends Component {
         totaisCusteio.forEach((total, index) => {
             const colunaIndex = 6 + index; // Índice real da coluna (6 é a coluna STA RIG)
             worksheet[XLSX.utils.encode_cell({ r: totalRows, c: colunaIndex })] = {
-                v: total.toFixed(2), // Valor total formatado com duas casas decimais
+                v: formatarValor(total), 
                 s: {
                     alignment: { horizontal: 'center', vertical: 'center' },
                     font: { bold: true },
