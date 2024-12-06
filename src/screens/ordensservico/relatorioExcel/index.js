@@ -168,19 +168,19 @@ class RelatorioExcel extends Component {
             'UND FATURAMENTO': item.portoNome === 'SANTOS' ? 'SANTOS' : 'RIO GRANDE', 
             'NACIONALIDADE': '',
 
-            'STA RIG': item.valorLiquidoStaRig !== null && !isNaN(parseFloat(item.valorLiquidoStaRig))
+            'STA RIG': item.valorLiquidoStaRig !== null && !isNaN(parseFloat(item.valorLiquidoStaRig)) && item.valorLiquidoStaRig > 0
             ? parseFloat(item.valorLiquidoStaRig).toFixed(2)
             : "-",
     
-            'STA SANTOS': item.valorLiquidoStaSantos !== null && !isNaN(parseFloat(item.valorLiquidoStaSantos))
+            'STA SANTOS': item.valorLiquidoStaSantos !== null && !isNaN(parseFloat(item.valorLiquidoStaSantos)) && item.valorLiquidoStaSantos > 0
                 ? parseFloat(item.valorLiquidoStaSantos).toFixed(2)
                 : "-",
         
-            'PORTO BRASIL': item.valorLiquidoPortoBrasil !== null && !isNaN(parseFloat(item.valorLiquidoPortoBrasil))
+            'PORTO BRASIL': item.valorLiquidoPortoBrasil !== null && !isNaN(parseFloat(item.valorLiquidoPortoBrasil)) && item.valorLiquidoPortoBrasil > 0
                 ? parseFloat(item.valorLiquidoPortoBrasil).toFixed(2)
                 : "-",
         
-            'COAST': item.valorLiquidoCoast !== null && !isNaN(parseFloat(item.valorLiquidoCoast))
+            'COAST': item.valorLiquidoCoast !== null && !isNaN(parseFloat(item.valorLiquidoCoast)) && item.valorLiquidoCoast > 0
                 ? parseFloat(item.valorLiquidoCoast).toFixed(2)
                 : "-",
         
