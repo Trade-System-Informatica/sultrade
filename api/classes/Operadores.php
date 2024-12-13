@@ -143,13 +143,47 @@ class Operadores {
     public static function getPermissao($Usuario, $Acessos){
         $database = new Database();
 
-        $result = $database->doSelect('permissoes',
-                                      'permissoes.*, acessos.*',
-                                      'Usuario = '.$Usuario.' AND Acessos = '.$Acessos,
-                                      'INNER JOIN acessos ON permissoes.Acessos = acessos.Chave'
-                                    );
-        $database->closeConection();
-        return $result;
+        $grupoResult = $database->doSelect(
+            'operadores',
+            'grupo',
+            'Codigo = ' . $Usuario
+        );
+
+        $grupo = $grupoResult[0]['Grupo'];
+
+        if ($grupo == 0) {
+            $result = $database->doSelect('permissoes',
+                                          'permissoes.*, acessos.*',
+                                          'Usuario = '.$Usuario.' AND Acessos = '.$Acessos,
+                                          'INNER JOIN acessos ON permissoes.Acessos = acessos.Chave'
+                                        );
+            $database->closeConection();
+            return $result;
+        } else {
+            $permissoesUsuario = $database->doSelect('permissoes',
+            'permissoes.*, acessos.*',
+            'Usuario = '.$Usuario.' AND Acessos = '.$Acessos,
+            'INNER JOIN acessos ON permissoes.Acessos = acessos.Chave'
+          );
+        
+            // Obter permissões dos usuários do grupo
+            $permissoesGrupo = $database->doSelect('permissoes',
+            'permissoes.*, acessos.*',
+            'Usuario = '.$grupo.' AND Acessos = '.$Acessos,
+            'INNER JOIN acessos ON permissoes.Acessos = acessos.Chave'
+          );
+
+          $database->closeConection();
+
+          $permissoesUsuarioArray = array_column($permissoesUsuario, 'Acessos');
+          $permissoesGrupoArray = array_column($permissoesGrupo, 'Acessos');
+      
+          // Combine as permissões (removendo duplicatas)
+          $permissoesCombinadas = array_unique(array_merge($permissoesUsuarioArray, $permissoesGrupoArray));
+
+          return $permissoesCombinadas;
+        }
+
 
     }
 

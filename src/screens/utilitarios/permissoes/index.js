@@ -148,6 +148,7 @@ class Permissoes extends Component {
                 const operadores = response.data.map((e) => ({
                     ...e,
                     botao: false,
+                    submit: false,
                     check: [false, false, false, false, false]
                 }))
 
@@ -331,6 +332,7 @@ class Permissoes extends Component {
     }
 
     salvaTipoConta = async () => {
+        await this.setState({loading: true});
         try {
             const promises = this.state.operadoresTipoConta.map(usuario => 
                 apiEmployee.post(`updateTipoConta.php`, {
@@ -362,6 +364,8 @@ class Permissoes extends Component {
         } catch (error) {
             console.error('Erro durante a chamada à API:', error);
             alert('Não foi possível alterar os tipos de conta. Tente novamente mais tarde.');
+        } finally {
+            this.setState({loading: false});
         }
     };
     
@@ -400,7 +404,7 @@ class Permissoes extends Component {
 
         let usuarios = this.state.operadores.map((usuario) => {
             if (usuario.Codigo == codigo) {
-                return({...usuario, botao: true});
+                return({...usuario, botao: true, submit: true});
             } else {
                 return({...usuario});
             }
@@ -413,9 +417,10 @@ class Permissoes extends Component {
     alteraTipoConta = async (codigo, value) => {
         let usuarios = this.state.operadores.map((usuario) => {
             if (usuario.Codigo == codigo) {
+                const novoGrupo = usuario.grupo == value ? 0 : value;
                 return({
                     ...usuario, 
-                    grupo: value,
+                    grupo: novoGrupo,
                     botao: true
                 });
             } else {
@@ -485,8 +490,10 @@ class Permissoes extends Component {
                                         }}
                                         onSubmit={async values => {
                                             await new Promise(r => setTimeout(r, 1000))
-                                            await this.salvaTipoConta()
-                                            this.salvaAlteracoes(feed.Codigo, validForm)
+                                            this.salvaTipoConta()
+                                            if (this.submit) {
+                                                this.salvaAlteracoes(feed.Codigo, validForm);
+                                            }
                                         }}
                                     >
                                         <Form className="contact-form" onBlur={() => {/*this.verificadorspans()*/ }} >
