@@ -81,6 +81,13 @@ class Permissoes extends Component {
                 this.setState({ bloqueado: true })
             }
         })
+
+        const operadoresComGrupoOriginal = this.state.operadores.map(usuario => ({
+            ...usuario,
+            grupoOriginal: usuario.grupo
+        }));
+    
+        this.setState({ operadores: operadoresComGrupoOriginal });
     }
 
 
@@ -323,12 +330,12 @@ class Permissoes extends Component {
 
     }
 
-    salvaTipoConta = async (dados) => {
+    salvaTipoConta = async () => {
         try {
-            const promises = dados.map(({ value, codigo }) =>
+            const promises = this.state.operadoresTipoConta.map(usuario => 
                 apiEmployee.post(`updateTipoConta.php`, {
-                    codigo: codigo,
-                    tipoConta: value,
+                    codigo: usuario.Codigo,
+                    tipoConta: usuario.grupo,
                 })
             );
     
@@ -336,10 +343,21 @@ class Permissoes extends Component {
     
             responses.forEach((response, index) => {
                 if (response.status === 200) {
-                    console.log(`Tipo de conta alterado com sucesso para código ${dados[index].codigo}:`, response.data);
+                    console.log(`Tipo de conta alterado com sucesso para código ${this.state.operadoresTipoConta[index].Codigo}`);
                 } else {
-                    console.error(`Erro ao alterar tipo de conta para código ${dados[index].codigo}:`, response.status);
+                    console.error(`Erro ao alterar tipo de conta para código ${this.state.operadoresTipoConta[index].Codigo}`);
                 }
+            });
+    
+            // Atualiza o grupoOriginal após o salvamento
+            let updatedOperadores = this.state.operadores.map(usuario => ({
+                ...usuario,
+                grupoOriginal: usuario.grupo
+            }));
+    
+            this.setState({
+                operadores: updatedOperadores,
+                operadoresTipoConta: []
             });
         } catch (error) {
             console.error('Erro durante a chamada à API:', error);
@@ -395,14 +413,20 @@ class Permissoes extends Component {
     alteraTipoConta = async (codigo, value) => {
         let usuarios = this.state.operadores.map((usuario) => {
             if (usuario.Codigo == codigo) {
-                return({...usuario, botao: true});
+                return({
+                    ...usuario, 
+                    grupo: value,
+                    botao: true
+                });
             } else {
-                return({...usuario});
+                return usuario;
             }
         });
-
-
-        this.setState({ userTipoConta: value, operadoresTipoConta: usuarios });
+    
+        this.setState({ 
+            operadores: usuarios,
+            operadoresTipoConta: usuarios.filter(u => u.grupo !== u.grupoOriginal)
+        });
     }
 
 
@@ -461,7 +485,7 @@ class Permissoes extends Component {
                                         }}
                                         onSubmit={async values => {
                                             await new Promise(r => setTimeout(r, 1000))
-                                            await this.salvaTipoConta(userTipoConta, operadoresTipoConta)
+                                            await this.salvaTipoConta()
                                             this.salvaAlteracoes(feed.Codigo, validForm)
                                         }}
                                     >
@@ -500,21 +524,21 @@ class Permissoes extends Component {
                                                                             <p>Tipo de Conta</p>
                                                                         </div>
                                                                         <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
-                                                                            <Field type="checkbox" className="checkPermissao" disabled={this.state.bloqueado} checked={feed.grupo == 2} onChange={(e) => { this.alteraTipoConta(feed.Codigo, 2) }} />
+                                                                            <Field type="checkbox" className="checkPermissao" disabled={this.state.bloqueado} checked={feed.grupo == 2} onChange={() => { this.alteraTipoConta(feed.Codigo, 2) }} />
                                                                             <label 
                                                                                 className={`dynamic-label ${index % 2 === 0 ? 'odd-label' : 'even-label'}`}
                                                                                 style={{color: index % 2 === 0 ? 'white' : 'black'}}
                                                                             >Administrativo</label>
                                                                         </div>
                                                                         <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
-                                                                            <Field type="checkbox" className="checkPermissao" disabled={this.state.bloqueado} checked={feed.grupo == 3} onChange={(e) => { this.alteraTipoConta(feed.Codigo, 3) }} />
+                                                                            <Field type="checkbox" className="checkPermissao" disabled={this.state.bloqueado} checked={feed.grupo == 3} onChange={() => { this.alteraTipoConta(feed.Codigo, 3) }} />
                                                                             <label 
                                                                                 className={`dynamic-label ${index % 2 === 0 ? 'odd-label' : 'even-label'}`}
                                                                                 style={{color: index % 2 === 0 ? 'white' : 'black'}}
                                                                             >Operacional</label>
                                                                         </div>
                                                                         <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
-                                                                            <Field type="checkbox" className="checkPermissao" disabled={this.state.bloqueado} checked={feed.grupo == 4} onChange={(e) => { this.alteraTipoConta(feed.Codigo, 4) }} />
+                                                                            <Field type="checkbox" className="checkPermissao" disabled={this.state.bloqueado} checked={feed.grupo == 4} onChange={() => { this.alteraTipoConta(feed.Codigo, 4) }} />
                                                                             <label 
                                                                                 className={`dynamic-label ${index % 2 === 0 ? 'odd-label' : 'even-label'}`}
                                                                                 style={{color: index % 2 === 0 ? 'white' : 'black'}}
