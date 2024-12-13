@@ -148,7 +148,6 @@ class Permissoes extends Component {
                 const operadores = response.data.map((e) => ({
                     ...e,
                     botao: false,
-                    submit: false,
                     check: [false, false, false, false, false]
                 }))
 
@@ -404,7 +403,7 @@ class Permissoes extends Component {
 
         let usuarios = this.state.operadores.map((usuario) => {
             if (usuario.Codigo == codigo) {
-                return({...usuario, botao: true, submit: true});
+                return({...usuario, botao: true});
             } else {
                 return({...usuario});
             }
@@ -490,10 +489,8 @@ class Permissoes extends Component {
                                         }}
                                         onSubmit={async values => {
                                             await new Promise(r => setTimeout(r, 1000))
-                                            this.salvaTipoConta()
-                                            if (this.submit) {
-                                                this.salvaAlteracoes(feed.Codigo, validForm);
-                                            }
+                                            await this.salvaTipoConta()
+                                            this.salvaAlteracoes(feed.Codigo, validForm);
                                         }}
                                     >
                                         <Form className="contact-form" onBlur={() => {/*this.verificadorspans()*/ }} >

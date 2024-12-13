@@ -151,21 +151,15 @@ class Operadores {
 
         $grupo = $grupoResult[0]['Grupo'];
 
-        if ($grupo == 0) {
-            $result = $database->doSelect('permissoes',
-                                          'permissoes.*, acessos.*',
-                                          'Usuario = '.$Usuario.' AND Acessos = '.$Acessos,
-                                          'INNER JOIN acessos ON permissoes.Acessos = acessos.Chave'
-                                        );
-            $database->closeConection();
-            return $result;
-        } else {
-            $permissoesUsuario = $database->doSelect('permissoes',
+        $permissoesUsuario = $database->doSelect('permissoes',
             'permissoes.*, acessos.*',
             'Usuario = '.$Usuario.' AND Acessos = '.$Acessos,
             'INNER JOIN acessos ON permissoes.Acessos = acessos.Chave'
           );
-        
+
+        if ($grupo == 0) {
+            return $permissoesUsuario;
+        } else {
             // Obter permissões dos usuários do grupo
             $permissoesGrupo = $database->doSelect('permissoes',
             'permissoes.*, acessos.*',
@@ -173,18 +167,13 @@ class Operadores {
             'INNER JOIN acessos ON permissoes.Acessos = acessos.Chave'
           );
 
-          $database->closeConection();
-
-          $permissoesUsuarioArray = array_column($permissoesUsuario, 'Acessos');
-          $permissoesGrupoArray = array_column($permissoesGrupo, 'Acessos');
-      
-          // Combine as permissões (removendo duplicatas)
-          $permissoesCombinadas = array_unique(array_merge($permissoesUsuarioArray, $permissoesGrupoArray));
-
-          return $permissoesCombinadas;
+          if (!empty($permissoesGrupo) && $permissoesGrupo[0]['Liberacao'] > $permissoesUsuario[0]['Liberacao']) {
+            $permissoesUsuario[0]['Liberacao'] = $permissoesGrupo[0]['Liberacao'];
         }
 
-
+        $database->closeConection();
+        return $permissoesUsuario;
+        }
     }
 
     public static function getLogs($Tabela, $ChaveAux){
