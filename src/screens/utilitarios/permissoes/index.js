@@ -20,6 +20,7 @@ import 'react-confirm-alert/src/react-confirm-alert.css'
 const estadoInicial = {
     name: '',
     operadores: [],
+    operadoresTipoConta: [],
     permissoes: [],
     pesquisa: "",
 
@@ -27,6 +28,8 @@ const estadoInicial = {
         user: [],
         permissao: []
     }*/],
+
+    userTipoConta: [],
 
     acesso: [/*{
         chave: ``,
@@ -320,6 +323,32 @@ class Permissoes extends Component {
 
     }
 
+    salvaTipoConta = async (dados) => {
+        try {
+            const promises = dados.map(({ value, codigo }) =>
+                apiEmployee.post(`updateTipoConta.php`, {
+                    codigo: codigo,
+                    tipoConta: value,
+                })
+            );
+    
+            const responses = await Promise.all(promises);
+    
+            responses.forEach((response, index) => {
+                if (response.status === 200) {
+                    console.log(`Tipo de conta alterado com sucesso para código ${dados[index].codigo}:`, response.data);
+                } else {
+                    console.error(`Erro ao alterar tipo de conta para código ${dados[index].codigo}:`, response.status);
+                }
+            });
+        } catch (error) {
+            console.error('Erro durante a chamada à API:', error);
+            alert('Não foi possível alterar os tipos de conta. Tente novamente mais tarde.');
+        }
+    };
+    
+
+
 
     marcaTodos = async (value, usuario, elementoIndex, index) => {
         console.log({value, usuario, elementoIndex, index})
@@ -361,6 +390,19 @@ class Permissoes extends Component {
 
 
         this.setState({ userPermissoes: userPermissoes, operadores: usuarios });
+    }
+
+    alteraTipoConta = async (codigo, value) => {
+        let usuarios = this.state.operadores.map((usuario) => {
+            if (usuario.Codigo == codigo) {
+                return({...usuario, botao: true});
+            } else {
+                return({...usuario});
+            }
+        });
+
+
+        this.setState({ userTipoConta: value, operadoresTipoConta: usuarios });
     }
 
 
@@ -419,6 +461,7 @@ class Permissoes extends Component {
                                         }}
                                         onSubmit={async values => {
                                             await new Promise(r => setTimeout(r, 1000))
+                                            await this.salvaTipoConta(userTipoConta, operadoresTipoConta)
                                             this.salvaAlteracoes(feed.Codigo, validForm)
                                         }}
                                     >
@@ -448,7 +491,39 @@ class Permissoes extends Component {
                                                     </AccordionSummary>
                                                     <AccordionDetails>
                                                         <Typography>
+                                                        <div className="row row-list">
+                                                        {feed.Codigo != 2 && feed.Codigo != 3 && feed.Codigo != 4 && (
                                                             <div className="row row-list">
+                                                                <div className="col-lg-12 col-md-12 col-sm-12 col-12">
+                                                                    <div className="row deleteMargin alignCenter">
+                                                                    <div className="col-xl-5 col-lg-5 col-md-5 col-sm-5 col-5 text-center">
+                                                                            <p>Tipo de Conta</p>
+                                                                        </div>
+                                                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
+                                                                            <Field type="checkbox" className="checkPermissao" disabled={this.state.bloqueado} checked={feed.grupo == 2} onChange={(e) => { this.alteraTipoConta(feed.Codigo, 2) }} />
+                                                                            <label 
+                                                                                className={`dynamic-label ${index % 2 === 0 ? 'odd-label' : 'even-label'}`}
+                                                                                style={{color: index % 2 === 0 ? 'white' : 'black'}}
+                                                                            >Administrativo</label>
+                                                                        </div>
+                                                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
+                                                                            <Field type="checkbox" className="checkPermissao" disabled={this.state.bloqueado} checked={feed.grupo == 3} onChange={(e) => { this.alteraTipoConta(feed.Codigo, 3) }} />
+                                                                            <label 
+                                                                                className={`dynamic-label ${index % 2 === 0 ? 'odd-label' : 'even-label'}`}
+                                                                                style={{color: index % 2 === 0 ? 'white' : 'black'}}
+                                                                            >Operacional</label>
+                                                                        </div>
+                                                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-center">
+                                                                            <Field type="checkbox" className="checkPermissao" disabled={this.state.bloqueado} checked={feed.grupo == 4} onChange={(e) => { this.alteraTipoConta(feed.Codigo, 4) }} />
+                                                                            <label 
+                                                                                className={`dynamic-label ${index % 2 === 0 ? 'odd-label' : 'even-label'}`}
+                                                                                style={{color: index % 2 === 0 ? 'white' : 'black'}}
+                                                                            >Gerência</label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            )}
                                                                 <div className="row row-list">
                                                                     <div className="col-lg-12 col-md-12 col-sm-12 col-12">
                                                                         <div className="row deleteMargin alignCenter">

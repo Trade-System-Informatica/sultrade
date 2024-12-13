@@ -49,11 +49,11 @@ class Operadores {
         if ($empresa != 0) {
             $result = $database->doSelect('operadores',
                                           'operadores.*',
-                                          "empresa = '".$empresa."' OR empresa = 0"
+                                          "empresa = '".$empresa."' OR empresa = 0 ORDER BY codigo"
                                         );
         } else {
             $result = $database->doSelect('operadores',
-                                          'operadores.*'
+                                          'operadores.*', "ORDER BY codigo"
           );
         }
         $database->closeConection();
@@ -365,6 +365,19 @@ class Operadores {
 
         $query = "Liberacao = '".$Liberacao."'";
         $result = $database->doUpdate('permissoes', $query, "Usuario = '".$Usuario."' AND Acessos = '".$Acessos."' AND Empresa = '".$Empresa."'");
+        
+        $database->closeConection();
+        if($result == NULL){
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+
+    public static function updateTipoConta($codigo, $tipoConta){
+        $database = new Database();
+
+        $result = $database->doUpdate('operadores', "grupo = $tipoConta", "Codigo = $codigo");
         
         $database->closeConection();
         if($result == NULL){

@@ -10,3 +10,11 @@
     min-width: 20px;
     min-height: 20px;
 }
+
+.dynamic-label.even-label {
+    color: black !important;
+}
+  
+.dynamic-label.odd-label {
+    color: white !important;
+}
