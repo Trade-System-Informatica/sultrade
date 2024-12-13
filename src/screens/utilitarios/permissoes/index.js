@@ -231,7 +231,6 @@ class Permissoes extends Component {
     }
 
     salvaAlteracoes = async (user, validForm) => {
-        await this.setState({loading: true});
         if (!validForm) {
             return;
         }
@@ -323,9 +322,6 @@ class Permissoes extends Component {
                 )
 
             }
-
-            //document.location.reload()
-
         })
 
     }
@@ -363,9 +359,7 @@ class Permissoes extends Component {
         } catch (error) {
             console.error('Erro durante a chamada à API:', error);
             alert('Não foi possível alterar os tipos de conta. Tente novamente mais tarde.');
-        } finally {
-            this.setState({loading: false});
-        }
+        } 
     };
     
 
