@@ -53,7 +53,7 @@ class Operadores {
                                         );
         } else {
             $result = $database->doSelect('operadores',
-                                          'operadores.*', "ORDER BY Codigo"
+                                          'operadores.*', "1 ORDER BY Codigo"
           );
         }
         $database->closeConection();
