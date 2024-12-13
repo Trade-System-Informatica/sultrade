@@ -167,9 +167,18 @@ class Operadores {
             'INNER JOIN acessos ON permissoes.Acessos = acessos.Chave'
           );
 
-          if (!empty($permissoesGrupo) && $permissoesGrupo[0]['permissoes.Liberacao'] > $permissoesUsuario[0]['permissoes.Liberacao']) {
-            $permissoesUsuario[0]['permissoes.Liberacao'] = $permissoesGrupo[0]['permissoes.Liberacao'];
+        $permissaoFinal = '';
+        $permissaoUsuario = $permissoesUsuario[0]['Liberacao'];
+        $permissaoGrupo = $permissoesGrupo[0]['Liberacao'];
+
+        // Mescla as permissões bit a bit
+        for ($i = 0; $i < strlen($permissaoUsuario); $i++) {
+            // Se qualquer um dos dois tem permissão (1), mantém a permissão
+            $permissaoFinal .= (($permissaoUsuario[$i] == '1') || ($permissaoGrupo[$i] == '1')) ? '1' : '0';
         }
+
+        // Atualiza a permissão do usuário
+        $permissoesUsuario[0]['Liberacao'] = $permissaoFinal;
 
         $database->closeConection();
         return $permissoesUsuario;
