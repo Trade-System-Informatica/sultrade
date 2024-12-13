@@ -167,8 +167,8 @@ class Operadores {
             'INNER JOIN acessos ON permissoes.Acessos = acessos.Chave'
           );
 
-          if (!empty($permissoesGrupo) && $permissoesGrupo[0]['Liberacao'] > $permissoesUsuario[0]['Liberacao']) {
-            $permissoesUsuario[0]['Liberacao'] = $permissoesGrupo[0]['Liberacao'];
+          if (!empty($permissoesGrupo) && $permissoesGrupo[0]['permissoes.Liberacao'] > $permissoesUsuario[0]['permissoes.Liberacao']) {
+            $permissoesUsuario[0]['permissoes.Liberacao'] = $permissoesGrupo[0]['permissoes.Liberacao'];
         }
 
         $database->closeConection();
