@@ -149,7 +149,7 @@ class Operadores {
             'Codigo = ' . $Usuario
         );
 
-        $grupo = $grupoResult[0]['Grupo'];
+        $grupo = $grupoResult[0]['grupo'];
 
         $permissoesUsuario = $database->doSelect('permissoes',
             'permissoes.*, acessos.*',
