@@ -21,7 +21,6 @@ const estadoInicial = {
     nome: '',
     codigo: '',
     token: '',
-    grupo: '',
     redirect: false,
     online: false,
     operadores: [],
@@ -87,7 +86,6 @@ class Login extends Component {
         }).then(
             async res => {
                 await this.setState({ codigo: res.data })
-                await this.setState({ grupo: res.data })
             }
         )
 
@@ -115,7 +113,6 @@ class Login extends Component {
             })
         } else {
             this.setState({ codigo: this.state.codigo[0].Codigo })
-            this.setState({ codigo: this.state.grupo[0].grupo })
             await this.props.onLogin({ ...this.state })
             this.setState({ redirect: true })
         }

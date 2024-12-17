@@ -299,7 +299,7 @@ class Operadores {
         $database = new Database();
 
         $result = $database->doSelect('operadores',
-                                      'Codigo, grupo',
+                                      'Codigo',
                                       "Codigo = '".$Codigo."'AND Senha = '". $Senha. "' AND ativo = 1");
 
         if($result == NULL){
