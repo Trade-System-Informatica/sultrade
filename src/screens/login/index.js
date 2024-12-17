@@ -86,8 +86,8 @@ class Login extends Component {
             Senha: senha,
         }).then(
             async res => {
-                await this.setState({ codigo: res.data.Codigo })
-                await this.setState({ grupo: res.data.grupo })
+                await this.setState({ codigo: res.data })
+                await this.setState({ grupo: res.data })
             }
         )
 
