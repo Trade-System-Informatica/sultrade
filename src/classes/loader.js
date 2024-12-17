@@ -496,7 +496,7 @@ export default class loader {
 
         const acessosPermissoes = acessos.map((e, i) => {
             permissao = permissoes.filter((permissao) => {
-                if (permissao.Usuario == usuarioLogado.codigo && permissao.Acessos == e.Chave && permissao.Empresa == usuarioLogado.empresa) {
+                if ((permissao.Usuario == usuarioLogado.codigo || permissao.Usuario == usuarioLogado.grupo) && permissao.Acessos == e.Chave && permissao.Empresa == usuarioLogado.empresa) {
                     return permissao;
                 }
             })[0]
