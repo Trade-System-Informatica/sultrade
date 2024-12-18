@@ -761,20 +761,29 @@ class OS
                             WHERE osi.chave_os = os.chave 
                             AND osi.moeda = 5 
                             AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 16), 0)) 
+                            AND osi.Fornecedor_Custeio != 269
+                            AND osi.Fornecedor_Custeio != 32
+                            AND osi.Fornecedor_Custeio != 17
+                            AND osi.Fornecedor_Custeio != 0), 0)) 
                     + 
                     (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
                             FROM os_servicos_itens osi 
                             WHERE osi.chave_os = os.chave 
                             AND osi.moeda = 6 
                             AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 16), 0) * os.ROE)
+                            AND osi.Fornecedor_Custeio != 269
+                            AND osi.Fornecedor_Custeio != 32
+                            AND osi.Fornecedor_Custeio != 17
+                            AND osi.Fornecedor_Custeio != 0), 0) * os.ROE)
                     - 
                     (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
                             FROM os_servicos_itens osi 
                             WHERE osi.chave_os = os.chave 
                             AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 16), 0))
+                            AND osi.Fornecedor_Custeio != 269
+                            AND osi.Fornecedor_Custeio != 32
+                            AND osi.Fornecedor_Custeio != 17
+                            AND osi.Fornecedor_Custeio != 0), 0))
                 ) AS valorLiquidoStaRig,
 
                 (
