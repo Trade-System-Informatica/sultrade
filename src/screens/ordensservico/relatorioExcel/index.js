@@ -178,19 +178,19 @@ class RelatorioExcel extends Component {
 
             'STA RIG': item.valorLiquidoStaRig !== null && !isNaN(parseFloat(item.valorLiquidoStaRig)) && item.valorLiquidoStaRig > 0
             ? formatarValor(item.valorLiquidoStaRig)
-            : 0,
+            : formatarValor(0),
     
             'STA SANTOS': item.valorLiquidoStaSantos !== null && !isNaN(parseFloat(item.valorLiquidoStaSantos)) && item.valorLiquidoStaSantos > 0
                 ? formatarValor(item.valorLiquidoStaSantos)
-                : 0,
+                : formatarValor(0),
         
             'PORTO BRASIL': item.valorLiquidoPortoBrasil !== null && !isNaN(parseFloat(item.valorLiquidoPortoBrasil)) && item.valorLiquidoPortoBrasil > 0
                 ? formatarValor(item.valorLiquidoPortoBrasil)
-                : 0,
+                : formatarValor(0),
         
             'COAST': item.valorLiquidoCoast !== null && !isNaN(parseFloat(item.valorLiquidoCoast)) && item.valorLiquidoCoast > 0
                 ? formatarValor(item.valorLiquidoCoast)
-                : 0,
+                : formatarValor(0),
         
             'TOTAL CUSTEIO': formatarValor([
                 item.valorLiquidoStaRig,
