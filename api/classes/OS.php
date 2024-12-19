@@ -2168,7 +2168,7 @@ class OS
                 $centroCusto = $database->doSelect('centros_custos', 'Chave', "Codigo = '$novoCodigo'");
                 $centroCustoAntigo = $database->doSelect('centros_custos', 'Chave', "Codigo = '$codigo'");
                 
-                if (!$centroCusto[0] && $centroCustoAntigo) {
+                if (!$centroCusto[0]) {
                     $descricaoAtual = $database->doSelect('centros_custos', 'Descricao', "Chave = '" . $centroCustoAntigo[0]['Chave'] . "'");
                     if ($descricaoAtual && isset($descricaoAtual[0]['Descricao'])) {
                         $novaDescricao = preg_replace('/^\w+\d+/', "OR$novoCodigo", $descricaoAtual[0]['Descricao']);
