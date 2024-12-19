@@ -480,7 +480,7 @@ class OsOrcamento extends Component {
                                                     {window.innerWidth >= 690 &&
                                                         <div className="row deleteMargin alignCenter">
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
-                                                                <p>{feed.centro_custo}</p>
+                                                                <p>{feed.codigo}</p>
                                                             </div>
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
                                                                 <p>{feed.navioNome}</p>
@@ -554,7 +554,7 @@ class OsOrcamento extends Component {
                                                     {window.innerWidth < 690 && window.innerWidth >= 500 &&
                                                         <div className="row deleteMargin alignCenter">
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
-                                                                <p>{feed.centro_custo}</p>
+                                                                <p>{feed.codigo}</p>
                                                             </div>
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
                                                                 <p>{feed.navioNome}</p>
@@ -610,7 +610,7 @@ class OsOrcamento extends Component {
 
                                                                     modalItemAberto: true,
                                                                     itemInfo: [
-                                                                        { titulo: 'Codigo', valor: feed.centro_custo },
+                                                                        { titulo: 'Codigo', valor: feed.codigo },
                                                                         { titulo: 'Cliente', valor: feed.clienteNome },
                                                                         { titulo: 'Navio', valor: feed.navioNome },
                                                                         { titulo: 'Porto', valor: feed.portoNome },
@@ -634,7 +634,7 @@ class OsOrcamento extends Component {
                                                             }}
                                                             className="row deleteMargin alignCenter">
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-center">
-                                                                <p>{feed.centro_custo}</p>
+                                                                <p>{feed.codigo}</p>
                                                             </div>
                                                             <div className="col-4 text-center" style={{ overflowWrap: 'anywhere ' }}>
                                                                 <p>{feed.Descricao}</p>
@@ -695,7 +695,7 @@ class OsOrcamento extends Component {
                                                     {window.innerWidth >= 690 &&
                                                         <div className="row deleteMargin alignCenter">
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
-                                                                <p>{feed.centro_custo}</p>
+                                                                <p>{feed.codigo}</p>
                                                             </div>
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
                                                                 <p>{feed.navioNome}</p>
@@ -768,7 +768,7 @@ class OsOrcamento extends Component {
                                                     {window.innerWidth < 690 && window.innerWidth >= 500 &&
                                                         <div className="row deleteMargin alignCenter">
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
-                                                                <p>{feed.centro_custo}</p>
+                                                                <p>{feed.codigo}</p>
                                                             </div>
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
                                                                 <p>{feed.navioNome}</p>
@@ -842,7 +842,7 @@ class OsOrcamento extends Component {
 
                                                                     modalItemAberto: true,
                                                                     itemInfo: [
-                                                                        { titulo: 'Codigo', valor: feed.centro_custo },
+                                                                        { titulo: 'Codigo', valor: feed.codigo },
                                                                         { titulo: 'Cliente', valor: feed.clienteNome },
                                                                         { titulo: 'Navio', valor: feed.navioNome },
                                                                         { titulo: 'Porto', valor: feed.portoNome },
