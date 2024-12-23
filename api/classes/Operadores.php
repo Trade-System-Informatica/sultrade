@@ -143,47 +143,60 @@ class Operadores {
     public static function getPermissao($Usuario, $Acessos){
         $database = new Database();
 
-        $grupoResult = $database->doSelect(
-            'operadores',
-            'grupo',
-            'Codigo = ' . $Usuario
-        );
-
-        $grupo = $grupoResult[0]['grupo'];
-
-        $permissoesUsuario = $database->doSelect('permissoes',
-            'permissoes.*, acessos.*',
-            'Usuario = '.$Usuario.' AND Acessos = '.$Acessos,
-            'INNER JOIN acessos ON permissoes.Acessos = acessos.Chave'
-          );
-
-        if ($grupo == 0) {
-            return $permissoesUsuario;
-        } else {
-            // Obter permissões dos usuários do grupo
-            $permissoesGrupo = $database->doSelect('permissoes',
-            'permissoes.*, acessos.*',
-            'Usuario = '.$grupo.' AND Acessos = '.$Acessos,
-            'INNER JOIN acessos ON permissoes.Acessos = acessos.Chave'
-          );
-
-        $permissaoFinal = '';
-        $permissaoUsuario = $permissoesUsuario[0]['Liberacao'];
-        $permissaoGrupo = $permissoesGrupo[0]['Liberacao'];
-
-        // Mescla as permissões bit a bit
-        for ($i = 0; $i < strlen($permissaoUsuario); $i++) {
-            // Se qualquer um dos dois tem permissão (1), mantém a permissão
-            $permissaoFinal .= (($permissaoUsuario[$i] == '1') || ($permissaoGrupo[$i] == '1')) ? '1' : '0';
-        }
-
-        // Atualiza a permissão do usuário
-        $permissoesUsuario[0]['Liberacao'] = $permissaoFinal;
-
+        $result = $database->doSelect('permissoes',
+                                      'permissoes.*, acessos.*',
+                                      'Usuario = '.$Usuario.' AND Acessos = '.$Acessos,
+                                      'INNER JOIN acessos ON permissoes.Acessos = acessos.Chave'
+                                    );
         $database->closeConection();
-        return $permissoesUsuario;
-        }
+        return $result;
+
     }
+
+    // public static function getPermissao($Usuario, $Acessos){
+    //     $database = new Database();
+
+    //     $grupoResult = $database->doSelect(
+    //         'operadores',
+    //         'grupo',
+    //         'Codigo = ' . $Usuario
+    //     );
+
+    //     $grupo = $grupoResult[0]['grupo'];
+
+    //     $permissoesUsuario = $database->doSelect('permissoes',
+    //         'permissoes.*, acessos.*',
+    //         'Usuario = '.$Usuario.' AND Acessos = '.$Acessos,
+    //         'INNER JOIN acessos ON permissoes.Acessos = acessos.Chave'
+    //       );
+
+    //     if ($grupo == 0) {
+    //         return $permissoesUsuario;
+    //     } else {
+    //         // Obter permissões dos usuários do grupo
+    //         $permissoesGrupo = $database->doSelect('permissoes',
+    //         'permissoes.*, acessos.*',
+    //         'Usuario = '.$grupo.' AND Acessos = '.$Acessos,
+    //         'INNER JOIN acessos ON permissoes.Acessos = acessos.Chave'
+    //       );
+
+    //     $permissaoFinal = '';
+    //     $permissaoUsuario = $permissoesUsuario[0]['Liberacao'];
+    //     $permissaoGrupo = $permissoesGrupo[0]['Liberacao'];
+
+    //     // Mescla as permissões bit a bit
+    //     for ($i = 0; $i < strlen($permissaoUsuario); $i++) {
+    //         // Se qualquer um dos dois tem permissão (1), mantém a permissão
+    //         $permissaoFinal .= (($permissaoUsuario[$i] == '1') || ($permissaoGrupo[$i] == '1')) ? '1' : '0';
+    //     }
+
+    //     // Atualiza a permissão do usuário
+    //     $permissoesUsuario[0]['Liberacao'] = $permissaoFinal;
+
+    //     $database->closeConection();
+    //     return $permissoesUsuario;
+    //     }
+    // }
 
     public static function getLogs($Tabela, $ChaveAux){
         $database = new Database();
