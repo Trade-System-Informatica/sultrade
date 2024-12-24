@@ -6337,13 +6337,13 @@ class AddOS extends Component {
                         this.state.pdfContent[0].codigo
                       )}
                     </td>
-                    <td className="pdf_money_colOS" colSpan="2">
+                    {/* <td className="pdf_money_colOS" colSpan="2">
                       <b style={{ paddingRight: 5 }}>O.C.C:</b>{" "}
                       {util.returnIfExists(
                         this.state.pdfContent[0],
                         this.state.pdfContent[0].centro_custo
                       )}
-                    </td>
+                    </td> */}
                   </tr>
                   <tr>
                     <td className="pdf_small_col" colSpan="4">

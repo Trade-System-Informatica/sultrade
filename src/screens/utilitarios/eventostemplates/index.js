@@ -266,8 +266,7 @@ class EventosTemplates extends Component {
                                             <div className="col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 text-left">
                                                 <span className="subtituloships">Descrição</span>
                                             </div>
-                                            <div className="col-2 text-right revertItem" onClick={() => this.reverterItens()}>
-                                                <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela} /></span>
+                                            <div className="col-2 text-right revertItem">
                                             </div>
                                         </div>
                                     </div>
@@ -277,7 +276,7 @@ class EventosTemplates extends Component {
 
                             <div id="product-list">
                                 {this.state.eventos[0] != undefined && this.state.eventos.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (
-                                    <div key={feed.Chave} className="row row-list">
+                                    <div key={feed.chave} className="row row-list">
                                         <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
                                         <div ref={feed.chave == this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-8 col-md-8 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.chave == this.state.chaveFocus ? "par focusLight" : "par " : feed.chave == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
                                                 <div className="row deleteMargin alignCenter">
