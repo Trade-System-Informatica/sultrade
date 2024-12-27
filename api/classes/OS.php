@@ -1352,9 +1352,11 @@ class OS
             $result = $database->doSelect('os_servicos_itens', 'os_servicos_itens.*', "1=1 ORDER BY chave DESC LIMIT 1");
         }
 
+        $ordem = 1;
         $chave = $result[0]['chave'];
         foreach ($grupos as $key => $grupo) {
-            $database->doInsert('templates_relacoes', "template, grupo", "'$chave', '$grupo'");
+            $database->doInsert('templates_relacoes', "template, grupo, ordem", "'$chave', '$grupo', '$ordem'");
+            $ordem++;
         }
 
         $database->closeConection();
