@@ -481,7 +481,7 @@ class AddEventoTemplate extends Component {
         if (parseInt(this.state.chave) === 0 && validForm) {
             await apiEmployee.post(`insertEventoTemplate.php`, {
                 token: true,
-                values: `'${this.state.data}', '${this.state.fornecedor}', '${this.state.taxa}', '${this.state.descricao}', '${this.state.tipo}', '${this.state.fornecedorCusteio}', '${this.state.remarks}', '${this.state.moeda}', '${parseFloat(this.state.valor == "" ? 0 : this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.vlrc == "" ? 0 : this.state.vlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.repasse ? 1 : 0}', '${this.state.qntd}'`,
+                values: `'${this.state.data}', '${this.state.fornecedor}', '${this.state.taxa}', '${this.state.descricao}', '${this.state.tipo}', '${this.state.fornecedorCusteio}', '${this.state.remarks}', '${this.state.moeda}', '${parseFloat(this.state.valor == "" ? 0 : this.state.valor.replaceAll('.', '').replaceAll(',', '.'))}', '${parseFloat(this.state.vlrc == "" ? 0 : this.state.vlrc.replaceAll('.', '').replaceAll(',', '.'))}', '${this.state.repasse ? 1 : 0}', 1, '${this.state.qntd}'`,
                 grupos: this.state.gruposEscolhidos
             }).then(
                 async res => {
