@@ -137,7 +137,7 @@ class RelatorioExcel extends Component {
         let where = [empresa, situacao, navio, centroCusto, porto, periodoInicial, periodoFinal, cliente];
         where = where.filter((e) => e.trim() != "");
     
-        await apiEmployee.post(`gerarRelatorioOS.php`, {
+        await apiEmployee.post(`gerarRelatorioExcel.php`, {
             token: true,
             where: where.join(' AND ')
         }).then(

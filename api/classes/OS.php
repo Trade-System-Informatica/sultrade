@@ -721,8 +721,59 @@ class OS
         $database->closeConection();
         return $result;
     }
-    
+
     public static function gerarRelatorioOS($where)
+    {
+        $database = new Database();
+
+        if ($where != "") {
+            $result = $database->doSelect(
+                "os
+                LEFT JOIN os_navios ON os.chave_navio = os_navios.chave
+                LEFT JOIN os_portos ON os.porto = os_portos.chave
+                LEFT JOIN pessoas ON os.Chave_Cliente = pessoas.chave
+                LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os
+                LEFT JOIN os_tipos_servicos ON os.chave_tipo_servico = os_tipos_servicos.chave",
+                "os.codigo,
+                os_navios.nome AS navioNome,
+                os_portos.Descricao AS portoNome,
+                os.eta AS ETA,
+                os.etb AS ETB,
+                os.data_saida AS ETS,
+                ((IFNULL((SELECT SUM(os_servicos_itens.valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0) / os.ROE) + IFNULL((SELECT SUM(os_servicos_itens.valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0)) as valor,
+                ((IFNULL((SELECT SUM(os_servicos_itens.desconto_valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0) / os.ROE) + IFNULL((SELECT SUM(os_servicos_itens.desconto_valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0)) as desconto,
+                pessoas.Nome AS pessoaNome,
+                pessoas.Nome_Fantasia AS pessoaNomeFantasia,
+                os_tipos_servicos.descricao AS tipoServicoNome",
+                "$where AND os.orcamento != 1 GROUP BY os.chave"
+            );
+            $database->closeConection();
+        } else {
+            $result = $database->doSelect(
+                "os
+                LEFT JOIN os_navios ON os.chave_navio = os_navios.chave
+                LEFT JOIN os_portos ON os.porto = os_portos.chave
+                LEFT JOIN pessoas ON os.Chave_Cliente = pessoas.chave
+                LEFT JOIN os_servicos_itens ON os.chave = os_servicos_itens.chave_os
+                LEFT JOIN os_tipos_servicos ON os.chave_tipo_servico = os_tipos_servicos.chave",
+                "os.codigo,
+                os_navios.nome AS navioNome,
+                os_portos.Descricao AS portoNome,
+                os.eta AS ETA,
+                os.etb AS ETB,
+                os.atb AS ETS,
+                ((IFNULL((SELECT SUM(os_servicos_itens.valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0) / os.ROE) + IFNULL((SELECT SUM(os_servicos_itens.valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0)) as valor,
+                ((IFNULL((SELECT SUM(os_servicos_itens.desconto_valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND os_servicos_itens.moeda = 5 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0) / os.ROE) + IFNULL((SELECT SUM(os_servicos_itens.desconto_valor) FROM os_servicos_itens WHERE os_servicos_itens.chave_os = os.chave AND moeda = 6 AND os_servicos_itens.cancelada = 0 GROUP BY os.chave),0)) as desconto,
+                pessoas.Nome AS pessoaNome,
+                pessoas.Nome_Fantasia AS pessoaNomeFantasia,
+                os_tipos_servicos.descricao AS tipoServicoNome",
+                "GROUP BY os.chave"
+            );
+        }
+        return $result;
+    }
+    
+    public static function gerarRelatorioExcel($where)
     {
         $database = new Database();
 
