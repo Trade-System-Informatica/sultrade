@@ -2387,20 +2387,20 @@ class AddOS extends Component {
       ?.split("@.@")
       ?.map((e) => this.state.templates.find((t) => t.chave == e));
 
-    templates.forEach(async (template, index) => {
-      let ordem;
-      if (this.state.eventos.length > 0) {
-        ordem =
-          parseFloat(
-            this.state.eventos[this.state.eventos.length - 1]?.ordem.replaceAll(
-              ",",
-              "."
-            )
-          ) +
-          (index + 1);
-      } else {
-        ordem = index + 1;
-      }
+      for (const [index, template] of templates.entries()) {
+        let ordem;
+        if (this.state.eventos.length > 0) {
+          ordem =
+            parseFloat(
+              this.state.eventos[this.state.eventos.length - 1]?.ordem.replaceAll(
+                ",",
+                "."
+              )
+            ) +
+            (index + 1);
+        } else {
+          ordem = index + 1;
+        }
 
       await apiEmployee
         .post(`insertServicoItemBasico.php`, {
@@ -2421,7 +2421,7 @@ class AddOS extends Component {
           },
           async (res) => await console.log(`Erro: ${res.data}`)
         );
-    });
+    };
 
     if (validForm) {
       this.salvarOS(validForm);
