@@ -823,7 +823,7 @@ class OS
                             AND osi.repasse = 0
                             AND osi.Fornecedor_Custeio NOT IN (269, 32, 17, 0)), 0) * os.ROE)
                     - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                    (IFNULL((SELECT SUM(osi.valor1) 
                             FROM os_servicos_itens osi 
                             WHERE osi.chave_os = os.chave 
                             AND osi.cancelada = 0 
@@ -862,7 +862,7 @@ class OS
                             AND osi.cancelada = 0 
                             AND osi.Fornecedor_Custeio = 17), 0) * os.ROE)
                     - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                    (IFNULL((SELECT SUM(osi.valor1) 
                             FROM os_servicos_itens osi 
                             WHERE osi.chave_os = os.chave 
                             AND osi.cancelada = 0 
@@ -920,7 +920,7 @@ class OS
                             AND osi.repasse = 0
                             AND osi.Fornecedor_Custeio NOT IN (269, 32, 17, 0)), 0) * os.ROE)
                     - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                    (IFNULL((SELECT SUM(osi.valor1) 
                             FROM os_servicos_itens osi 
                             WHERE osi.chave_os = os.chave 
                             AND osi.cancelada = 0 
@@ -959,7 +959,7 @@ class OS
                             AND osi.cancelada = 0 
                             AND osi.Fornecedor_Custeio = 17), 0) * os.ROE)
                     - 
-                    (IFNULL((SELECT SUM(osi.valor1 * osi.qntd) 
+                    (IFNULL((SELECT SUM(osi.valor1) 
                             FROM os_servicos_itens osi 
                             WHERE osi.chave_os = os.chave 
                             AND osi.cancelada = 0 
