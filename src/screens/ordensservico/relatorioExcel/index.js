@@ -176,19 +176,19 @@ class RelatorioExcel extends Component {
             'UND FATURAMENTO': item.portoNome === 'SANTOS' ? 'SANTOS' : 'RIO GRANDE', 
             'NACIONALIDADE': '',
 
-            'STA RIG': item.valorLiquidoStaRig !== null && !isNaN(parseFloat(item.valorLiquidoStaRig)) && item.valorLiquidoStaRig > 0
+            'STA RIG': item.valorLiquidoStaRig !== null && !isNaN(parseFloat(item.valorLiquidoStaRig))
             ? formatarValor(item.valorLiquidoStaRig)
             : formatarValor(0),
     
-            'STA SANTOS': item.valorLiquidoStaSantos !== null && !isNaN(parseFloat(item.valorLiquidoStaSantos)) && item.valorLiquidoStaSantos > 0
+            'STA SANTOS': item.valorLiquidoStaSantos !== null && !isNaN(parseFloat(item.valorLiquidoStaSantos))
                 ? formatarValor(item.valorLiquidoStaSantos)
                 : formatarValor(0),
         
-            'PORTO BRASIL': item.valorLiquidoPortoBrasil !== null && !isNaN(parseFloat(item.valorLiquidoPortoBrasil)) && item.valorLiquidoPortoBrasil > 0
+            'PORTO BRASIL': item.valorLiquidoPortoBrasil !== null && !isNaN(parseFloat(item.valorLiquidoPortoBrasil))
                 ? formatarValor(item.valorLiquidoPortoBrasil)
                 : formatarValor(0),
         
-            'COAST': item.valorLiquidoCoast !== null && !isNaN(parseFloat(item.valorLiquidoCoast)) && item.valorLiquidoCoast > 0
+            'COAST': item.valorLiquidoCoast !== null && !isNaN(parseFloat(item.valorLiquidoCoast))
                 ? formatarValor(item.valorLiquidoCoast)
                 : formatarValor(0),
         
@@ -199,7 +199,7 @@ class RelatorioExcel extends Component {
                 item.valorLiquidoCoast
             ].reduce((total, valor) => {
                 const valorNumerico = parseFloat(valor);
-                return !isNaN(valorNumerico) && valorNumerico >= 0 ? total + valorNumerico : total;
+                return !isNaN(valorNumerico) ? total + valorNumerico : total;
             }, 0)),    
 
             'SERVIÇO': item.tipoServicoNome,                                 
