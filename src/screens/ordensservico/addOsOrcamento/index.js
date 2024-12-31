@@ -849,7 +849,7 @@ class AddOsOrcamento extends Component {
       ...(await loader.getBase(
         `getOS.php`,
         this.state.usuarioLogado.empresa,
-        201,
+        500,
         0
       )),
     ];
