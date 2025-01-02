@@ -8632,18 +8632,14 @@ class AddOS extends Component {
                 overflow: "scroll",
               }}
               open={this.state.gruposTemplatesModal}
-              onClose={async () =>
-                await this.setState({ gruposTemplatesModal: false })
-              }
+              onClose={async () => await this.setState({ gruposTemplatesModal: false })}
             >
               <div className="modalContainer">
                 <div className="modalCriar">
                   <div className="containersairlistprodmodal">
                     <div
                       className="botaoSairModal"
-                      onClick={async () =>
-                        await this.setState({ gruposTemplatesModal: false })
-                      }
+                      onClick={async () => await this.setState({ gruposTemplatesModal: false })}
                     >
                       <span>X</span>
                     </div>
@@ -8653,6 +8649,7 @@ class AddOS extends Component {
                       <Formik
                         initialValues={{
                           name: "",
+                          search: "",
                         }}
                         onSubmit={async (values) => {
                           await new Promise((r) => setTimeout(r, 1000));
@@ -8660,101 +8657,106 @@ class AddOS extends Component {
                           await this.setState({ gruposTemplatesModal: false });
                         }}
                       >
-                        <Form className="contact-form">
-                          <div className="row">
-                            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
-                              <div className="row addservicos">
-                                <div className="col-12">
-                                  <h4 className="text-center white">
-                                    Grupos de Templates:
-                                  </h4>
-                                </div>
-                                {this.state.gruposTemplates[0] && (
-                                  <div className="agrupador_eventos_selecionados">
-                                    <table className="agrupador_lista">
-                                      <tr>
-                                        <th className="text-center">
-                                          <span>Chave</span>
-                                        </th>
-                                        <th className="text-center">
-                                          <span>Nome</span>
-                                        </th>
-                                      </tr>
-                                      {this.state.gruposTemplates[0] !=
-                                        undefined &&
-                                        this.state.gruposTemplates
-                                          .filter(
-                                            (feed) => /*this.filterTemplate*/ {
-                                              return true;
-                                            }
-                                          )
-                                          .map((feed, index) => (
-                                            <tr
-                                              onClick={() => {
-                                                if (
-                                                  this.state.grupoTemplate &&
-                                                  this.state.grupoTemplate
-                                                    .chave != feed.chave
-                                                ) {
-                                                  this.setState({
-                                                    grupoTemplate: feed,
-                                                  });
-                                                } else {
-                                                  this.setState({
-                                                    grupoTemplate: {},
-                                                  });
-                                                }
-                                              }}
-                                              style={{
-                                                filter:
-                                                  feed.chave ==
-                                                  this.state.grupoTemplate.chave
-                                                    ? "brightness(0.5)"
-                                                    : undefined,
-                                              }}
-                                            >
-                                              <td className="text-center">
-                                                <p>{feed.chave}</p>
-                                              </td>
-                                              <td className="text-center">
-                                                <p>{feed.nome}</p>
-                                              </td>
-                                            </tr>
-                                          ))}
-                                    </table>
+                        {({ values, handleChange }) => (
+                          <Form className="contact-form">
+                            <div className="row">
+                              <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                <div className="row addservicos">
+                                  <div className="col-12">
+                                    <h4 className="text-center white">Grupos de Templates:</h4>
                                   </div>
-                                )}
-                                {!this.state.gruposTemplates[0] && (
-                                  <h4 className="text-center">Nenhum</h4>
-                                )}
-                              </div>
-                            </div>
-                            {this.state.grupoTemplate && (
-                              <div className="row">
-                                <div className="col-2"></div>
-                                <div
-                                  className="col-8"
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                  }}
-                                >
-                                  <button
-                                    type="submit"
-                                    disabled={
-                                      !this.state.grupoTemplate?.chave ||
-                                      !validForm
-                                    }
-                                    style={{ width: 300 }}
-                                  >
-                                    Salvar
-                                  </button>
+                                  <div className="col-12 mb-3">
+                                    <input
+                                      type="text"
+                                      name="search"
+                                      className="form-control"
+                                      placeholder="Pesquisar templates..."
+                                      value={values.search}
+                                      onChange={handleChange}
+                                    />
+                                  </div>
+                                  {this.state.gruposTemplates[0] && (
+                                    <div className="agrupador_eventos_selecionados">
+                                      <table className="agrupador_lista">
+                                        <tr>
+                                          <th className="text-center">
+                                            <span>Chave</span>
+                                          </th>
+                                          <th className="text-center">
+                                            <span>Nome</span>
+                                          </th>
+                                        </tr>
+                                        {this.state.gruposTemplates[0] != undefined &&
+                                          this.state.gruposTemplates
+                                            .filter((feed) => {
+                                              return (
+                                                feed.nome
+                                                  .toLowerCase()
+                                                  .includes(values.search.toLowerCase()) ||
+                                                feed.chave
+                                                  .toLowerCase()
+                                                  .includes(values.search.toLowerCase())
+                                              );
+                                            })
+                                            .map((feed, index) => (
+                                              <tr
+                                                onClick={() => {
+                                                  if (
+                                                    this.state.grupoTemplate &&
+                                                    this.state.grupoTemplate.chave != feed.chave
+                                                  ) {
+                                                    this.setState({ grupoTemplate: feed });
+                                                  } else {
+                                                    this.setState({ grupoTemplate: {} });
+                                                  }
+                                                }}
+                                                style={{
+                                                  filter:
+                                                    feed.chave == this.state.grupoTemplate.chave
+                                                      ? "brightness(0.5)"
+                                                      : undefined,
+                                                }}
+                                              >
+                                                <td className="text-center">
+                                                  <p>{feed.chave}</p>
+                                                </td>
+                                                <td className="text-center">
+                                                  <p>{feed.nome}</p>
+                                                </td>
+                                              </tr>
+                                            ))}
+                                      </table>
+                                    </div>
+                                  )}
+                                  {!this.state.gruposTemplates[0] && (
+                                    <h4 className="text-center">Nenhum</h4>
+                                  )}
                                 </div>
-                                <div className="col-2"></div>
                               </div>
-                            )}
-                          </div>
-                        </Form>
+                              {this.state.grupoTemplate && (
+                                <div className="row">
+                                  <div className="col-2"></div>
+                                  <div
+                                    className="col-8"
+                                    style={{
+                                      display: "flex",
+                                      justifyContent: "center",
+                                    }}
+                                  >
+                                    <button
+                                      type="submit"
+                                      disabled={!this.state.grupoTemplate?.chave || !validForm}
+                                      style={{ width: 300 }}
+                                    >
+                                      Salvar
+                                    </button>
+                                  </div>
+                                  <div className="col-2"></div>
+                                </div>
+                              )}
+                            </div>
+                          </Form>
+                        )}
                       </Formik>
                     </div>
                   </div>
