@@ -804,7 +804,7 @@ class OS
                             WHERE osi.chave_os = os.chave 
                             AND osi.moeda = 6 
                             AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 269), 0) * os.ROE)
+                            AND osi.Fornecedor_Custeio = 269), 0) * IF(os.ROE = 0, 5, os.ROE))
                 ) AS valorLiquidoCoast,
                 (
                     (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
@@ -821,7 +821,7 @@ class OS
                             AND osi.moeda = 6 
                             AND osi.cancelada = 0 
                             AND osi.repasse = 0
-                            AND osi.Fornecedor_Custeio NOT IN (269, 32, 17, 0)), 0) * os.ROE)
+                            AND osi.Fornecedor_Custeio NOT IN (269, 32, 17, 0)), 0) * IF(os.ROE = 0, 5, os.ROE))
                     - 
                     (IFNULL((SELECT SUM(osi.valor1) 
                             FROM os_servicos_itens osi 
@@ -844,7 +844,7 @@ class OS
                             WHERE osi.chave_os = os.chave 
                             AND osi.moeda = 6 
                             AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 32), 0) * os.ROE)
+                            AND osi.Fornecedor_Custeio = 32), 0) * IF(os.ROE = 0, 5, os.ROE))
                 ) AS valorLiquidoPortoBrasil,
 
                 (
@@ -860,7 +860,7 @@ class OS
                             WHERE osi.chave_os = os.chave 
                             AND osi.moeda = 6 
                             AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 17), 0) * os.ROE)
+                            AND osi.Fornecedor_Custeio = 17), 0) * IF(os.ROE = 0, 5, os.ROE))
                     - 
                     (IFNULL((SELECT SUM(osi.valor1) 
                             FROM os_servicos_itens osi 
@@ -901,7 +901,7 @@ class OS
                             WHERE osi.chave_os = os.chave 
                             AND osi.moeda = 6 
                             AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 269), 0) * os.ROE)
+                            AND osi.Fornecedor_Custeio = 269), 0) * IF(os.ROE = 0, 5, os.ROE))
                 ) AS valorLiquidoCoast,
                 (
                     (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
@@ -918,7 +918,7 @@ class OS
                             AND osi.moeda = 6 
                             AND osi.cancelada = 0 
                             AND osi.repasse = 0
-                            AND osi.Fornecedor_Custeio NOT IN (269, 32, 17, 0)), 0) * os.ROE)
+                            AND osi.Fornecedor_Custeio NOT IN (269, 32, 17, 0)), 0) * IF(os.ROE = 0, 5, os.ROE))
                     - 
                     (IFNULL((SELECT SUM(osi.valor1) 
                             FROM os_servicos_itens osi 
@@ -941,7 +941,7 @@ class OS
                             WHERE osi.chave_os = os.chave 
                             AND osi.moeda = 6 
                             AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 32), 0) * os.ROE)
+                            AND osi.Fornecedor_Custeio = 32), 0) * IF(os.ROE = 0, 5, os.ROE))
                 ) AS valorLiquidoPortoBrasil,
 
                 (
@@ -957,7 +957,7 @@ class OS
                             WHERE osi.chave_os = os.chave 
                             AND osi.moeda = 6 
                             AND osi.cancelada = 0 
-                            AND osi.Fornecedor_Custeio = 17), 0) * os.ROE)
+                            AND osi.Fornecedor_Custeio = 17), 0) * IF(os.ROE = 0, 5, os.ROE))
                     - 
                     (IFNULL((SELECT SUM(osi.valor1) 
                             FROM os_servicos_itens osi 
