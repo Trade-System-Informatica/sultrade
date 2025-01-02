@@ -812,7 +812,6 @@ class OS
                             WHERE osi.chave_os = os.chave 
                             AND osi.moeda = 5 
                             AND osi.cancelada = 0 
-                            AND osi.repasse = 0
                             AND osi.Fornecedor_Custeio NOT IN (269, 32, 17, 0)), 0))  
                     + 
                     (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
@@ -820,14 +819,12 @@ class OS
                             WHERE osi.chave_os = os.chave 
                             AND osi.moeda = 6 
                             AND osi.cancelada = 0 
-                            AND osi.repasse = 0
                             AND osi.Fornecedor_Custeio NOT IN (269, 32, 17, 0)), 0) * IF(os.ROE = 0, 5, os.ROE))
                     - 
                     (IFNULL((SELECT SUM(osi.valor1) 
                             FROM os_servicos_itens osi 
                             WHERE osi.chave_os = os.chave 
                             AND osi.cancelada = 0 
-                            AND osi.repasse = 0
                             AND osi.Fornecedor_Custeio NOT IN (17, 0)), 0)) 
                 ) AS valorLiquidoStaRig,
 
@@ -909,7 +906,6 @@ class OS
                             WHERE osi.chave_os = os.chave 
                             AND osi.moeda = 5 
                             AND osi.cancelada = 0 
-                            AND osi.repasse = 0
                             AND osi.Fornecedor_Custeio NOT IN (269, 32, 17, 0)), 0))  
                     + 
                     (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
@@ -917,7 +913,6 @@ class OS
                             WHERE osi.chave_os = os.chave 
                             AND osi.moeda = 6 
                             AND osi.cancelada = 0 
-                            AND osi.repasse = 0
                             AND osi.Fornecedor_Custeio NOT IN (269, 32, 17, 0)), 0) * IF(os.ROE = 0, 5, os.ROE))
                     - 
                     (IFNULL((SELECT SUM(osi.valor1) 
@@ -925,7 +920,7 @@ class OS
                             WHERE osi.chave_os = os.chave 
                             AND osi.cancelada = 0 
                             AND osi.repasse = 0
-                            AND osi.Fornecedor_Custeio NOT IN (269, 32, 17, 0)), 0)) 
+                            AND osi.Fornecedor_Custeio NOT IN (17, 0)), 0)) 
                 ) AS valorLiquidoStaRig,
 
                 (
