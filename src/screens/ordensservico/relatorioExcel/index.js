@@ -168,7 +168,16 @@ class RelatorioExcel extends Component {
 
         console.log(relatorio)
 
-        const dadosFormatados = relatorio.map(item => ({
+        const dadosFormatados = relatorio.map(item => {
+            const parseValor = (valor) => {
+                return valor !== null && !isNaN(parseFloat(valor)) ? parseFloat(valor) : 0;
+            };
+        
+            // Calcula valores de STA
+            const valorStaRig = parseValor(item.valorLiquidoStaRig);
+            const valorStaSantos = parseValor(item.valorLiquidoStaSantos);
+
+            return {
             'CLIENTES': item.pessoaNome,               
             'ST': item.codigo,                          
             'NAVIO': item.navioNome,                
@@ -176,25 +185,17 @@ class RelatorioExcel extends Component {
             'UND FATURAMENTO': item.portoNome === 'SANTOS' ? 'SANTOS' : 'RIO GRANDE', 
             'NACIONALIDADE': '',
 
-            'STA RIG': item.portoNome === 'SANTOS' ? 0 : (item.valorLiquidoStaRig !== null && !isNaN(parseFloat(item.valorLiquidoStaRig))
-            ? formatarValor(item.valorLiquidoStaRig)
-            : formatarValor(0)),
-    
-            'STA SANTOS': item.portoNome === 'SANTOS' ? ((item.valorLiquidoStaRig !== null && !isNaN(parseFloat(item.valorLiquidoStaRig))
-            ? formatarValor(item.valorLiquidoStaRig)
-            : formatarValor(0)) + (item.valorLiquidoStaSantos !== null && !isNaN(parseFloat(item.valorLiquidoStaSantos))
-            ? formatarValor(item.valorLiquidoStaSantos)
-            : formatarValor(0))) : (item.valorLiquidoStaSantos !== null && !isNaN(parseFloat(item.valorLiquidoStaSantos))
-            ? formatarValor(item.valorLiquidoStaSantos)
-            : formatarValor(0)),
+            'STA RIG': item.portoNome === 'SANTOS' 
+            ? formatarValor(0) 
+            : formatarValor(valorStaRig),
+
+            'STA SANTOS': item.portoNome === 'SANTOS'
+            ? formatarValor(valorStaRig + valorStaSantos)
+            : formatarValor(valorStaSantos),
         
-            'PORTO BRASIL': item.valorLiquidoPortoBrasil !== null && !isNaN(parseFloat(item.valorLiquidoPortoBrasil))
-                ? formatarValor(item.valorLiquidoPortoBrasil)
-                : formatarValor(0),
+            'PORTO BRASIL': formatarValor(parseValor(item.valorLiquidoPortoBrasil)),
         
-            'COAST': item.valorLiquidoCoast !== null && !isNaN(parseFloat(item.valorLiquidoCoast))
-                ? formatarValor(item.valorLiquidoCoast)
-                : formatarValor(0),
+            'COAST': formatarValor(parseValor(item.valorLiquidoCoast)),
         
             'TOTAL CUSTEIO': formatarValor([
                 item.valorLiquidoStaRig,
@@ -210,7 +211,7 @@ class RelatorioExcel extends Component {
             'ETA': item.ETA,                        
             'ETB': item.ETB,                        
             'ETS': item.ETS,               
-        }));
+        }});
     
         // Criar a worksheet manualmente
         const worksheet = {};
