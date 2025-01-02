@@ -176,13 +176,17 @@ class RelatorioExcel extends Component {
             'UND FATURAMENTO': item.portoNome === 'SANTOS' ? 'SANTOS' : 'RIO GRANDE', 
             'NACIONALIDADE': '',
 
-            'STA RIG': item.valorLiquidoStaRig !== null && !isNaN(parseFloat(item.valorLiquidoStaRig))
+            'STA RIG': item.portoNome === 'SANTOS' ? 0 : item.valorLiquidoStaRig !== null && !isNaN(parseFloat(item.valorLiquidoStaRig))
             ? formatarValor(item.valorLiquidoStaRig)
             : formatarValor(0),
     
-            'STA SANTOS': item.valorLiquidoStaSantos !== null && !isNaN(parseFloat(item.valorLiquidoStaSantos))
-                ? formatarValor(item.valorLiquidoStaSantos)
-                : formatarValor(0),
+            'STA SANTOS': item.portoNome === 'SANTOS' ? ((item.valorLiquidoStaRig !== null && !isNaN(parseFloat(item.valorLiquidoStaRig))
+            ? formatarValor(item.valorLiquidoStaRig)
+            : formatarValor(0)) + (item.valorLiquidoStaSantos !== null && !isNaN(parseFloat(item.valorLiquidoStaSantos))
+            ? formatarValor(item.valorLiquidoStaSantos)
+            : formatarValor(0))) : item.valorLiquidoStaSantos !== null && !isNaN(parseFloat(item.valorLiquidoStaSantos))
+            ? formatarValor(item.valorLiquidoStaSantos)
+            : formatarValor(0),
         
             'PORTO BRASIL': item.valorLiquidoPortoBrasil !== null && !isNaN(parseFloat(item.valorLiquidoPortoBrasil))
                 ? formatarValor(item.valorLiquidoPortoBrasil)
