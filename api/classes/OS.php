@@ -828,7 +828,7 @@ class OS
                             WHERE osi.chave_os = os.chave 
                             AND osi.cancelada = 0 
                             AND osi.repasse = 0
-                            AND osi.Fornecedor_Custeio NOT IN (269, 32, 17, 0)), 0)) 
+                            AND osi.Fornecedor_Custeio NOT IN (17, 0)), 0)) 
                 ) AS valorLiquidoStaRig,
 
                 (
@@ -968,7 +968,7 @@ class OS
                 pessoas.Nome AS pessoaNome,
                 pessoas.Nome_Fantasia AS pessoaNomeFantasia,
                 os_tipos_servicos.descricao AS tipoServicoNome",
-                "GROUP BY os.chave"
+                "os.orcamento != 1 GROUP BY os.chave"
             );
         }
         return $result;
