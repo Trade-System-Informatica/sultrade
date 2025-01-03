@@ -160,7 +160,7 @@ class GruposTemplates extends Component {
         if (this.state.tipoPesquisa == 1) {
             return grupos.nome.toLowerCase().includes(this.state.pesquisa.toLowerCase());
         } else if (this.state.tipoPesquisa == 2) {
-            return grupos.porto.toLowerCase().includes(this.state.pesquisa.toLowerCase());
+            return (grupos.porto || '').toLowerCase().includes(this.state.pesquisa.toLowerCase());
         } else {
             return grupos.chave.toLowerCase().includes(this.state.pesquisa.toLowerCase());
         }
