@@ -16,6 +16,7 @@ import 'react-confirm-alert/src/react-confirm-alert.css'
 
 const estadoInicial = {
     name: '',
+    porto: '',
     grupos: [],
     pesquisa: "",
     tipoPesquisa: 1,
@@ -158,6 +159,8 @@ class GruposTemplates extends Component {
         
         if (this.state.tipoPesquisa == 1) {
             return grupos.nome.toLowerCase().includes(this.state.pesquisa.toLowerCase());
+        } else if (this.state.tipoPesquisa == 2) {
+            return grupos.porto.toLowerCase().includes(this.state.pesquisa.toLowerCase());
         } else {
             return grupos.chave.toLowerCase().includes(this.state.pesquisa.toLowerCase());
         }
@@ -202,7 +205,8 @@ class GruposTemplates extends Component {
                                             <div className='col-2'></div>
                                             <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
                                                 <option value={1}>Nome</option>
-                                                <option value={2}>Chave</option>
+                                                <option value={2}>Porto</option>
+                                                <option value={3}>Chave</option>
                                             </select>
                                             <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
                                             <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
@@ -236,8 +240,11 @@ class GruposTemplates extends Component {
                                                 <div className="col-2 text-left">
                                                     <span className="subtituloships">Chave</span>
                                                 </div>
-                                            <div className="col-8 text-left">
+                                            <div className="col-5 text-left">
                                                 <span className="subtituloships">Nome</span>
+                                            </div>
+                                            <div className="col-3 text-left">
+                                                <span className="subtituloships">Porto</span>
                                             </div>
                                             <div className="col-2 text-right revertItem" onClick={() => this.reverterItens()}>
                                                 <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela} /></span>
@@ -257,8 +264,11 @@ class GruposTemplates extends Component {
                                                 <div className="col-2 text-left">
                                                     <p>{feed.chave}</p>
                                                 </div>
-                                                <div className="col-8 text-left">
+                                                <div className="col-5 text-left">
                                                     <p>{feed.nome}</p>
+                                                </div>
+                                                <div className="col-3 text-left">
+                                                    <p>{feed.porto}</p>
                                                 </div>
                                                 <div className="col-2 text-left mobileajuster4 icones">
                                                     <div className='iconelixo giveMargin' type='button' >

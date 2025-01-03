@@ -1295,7 +1295,7 @@ class OS
     {
         $database = new Database();
 
-        $cols = 'nome';
+        $cols = 'nome, porto';
 
         $result = $database->doInsert('templates_grupos', $cols, $values);
         $chave = $result[0]['chave'];
@@ -1889,11 +1889,11 @@ class OS
         }
     }
 
-    public static function updateGrupoTemplate($chave, $nome, $templatesNovas, $templatesDeletadas)
+    public static function updateGrupoTemplate($chave, $nome, $templatesNovas, $templatesDeletadas, $porto)
     {
         $database = new Database();
 
-        $query = "nome = '" . $nome . "'";
+        $query = "nome = '" . $nome . "', porto = '" . $porto . "'";
 
         $result = $database->doUpdate('templates_grupos', $query, 'chave = ' . $chave);
 

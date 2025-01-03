@@ -26,6 +26,7 @@ const estadoInicial = {
 
     chave: '',
     nome: '',
+    porto: '',
 
     logs: [],
     modalLog: false,
@@ -71,6 +72,7 @@ class AddGrupoTemplate extends Component {
             
             await this.setState({
                 nome: this.state.grupo.nome,
+                porto: this.state.grupo.porto,
                 templatesIniciais: this.state.grupo.templatesChaves != null ? this.state.grupo.templatesChaves.split('@.@') : [],
                 templatesEscolhidas: this.state.grupo.templatesChaves != null ? this.state.grupo.templatesChaves?.split('@.@') : [],
                 ordem: this.state.grupo.ordem != null ? this.state.grupo.ordem?.split('@.@') : []
@@ -84,7 +86,8 @@ class AddGrupoTemplate extends Component {
         if (this.state.chave != 0) {
             await this.setState({
                 dadosIniciais: [
-                    { titulo: 'Nome', valor: util.formatForLogs(this.state.nome) }
+                    { titulo: 'Nome', valor: util.formatForLogs(this.state.nome) },
+                    { titulo: 'Porto', valor: util.formatForLogs(this.state.porto) }
                 ]
             })
         }
@@ -164,6 +167,7 @@ class AddGrupoTemplate extends Component {
         await this.setState({
             dadosFinais: [
                 { titulo: 'Nome', valor: util.formatForLogs(this.state.nome) },
+                { titulo: 'Porto', valor: util.formatForLogs(this.state.porto) },
             ],
             loading: true
         })
@@ -171,7 +175,7 @@ class AddGrupoTemplate extends Component {
         if (parseInt(this.state.chave) === 0 && validForm) {
             await apiEmployee.post(`insertGrupoTemplate.php`, {
                 token: true,
-                values: `'${this.state.nome}'`,
+                values: `'${this.state.nome}', ${this.state.porto}`,
                 templates: this.state.templatesEscolhidas.map((chave, index) => ({
                     chave,
                     ordem: index + 1, // Inclui a ordem
@@ -209,6 +213,7 @@ class AddGrupoTemplate extends Component {
                 token: true,
                 chave: this.state.chave,
                 nome: this.state.nome,
+                porto: this.state.porto,
                 templatesNovas,
                 templatesDeletadas,
                 ordemTemplates: this.state.templatesEscolhidas.map((chave, index) => ({
@@ -274,6 +279,7 @@ class AddGrupoTemplate extends Component {
     render() {
         const validations = []
         validations.push(this.state.nome);
+        validations.push(this.state.porto);
 
         validations.push(!this.state.bloqueado);
 
@@ -566,6 +572,14 @@ class AddGrupoTemplate extends Component {
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Field className='form-control' value={this.state.nome} onChange={(e) => { this.setState({ nome: e.currentTarget.value }) }} />
+                                                        </div>
+                                                        <div className={this.state.chave == 0 ? "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm firstLabel" : "col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm"}>
+                                                            <label>Porto</label>
+                                                        </div>
+                                                        <div className='col-1 errorMessage'>
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Field className='form-control' value={this.state.porto} onChange={(e) => { this.setState({ porto: e.currentTarget.value }) }} />
                                                         </div>
                                                     </div>
 

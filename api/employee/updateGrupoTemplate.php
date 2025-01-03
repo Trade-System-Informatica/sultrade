@@ -14,6 +14,7 @@ if($objData != NULL){
     $token = prepareInput($objData->token);
     $chave = prepareInput($objData->chave);
     $nome = prepareInput($objData->nome);
+    $porto = prepareInput($objData->porto);
     $templatesNovas = $objData->templatesNovas;
     $templatesDeletadas = $objData->templatesDeletadas;
     
@@ -22,7 +23,7 @@ if($objData != NULL){
     //$result = $employees->checkToken($token);
     //if($result == 'true'){
         //$result = "'" . $id_seaport . "'";
-        $result = $os->updateGrupoTemplate($chave, $nome, $templatesNovas, $templatesDeletadas);
+        $result = $os->updateGrupoTemplate($chave, $nome, $templatesNovas, $templatesDeletadas, $porto);
     //}
 } else {
     $result = "false";

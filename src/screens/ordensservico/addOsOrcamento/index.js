@@ -9435,23 +9435,30 @@ class AddOsOrcamento extends Component {
                                     <div className="agrupador_eventos_selecionados">
                                       <table className="agrupador_lista">
                                         <tr>
-                                          <th className="text-center">
+                                          <th className="text-center px-4">
                                             <span>Chave</span>
                                           </th>
-                                          <th className="text-center">
+                                          <th className="text-center px-4">
                                             <span>Nome</span>
+                                          </th>
+                                          <th className="text-center px-4">
+                                            <span>Porto</span>
                                           </th>
                                         </tr>
                                         {this.state.gruposTemplates[0] != undefined &&
                                           this.state.gruposTemplates
                                             .filter((feed) => {
+                                              const searchTerm = values.search.toLowerCase();
                                               return (
+                                                (feed.porto || "")
+                                                  .toLowerCase()
+                                                  .includes(searchTerm) ||
                                                 feed.nome
                                                   .toLowerCase()
-                                                  .includes(values.search.toLowerCase()) ||
+                                                  .includes(searchTerm) ||
                                                 feed.chave
                                                   .toLowerCase()
-                                                  .includes(values.search.toLowerCase())
+                                                  .includes(searchTerm)
                                               );
                                             })
                                             .map((feed, index) => (
@@ -9473,11 +9480,14 @@ class AddOsOrcamento extends Component {
                                                       : undefined,
                                                 }}
                                               >
-                                                <td className="text-center">
+                                                <td className="text-center px-4">
                                                   <p>{feed.chave}</p>
                                                 </td>
-                                                <td className="text-center">
+                                                <td className="text-center px-4">
                                                   <p>{feed.nome}</p>
+                                                </td>
+                                                <td className="text-center px-4">
+                                                  <p>{feed.porto || "-"}</p>
                                                 </td>
                                               </tr>
                                             ))}
