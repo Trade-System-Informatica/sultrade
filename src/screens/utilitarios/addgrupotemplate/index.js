@@ -175,7 +175,7 @@ class AddGrupoTemplate extends Component {
         if (parseInt(this.state.chave) === 0 && validForm) {
             await apiEmployee.post(`insertGrupoTemplate.php`, {
                 token: true,
-                values: `'${this.state.nome}', ${this.state.porto}`,
+                values: `'${this.state.nome}', '${this.state.porto}'`,
                 templates: this.state.templatesEscolhidas.map((chave, index) => ({
                     chave,
                     ordem: index + 1, // Inclui a ordem
