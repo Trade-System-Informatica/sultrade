@@ -411,7 +411,7 @@ class OS extends Component {
                             </div>
 
                             <div id="product-list">
-                                {this.state.pesquisa1 == '' &&
+                                {(this.state.pesquisa1 == '' && this.state.pesquisa2 == '') &&
                                     <>
                                         {this.state.os[0] != undefined && this.state.os.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (
                                             <div key={feed.Chave} className="row row-list">
@@ -598,7 +598,7 @@ class OS extends Component {
                                         ))}
                                     </>
                                 }
-                                {this.state.pesquisa != '' &&
+                                {(this.state.pesquisa1 != '' || this.state.pesquisa2 != '') &&
                                     <>
                                         {this.state.osPesquisa[0] != undefined && this.state.osPesquisa.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (
                                             <div key={feed.Chave} className="row row-list">
@@ -776,7 +776,7 @@ class OS extends Component {
                                         ))}
                                     </>
                                 }
-                                {this.state.pesquisa == '' && this.state.os.filter(this.filtrarPesquisa)[this.state.load] &&
+                                {(this.state.pesquisa1 == '' && this.state.pesquisa2 == '') && this.state.os.filter(this.filtrarPesquisa)[this.state.load] &&
                                     <div className='loadMoreDiv'>
                                         <div className='loadMore' onClick={async () => { await this.setState({ offset: this.state.load, load: this.state.load + 50 }); await this.getOS() }}>Carregar Mais...</div>
                                     </div>

@@ -617,6 +617,7 @@ export default class loader {
     }
     //
     static async getOSPesquisaMultiple(pesquisa1, tipoPesquisa1, pesquisa2, tipoPesquisa2, empresa) {
+        console.log(pesquisa1, pesquisa2);
         const tipos = ["",
             "os.orcamento = 0 and os.codigo LIKE '%[PESQUISA]%'",
             "os.orcamento = 0 and os_navios.nome LIKE '%[PESQUISA]%'",
@@ -631,7 +632,7 @@ export default class loader {
                            pesquisa1 ? where1 : 
                            pesquisa2 ? where2 : 
                            "os.orcamento = 0";
-    
+        console.log(whereClause);
         return await apiEmployee.post(`getOSPesquisa.php`, {
             token: true,
             where: whereClause,
