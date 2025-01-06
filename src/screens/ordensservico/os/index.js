@@ -21,8 +21,10 @@ const estadoInicial = {
     name: '',
     os: [],
     osPesquisa: [],
-    pesquisa: "",
-    tipoPesquisa: 1,
+    pesquisa1: "",
+    tipoPesquisa1: 1,
+    pesquisa2: "",
+    tipoPesquisa2: 2,
     situacao: 2,
 
     pesquisaTimer: 0,
@@ -173,15 +175,21 @@ class OS extends Component {
     }
 
 
-    pesquisa = async (value) => {
+    pesquisa = async () => {
         clearTimeout(this.state.pesquisaTimer)
 
         const newTimer = setTimeout(async () => {
-            await this.setState({ osPesquisa: await loader.getOSPesquisa(this.state.pesquisa, this.state.tipoPesquisa, this.state.usuarioLogado.empresa) });
+            const results = await loader.getOSPesquisaMultiple(
+                this.state.pesquisa1,
+                this.state.tipoPesquisa1,
+                this.state.pesquisa2,
+                this.state.tipoPesquisa2,
+                this.state.usuarioLogado.empresa
+            );
+            await this.setState({ osPesquisa: results });
         }, 500)
 
-        await this.setState({ pesquisaTimer: newTimer, pesquisa: value })
-
+        await this.setState({ pesquisaTimer: newTimer })
     }
 
     filtrarPesquisa = (os) => {
@@ -249,14 +257,49 @@ class OS extends Component {
                                     <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
                                         <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
                                             <div className='col-2'></div>
-                                            <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={async (e) => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
+                                            {/* First Search Field */}
+                                            <select className="form-control tipoPesquisa col-2" 
+                                                    value={this.state.tipoPesquisa1} 
+                                                    onChange={async (e) => { 
+                                                        await this.setState({ tipoPesquisa1: e.currentTarget.value });
+                                                        this.pesquisa();
+                                                    }}>
                                                 <option value={1}>Codigo</option>
                                                 <option value={2}>Navio</option>
                                                 <option value={3}>Serviço</option>
                                                 <option value={4}>Porto</option>
                                                 <option value={5}>Cliente</option>
                                             </select>
-                                            <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={async e => { await this.pesquisa(e.currentTarget.value) }} />
+                                            <input className="form-control campoPesquisa col-3" 
+                                                placeholder="Pesquise aqui..." 
+                                                value={this.state.pesquisa1} 
+                                                onChange={async e => { 
+                                                    await this.setState({ pesquisa1: e.currentTarget.value });
+                                                    this.pesquisa();
+                                                }} 
+                                            />
+
+                                            {/* Second Search Field */}
+                                            <select className="form-control tipoPesquisa col-2" 
+                                                    value={this.state.tipoPesquisa2} 
+                                                    onChange={async (e) => { 
+                                                        await this.setState({ tipoPesquisa2: e.currentTarget.value });
+                                                        this.pesquisa();
+                                                    }}>
+                                                <option value={1}>Codigo</option>
+                                                <option value={2}>Navio</option>
+                                                <option value={3}>Serviço</option>
+                                                <option value={4}>Porto</option>
+                                                <option value={5}>Cliente</option>
+                                            </select>
+                                            <input className="form-control campoPesquisa col-3" 
+                                                placeholder="Pesquise aqui..." 
+                                                value={this.state.pesquisa2} 
+                                                onChange={async e => { 
+                                                    await this.setState({ pesquisa2: e.currentTarget.value });
+                                                    this.pesquisa();
+                                                }} 
+                                            />
                                             <div className="dropdown" style={{ marginLeft: 15 }}>
                                                 <button className="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     Relatório
@@ -276,8 +319,8 @@ class OS extends Component {
                                     </div>
                                     <div className='col-1 col-sm-2 col-md-2 col-lg-4 col-xl-4'>
                                     </div>
-                                    <div className='col-3 col-sm-3 col-md-2 col-lg-2 col-xl-2'>
-                                        <label style={{ fontSize: '1.1em', marginTop: 3, fontWeight: 'bold' }}>Situação: </label>
+                                    <div className='col-3 col-sm-3 col-md-2 col-lg-1 col-xl-2'>
+                                        <label style={{ fontSize: '1.1em', marginTop: 3, fontWeight: 'bold' }}>Situação:</label>
                                     </div>
                                     <div className='col-5 col-sm-5 col-md-4 col-lg-2 col-xl-2'>
                                         <select className='form-control' value={this.state.situacao} onChange={(e) => { this.setState({ situacao: e.currentTarget.value }) }}>
@@ -368,7 +411,7 @@ class OS extends Component {
                             </div>
 
                             <div id="product-list">
-                                {this.state.pesquisa == '' &&
+                                {this.state.pesquisa1 == '' &&
                                     <>
                                         {this.state.os[0] != undefined && this.state.os.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (
                                             <div key={feed.Chave} className="row row-list">

@@ -616,5 +616,32 @@ export default class loader {
         )
     }
     //
+    static async getOSPesquisaMultiple(pesquisa1, tipoPesquisa1, pesquisa2, tipoPesquisa2, empresa) {
+        const tipos = ["",
+            "os.orcamento = 0 and os.codigo LIKE '%[PESQUISA]%'",
+            "os.orcamento = 0 and os_navios.nome LIKE '%[PESQUISA]%'",
+            "os.orcamento = 0 and os_tipos_servicos.descricao LIKE '%[PESQUISA]%'",
+            "os.orcamento = 0 and os_portos.descricao LIKE '%[PESQUISA]%'",
+            "os.orcamento = 0 and pessoas.nome LIKE '%[PESQUISA]%'"
+        ];
+    
+        const where1 = tipos[tipoPesquisa1].replace('[PESQUISA]', pesquisa1);
+        const where2 = tipos[tipoPesquisa2].replace('[PESQUISA]', pesquisa2);
+        const whereClause = pesquisa1 && pesquisa2 ? `(${where1}) AND (${where2})` : 
+                           pesquisa1 ? where1 : 
+                           pesquisa2 ? where2 : 
+                           "os.orcamento = 0";
+    
+        return await apiEmployee.post(`getOSPesquisa.php`, {
+            token: true,
+            where: whereClause,
+            empresa: empresa
+        }).then(
+            async res => {
+                return res.data;
+            },
+            err => { alert(err) }
+        );
+    }
 
 }
