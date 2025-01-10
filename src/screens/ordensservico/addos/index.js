@@ -7194,6 +7194,14 @@ class AddOS extends Component {
     await this.setState({ logs, modalLog: true });
   };
 
+  DesabilitaRetroceder() {
+    const {encerramento} = this.state;
+    if (encerramento && encerramento !== 'T.B.I.') {
+        return true;
+    }
+    else return false;
+  }
+
   validateDates() {
     const { encerramento, faturamento, envio } = this.state;
 
@@ -11376,6 +11384,7 @@ class AddOS extends Component {
                       </div>
                       <div className="relatorioButton">
                         <button
+                          disabled={this.DesabilitaRetroceder()}
                           className="btn btn-danger"
                           onClick={() => this.RetornaParaOrcamento(true)}
                         >
