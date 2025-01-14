@@ -1722,12 +1722,14 @@ class AddEvento extends Component {
                                         <Formik
                                             initialValues={{
                                                 name: '',
+                                                search: "",
                                             }}
                                             onSubmit={async values => {
                                                 await new Promise(r => setTimeout(r, 1000))
                                                 await this.setState({ templatesModal: false })
                                             }}
                                         >
+                                            {({ values, handleChange }) => (
                                             <Form className="contact-form" >
 
 
@@ -1738,6 +1740,16 @@ class AddEvento extends Component {
                                                         <div className="row addservicos">
                                                             <div className="col-12">
                                                                 <h4 className='text-center white'>Templates:</h4>
+                                                            </div>
+                                                            <div className="col-12 mb-3">
+                                                                <input
+                                                                type="text"
+                                                                name="search"
+                                                                className="form-control"
+                                                                placeholder="Pesquisar templates..."
+                                                                value={values.search}
+                                                                onChange={handleChange}
+                                                                />
                                                             </div>
                                                             {this.state.templates[0] &&
                                                                 <div className="agrupador_eventos_selecionados">
@@ -1763,7 +1775,16 @@ class AddEvento extends Component {
                                                                                 <span>Valor (USD)</span>
                                                                             </th>
                                                                         </tr>
-                                                                        {this.state.templates[0] != undefined && this.state.templates?.filter((feed) => /*this.filterTemplate*/ { return true }).map((feed, index) => (
+                                                                        {this.state.templates[0] != undefined && this.state.templates?.filter((feed) => {
+                                                                            return (
+                                                                                feed.descricao
+                                                                                .toLowerCase()
+                                                                                .includes(values.search.toLowerCase()) ||
+                                                                                feed.chave
+                                                                                .toLowerCase()
+                                                                                .includes(values.search.toLowerCase())
+                                                                            );
+                                                                            }).map((feed, index) => (
                                                                             <>
                                                                                 {window.innerWidth < 500 &&
                                                                                     <tr onClick={() => {
@@ -1818,6 +1839,7 @@ class AddEvento extends Component {
                                                     <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
                                                 </div>
                                             </Form>
+                                            )}
                                         </Formik>
 
                                     </div>
