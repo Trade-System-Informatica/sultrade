@@ -381,7 +381,8 @@ class AddEvento extends Component {
             empresa: this.state.usuarioLogado.empresa,
         }).then(
             async res => {
-                await this.setState({ templates: res.data })
+                const templatesFiltered = res.data.filter(template => template.showInOs == 1);
+                await this.setState({ templates: templatesFiltered })
             },
             async err => { this.erroApi(err) }
         )

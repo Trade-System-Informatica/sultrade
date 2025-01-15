@@ -1889,6 +1889,23 @@ class OS
         }
     }
 
+    public static function updateEventoTemplateVisibility($chave, $showInOs)
+    {
+        $database = new Database();
+
+        $query = "showInOs = '" . $showInOs . "'";
+
+        $result = $database->doUpdate('os_servicos_itens', $query, 'template = 1 AND chave = ' . $chave);
+
+        $result = $database->doSelect('os_servicos_itens', "os_servicos_itens.*", 'template = 1 AND chave = ' . $chave);
+        $database->closeConection();
+        if ($result == NULL) {
+            return 'false';
+        } else {
+            return $result;
+        }
+    }
+
     public static function updateGrupoTemplate($chave, $nome, $templatesNovas, $templatesDeletadas, $porto)
     {
         $database = new Database();

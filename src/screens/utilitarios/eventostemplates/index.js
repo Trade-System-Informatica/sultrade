@@ -8,7 +8,7 @@ import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTimes, faPen, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faChevronDown, faChevronUp, faTimes, faPen, faPlus } from '@fortawesome/free-solid-svg-icons'
 import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import moment from 'moment'
@@ -48,6 +48,7 @@ const estadoInicial = {
 
     load: 100,
     offset: 0,
+    direcaoTabela: faChevronDown,
 }
 
 
@@ -175,6 +176,19 @@ class EventosTemplates extends Component {
         })
     }
 
+    reverterItens = async () => {
+            await this.setState({ loading: true })
+            const eventos = this.state.eventos.reverse();
+    
+            if (this.state.direcaoTabela == faChevronDown) {
+                await this.setState({ direcaoTabela: faChevronUp });
+            } else {
+                await this.setState({ direcaoTabela: faChevronDown });
+            }
+    
+            await this.setState({ eventos, loading: false });
+    }
+
     filtrarPesquisa = (eventos) => {
         let eventosfiltrados = eventos
         if (!this.state.pesquisa) {
@@ -185,6 +199,27 @@ class EventosTemplates extends Component {
             return eventosfiltrados.descricao.toLowerCase().includes(this.state.pesquisa.toLowerCase())
         }
 
+    }
+
+    toggleShowInOS = async (chave, currentValue) => {
+        try {
+            await apiEmployee.post(`updateEventoTemplateVisibility.php`, {
+                token: true,
+                chave: chave,
+                showInOs: currentValue ? 0 : 1
+            });
+
+            const updatedEventos = this.state.eventos.map(evento => {
+                if (evento.chave === chave) {
+                    return { ...evento, showInOs: currentValue ? 0 : 1 };
+                }
+                return evento;
+            });
+
+            await this.setState({ eventos: updatedEventos });
+        } catch (error) {
+            this.erroApi(error);
+        }
     }
 
 
@@ -261,12 +296,16 @@ class EventosTemplates extends Component {
                                     <div className="single-product-item" >
                                         <div className="row subtitulosTabela">
                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
-                                                <span className="subtituloships">Chave</span>
+                                                <span className="subtituloships" style={{ fontSize: '1.0em'}}>Chave</span>
                                             </div>
-                                            <div className="col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 text-left">
-                                                <span className="subtituloships">Descrição</span>
+                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 text-left">
+                                                <span className="subtituloships" style={{ fontSize: '1.0em'}}>Descrição</span>
                                             </div>
-                                            <div className="col-2 text-right revertItem">
+                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2">
+                                                <span className="subtituloships" style={{ fontSize: '1.0em'}}>Mostrar na OS</span>
+                                            </div>
+                                            <div className="col-2 text-right revertItem" onClick={() => this.reverterItens()}>
+                                                <span className="subtituloships" style={{ fontSize: '1.0em'}}><FontAwesomeIcon icon={this.state.direcaoTabela} /></span>
                                             </div>
                                         </div>
                                     </div>
@@ -275,40 +314,50 @@ class EventosTemplates extends Component {
                             </div>
 
                             <div id="product-list">
-                                {this.state.eventos[0] != undefined && this.state.eventos.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (
-                                    <div key={feed.chave} className="row row-list">
-                                        <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
-                                        <div ref={feed.chave == this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-8 col-md-8 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.chave == this.state.chaveFocus ? "par focusLight" : "par " : feed.chave == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
-                                                <div className="row deleteMargin alignCenter">
-                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left" style={{ overflowWrap: 'anywhere' }}>
-                                                        <p>{feed.chave}</p>
-                                                    </div>
-                                                    <div className="col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 text-left">
-                                                        <p>{feed.descricao}</p>
-                                                    </div>
-                                                    <div className="col-lg-2 col-md-2 col-sm-2 col-2 text-left  mobileajuster4 icones">
-                                                        <div className='iconelixo giveMargin' type='button' >
-                                                            <Link to=
-                                                                {{
-                                                                    pathname: `/utilitarios/addeventotemplate/0`,
-                                                                    state: { evento: { ...feed } }
-                                                                }}
-                                                            >
-                                                                <FontAwesomeIcon icon={faPlus} />
-                                                            </Link>
-                                                        </div>
+                            {this.state.eventos[0] != undefined && this.state.eventos.filter(this.filtrarPesquisa).splice(0, this.state.load).map((feed, index) => (
+                                <div key={feed.chave} className="row row-list">
+                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-0"></div>
+                                    <div ref={feed.chave == this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-8 col-md-8 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.chave == this.state.chaveFocus ? "par focusLight" : "par " : feed.chave == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
+                                        <div className="row deleteMargin alignCenter">
+                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left" style={{ overflowWrap: 'anywhere' }}>
+                                                <p>{feed.chave}</p>
+                                            </div>
+                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 text-left">
+                                                <p>{feed.descricao}</p>
+                                            </div>
+                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2" style={{ 
+                                                display: 'flex', 
+                                                justifyContent: 'center', 
+                                                alignItems: 'center',
+                                                height: '100%'
+                                            }}>
+                                                <div className="checkbox-wrapper" onClick={() => this.toggleShowInOS(feed.chave, feed.showInOs)} style={{ cursor: 'pointer' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={feed.showInOs == 1}
+                                                        style={{ marginRight: '5px' }}
+                                                        readOnly
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="col-lg-2 col-md-2 col-sm-2 col-2 text-left mobileajuster4 icones">
+                                                <div className='iconelixo giveMargin' type='button' >
+                                                    <Link to={{
+                                                        pathname: `/utilitarios/addeventotemplate/0`,
+                                                        state: { evento: { ...feed } }
+                                                    }}>
+                                                        <FontAwesomeIcon icon={faPlus} />
+                                                    </Link>
+                                                </div>
 
-
-                                                        <div className='iconelixo giveMargin' type='button' >
-                                                            <Link to=
-                                                                {{
-                                                                    pathname: `/utilitarios/addeventotemplate/${feed.chave}`,
-                                                                    state: { evento: { ...feed } }
-                                                                }}
-                                                            >
-                                                                <FontAwesomeIcon icon={faPen} />
-                                                            </Link>
-                                                        </div>
+                                                <div className='iconelixo giveMargin' type='button' >
+                                                    <Link to={{
+                                                        pathname: `/utilitarios/addeventotemplate/${feed.chave}`,
+                                                        state: { evento: { ...feed } }
+                                                    }}>
+                                                        <FontAwesomeIcon icon={faPen} />
+                                                    </Link>
+                                                </div>
 
                                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'SERVICOS_ITENS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
                                                             <div type='button' className='iconelixo' onClick={(a) => this.deleteEventoTemplate(feed.chave, feed.descricao)} >
