@@ -641,13 +641,13 @@ class OS extends Component {
                                                 <div className={feed.cancelada == 1 ? "col-lg-8 col-md-8 col-sm-12 col-12 mix all dresses bags cancelada" : index % 2 == 0 ? "col-lg-8 col-md-8 col-sm-12 col-12 mix all dresses bags par" : "col-lg-8 col-md-8 col-sm-12 col-12 mix all dresses bags itemLista impar"}>
                                                     {window.innerWidth >= 690 &&
                                                         <div className="row deleteMargin alignCenter">
-                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
+                                                            <div className="col-xl-1-5 col-lg-1-5 col-md-1-5 col-sm-1-5 col-1-5 text-left">
                                                                 <p>{feed.codigo}</p>
                                                             </div>
-                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
+                                                            <div className="col-xl-1-5 col-lg-1-5 col-md-1-5 col-sm-1-5 col-1-5 text-left">
                                                                 <p>{feed.navioNome}</p>
                                                             </div>
-                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
+                                                            <div className="col-xl-1-5 col-lg-1-5 col-md-1-5 col-sm-1-5 col-1-5 text-left">
                                                                 <p>{feed.portoNome}</p>
                                                             </div>
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
@@ -656,14 +656,16 @@ class OS extends Component {
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left" style={{ overflowWrap: 'anywhere ' }}>
                                                                 <p>{feed.tipoServicoNome}</p>
                                                             </div>
-                                                            <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones">
-                                                                <div className='iconelixo giveMargin' type='button' >
-                                                                    <Link to=
-                                                                        {{
-                                                                            pathname: `/ordensservico/addos/0`,
-                                                                            state: { os: { ...feed } }
-                                                                        }}
-                                                                    >
+                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
+                                                                <p>{feed.operadorNome || this.state.operadoresOptions.find(
+                                                                    (operador) => operador.value == feed.operador)?.label || '-'}</p>
+                                                            </div>
+                                                            <div className="col-lg-1-5 col-md-1-5 col-sm-1-5 col-1-5 text-left mobileajuster4 icones">
+                                                                <div className='iconelixo giveMargin' type='button'>
+                                                                    <Link to={{
+                                                                        pathname: `/ordensservico/addos/0`,
+                                                                        state: { os: { ...feed } }
+                                                                    }}>
                                                                         <FontAwesomeIcon icon={faPlus} />
                                                                     </Link>
                                                                 </div>
