@@ -467,12 +467,8 @@ class OS extends Component {
                                                                 <p>{feed.tipoServicoNome}</p>
                                                             </div>
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
-                                                                <p>{this.state.operadoresOptions.find(
-                                                                    (operador) => operador.value == feed.operador)
-                                                                    ? this.state.operadoresOptions.find(
-                                                                        (operador) => operador.value == feed.operador
-                                                                    ).label
-                                                                    : ""}</p>
+                                                                <p>{feed.operadorNome || this.state.operadoresOptions.find(
+                                                                    (operador) => operador.value == feed.operador)?.label || '-'}</p>
                                                             </div>
                                                             <div className="col-lg-1-5 col-md-1-5 col-sm-1-5 col-1-5 text-left mobileajuster4 icones">
                                                                 <div className='iconelixo giveMargin' type='button'>
