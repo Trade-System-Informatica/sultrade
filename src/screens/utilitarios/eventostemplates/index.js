@@ -206,12 +206,12 @@ class EventosTemplates extends Component {
             await apiEmployee.post(`updateEventoTemplateVisibility.php`, {
                 token: true,
                 chave: chave,
-                showInOs: currentValue ? 0 : 1
+                showInOs: currentValue == 0 ? 1 : 0
             });
 
             const updatedEventos = this.state.eventos.map(evento => {
                 if (evento.chave === chave) {
-                    return { ...evento, showInOs: currentValue ? 0 : 1 };
+                    return { ...evento, showInOs: currentValue == 0 ? 1 : 0 };
                 }
                 return evento;
             });

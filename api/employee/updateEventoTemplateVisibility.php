@@ -11,11 +11,11 @@ $objData = json_decode($data);
 if($objData != NULL){
     $token = prepareInput($objData->token);
     $chave = prepareInput($objData->chave);
-    $showInOS = prepareInput($objData->showInOS);
+    $showInOs = prepareInput($objData->showInOs);
     
     $os = new OS();
 
-    $result = $os->updateEventoTemplateVisibility($chave, $showInOS);
+    $result = $os->updateEventoTemplateVisibility($chave, $showInOs);
 
 } else {
     $result = "false";
