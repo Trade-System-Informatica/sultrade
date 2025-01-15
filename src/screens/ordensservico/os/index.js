@@ -51,6 +51,9 @@ const estadoInicial = {
 
     load: 200,
     offset: 0,
+
+    operadores: [],
+    operadoresOptions: [],
 }
 
 class OS extends Component {
@@ -88,6 +91,7 @@ class OS extends Component {
 
     loadAll = async () => {
         await this.getOS();
+        await this.getOperadores();
 
         await this.setState({
             moedas: await loader.getBase('getMoedas.php'),
@@ -120,6 +124,29 @@ class OS extends Component {
         alert(res)
         await this.setState({ redirect: true })
     }
+
+    getOperadores = async () => {
+        await apiEmployee
+          .post(`getOperadores.php`, {
+            token: true,
+            empresa: this.state.usuarioLogado.empresa,
+          })
+          .then(
+            async (res) => {
+              await this.setState({ operadores: res.data });
+              const options = this.state.operadores
+                .filter((e) => e.ativo == 1)
+                .map((e) => {
+                  return { label: e.Nome, value: e.Codigo };
+                });
+    
+              await this.setState({ operadoresOptions: options });
+            },
+            async (err) => {
+              this.erroApi(err);
+            }
+          );
+      };
 
     deleteOS = async (chave, nome) => {
         this.setState({ deleteOS: true })
@@ -269,6 +296,7 @@ class OS extends Component {
                                                 <option value={3}>Serviço</option>
                                                 <option value={4}>Porto</option>
                                                 <option value={5}>Cliente</option>
+                                                <option value={6}>Operador</option>
                                             </select>
                                             <input className="form-control campoPesquisa col-3" 
                                                 placeholder="Pesquise aqui..." 
@@ -291,6 +319,7 @@ class OS extends Component {
                                                 <option value={3}>Serviço</option>
                                                 <option value={4}>Porto</option>
                                                 <option value={5}>Cliente</option>
+                                                <option value={6}>Operador</option>
                                             </select>
                                             <input className="form-control campoPesquisa col-3" 
                                                 placeholder="Pesquise aqui..." 
@@ -348,13 +377,13 @@ class OS extends Component {
                                     <div className="single-product-item" >
                                         {window.innerWidth >= 690 &&
                                             <div className="row subtitulosTabela">
-                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
+                                                <div className="col-xl-1-5 col-lg-1-5 col-md-1-5 col-sm-1-5 col-1-5 text-left">
                                                     <span className="subtituloships">Código</span>
                                                 </div>
-                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
+                                                <div className="col-xl-1-5 col-lg-1-5 col-md-1-5 col-sm-1-5 col-1-5 text-left">
                                                     <span className="subtituloships">Navio</span>
                                                 </div>
-                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
+                                                <div className="col-xl-1-5 col-lg-1-5 col-md-1-5 col-sm-1-5 col-1-5 text-left">
                                                     <span className="subtituloships">Porto</span>
                                                 </div>
                                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
@@ -363,7 +392,10 @@ class OS extends Component {
                                                 <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
                                                     <span className="subtituloships">Serviço</span>
                                                 </div>
-                                                <div style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}} className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-right">
+                                                <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
+                                                    <span className="subtituloships">Operador</span>
+                                                </div>
+                                                <div style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}} className="col-xl-1-5 col-lg-1-5 col-md-1-5 col-sm-1-5 col-1-5 text-right">
                                                     <span className="subtituloships"><Link to={{ pathname: `/ordensservico/addos/0` }}><FontAwesomeIcon icon={faPlus} /></Link></span>
                                                 </div>
                                             </div>
@@ -419,13 +451,13 @@ class OS extends Component {
                                                 <div ref={feed.codigo == this.state.chaveFocus ? "focusMe" : ""} tabindex={-1} key={feed.id} className={`col-lg-8 col-md-8 col-sm-12 mix all dresses bags ${index % 2 == 0 ? feed.codigo == this.state.chaveFocus ? "par focusLight" : "par " : feed.codigo == this.state.chaveFocus ? "impar focusDark" : "impar"}`}>
                                                     {window.innerWidth >= 690 &&
                                                         <div className="row deleteMargin alignCenter">
-                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
+                                                            <div className="col-xl-1-5 col-lg-1-5 col-md-1-5 col-sm-1-5 col-1-5 text-left">
                                                                 <p>{feed.codigo}</p>
                                                             </div>
-                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
+                                                            <div className="col-xl-1-5 col-lg-1-5 col-md-1-5 col-sm-1-5 col-1-5 text-left">
                                                                 <p>{feed.navioNome}</p>
                                                             </div>
-                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
+                                                            <div className="col-xl-1-5 col-lg-1-5 col-md-1-5 col-sm-1-5 col-1-5 text-left">
                                                                 <p>{feed.portoNome}</p>
                                                             </div>
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
@@ -434,17 +466,24 @@ class OS extends Component {
                                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left" style={{ overflowWrap: 'anywhere ' }}>
                                                                 <p>{feed.tipoServicoNome}</p>
                                                             </div>
-                                                            <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones">
-                                                                <div className='iconelixo giveMargin' type='button' >
-                                                                    <Link to=
-                                                                        {{
-                                                                            pathname: `/ordensservico/addos/0`,
-                                                                            state: { os: { ...feed } }
-                                                                        }}
-                                                                    >
+                                                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
+                                                                <p>{this.state.operadoresOptions.find(
+                                                                    (operador) => operador.value == feed.operador)
+                                                                    ? this.state.operadoresOptions.find(
+                                                                        (operador) => operador.value == feed.operador
+                                                                    ).label
+                                                                    : ""}</p>
+                                                            </div>
+                                                            <div className="col-lg-1-5 col-md-1-5 col-sm-1-5 col-1-5 text-left mobileajuster4 icones">
+                                                                <div className='iconelixo giveMargin' type='button'>
+                                                                    <Link to={{
+                                                                        pathname: `/ordensservico/addos/0`,
+                                                                        state: { os: { ...feed } }
+                                                                    }}>
                                                                         <FontAwesomeIcon icon={faPlus} />
                                                                     </Link>
                                                                 </div>
+
 
                                                                 {feed.cancelada != 1 &&
                                                                     <div className='iconelixo giveMargin' type='button' >

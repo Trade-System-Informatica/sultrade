@@ -623,7 +623,8 @@ export default class loader {
             "os.orcamento = 0 and os_navios.nome LIKE '%[PESQUISA]%'",
             "os.orcamento = 0 and os_tipos_servicos.descricao LIKE '%[PESQUISA]%'",
             "os.orcamento = 0 and os_portos.descricao LIKE '%[PESQUISA]%'",
-            "os.orcamento = 0 and pessoas.nome LIKE '%[PESQUISA]%'"
+            "os.orcamento = 0 and pessoas.nome LIKE '%[PESQUISA]%'",
+            "os.orcamento = 0 and operadores.nome LIKE '%[PESQUISA]%'"
         ];
     
         const where1 = tipos[tipoPesquisa1].replace('[PESQUISA]', pesquisa1);

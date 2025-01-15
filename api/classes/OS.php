@@ -275,13 +275,15 @@ class OS
             LEFT JOIN pessoas ON pessoas.chave = os.chave_cliente
             LEFT JOIN centros_custos ON centros_custos.Chave = os.centro_custo
             LEFT JOIN os_tipos_servicos ON os_tipos_servicos.chave = os.chave_tipo_servico
-            LEFT JOIN os_portos ON os_portos.Chave = os.porto',
+            LEFT JOIN os_portos ON os_portos.Chave = os.porto
+            LEFT JOIN operadores ON operadores.codigo = os.operador',
             'os.*, 
                                           os_navios.nome AS navioNome, 
                                           pessoas.nome AS clienteNome, 
                                           os_portos.Descricao AS portoNome,
                                           centros_custos.Descricao AS centroCustoNome,
-                                          os_tipos_servicos.descricao AS tipoServicoNome',
+                                          os_tipos_servicos.descricao AS tipoServicoNome,
+                                          operadores.nome AS operadorNome',
             "os.empresa = '" . $Empresa . "' AND " . $where . " ORDER BY os.chave DESC"
         );
 

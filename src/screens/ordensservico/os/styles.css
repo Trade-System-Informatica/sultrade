@@ -9,3 +9,35 @@
     flex-direction: column;
     justify-content: center;
 }
+.col-1-5 {
+    flex: 0 0 12.5%;
+    max-width: 12.5%;
+}
+
+@media (min-width: 576px) {
+    .col-sm-1-5 {
+        flex: 0 0 12.5%;
+        max-width: 12.5%;
+    }
+}
+
+@media (min-width: 768px) {
+    .col-md-1-5 {
+        flex: 0 0 12.5%;
+        max-width: 12.5%;
+    }
+}
+
+@media (min-width: 992px) {
+    .col-lg-1-5 {
+        flex: 0 0 12.5%;
+        max-width: 12.5%;
+    }
+}
+
+@media (min-width: 1200px) {
+    .col-xl-1-5 {
+        flex: 0 0 12.5%;
+        max-width: 12.5%;
+    }
+}
