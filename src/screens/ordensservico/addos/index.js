@@ -11992,7 +11992,7 @@ class AddOS extends Component {
                           Campos de Voucher
                         </button>
                       </div>
-                      <div className="relatorioButton">
+                      {/* <div className="relatorioButton">
                         <button
                           disabled={this.DesabilitaRetroceder()}
                           className="btn btn-danger"
@@ -12000,7 +12000,7 @@ class AddOS extends Component {
                         >
                           Retroceder para orçamento
                         </button>
-                      </div>
+                      </div> */}
                       <div className="relatorioButton">
                         <button
                           className="btn btn-danger"
