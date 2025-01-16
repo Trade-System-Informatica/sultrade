@@ -22,7 +22,7 @@ const estadoInicial = {
     pesquisa: "",
     pesquisaCliente: "",
     pesquisaNavio: "",
-    tipoPesquisa: 3,
+    tipoPesquisa: 1,
     chaveFocus: '',
 
     deleteEvento: false,
@@ -189,15 +189,16 @@ class EventosTemplates extends Component {
             await this.setState({ eventos, loading: false });
     }
 
-    filtrarPesquisa = (eventos) => {
-        let eventosfiltrados = eventos
+    filtrarPesquisa = (evento) => {
         if (!this.state.pesquisa) {
             return true;
         }
         
-        if (eventosfiltrados.descricao && this.state.tipoPesquisa == 1) {
-            return eventosfiltrados.descricao.toLowerCase().includes(this.state.pesquisa.toLowerCase())
+        if (this.state.tipoPesquisa == 1 && evento.descricao) {
+            return evento.descricao.toLowerCase().includes(this.state.pesquisa.toLowerCase())
         }
+
+        return false;
 
     }
 
