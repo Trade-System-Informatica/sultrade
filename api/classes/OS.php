@@ -1686,18 +1686,17 @@ class OS
     {
         $database = new Database();
 
-        $query = "chave_os = " . $chave_os;
         $eventosAtuais = $database->doSelect('os_servicos_itens', "os_servicos_itens.*", "chave_os = $chave_os AND cancelada = 0");
-        if($eventosAtuais != NULL){
-            $ordem_nova = end($eventosAtuais)['ordem'] + 1;
-        }else{
-            $ordem_nova = 1;
-        }
-        $eventos = $database->doSelect("os_servicos_itens", "os_servicos_itens.*", "chave_os = $chave_orcamento AND cancelada = 0");
+        $ordem_inicial = ($eventosAtuais != NULL) ? end($eventosAtuais)['ordem'] + 1 : 1;
+
+        $eventos = $database->doSelect("os_servicos_itens", "os_servicos_itens.*", "chave_os = $chave_orcamento AND cancelada = 0 ORDER BY ordem ASC");
         
+        $ordem_atual = $ordem_inicial;
+
         foreach ($eventos as $evento) {
-            $database->doUpdate("os_servicos_itens", $query.', ordem = '.$ordem_nova, "chave = ". $evento["chave"]);
-            $ordem_nova = $ordem_nova + 1;
+            $campos = "chave_os = $chave_os, ordem = $ordem_atual";
+            $database->doUpdate("os_servicos_itens", $campos, "chave = ". $evento["chave"]);
+            $ordem_atual++;
         }
 
         $result = $database->doSelect('os_servicos_itens', "os_servicos_itens.*", 'chave_os = ' . $chave_os);
