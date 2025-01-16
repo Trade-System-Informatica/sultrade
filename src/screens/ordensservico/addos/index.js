@@ -6735,6 +6735,606 @@ class AddOS extends Component {
       await this.setState({ erro: "Erro ao criar o pdf", loading: false });
     }
   };
+
+  CommercialInvoice = async (codigo, validForm) => {
+    try {
+      if (!validForm) {
+        await this.setState({
+          error: {
+            type: "error",
+            msg: "Verifique se as informações estão corretas!",
+          },
+        });
+        return;
+      }
+
+      await this.salvarOS(validForm, false);
+
+      this.setState({
+        pdfNome: `Commercial Invoice${
+          this.state.codigo ? ` - ${this.state.codigo}` : ""
+        }`,
+      });
+
+      await this.setState({ loading: true });
+      await apiEmployee
+        .post(`getCloseToReal.php`, {
+          token: true,
+          codigo: codigo,
+        })
+        .then(
+          async (response) => {
+            await this.setState({ pdfContent: response.data });
+          },
+          async (response) => {
+            console.log(response);
+          }
+        );
+      let valorTotal = 0;
+      let valorTotalDolar = 0;
+      let recebimentoTotal = 0;
+      let recebimentoTotalDolar = 0;
+      let descontoTotal = 0;
+      let descontoTotalDolar = 0;
+      let pdf = "";
+
+      if (!this.state.pdfContent || !this.state.pdfContent[0]) {
+        return this.setState({
+          error: { type: "error", msg: "Sem informações necessárias" },
+          loading: false,
+        });
+      }
+
+      if (this.state.pdfContent[0]) {
+        if (this.state.pdfContent[0].governmentTaxes > 0) {
+          valorTotal += parseFloat(this.state.pdfContent[0].governmentTaxes);
+          valorTotalDolar += Util.toFixed(
+            parseFloat(
+              this.state.pdfContent[0].governmentTaxes /
+                (this.state.pdfContent[0].roe
+                  ? this.state.pdfContent[0].roe
+                  : 5)
+            ),
+            2
+          );
+        }
+        if (this.state.pdfContent[0].bankCharges > 0) {
+          valorTotal += parseFloat(this.state.pdfContent[0].bankCharges);
+          valorTotalDolar += Util.toFixed(
+            parseFloat(
+              this.state.pdfContent[0].bankCharges /
+                (this.state.pdfContent[0].roe
+                  ? this.state.pdfContent[0].roe
+                  : 5)
+            ),
+            2
+          );
+        }
+
+        if (
+          this.state.pdfContent.find(
+            (os) => (os.tipo == 0 || os.tipo == 1) && !os.chavTaxa
+          )
+        ) {
+          return this.setState({
+            error: { type: "error", msg: "Há eventos sem taxas" },
+            loading: false,
+          });
+        }
+
+        pdf = (
+          <div style={{ zoom: 1 }} key={546546554654}>
+            <div className="pdfHeader">
+              <img
+                className="img-fluid"
+                src="https://i.ibb.co/vmKJkx4/logo.png"
+                alt="logo-lpc"
+                border="0"
+                style={{ width: "24%", height: "150px" }}
+              />
+              <h3 className="pdfTitle"></h3>
+              <h4>COMMERCIAL INVOICE</h4>
+            </div>
+            <hr />
+            <div className="pdfContent">
+              <div>
+                <table className="pdfTableCabecalho">
+                  <tr>
+                    <td colSpan={4} className="pdf_large_col">
+                      <b style={{ paddingRight: 5 }}>COMPANY:</b>{" "}
+                      {util.returnIfExists(
+                        this.state.pdfContent[0],
+                        this.state.pdfContent[0].cliente
+                      )}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="pdf_large_col" colSpan="4">
+                      <b style={{ paddingRight: 5 }}>ADDRESS:</b>{" "}
+                      {`${util.returnIfExists(
+                        this.state.pdfContent[0],
+                        this.state.pdfContent[0].complemento
+                      )} ${util.returnIfExists(
+                        this.state.pdfContent[0],
+                        this.state.pdfContent[0].rua
+                      )} ${
+                        this.state.pdfContent[0].numero &&
+                        this.state.pdfContent[0].numero != "0"
+                          ? this.state.pdfContent[0].numero
+                          : ""
+                      } ${
+                        this.state.pdfContent[0].cep &&
+                        this.state.pdfContent[0].cep != "0"
+                          ? this.state.pdfContent[0].cep
+                          : ""
+                      }`}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="pdf_small_col" colSpan="2">
+                      <b style={{ paddingRight: 5 }}>Vessel Name:</b>{" "}
+                      {util.returnIfExists(
+                        this.state.pdfContent[0],
+                        this.state.pdfContent[0].nomeNavio
+                      )}
+                    </td>
+                    <td className="pdf_money_colOS" colSpan="2">
+                      <b style={{ paddingRight: 5 }}>Name of Port:</b>{" "}
+                      {util.returnIfExists(
+                        this.state.pdfContent[0],
+                        this.state.pdfContent[0].nomePorto
+                      )}
+                    </td>
+                  </tr>
+                  <tr>
+                    {this.state.pdfContent[0].data_chegada &&
+                      moment(
+                        this.state.pdfContent[0].data_chegada
+                      ).isValid() && (
+                        <td className="pdf_small_col" colSpan="2">
+                          <b style={{ paddingRight: 5 }}>Arrived:</b>{" "}
+                          {moment(
+                            util.returnIfExists(
+                              this.state.pdfContent[0],
+                              this.state.pdfContent[0].data_chegada
+                            )
+                          ).format("MMMM DD, YYYY")}
+                        </td>
+                      )}
+                    {this.state.pdfContent[0].data_saida &&
+                      moment(this.state.pdfContent[0].data_saida).format(
+                        "DD/MM/YYYY"
+                      ) != "Invalid date" && (
+                        <td
+                          className={`${
+                            this.state.pdfContent[0].data_chegada &&
+                            moment(this.state.pdfContent[0].data_chegada)
+                              .isValid
+                              ? "pdf_money_colOS"
+                              : "pdf_small_col"
+                          }`}
+                          colSpan="2"
+                        >
+                          <b style={{ paddingRight: 5 }}>Sailed:</b>{" "}
+                          {moment(
+                            util.returnIfExists(
+                              this.state.pdfContent[0],
+                              this.state.pdfContent[0].data_saida
+                            )
+                          ).format("MMMM DD, YYYY")}
+                        </td>
+                      )}
+                  </tr>
+                  <tr>
+                    <td className="pdf_small_col" colSpan="2">
+                      <b style={{ paddingRight: 5 }}>PO:</b>{" "}
+                      {util.returnIfExists(
+                        this.state.pdfContent[0],
+                        this.state.pdfContent[0].codigo
+                      )}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="pdf_small_col" colSpan="4">
+                      <b style={{ paddingRight: 5 }}>ROE:</b>{" "}
+                      {util.returnIfExists(
+                        this.state.pdfContent[0],
+                        this.state.pdfContent[0].roe.replaceAll(".", ",")
+                      )}
+                    </td>
+                  </tr>
+                </table>
+                <br />
+              </div>
+            </div>
+            <div>
+              <table style={{ width: "90%", marginLeft: "5%" }}>
+                <tr>
+                  <td colSpan="2" className="pdf_small_col pdfTitle"></td>
+                  <td className="pdf_small_col"></td>
+                  <td className="pdf_small_col"></td>
+                </tr>
+                <tr></tr>
+                <tr>
+                  <td
+                    colSpan="7"
+                    className="pdf_large_col"
+                    style={{ backgroundColor: "#CDCDCD" }}
+                  >
+                    DESCRIPTION:
+                  </td>
+                  <td
+                    className="pdf_money_colOS"
+                    style={{ backgroundColor: "#CDCDCD" }}
+                  >
+                    VALUE (USD)
+                  </td>
+                  <td
+                    className="pdf_money_colOS"
+                    style={{ backgroundColor: "#CDCDCD" }}
+                  >
+                    VALUE (R$)
+                  </td>
+                </tr>
+                {this.state.pdfContent.map((e, index) => {
+                  if (e.tipo == 0 || e.tipo == 1) {
+                    if (e.moeda == 5) {
+                      valorTotal += parseFloat((e.valor*e.qntd));
+                      valorTotalDolar += Util.toFixed(
+                        parseFloat(
+                          e.valor /
+                            (this.state.pdfContent[0].roe
+                              ? this.state.pdfContent[0].roe
+                              : 5)
+                        ),
+                        2
+                      );
+                    } else {
+                      valorTotal += Util.toFixed(
+                        parseFloat(
+                          (e.valor*e.qntd) *
+                            (this.state.pdfContent[0].roe
+                              ? this.state.pdfContent[0].roe
+                              : 5)
+                        ),
+                        2
+                      );
+                      valorTotalDolar += parseFloat((e.valor*e.qntd));
+                    }
+                  } else if (e.tipo == 2) {
+                    if (e.moeda == 5) {
+                      recebimentoTotal += parseFloat(e.valor*e.qntd);
+                      recebimentoTotalDolar += Util.toFixed(
+                        parseFloat(
+                          (e.valor*e.qntd) /
+                            (this.state.pdfContent[0].roe
+                              ? this.state.pdfContent[0].roe
+                              : 5)
+                        ),
+                        2
+                      );
+                    } else {
+                      recebimentoTotal += Util.toFixed(
+                        parseFloat(
+                          (e.valor*e.qntd) *
+                            (this.state.pdfContent[0].roe
+                              ? this.state.pdfContent[0].roe
+                              : 5)
+                        ),
+                        2
+                      );
+                      recebimentoTotalDolar += parseFloat((e.valor*e.qntd));
+                    }
+                  } else if (e.tipo == 3) {
+                    if (e.moeda == 5) {
+                      descontoTotal += parseFloat((e.valor*e.qntd));
+                      descontoTotalDolar += Util.toFixed(
+                        parseFloat(
+                          (e.valor*e.qntd) /
+                            (this.state.pdfContent[0].roe
+                              ? this.state.pdfContent[0].roe
+                              : 5)
+                        ),
+                        2
+                      );
+                    } else {
+                      descontoTotal += Util.toFixed(
+                        parseFloat(
+                          (e.valor*e.qntd) *
+                            (this.state.pdfContent[0].roe
+                              ? this.state.pdfContent[0].roe
+                              : 5)
+                        ),
+                        2
+                      );
+                      descontoTotalDolar += parseFloat((e.valor*e.qntd));
+                    }
+                  }
+
+                  if (e.tipo == 0 || e.tipo == 1) {
+                    return (
+                      <tr
+                        style={{
+                          background: index % 2 == 0 ? "white" : "#dddddd",
+                        }}
+                      >
+                        <td
+                          colSpan="7"
+                          className="pdf_large_col reduce_font"
+                          style={{
+                            background: index % 2 == 0 ? "white" : "#ccc",
+                          }}
+                        >
+                          {e.descos}
+                        </td>
+                        <td
+                          className="pdf_money_colOS reduce_font"
+                          style={{
+                            background: index % 2 == 0 ? "white" : "#ccc",
+                          }}
+                        >
+                          {e.moeda == 5
+                            ? util.formataDinheiroBrasileiro(
+                                parseFloat(
+                                  (e.valor*e.qntd) /
+                                    (this.state.pdfContent[0].roe
+                                      ? this.state.pdfContent[0].roe
+                                      : 5)
+                                )
+                              )
+                            : util.formataDinheiroBrasileiro(
+                                parseFloat((e.valor*e.qntd))
+                              )}
+                        </td>
+                        <td
+                          className="pdf_money_colOS reduce_font"
+                          style={{
+                            background: index % 2 == 0 ? "white" : "#ccc",
+                          }}
+                        >
+                          {e.moeda == 6
+                            ? util.formataDinheiroBrasileiro(
+                                parseFloat(
+                                  (e.valor*e.qntd) *
+                                    (this.state.pdfContent[0].roe
+                                      ? this.state.pdfContent[0].roe
+                                      : 5)
+                                )
+                              )
+                            : util.formataDinheiroBrasileiro(
+                                parseFloat((e.valor*e.qntd))
+                              )}
+                        </td>
+                      </tr>
+                    );
+                  }
+                })}
+                {this.state.pdfContent[0].governmentTaxes > 0 && (
+                  <tr>
+                    <td colSpan="7" className="pdf_large_col reduce_font">
+                      <b>GOVERNMENT TAXES</b>
+                    </td>
+                    <td className="pdf_money_colOS reduce_font">
+                      <b>
+                        {util.formataDinheiroBrasileiro(
+                          parseFloat(
+                            this.state.pdfContent[0].governmentTaxes /
+                              (this.state.pdfContent[0].roe
+                                ? this.state.pdfContent[0].roe
+                                : 5)
+                          )
+                        )}
+                      </b>
+                    </td>
+                    <td className="pdf_money_colOS reduce_font">
+                      <b>
+                        {util.formataDinheiroBrasileiro(
+                          parseFloat(this.state.pdfContent[0].governmentTaxes)
+                        )}
+                      </b>
+                    </td>
+                  </tr>
+                )}
+                {this.state.pdfContent[0].bankCharges > 0 && (
+                  <tr styles={{ padding: "37px 0px 37px 0px" }}>
+                    <td colSpan="7" className="pdf_large_col reduce_font">
+                      <b>BANK CHARGES</b>
+                    </td>
+                    <td className="pdf_money_colOS reduce_font">
+                      <b>
+                        {util.formataDinheiroBrasileiro(
+                          parseFloat(
+                            this.state.pdfContent[0].bankCharges /
+                              (this.state.pdfContent[0].roe
+                                ? this.state.pdfContent[0].roe
+                                : 5)
+                          )
+                        )}
+                      </b>
+                    </td>
+                    <td className="pdf_money_colOS reduce_font">
+                      <b>
+                        {util.formataDinheiroBrasileiro(
+                          parseFloat(this.state.pdfContent[0].bankCharges)
+                        )}
+                      </b>
+                    </td>
+                  </tr>
+                )}
+                <tr>
+                  <td colSpan="7" className="pdf_large_col pdfTitle">
+                    Total
+                  </td>
+                  <td className="pdf_money_colOS">
+                    <b>
+                      {util.formataDinheiroBrasileiro(
+                        parseFloat(valorTotalDolar)
+                      )}
+                    </b>
+                  </td>
+                  <td className="pdf_money_colOS">
+                    <b>
+                      {util.formataDinheiroBrasileiro(parseFloat(valorTotal))}
+                    </b>
+                  </td>
+                </tr>
+                {parseFloat(descontoTotal) > 0 && (
+                  <tr>
+                    <td colSpan="7" className="pdf_large_col pdfTitle">
+                      Discount
+                    </td>
+                    <td className="pdf_money_colOS">
+                      <b>
+                        {util.formataDinheiroBrasileiro(
+                          parseFloat(descontoTotalDolar)
+                        )}
+                      </b>
+                    </td>
+                    <td className="pdf_money_colOS">
+                      <b>
+                        {util.formataDinheiroBrasileiro(
+                          parseFloat(descontoTotal)
+                        )}
+                      </b>
+                    </td>
+                  </tr>
+                )}
+                {parseFloat(recebimentoTotal) > 0 && (
+                  <tr>
+                    <td colSpan="7" className="pdf_large_col pdfTitle">
+                      Received
+                    </td>
+                    <td className="pdf_money_colOS">
+                      <b>
+                        {util.formataDinheiroBrasileiro(
+                          parseFloat(recebimentoTotalDolar)
+                        )}
+                      </b>
+                    </td>
+                    <td className="pdf_money_colOS">
+                      <b>
+                        {util.formataDinheiroBrasileiro(
+                          parseFloat(recebimentoTotal)
+                        )}
+                      </b>
+                    </td>
+                  </tr>
+                )}
+                <tr>
+                  <td colSpan="7" className="pdf_large_col pdfTitle">
+                    Balance
+                  </td>
+                  <td className="pdf_money_colOS">
+                    <b>
+                      {util.formataDinheiroBrasileiro(
+                        parseFloat(valorTotalDolar) -
+                          (parseFloat(recebimentoTotalDolar) +
+                            parseFloat(descontoTotalDolar))
+                      )}
+                    </b>
+                  </td>
+                  <td className="pdf_money_colOS">
+                    <b>
+                      {util.formataDinheiroBrasileiro(
+                        parseFloat(valorTotal) -
+                          (parseFloat(recebimentoTotal) +
+                            parseFloat(descontoTotal))
+                      )}
+                    </b>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <br />
+            <br />
+            <br />
+
+            <h5 style={{ width: "100%", textAlign: "center" }}>
+              BANKING DETAILS
+            </h5>
+            <table style={{ width: "80%", marginLeft: "5%" }}>
+              <tr>
+                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                  <b style={{ paddingRight: 5 }}>Bank's name:</b> Banco do
+                  Brasil
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                  <b style={{ paddingRight: 5 }}>Branch's name:</b> Rio Grande
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                  <b style={{ paddingRight: 5 }}>Address:</b> Benjamin Constant
+                  St, 72
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                  <b style={{ paddingRight: 5 }}>Swift Code:</b> BRASBRRJCTA
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                  <b style={{ paddingRight: 5 }}>IBAN:</b>{" "}
+                  BR6400000000026940001614410C1
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                  <b style={{ paddingRight: 5 }}>Branch's number:</b> 2694-8
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                  <b style={{ paddingRight: 5 }}>Account number:</b> 161441-X
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                  <b style={{ paddingRight: 5 }}>Account name:</b> SUL TRADE
+                  AGENCIAMENTOS MARITIMOS LTDA-ME
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                  <b style={{ paddingRight: 5 }}>Phone:</b> +55 53 3235 3500
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                  <b style={{ paddingRight: 5 }}>CNPJ:</b> 10.432.546/0001-75
+                </td>
+              </tr>
+            </table>
+            <br />
+            <br />
+            <br />
+            <div style={{ display: "flex", justifyContent: "center", marginTop: "50px" }}>
+              <h5 style={{ borderTop: "1px solid black", width: "40%", paddingTop: "5px", textAlign: "center", margin: 0 }}>
+                MASTER OF {util.returnIfExists(
+                  this.state.pdfContent[0],
+                  this.state.pdfContent[0].nomeNavio
+                )}
+              </h5>
+            </div>
+          </div>
+        );
+      } else {
+        await this.setState({
+          erro: "Sem as informações necessárias para gerar o pdf!",
+          loading: false,
+        });
+        return;
+      }
+
+      await this.setState({ pdfgerado: pdf });
+      this.handleExportWithComponent();
+    } catch (err) {
+      await this.setState({ erro: "Erro ao criar o pdf", loading: false });
+    }
+  };
   //
 
   GerarEtiqueta = async (codigo, criacao=false) => {
@@ -11240,6 +11840,16 @@ class AddOS extends Component {
                           }
                         >
                           Close to Real
+                        </button>
+                      </div>
+                      <div className="relatorioButton">
+                        <button
+                          className="btn btn-danger"
+                          onClick={() =>
+                            this.CommercialInvoice(this.state.os.codigo, validForm)
+                          }
+                        >
+                          Commercial Invoice
                         </button>
                       </div>
                       {this.state.acessosPermissoes
