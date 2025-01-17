@@ -7852,17 +7852,17 @@ class AddOsOrcamento extends Component {
       })
       .then(
         async (res) => {
-          if (res.data === true) {
+          if (res.data.success) {
             await loader.salvaLogs(
               "os",
               this.state.usuarioLogado.codigo,
               this.state.dadosIniciais,
               this.state.dadosFinais,
               this.state.chave,
-              `Orçamento -> OS: ${this.state.codigo}`
+              `Orçamento -> OS: ${res.data.codigo}`
             );
 
-            await this.GerarEtiqueta(this.state.codigo, true);
+            await this.GerarEtiqueta(res.data.codigo, true);
 
             await this.setState({
               loading: false,

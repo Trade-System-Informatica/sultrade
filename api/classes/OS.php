@@ -1998,9 +1998,12 @@ class OS
         $result = $database->doUpdate('os', $query, 'Chave = ' . $Chave);
         $database->closeConection();
         if ($result == NULL) {
-            return 'false';
+            return ['success' => false];
         } else {
-            return $result;
+            return [
+                'success' => true,
+                'codigo' => "ST$codigo"
+            ];
         }
     }
     
