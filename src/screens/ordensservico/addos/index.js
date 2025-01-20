@@ -6541,6 +6541,22 @@ class AddOS extends Component {
                   }
 
                   if (e.tipo == 0 || e.tipo == 1) {
+                      if (e.descos === "LINHA VAZIA") {
+                        return (
+                            <tr
+                                style={{
+                                    background: index % 2 == 0 ? "white" : "#dddddd",
+                                    height: "20px" 
+                                }}
+                            >
+                                <td colSpan="9"
+                                style={{
+                                  background: index % 2 == 0 ? "white" : "#ccc",
+                                }}
+                                ></td>
+                            </tr>
+                        );
+                    }
                     return (
                       <tr
                         style={{
