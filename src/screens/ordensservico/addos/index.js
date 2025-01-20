@@ -276,6 +276,7 @@ const estadoInicial = {
   redirectEventos: false,
 
   ordemModificada: false,
+  selectedEvents: [],
 };
 
 class AddOS extends Component {
@@ -584,6 +585,22 @@ class AddOS extends Component {
     [eventos[nextIndex], eventos[index]] = [eventos[index], eventos[nextIndex]];
     this.setState({ eventos, ordemModificada: true });
   }
+
+  handleCheckboxChange = (chave) => {
+    this.setState(prevState => ({
+      selectedEvents: prevState.selectedEvents.includes(chave)
+        ? prevState.selectedEvents.filter(item => item !== chave)
+        : [...prevState.selectedEvents, chave]
+    }));
+  };
+
+  handleSelectAll = () => {
+    this.setState(prevState => ({
+      selectedEvents: prevState.selectedEvents.length === this.state.eventos.length
+        ? [] // Se todos estão selecionados, desmarca todos
+        : this.state.eventos.map(evento => evento.chave) // Seleciona todos
+    }));
+  };
 
   calculaTotal = () => {
     let eventosTotal = 0;
@@ -2173,6 +2190,67 @@ class AddOS extends Component {
                       this.erroApi(response);
                     }
                   );
+                onClose();
+              }}
+            >
+              Sim
+            </button>
+          </div>
+        );
+      },
+    });
+  };
+
+  deleteMultipleEvents = async () => {
+    if (this.state.selectedEvents.length === 0) return;
+
+    const eventNames = this.state.selectedEvents.map(chave => 
+      this.state.eventos.find(evento => evento.chave === chave)?.descricao
+    ).join(', ');
+
+    confirmAlert({
+      customUI: ({ onClose }) => {
+        {this.setState({ modalItemAberto: false })}
+        return (
+          <div className="custom-ui text-center">
+            <h1>{NOME_EMPRESA}</h1>
+            <p>Deseja remover estes eventos? ({eventNames}) </p>
+            <button
+              style={{ marginRight: 5 }}
+              className="btn btn-danger w-25"
+              onClick={onClose}
+            >
+              Não
+            </button>
+            <button
+              style={{ marginRight: 5 }}
+              className="btn btn-success w-25"
+              onClick={async () => {
+                for (const chave of this.state.selectedEvents) {
+                  await apiEmployee
+                    .post(`deleteServicoItem.php`, {
+                      token: true,
+                      chave: chave,
+                      canceladaPor: this.state.usuarioLogado.codigo,
+                    })
+                    .then(
+                      async (response) => {
+                        if (response.data == true) {
+                          await loader.salvaLogs(
+                            "os_servicos_itens",
+                            this.state.usuarioLogado.codigo,
+                            null,
+                            "Cancelamento",
+                            chave
+                          );
+                        }
+                      },
+                      (response) => {
+                        this.erroApi(response);
+                      }
+                    );
+                }
+                document.location.reload();
                 onClose();
               }}
             >
@@ -12038,7 +12116,14 @@ class AddOS extends Component {
                                 <div className="single-product-item">
                                   <div className="row subtitulosTabela">
                                     <table className="addOsTable">
-                                      <tr>
+                                      <tr className="cabecalhoEventos">
+                                      <th className="text-center">
+                                        <input
+                                          type="checkbox"
+                                          onChange={this.handleSelectAll}
+                                          checked={this.state.selectedEvents.length === this.state.eventos.length && this.state.eventos.length > 0}
+                                        />
+                                      </th>
                                         <th className="text-center">
                                           <span>Chave</span>
                                         </th>
@@ -12101,6 +12186,14 @@ class AddOS extends Component {
                                                       : "imparTr"
                                                   }
                                                 >
+                                                  <td className="text-center pseudo_link">
+                                                    <input
+                                                      type="checkbox"
+                                                      checked={this.state.selectedEvents.includes(feed.chave)}
+                                                      onChange={() => this.handleCheckboxChange(feed.chave)}
+                                                      onClick={(e) => e.stopPropagation()}
+                                                    />
+                                                  </td>
                                                   <td className="text-center pseudo_link">
                                                     <p>{feed.chave}</p>
                                                   </td>
@@ -12248,6 +12341,14 @@ class AddOS extends Component {
                                                       : "imparTr"
                                                   }
                                                 >
+                                                  <td className="text-center">
+                                                    <input
+                                                      type="checkbox"
+                                                      checked={this.state.selectedEvents.includes(feed.chave)}
+                                                      onChange={() => this.handleCheckboxChange(feed.chave)}
+                                                      onClick={(e) => e.stopPropagation()}
+                                                    /><p></p>
+                                                  </td>
                                                   <td className="text-center pseudo_link">
                                                     <p>{feed.chave}</p>
                                                   </td>
@@ -12415,6 +12516,7 @@ class AddOS extends Component {
                                                     }
                                                   >
                                                     <td className="text-center"></td>
+                                                    <td className="text-center"></td>
                                                     <td className="text-center">
                                                       Bank Charges
                                                     </td>
@@ -12507,6 +12609,7 @@ class AddOS extends Component {
                                                         : "imparTr"
                                                     }
                                                   >
+                                                    <td className="text-center"></td>
                                                     <td className="text-center"></td>
                                                     <td className="text-center">
                                                       Government Taxes
@@ -12662,6 +12765,7 @@ class AddOS extends Component {
                                                     }
                                                   >
                                                     <td className="text-center"></td>
+                                                    <td className="text-center"></td>
                                                     <td className="text-center">
                                                       Bank Charges
                                                     </td>
@@ -12757,6 +12861,7 @@ class AddOS extends Component {
                                                     }
                                                   >
                                                     <td className="text-center"></td>
+                                                    <td className="text-center"></td>
                                                     <td className="text-center">
                                                       Government Taxes
                                                     </td>
@@ -12850,6 +12955,7 @@ class AddOS extends Component {
                                                 }
                                               >
                                                 <td className="text-center"></td>
+                                                <td className="text-center"></td>
                                                 <td className="text-center">
                                                   Total
                                                 </td>
@@ -12900,6 +13006,27 @@ class AddOS extends Component {
                                       )}
                                     </table>
                                   </div>
+                                  {this.state.acessosPermissoes
+                                  .filter((e) => {
+                                    if (
+                                      e.acessoAcao ==
+                                      "SERVICOS_ITENS"
+                                    ) {
+                                      return e;
+                                    }
+                                  })
+                                  .map(
+                                    (e) => e.permissaoDeleta
+                                  )[0] == 1 && this.state.selectedEvents.length > 0 && (
+                                    <div className="excluirEventos mb-3">
+                                      <button 
+                                        className="btn btn-danger"
+                                        onClick={this.deleteMultipleEvents}
+                                      >
+                                        <FontAwesomeIcon icon={faTrashAlt} /> Excluir Selecionados ({this.state.selectedEvents.length})
+                                      </button>
+                                    </div>
+                                    )}
                                     {this.state.ordemModificada && (
                                       <button className='salvarOrdem' onClick={this.salvarOrdem} disabled={this.state.loading}>
                                         {this.state.loading ? (
