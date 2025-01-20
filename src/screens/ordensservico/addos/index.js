@@ -29,7 +29,8 @@ import {
   faChevronLeft,
   faArrowUp, 
   faArrowDown, 
-  faSave
+  faSave,
+  faCopy
 } from "@fortawesome/free-solid-svg-icons";
 import moment from "moment";
 import Select from "react-select";
@@ -2142,6 +2143,77 @@ class AddOS extends Component {
       });
     }
   };
+
+    copyServicoItem = async (item, nome) => {
+      const currentOrders = this.state.eventos?.map(item => item.ordem) || [];
+      const nextOrder = Math.max(...currentOrders, 0) + 1;
+      const values = `'${this.state.os.Chave}', 
+                      '${item.data}', 
+                      '${item.fornecedor}', 
+                      '${item.taxa}', 
+                      '${item.descricao}', 
+                      '${item.tipo_sub}', 
+                      '${item.Fornecedor_Custeio}', 
+                      '${item.remarks}', 
+                      '${item.Moeda}', 
+                      '${item.valor}', 
+                      '${item.valor1}', 
+                      '${item.repasse}', 
+                      '${item.qntd}'`;
+      confirmAlert({
+        customUI: ({ onClose }) => {
+          return (
+            <div className="custom-ui text-center">
+              {this.setState({ modalItemAberto: false })}
+              <h1>{NOME_EMPRESA}</h1>
+              <p>Deseja copiar este evento? ({nome}) </p>
+              <button
+                style={{ marginRight: 5 }}
+                className="btn btn-danger w-25"
+                onClick={async () => {
+                  onClose();
+                }}
+              >
+                Não
+              </button>
+              <button
+                style={{ marginRight: 5 }}
+                className="btn btn-success w-25"
+                onClick={async () => {
+                  await apiEmployee
+                    .post(`insertServicoItemBasico.php`, {
+                      token: true,
+                      values: values,
+                      chave_os: this.state.os.Chave,
+                      ordem: nextOrder
+                    })
+                    .then(
+                      async (response) => {
+                        if (response.data == true) {
+                          await loader.salvaLogs(
+                            "os_servicos_itens",
+                            this.state.usuarioLogado.codigo,
+                            null,
+                            "Copia",
+                            item.chave
+                          );
+                        }
+                        document.location.reload();
+                      },
+                      async (response) => {
+                        this.erroApi(response);
+                      }
+                    );
+                  onClose();
+                }}
+              >
+                Sim
+              </button>
+            </div>
+          );
+        },
+      });
+    };
 
   deleteServicoItem = async (chave, nome) => {
     this.setState({ deleteSolicitao: true });
@@ -12476,6 +12548,19 @@ class AddOS extends Component {
                                                           icon={faDollarSign}
                                                         />
                                                       </Link>
+                                                    </span>
+
+                                                    <span
+                                                      className="iconelixo giveMargin"
+                                                      type="button"
+                                                      onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        this.copyServicoItem(feed, feed.descricao);
+                                                      }}
+                                                    >
+                                                      <FontAwesomeIcon
+                                                        icon={faCopy}
+                                                      />
                                                     </span>
 
                                                     {this.state.acessosPermissoes
