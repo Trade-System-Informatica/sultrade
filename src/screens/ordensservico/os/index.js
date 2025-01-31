@@ -8,7 +8,7 @@ import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTimes, faPen, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faTimes, faPen, faPlus, faTrashArrowUp } from '@fortawesome/free-solid-svg-icons'
 import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import moment from 'moment'
@@ -180,6 +180,59 @@ class OS extends Component {
                                         async response => {
                                             if (response.data == true) {
                                                 await loader.salvaLogs('os', this.state.usuarioLogado.codigo, null, "Cancelamento", chave);
+
+                                                document.location.reload()
+                                            }
+                                        },
+                                        async response => {
+                                            this.erroApi(response)
+                                        }
+                                    )
+                                    onClose()
+                                }
+                            }
+
+                        >
+                            Sim
+                        </button>
+                    </div>
+                )
+            }
+        })
+    }
+
+    undeleteOS = async (chave, nome) => {
+        this.setState({ deleteOS: true })
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return (
+                    <div className='custom-ui text-center'>
+                        <h1>{NOME_EMPRESA}</h1>
+                        <p>Deseja desfazer o cancelamento desta OS? ({nome}) </p>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-danger w-25"
+                            onClick={
+                                async () => {
+                                    onClose()
+                                }
+                            }
+                        >
+                            Não
+                        </button>
+                        <button
+                            style={{ marginRight: 5 }}
+                            className="btn btn-success w-25"
+                            onClick={
+                                async () => {
+                                    await apiEmployee.post(`undeleteOS.php`, {
+                                        token: true,
+                                        chave: chave,
+                                        canceladoPor: null
+                                    }).then(
+                                        async response => {
+                                            if (response.data == true) {
+                                                await loader.salvaLogs('os', this.state.usuarioLogado.codigo, null, "Desfazer cancelamento", chave);
 
                                                 document.location.reload()
                                             }
@@ -480,6 +533,12 @@ class OS extends Component {
                                                                     </Link>
                                                                 </div>
 
+                                                                {feed.cancelada == 1 &&
+                                                                    <div className='iconelixo giveMargin' type='button' onClick={(a) => this.undeleteOS(feed.Chave, feed.Descricao)}>
+                                                                            <FontAwesomeIcon styles={{ color: "red !important" }} icon={faTrashArrowUp} />
+                                                                    </div>
+                                                                }
+
 
                                                                 {feed.cancelada != 1 &&
                                                                     <div className='iconelixo giveMargin' type='button' >
@@ -529,6 +588,12 @@ class OS extends Component {
                                                                         <FontAwesomeIcon icon={faPlus} />
                                                                     </Link>
                                                                 </div>
+
+                                                                {feed.cancelada == 1 &&
+                                                                    <div className='iconelixo giveMargin' type='button' onClick={(a) => this.undeleteOS(feed.Chave, feed.Descricao)}>
+                                                                            <FontAwesomeIcon styles={{ color: "red !important" }} icon={faTrashArrowUp} />
+                                                                    </div>
+                                                                }
 
                                                                 {feed.cancelada != 1 &&
                                                                     <div className='iconelixo giveMargin' type='button' >
