@@ -734,6 +734,12 @@ class OS extends Component {
                                                                     </Link>
                                                                 </div>
 
+                                                                {feed.cancelada == 1 &&
+                                                                    <div className='iconelixo giveMargin' type='button' onClick={(a) => this.undeleteOS(feed.Chave, feed.codigo)}>
+                                                                            <FontAwesomeIcon styles={{ color: "red !important" }} icon={faTrashArrowUp} />
+                                                                    </div>
+                                                                }
+
                                                                 {feed.cancelada != 1 &&
                                                                     <div className='iconelixo giveMargin' type='button' >
                                                                         <Link to=
@@ -782,6 +788,12 @@ class OS extends Component {
                                                                         <FontAwesomeIcon icon={faPlus} />
                                                                     </Link>
                                                                 </div>
+
+                                                                {feed.cancelada == 1 &&
+                                                                    <div className='iconelixo giveMargin' type='button' onClick={(a) => this.undeleteOS(feed.Chave, feed.codigo)}>
+                                                                            <FontAwesomeIcon styles={{ color: "red !important" }} icon={faTrashArrowUp} />
+                                                                    </div>
+                                                                }
 
                                                                 {feed.cancelada != 1 &&
                                                                     <div className='iconelixo giveMargin' type='button' >
