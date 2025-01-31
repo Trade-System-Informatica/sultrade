@@ -2106,11 +2106,11 @@ class OS
         return $result;
     }
 
-    public static function undeleteOS($chave, $canceladaPor)
+    public static function undeleteOS($chave)
     {
         $database = new Database();
 
-        $result = $database->doUpdate('os', "cancelada = 0, canceladoPor = '" . $canceladaPor . "'", 'Chave = ' . $chave);
+        $result = $database->doUpdate('os', "cancelada = 0, canceladoPor = NULL", 'Chave = ' . $chave);
         $database->closeConection();
         return $result;
     }

@@ -12,11 +12,10 @@ $objData = json_decode($data);
 if($objData != NULL){
     $token = prepareInput($objData->token);
     $chave = prepareInput($objData->chave);
-    $canceladoPor = prepareInput($objData->canceladoPor);
 
     $os = new OS();
     
- $result = $os->undeleteOS($chave, $canceladoPor);
+ $result = $os->undeleteOS($chave);
     } else {
     $result = "false";
 }

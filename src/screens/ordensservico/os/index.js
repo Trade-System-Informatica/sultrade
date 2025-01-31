@@ -228,7 +228,6 @@ class OS extends Component {
                                     await apiEmployee.post(`undeleteOS.php`, {
                                         token: true,
                                         chave: chave,
-                                        canceladoPor: null
                                     }).then(
                                         async response => {
                                             if (response.data == true) {
@@ -534,7 +533,7 @@ class OS extends Component {
                                                                 </div>
 
                                                                 {feed.cancelada == 1 &&
-                                                                    <div className='iconelixo giveMargin' type='button' onClick={(a) => this.undeleteOS(feed.Chave, feed.Descricao)}>
+                                                                    <div className='iconelixo giveMargin' type='button' onClick={(a) => this.undeleteOS(feed.Chave, feed.codigo)}>
                                                                             <FontAwesomeIcon styles={{ color: "red !important" }} icon={faTrashArrowUp} />
                                                                     </div>
                                                                 }
@@ -554,7 +553,7 @@ class OS extends Component {
                                                                 }
 
                                                                 {feed.cancelada != 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-                                                                    <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.Descricao)} >
+                                                                    <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.codigo)} >
                                                                         <FontAwesomeIcon icon={faTimes} />
                                                                     </div>
                                                                 }
@@ -608,7 +607,7 @@ class OS extends Component {
                                                                     </div>
                                                                 }
                                                                 {feed.cancelada != 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-                                                                    <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.Descricao)} >
+                                                                    <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.codigo)} >
                                                                         <FontAwesomeIcon icon={faTimes} />
                                                                     </div>
                                                                 }
@@ -683,7 +682,7 @@ class OS extends Component {
                                                                 }
 
                                                                 {feed.cancelada != 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-                                                                    <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.Descricao)} >
+                                                                    <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.codigo)} >
                                                                         <FontAwesomeIcon icon={faTimes} />
                                                                     </div>
                                                                 }
@@ -749,7 +748,7 @@ class OS extends Component {
                                                                 }
 
                                                                 {feed.cancelada != 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-                                                                    <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.Descricao)} >
+                                                                    <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.codigo)} >
                                                                         <FontAwesomeIcon icon={faTimes} />
                                                                     </div>
                                                                 }
@@ -797,7 +796,7 @@ class OS extends Component {
                                                                     </div>
                                                                 }
                                                                 {feed.cancelada != 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-                                                                    <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.Descricao)} >
+                                                                    <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.codigo)} >
                                                                         <FontAwesomeIcon icon={faTimes} />
                                                                     </div>
                                                                 }
@@ -863,7 +862,7 @@ class OS extends Component {
                                                                 }
 
                                                                 {feed.cancelada != 1 && this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'OS') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
-                                                                    <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.Descricao)} >
+                                                                    <div type='button' className='iconelixo' onClick={(a) => this.deleteOS(feed.Chave, feed.codigo)} >
                                                                         <FontAwesomeIcon icon={faTimes} />
                                                                     </div>
                                                                 }
