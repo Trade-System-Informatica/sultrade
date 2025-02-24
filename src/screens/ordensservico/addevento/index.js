@@ -290,9 +290,6 @@ class AddEvento extends Component {
                     this.setState({habilitado: true})
                 }
             }
-            if(this.props.location?.state?.editavelDataFaturamento == false){
-                this.setState({habilitado: false})
-            } 
         }
         console.log(this.state.habilitado)
         console.log(this.props.location.state.editavel)
@@ -312,9 +309,6 @@ class AddEvento extends Component {
                     }
                 }else {
                     this.setState({habilitado: true})
-                }
-                if(this.props.location?.state?.editavelDataFaturamento == false){
-                    this.setState({habilitado: false})
                 }
             }
             setTimeout(() => {
@@ -2176,18 +2170,23 @@ class AddEvento extends Component {
 
                                             {/* ALERTA */}
                                             {this.state.chave == 0 ?
-                                                !this.state.editavelDataFaturamento?
-                                                <p style={{display: 'flex', justifyContent: 'center', margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>Os faturada, não é possível adicionar um evento.</p>
-                                                :
-                                                !this.state.editavel?
-                                                    !this.state.habilitado?
-                                                        <p style={{display: 'flex', justifyContent: 'center', margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>Os encerrada, somente eventos do tipo: Desconto ou Recebimento de Remessas</p>
+                                                !this.state.editavelDataFaturamento && !this.state.habilitado ?
+                                                    <p style={{display: 'flex', justifyContent: 'center', margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>
+                                                        Os faturada, somente eventos do tipo: Desconto ou Recebimento de Remessas.
+                                                    </p>
                                                     :
-                                                    null
+                                                    !this.state.editavel ?
+                                                        !this.state.habilitado ?
+                                                            <p style={{display: 'flex', justifyContent: 'center', margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>
+                                                                Os encerrada, somente eventos do tipo: Desconto ou Recebimento de Remessas
+                                                            </p>
+                                                            :
+                                                            null
+                                                        :
+                                                        null
                                                 :
                                                 null
-                                            :
-                                                null}
+                                            }
                                             <div className="row">
                                                 <div className="col-2">
                                                 </div>
