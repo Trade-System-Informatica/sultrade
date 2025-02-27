@@ -18,8 +18,9 @@ const estadoInicial = {
     optionsTexto: "",
     itemEdit: {},
     habilitado: false,
+    habilitadoRemark: false,
+    outroCampoAlterado: false,
     editavelDataFaturamento: true,
-    valoresIniciais: {},
 
     modalAberto: false,
     modal: '',
@@ -53,14 +54,6 @@ class EventoEdit extends Component {
 
     componentDidUpdate = async (prevProps, prevState) => {
         if ((this.props.itemEdit?.valores) && ((!prevProps.itemEdit?.valores) || (!prevProps.aberto && this.props.aberto))) {
-            this.setState({
-                valoresIniciais: { 
-                    valores: [...this.props.itemEdit.valores],
-                    onSubmit: this.props.itemEdit.onSubmit 
-                }
-            });
-        }
-        if ((this.props.itemEdit?.valores) && ((!prevProps.itemEdit?.valores) || (!prevProps.aberto && this.props.aberto))) {
             let itemEdit = { valores: [...this.props.itemEdit.valores], onSubmit: this.props.itemEdit.onSubmit };
 
             if (itemEdit.valores.find((e) => e.titulo == "Tipo")?.valor == 0) {
@@ -92,6 +85,30 @@ class EventoEdit extends Component {
                 }
             }else {
                 this.setState({habilitado: true})
+            }
+        }
+
+        if (prevState.itemEdit !== this.state.itemEdit) {
+            console.log('Mudou itemEdit');
+        
+            // Verifica se o campo "Remarks" foi alterado
+            const currentRemark = this.state.itemEdit?.valores?.find((e) => e.titulo === "Remarks")?.valor;
+            const previousRemark = prevState.itemEdit?.valores?.find((e) => e.titulo === "Remarks")?.valor;
+        
+            // Verifica se outros campos foram alterados
+            const otherFieldsChanged = this.state.itemEdit?.valores?.some((e) => {
+                return e.titulo !== "Remarks" && e.valor !== prevState.itemEdit?.valores?.find((prevE) => prevE.titulo === e.titulo)?.valor;
+            });
+        
+            if (otherFieldsChanged) {
+                console.log('Outros campos foram alterados, bloqueia salvamento');
+                this.setState({ outroCampoAlterado: true });
+            } else if (currentRemark !== previousRemark && !this.outroCampoAlterado) {
+                console.log('Apenas o Remark foi alterado, permite salvamento');
+                this.setState({ habilitadoRemark: true });
+            } else {
+                console.log('Nenhuma alteração relevante');
+                this.setState({ habilitadoRemark: false });
             }
         }
         
@@ -271,39 +288,6 @@ class EventoEdit extends Component {
         return (e.label.toUpperCase().includes(text))
     }
 
-    verificaAlteracoes = () => {
-        const { itemEdit, valoresIniciais } = this.state;
-        const { editavel, editavelDataFaturamento } = this.props;
-        // Verifica se a OS está encerrada ou faturada
-        const osBloqueada = !editavel || !editavelDataFaturamento;
-    
-        // Se a OS não estiver bloqueada, permite qualquer alteração
-        if (!osBloqueada) {
-            return true;
-        }
-    
-        // Verifica se o campo "Remarks" foi alterado
-        const currentRemark = itemEdit?.valores?.find((e) => e.titulo === "Remarks")?.valor;
-        const initialRemark = valoresIniciais?.valores?.find((e) => e.titulo === "Remarks")?.valor;
-    
-        // Verifica se outros campos (diferentes de "Remarks") foram alterados
-        const otherFieldsChanged = itemEdit?.valores?.some((e) => {
-            if (e.titulo === "Remarks") {
-                return false; // Ignora o campo "Remarks"
-            }
-            const initialValue = valoresIniciais?.valores?.find((initialE) => initialE.titulo === e.titulo)?.valor;
-            return e.valor !== initialValue; // Verifica se o valor foi alterado
-        });
-    
-        if (otherFieldsChanged) {
-            return false; // Bloqueia salvamento
-        } else if (currentRemark !== initialRemark) {
-            return true; // Permite salvamento
-        } else {
-            return false; // Bloqueia salvamento
-        }
-    }
-
     render() {
 
         if (!this.props.aberto) {
@@ -330,11 +314,6 @@ class EventoEdit extends Component {
                                     name: '',
                                 }}
                                 onSubmit={async values => {
-                                    if (!this.verificaAlteracoes()) {
-                                        alert("Não é possível salvar. Apenas o campo 'Remarks' pode ser alterado.");
-                                        return;
-                                    }
-
                                     await this.props.setItemEdit(this.state.itemEdit);
                                     await new Promise(r => setTimeout(r, 1000))
                                     await setTimeout(async () => {
@@ -461,22 +440,48 @@ class EventoEdit extends Component {
                                             <div className="row">
                                                 <div className="col-2"></div>
                                                 <div className="col-8" style={{ display: 'flex', justifyContent: 'center' }}>
-                                                <button 
-                                                    type="submit" 
-                                                    disabled={!this.props.valid || !this.verificaAlteracoes()} 
-                                                    style={this.props.valid && this.verificaAlteracoes() ? { width: 300, backgroundColor: "white" } : { width: 300 }}
-                                                >
-                                                    Salvar
-                                                </button>
+                                                    {
+                                                        !this.props.chave ? 
+                                                            (this.props.editavel && this.props.editavelDataFaturamento ?
+                                                                <button 
+                                                                    type="submit" 
+                                                                    disabled={!this.props.valid || (!this.state.habilitadoRemark && !this.props.editavelDataFaturamento)} 
+                                                                    style={this.props.valid && (this.state.habilitadoRemark || this.props.editavelDataFaturamento) ? { width: 300, backgroundColor: "white" } : { width: 300 }}
+                                                                >
+                                                                    Salvar
+                                                                </button>
+                                                                :
+                                                                <button 
+                                                                    type="submit" 
+                                                                    disabled={!this.props.valid || (!this.state.habilitadoRemark && !this.props.editavelDataFaturamento)} 
+                                                                    style={this.props.valid && (this.state.habilitadoRemark || this.props.editavelDataFaturamento) ? { width: 300, backgroundColor: "white" } : { width: 300 }}
+                                                                >
+                                                                    Salvar
+                                                                </button>
+                                                            )
+                                                        :
+                                                        <button 
+                                                            type="submit" 
+                                                            disabled={!this.props.valid || (!this.state.habilitadoRemark && !this.props.editavelDataFaturamento)} 
+                                                            style={this.props.valid && (this.state.habilitadoRemark || this.props.editavelDataFaturamento) ? { width: 300, backgroundColor: "white" } : { width: 300 }}
+                                                        >
+                                                            Salvar
+                                                        </button>
+                                                    }
                                                 </div>
                                                 <div className="col-2"></div>
                                             </div>
                                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
-                                            {!this.verificaAlteracoes() && 
+                                            {!this.props.chave && !this.props.editavel && !this.state.habilitado && !this.state.habilitadoRemark && (
                                                 <p style={{ display: 'flex', justifyContent: 'center', margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>
-                                                    Apenas o campo "Remarks" pode ser alterado quando a OS está encerrada ou faturada.
+                                                    Os encerrada, somente eventos do tipo: Desconto ou Recebimento de Remessas
                                                 </p>
-                                            }
+                                            )}
+                                            {(!this.props.editavelDataFaturamento || !this.state.habilitado) && !this.state.habilitadoRemark && (
+                                                <p style={{ display: 'flex', justifyContent: 'center', margin: 'auto', fontWeight: 'bold', color: 'red', marginBottom: 15}}>
+                                                    Os faturada, somente alterações no remarks.
+                                                </p>
+                                            )}
                                             </div>
                                         </div>
                                     </div>
