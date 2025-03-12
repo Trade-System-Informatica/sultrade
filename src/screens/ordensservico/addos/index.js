@@ -7415,7 +7415,7 @@ class AddOS extends Component {
             <br />
             <br />
 
-            <h5 style={{ width: "100%", textAlign: "center" }}>
+            {/* <h5 style={{ width: "100%", textAlign: "center" }}>
               BANKING DETAILS
             </h5>
             <table style={{ width: "80%", marginLeft: "5%" }}>
@@ -7472,8 +7472,9 @@ class AddOS extends Component {
                 <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
                   <b style={{ paddingRight: 5 }}>CNPJ:</b> 10.432.546/0001-75
                 </td>
-              </tr>
+              </tr> 
             </table>
+            */}
             <br />
             <br />
             <br />
