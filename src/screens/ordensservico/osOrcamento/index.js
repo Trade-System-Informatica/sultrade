@@ -273,9 +273,21 @@ class OsOrcamento extends Component {
                 }
                 return osItem;
             });
+
+            const osPesquisaAtualizados = prevState.osPesquisa.map((osItem) => {
+                if (osItem.Chave === feed.Chave) {
+                    return { 
+                        ...osItem,
+                        chave: feed.Chave,
+                        Descricao: novaDescricao 
+                    };
+                }
+                return osItem;
+            });
     
             return {
                 os: osAtualizados,
+                osPesquisa: osPesquisaAtualizados,
                 descricaoModificada: true, 
             };
         });
