@@ -276,7 +276,7 @@ class Pessoas
     {
         $database = new Database();
 
-        $cols = 'Nome, Nome_Fantasia, Cnpj_Cpf, Rg_Ie, Inscricao_Municipal, Nascimento_Abertura, Inclusao, Categoria, Conta_Contabil, Conta_Provisao, Conta_Faturar, Indicado';
+        $cols = 'Nome, Nome_Fantasia, Cnpj_Cpf, Rg_Ie, Inscricao_Municipal, Nascimento_Abertura, Inclusao, Categoria, Conta_Contabil, Conta_Provisao, Conta_Faturar, Limite, Indicado';
 
         $result = $database->doInsert('pessoas', $cols, $values);
         $database->closeConection();
