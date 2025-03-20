@@ -399,11 +399,11 @@ class Pessoas
         return $result;
     }
 
-    public static function updatePessoa($Chave, $Nome, $Nome_Fantasia, $Cnpj_Cpf, $Rg_Ie, $Inscricao_Municipal, $Nascimento_Abertura, $Inclusao, $Categoria, $Conta_Contabil, $Conta_Provisao, $Conta_Faturar, $Indicado)
+    public static function updatePessoa($Chave, $Nome, $Nome_Fantasia, $Cnpj_Cpf, $Rg_Ie, $Inscricao_Municipal, $Nascimento_Abertura, $Inclusao, $Categoria, $Conta_Contabil, $Conta_Provisao, $Conta_Faturar, $Balance, $Indicado)
     {
         $database = new Database();
 
-        $query = "Nome = '" . $Nome . "', Nome_Fantasia = '" . $Nome_Fantasia . "', Cnpj_Cpf = '" . $Cnpj_Cpf . "', Rg_Ie = '" . $Rg_Ie . "', Inscricao_Municipal = '$Inscricao_Municipal', Nascimento_Abertura = '" . $Nascimento_Abertura . "', Inclusao = '" . $Inclusao . "', Categoria = '" . $Categoria . "', Conta_Contabil = '" . $Conta_Contabil . "', Conta_Provisao = '" . $Conta_Provisao . "', Conta_Faturar = '$Conta_Faturar', Indicado = $Indicado";
+        $query = "Nome = '" . $Nome . "', Nome_Fantasia = '" . $Nome_Fantasia . "', Cnpj_Cpf = '" . $Cnpj_Cpf . "', Rg_Ie = '" . $Rg_Ie . "', Inscricao_Municipal = '$Inscricao_Municipal', Nascimento_Abertura = '" . $Nascimento_Abertura . "', Inclusao = '" . $Inclusao . "', Categoria = '" . $Categoria . "', Conta_Contabil = '" . $Conta_Contabil . "', Conta_Provisao = '" . $Conta_Provisao . "', Conta_Faturar = '" . $Conta_Faturar . "', Limite = '" . $Balance . "', Indicado = '" . $Indicado . "'";
         $result = $database->doUpdate('pessoas', $query, 'Chave = ' . $Chave);
 
         $database->closeConection();

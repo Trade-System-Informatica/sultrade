@@ -125,6 +125,8 @@ const estadoInicial = {
 
     apontadoPor: 0,
 
+    balance: 0,
+
 }
 
 class AddPessoa extends Component {
@@ -165,6 +167,7 @@ class AddPessoa extends Component {
                 contaProvisao: this.state.pessoa.Conta_Provisao,
                 contaFaturar: this.state.pessoa.Conta_Faturar,
                 Indicado: this.state.pessoa.Indicado,
+                balance: this.state.pessoa.Limite
             })
             await this.converteCategoria();
         }
@@ -188,7 +191,8 @@ class AddPessoa extends Component {
                     { titulo: 'Inclusão', valor: util.formatForLogs(this.state.inclusao, 'date') },
                     { titulo: 'Conta Pagar', valor: util.formatForLogs(this.state.contaProvisao, 'options', '', '', this.state.planosContasOptions) },
                     { titulo: 'Conta Receber', valor: util.formatForLogs(this.state.contaContabil, 'options', '', '', this.state.planosContasOptions) },
-                    { titulo: 'Conta Faturar', valor: util.formatForLogs(this.state.contaFaturar, 'options', '', '', this.state.planosContasOptions) }
+                    { titulo: 'Conta Faturar', valor: util.formatForLogs(this.state.contaFaturar, 'options', '', '', this.state.planosContasOptions) },
+                    { titulo: 'Balance', valor: util.formatForLogs(this.state.balance) },
                 ],
             })
 
@@ -541,7 +545,8 @@ class AddPessoa extends Component {
                 { titulo: 'Inclusão', valor: util.formatForLogs(this.state.inclusao, 'date') },
                 { titulo: 'Conta Pagar', valor: util.formatForLogs(this.state.contaProvisao, 'options', '', '', this.state.planosContasOptions) },
                 { titulo: 'Conta Receber', valor: util.formatForLogs(this.state.contaContabil, 'options', '', '', this.state.planosContasOptions) },
-                { titulo: 'Conta Faturar', valor: util.formatForLogs(this.state.contaFaturar, 'options', '', '', this.state.planosContasOptions) }
+                { titulo: 'Conta Faturar', valor: util.formatForLogs(this.state.contaFaturar, 'options', '', '', this.state.planosContasOptions) },
+                { titulo: 'Balance', valor: util.formatForLogs(this.state.balance) },
             ],
             loading: true
         })
@@ -549,7 +554,7 @@ class AddPessoa extends Component {
         if (this.state.chave == 0) {
             await apiEmployee.post(`insertPessoa.php`, {
                 token: true,
-                values: `"${this.state.nome.replaceAll("'", "\'")}", '${this.state.nome_fantasia.replaceAll("'", "\'")}', '${this.state.cnpj_cpfLimpo}', '${this.state.rg_ie}', '${this.state.inscricao_municipal}', '${this.state.nascimento}', '${this.state.inclusao}', '${categoria}', '${this.state.contaContabil}', '${this.state.contaProvisao}', '${this.state.contaFaturar}', ${parseInt(this.state.apontadoPor)}`
+                values: `"${this.state.nome.replaceAll("'", "\'")}", '${this.state.nome_fantasia.replaceAll("'", "\'")}', '${this.state.cnpj_cpfLimpo}', '${this.state.rg_ie}', '${this.state.inscricao_municipal}', '${this.state.nascimento}', '${this.state.inclusao}', '${categoria}', '${this.state.contaContabil}', '${this.state.contaProvisao}', '${this.state.contaFaturar}', '${this.state.balance}', ${parseInt(this.state.apontadoPor)}`
             }).then(
                 async res => {
                     if (res.data[0].Chave) {
@@ -576,7 +581,8 @@ class AddPessoa extends Component {
                 Conta_Contabil: this.state.contaContabil,
                 Conta_Provisao: this.state.contaProvisao,
                 Conta_Faturar: this.state.contaFaturar,
-                Indicado: this.state.apontadoPor
+                Indicado: this.state.apontadoPor,
+                Balance: this.state.balance
             }).then(
                 async res => {
                     console.log(res.data);
@@ -807,6 +813,15 @@ class AddPessoa extends Component {
                                                                     </div>
                                                                     <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                         <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.contaFaturar)[0]} search={true} onChange={(e) => { this.setState({ contaFaturar: e.value, }) }} />
+                                                                    </div>
+                                                                    <div className='col-1'></div>
+                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <label>Balance</label>
+                                                                    </div>
+                                                                    <div className='col-1 errorMessage'>
+                                                                    </div>
+                                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                    <Field className="form-control" type="number" value={this.state.balance} onChange={async e => { this.setState({ balance: e.currentTarget.value }) }} />
                                                                     </div>
                                                                 </>
                                                             }
