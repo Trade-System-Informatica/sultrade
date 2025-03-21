@@ -44,6 +44,7 @@ import XLSX from "xlsx-js-style";
 import ModalEventoEdit from "../../../components/modalEventoEdit";
 import EventoEdit from "../../../components/eventoEdit";
 import ModalCamposOS from "../../../components/modalCamposOS";
+import apiHeroku from "../../../services/apiHeroku";
 
 const estadoInicial = {
   os: "",
@@ -2887,13 +2888,32 @@ class AddOS extends Component {
                 loading: false,
                 bloqueado: false,
                 governmentTaxes: this.state.governmentTaxes
-                  ? this.state.governmentTaxes
-                  : false,
+                ? this.state.governmentTaxes
+                : false,
                 bankCharges: this.state.bankCharges
-                  ? this.state.bankCharges
-                  : false,
+                ? this.state.bankCharges
+                : false,
               });
-              if (reload) {
+              // CHECA SE O BALANCE É MENOR QUE O BALANCE MAXIMO DO CLIENTE QUANDO FOR COLOCADO UMA DATA DE FATURAMENTO
+              if ((this.state.dadosIniciais?.find((e) => e.titulo === "Data de Faturamento")?.valor) != (this.state.dadosFinais?.find((e) => e.titulo === "Data de Faturamento")?.valor)) {
+                fetch('https://apisiacweb.herokuapp.com/sultrade/maxBalance', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': '07256661000128',
+                  },
+                  body: JSON.stringify({
+                    codigo: this.state.codigo, 
+                    cliente: this.state.cliente, 
+                    centro_custo: this.state.centroCusto
+                  }),
+                  keepalive: true
+                });
+                
+                if (reload) {
+                  window.location.reload();
+                }
+              } else if (reload) {
                 window.location.reload();
               }
             } else {

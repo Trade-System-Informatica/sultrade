@@ -80,7 +80,7 @@ if ($os) {
         $mail->Host       = 'smtp.tradesystem.com.br';
         $mail->SMTPAuth   = true;
         $mail->Username   = 'no-reply@tradesystem.com.br';
-        $mail->Password   = 'Trade@1697';
+        $mail->Password   = 'Trade@6086';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port  = 587;
 
