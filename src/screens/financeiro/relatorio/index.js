@@ -676,11 +676,14 @@ class Relatorio extends Component {
                   let totalDiscountPorGrupo = 0;
                   let totalReceivedPorGrupo = 0;
                   let totalBalancePorGrupo = 0;
+
+                  const hasDiscount = rows.some(row => parseFloat(row.discount) > 0.00);
+
                   return (
                     <div>
                       <table className="pdfTable">
                         <tr>
-                          <th colSpan={9}>
+                        <th colSpan={hasDiscount ? 9 : 8}>
                             <span style={{ fontSize: 15 }}>
                               {this.state.por == "porCliente" && e.pessoa?.nome
                                 ? e?.pessoa?.nome
@@ -698,10 +701,10 @@ class Relatorio extends Component {
                           <th>PO</th>
                           <th>PORT OF CALL</th>
                           <th>SAILED</th>
-                          {!this.state.clientes[0] && <th>BILLING</th>}
+                          <th>BILLING</th>
                           <th>ROE</th>
                           <th>FDA</th>
-                          <th>DISCOUNT</th>
+                          {hasDiscount && <th>DISCOUNT</th>}
                           <th>RECEIVED</th>
                           <th>BALANCE</th>
                         </tr>
@@ -771,16 +774,6 @@ class Relatorio extends Component {
                                       >
                                         {moment(row.sailed).format("DD/MM/YY")}
                                       </td>
-                                      <td
-                                        style={{
-                                          backgroundColor: "inherit",
-                                          whiteSpace: "nowrap",
-                                          maxWidth: 55,
-                                          minWidth: 55,
-                                        }}
-                                      >
-                                        {row.billing}
-                                      </td>
                                     </>
                                   )}
                                   {this.state.clientes[0] && (
@@ -813,6 +806,16 @@ class Relatorio extends Component {
                                     style={{
                                       backgroundColor: "inherit",
                                       whiteSpace: "nowrap",
+                                      maxWidth: 55,
+                                      minWidth: 55,
+                                    }}
+                                  >
+                                    {row.billing}
+                                  </td>
+                                  <td
+                                    style={{
+                                      backgroundColor: "inherit",
+                                      whiteSpace: "nowrap",
                                       maxWidth: 65,
                                       minWidth: 65,
                                     }}
@@ -834,21 +837,21 @@ class Relatorio extends Component {
                                       maximumFractionDigits: 2,
                                     }).format(row.fda)}
                                   </td>
-                                  <td
-                                    style={{
+                                  {hasDiscount && (
+                                    <td style={{
                                       backgroundColor: "inherit",
                                       whiteSpace: "nowrap",
                                       maxWidth: 95,
                                       minWidth: 95,
-                                    }}
-                                  >
-                                    {this.state.moeda == 5 ? "R$" : "USD"}{" "}
-                                    {new Intl.NumberFormat("pt-BR", {
-                                      style: "decimal",
-                                      minimumFractionDigits: 2,
-                                      maximumFractionDigits: 2,
-                                    }).format(row.discount)}
-                                  </td>
+                                    }}>
+                                      {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                                      {new Intl.NumberFormat("pt-BR", {
+                                        style: "decimal",
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                      }).format(row.discount)}
+                                    </td>
+                                  )}
                                   <td
                                     style={{
                                       backgroundColor: "inherit",
@@ -882,7 +885,7 @@ class Relatorio extends Component {
                             }
                           })}
                         <tr style={{ fontSize: 13 }}>
-                          <th colSpan={this.state.clientes[0] ? "5" : "6"}>
+                          <th colSpan={this.state.clientes[0] ? "6" : "6"}>
                             {"Total ->"}
                           </th>
                           <td
@@ -899,20 +902,20 @@ class Relatorio extends Component {
                               maximumFractionDigits: 2,
                             }).format(totalFDAPorGrupo)}
                           </td>
-                          <td
-                            style={{
+                          {hasDiscount && (
+                            <td style={{
                               paddingRight: "15px",
                               borderTop: "1px solid black",
                               whiteSpace: "nowrap",
-                            }}
-                          >
-                            {this.state.moeda == 5 ? "R$" : "USD"}{" "}
-                            {new Intl.NumberFormat("pt-BR", {
-                              style: "decimal",
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            }).format(totalDiscountPorGrupo)}
-                          </td>
+                            }}>
+                              {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                              {new Intl.NumberFormat("pt-BR", {
+                                style: "decimal",
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              }).format(totalDiscountPorGrupo)}
+                            </td>
+                          )}
                           <td
                             style={{
                               paddingRight: "15px",
@@ -1342,11 +1345,13 @@ class Relatorio extends Component {
                 let totalReceivedPorGrupo = 0;
                 let totalBalancePorGrupo = 0;
 
+                const hasDiscount = rows.some(row => parseFloat(row.discount) > 0.00);
+
                 return (
                   <div>
                     <table className="pdfTable">
                       <tr>
-                        <th colSpan={9}>
+                      <th colSpan={hasDiscount ? 9 : 8}>
                           <span style={{ fontSize: 15 }}>
                             {this.state.por == "porCliente" && e.pessoa
                               ? e.pessoa.split("@.@")[0]
@@ -1368,10 +1373,10 @@ class Relatorio extends Component {
                         <th>PO</th>
                         <th>PORT OF CALL</th>
                         <th>SAILED</th>
-                        {!this.state.clientes[0] && <th>BILLING</th>}
+                        <th>BILLING</th>
                         <th>ROE</th>
                         <th>FDA</th>
-                        <th>DISCOUNT</th>
+                        {hasDiscount && <th>DISCOUNT</th>}
                         <th>RECEIVED</th>
                         <th>BALANCE</th>
                       </tr>
@@ -1439,16 +1444,6 @@ class Relatorio extends Component {
                                     >
                                       {moment(row.sailed).format("DD/MM/YY")}
                                     </td>
-                                    <td
-                                      style={{
-                                        backgroundColor: "inherit",
-                                        whiteSpace: "nowrap",
-                                        maxWidth: 55,
-                                        minWidth: 55,
-                                      }}
-                                    >
-                                      {row.billing}
-                                    </td>
                                   </>
                                 )}
                                 {this.state.clientes[0] && (
@@ -1479,6 +1474,16 @@ class Relatorio extends Component {
                                   style={{
                                     backgroundColor: "inherit",
                                     whiteSpace: "nowrap",
+                                    maxWidth: 55,
+                                    minWidth: 55,
+                                  }}
+                                >
+                                  {row.billing}
+                                </td>
+                                <td
+                                  style={{
+                                    backgroundColor: "inherit",
+                                    whiteSpace: "nowrap",
                                     maxWidth: 65,
                                     minWidth: 65,
                                   }}
@@ -1500,21 +1505,21 @@ class Relatorio extends Component {
                                     maximumFractionDigits: 2,
                                   }).format(row.fda)}
                                 </td>
-                                <td
-                                  style={{
+                                {hasDiscount && (
+                                  <td style={{
                                     backgroundColor: "inherit",
                                     whiteSpace: "nowrap",
                                     maxWidth: 95,
                                     minWidth: 95,
-                                  }}
-                                >
-                                  {this.state.moeda == 5 ? "R$" : "USD"}{" "}
-                                  {new Intl.NumberFormat("pt-BR", {
-                                    style: "decimal",
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  }).format(row.discount)}
-                                </td>
+                                  }}>
+                                    {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                                    {new Intl.NumberFormat("pt-BR", {
+                                      style: "decimal",
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    }).format(row.discount)}
+                                  </td>
+                                )}
                                 <td
                                   style={{
                                     backgroundColor: "inherit",
@@ -1548,7 +1553,7 @@ class Relatorio extends Component {
                           }
                         })}
                       <tr style={{ fontSize: 13 }}>
-                        <th colSpan={this.state.clientes[0] ? "5" : "6"}>
+                        <th colSpan={this.state.clientes[0] ? "6" : "6"}>
                           {"Total ->"}
                         </th>
                         <td
@@ -1565,20 +1570,20 @@ class Relatorio extends Component {
                             maximumFractionDigits: 2,
                           }).format(totalFDAPorGrupo)}
                         </td>
-                        <td
-                          style={{
+                        {hasDiscount && (
+                          <td style={{
                             paddingRight: "15px",
                             borderTop: "1px solid black",
                             whiteSpace: "nowrap",
-                          }}
-                        >
-                          {this.state.moeda == 5 ? "R$" : "USD"}{" "}
-                          {new Intl.NumberFormat("pt-BR", {
-                            style: "decimal",
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          }).format(totalDiscountPorGrupo)}
-                        </td>
+                          }}>
+                            {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                            {new Intl.NumberFormat("pt-BR", {
+                              style: "decimal",
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }).format(totalDiscountPorGrupo)}
+                          </td>
+                        )}
                         <td
                           style={{
                             paddingRight: "15px",
