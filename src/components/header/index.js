@@ -34,7 +34,9 @@ class Header extends Component {
 
         tarifasVencidas: [],
         anexosNaoValidados: [],
-        alert: { msg: "", type: "" }
+        alert: { msg: "", type: "" },
+
+        //osAviso: [],
     }
 
     fazerLogout = async () => {
@@ -113,6 +115,7 @@ class Header extends Component {
 
                 if (permission) {
                     const tarifas = await loader.testaTarifasVencimentos();
+                    //const osSemEnvio = await loader.getOsSemEnvio();
 
 
                     if (tarifas[0]) {
@@ -125,6 +128,16 @@ class Header extends Component {
                             }
                         })
                     }
+                    // if (osSemEnvio[0]) {
+                    //     this.setState({ osAviso: osSemEnvio.map((os) => ({ ...os, value: false })) });
+                    //     this.setState({
+                    //         alert: {
+                    //             type: "confirm", msg: `Há ordens de serviço sem data de envio.`,
+                    //             checkboxes: osSemEnvio.map((os) => ({ chave: os.chave, value: os.value, label: `${os.codigo}` })),
+                    //             changeCheckbox: (chave) => this.changeCheckbox(chave)
+                    //         }
+                    //     })
+                    // }
                 }
 
             }

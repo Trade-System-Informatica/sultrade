@@ -2299,4 +2299,16 @@ class OS
             return "Erro: " . $e->getMessage();
         }
     }
+    public static function getOsSemEnvio()
+    {
+        $database = new Database();
+
+        $result = $database->doSelect(
+            'os',
+            'os.*',
+            'envio IS NULL AND Data_Faturamento <= DATE_SUB(CURDATE(), INTERVAL 2 DAY) and cancelada = 0 and orcamento = 0'
+        );
+        $database->closeConection();
+        return $result;
+    }
 }

@@ -645,5 +645,15 @@ export default class loader {
             err => { alert(err) }
         );
     }
+    static async getOsSemEnvio() {
+        return await apiEmployee.post('getOsSemEnvio.php').then(
+            async res => {
+                return res.data;
+            },
+            async err => {
+                alert(err);
+            }
+        )
+    }
 
 }
