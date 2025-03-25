@@ -6,15 +6,9 @@ header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 include_once '../classes/OS.php';
 include_once '../libraries/utils.php';
 
-$data = file_get_contents("php://input");
-$objData = json_decode($data);
+$os = new OS();
+$result = $os->getOsSemEnvio();
 
-if($objData != NULL){
-    $os = new OS();
-        $result = $os->getOsSemEnvio();
-    } else {
-        $result = "false";
-    }
     
 echo(json_encode($result));
 exit;

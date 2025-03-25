@@ -115,7 +115,8 @@ class Header extends Component {
 
                 if (permission) {
                     const tarifas = await loader.testaTarifasVencimentos();
-                    //const osSemEnvio = await loader.getOsSemEnvio();
+                    // const osSemEnvio = await loader.getOsSemEnvio();
+                    // console.log('os sem envio: ', osSemEnvio);
 
 
                     if (tarifas[0]) {
