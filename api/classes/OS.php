@@ -2307,6 +2307,8 @@ class OS
             'os',
             'os.*',
             "(envio IS NULL OR envio = '0000-00-00')
+			AND Data_Faturamento IS NOT NULL 
+			AND Data_Faturamento != '0000-00-00 00:00:00'
             AND Data_Faturamento <= DATE_SUB(CURDATE(), INTERVAL 2 DAY)
             AND cancelada = 0 
             AND orcamento = 0 
