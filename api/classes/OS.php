@@ -2312,7 +2312,8 @@ class OS
             AND Data_Faturamento <= DATE_SUB(CURDATE(), INTERVAL 2 DAY)
             AND cancelada = 0 
             AND orcamento = 0 
-            AND Data_Abertura > '2025-01-01'"
+            AND Data_Abertura > '2025-01-01'
+            ORDER BY codigo DESC"
         );
         $database->closeConection();
         return $result;
