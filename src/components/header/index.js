@@ -36,7 +36,7 @@ class Header extends Component {
         anexosNaoValidados: [],
         alert: { msg: "", type: "" },
 
-        //osAviso: [],
+        osAviso: [],
     }
 
     fazerLogout = async () => {
@@ -97,6 +97,103 @@ class Header extends Component {
         await loader.tarifasVencidasEmails(this.state.tarifasVencidas.filter((tarifa) => tarifa.value));
     }
 
+    avisoOsSemEnvio = async (osList) => {
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return (
+                    <div className='custom-ui text-center' style={{
+                        backgroundColor: '#fff',
+                        borderRadius: '8px',
+                        padding: '20px',
+                        width: '90%',
+                        maxWidth: '500px',
+                        boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
+                        textAlign: 'center'
+                    }}>
+                        <div style={{
+                            borderBottom: '1px solid #eee',
+                            paddingBottom: '15px',
+                            marginBottom: '15px'
+                        }}>
+                            <h1 style={{
+                                color: '#2c3e50',
+                                fontSize: '1.5rem',
+                                marginBottom: '5px'
+                            }}>{NOME_EMPRESA}</h1>
+                            <p style={{
+                                color: '#7f8c8d',
+                                fontSize: '1rem',
+                                margin: 0
+                            }}>Ordens de serviço sem data de envio</p>
+                        </div>
+                        
+                        <div style={{ 
+                            maxHeight: '300px', 
+                            overflowY: 'auto', 
+                            margin: '15px 0',
+                            textAlign: 'left'
+                        }}>
+                            {osList.map((os) => (
+                                <div key={os.chave} style={{
+                                    padding: '10px',
+                                    margin: '5px 0',
+                                    backgroundColor: '#f8f9fa',
+                                    borderRadius: '4px',
+                                    transition: 'all 0.3s ease',
+                                    ':hover': {
+                                        backgroundColor: '#e9ecef'
+                                    }
+                                }}>
+                                    <a 
+                                        href={`${window.location.origin}/ordensservico/addos/${os.Chave}`}
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        style={{
+                                            color: '#3498db',
+                                            textDecoration: 'none',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            fontWeight: '500'
+                                        }}
+                                    >
+                                        <span style={{
+                                            display: 'inline-block',
+                                            width: '24px',
+                                            height: '24px',
+                                            backgroundColor: '#3498db',
+                                            color: 'white',
+                                            borderRadius: '4px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            marginRight: '10px',
+                                            fontSize: '0.8rem'
+                                        }}>OS</span>
+                                        {os.codigo}
+                                        <span style={{
+                                            marginLeft: 'auto',
+                                            fontSize: '0.8rem',
+                                            color: '#95a5a6'
+                                        }}>
+                                            {os.Data_Faturamento ? new Date(os.Data_Faturamento).toLocaleDateString() : 'Sem data'}
+                                        </span>
+                                    </a>
+                                </div>
+                            ))}
+                        </div>
+    
+                        <button
+                            onClick={onClose}
+                            className="btn btn-success w-50"
+                        >
+                            OK
+                        </button>
+                    </div>
+                );
+            }
+        });
+    };
+
     componentDidMount = async () => {
         await this.carregaTiposAcessos()
         await this.carregaPermissoes()
@@ -107,17 +204,18 @@ class Header extends Component {
         } else if (this.props.user.codigo) {
             if (this.props.user.justLogged) {
                 let permission = false;
+                let permissionAviso = false;
                 this.state.acessosPermissoes.map((e) => {
                     if ((e.acessoAcao == "ANEXOS" && e.permissaoEdita != 0)) {
                         permission = true;
+                    }
+                    if ((e.acessoAcao == "SEM_ENVIO" && e.permissoes == 1)) {
+                        permissionAviso = true;
                     }
                 })
 
                 if (permission) {
                     const tarifas = await loader.testaTarifasVencimentos();
-                    // const osSemEnvio = await loader.getOsSemEnvio();
-                    // console.log('os sem envio: ', osSemEnvio);
-
 
                     if (tarifas[0]) {
                         this.setState({ tarifasVencidas: tarifas.map((tarifa) => ({ ...tarifa, value: false })) });
@@ -129,16 +227,13 @@ class Header extends Component {
                             }
                         })
                     }
-                    // if (osSemEnvio[0]) {
-                    //     this.setState({ osAviso: osSemEnvio.map((os) => ({ ...os, value: false })) });
-                    //     this.setState({
-                    //         alert: {
-                    //             type: "confirm", msg: `Há ordens de serviço sem data de envio.`,
-                    //             checkboxes: osSemEnvio.map((os) => ({ chave: os.chave, value: os.value, label: `${os.codigo}` })),
-                    //             changeCheckbox: (chave) => this.changeCheckbox(chave)
-                    //         }
-                    //     })
-                    // }
+                }
+                if (permissionAviso) {
+                    const osSemEnvio = await loader.getOsSemEnvio();
+
+                    if (osSemEnvio[0]) {
+                        await this.avisoOsSemEnvio(osSemEnvio);
+                    }
                 }
 
             }

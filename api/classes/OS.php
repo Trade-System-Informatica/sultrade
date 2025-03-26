@@ -2306,7 +2306,11 @@ class OS
         $result = $database->doSelect(
             'os',
             'os.*',
-            'envio IS NULL AND Data_Faturamento <= DATE_SUB(CURDATE(), INTERVAL 2 DAY) and cancelada = 0 and orcamento = 0'
+            "(envio IS NULL OR envio = '')
+            AND Data_Faturamento <= DATE_SUB(CURDATE(), INTERVAL 2 DAY)
+            AND cancelada = 0 
+            AND orcamento = 0 
+            AND Data_Abertura > '2025-01-01'"
         );
         $database->closeConection();
         return $result;
