@@ -584,12 +584,11 @@ input[type=number] {
     }
 }
 
-.salvarOrdem {
+/* .salvarOrdem {
     position: fixed;
-    bottom: 20px;
+    bottom: 16px;
     right: 20px;
     padding: 10px 20px;
-    background-color: #4CAF50; /* Cor do botão */
     color: white;
     border: none;
     border-radius: 5px;
@@ -597,7 +596,7 @@ input[type=number] {
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     font-size: 16px;
     z-index: 999;
-}
+} */
 
 th.ordem-column{
     min-width: 70px;
@@ -611,9 +610,9 @@ th.desc-column {
     width: 750px;
 }
 
-.excluirEventos {
+/* .excluirEventos {
     position: fixed;
-    bottom: 40px;
+    bottom: 30px;
     right: 0px;
     padding: 10px 20px;
     color: white;
@@ -623,8 +622,57 @@ th.desc-column {
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     font-size: 16px;
     z-index: 999;
+} */
+
+/* .compartilharEventos {
+    position: fixed;
+    bottom: 70px;
+    right: 0px;
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+} */
+
+.action-buttons-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
+    z-index: 999;
+}
+
+.action-button {
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    font-size: 15px;
+    width: 220px; /* Largura consistente para todos */
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
 }
 
 .cabecalhoEventos{
     border-bottom: 2px solid black;
+}
+
+.react-confirm-alert-overlay {
+    z-index: 9999 !important;
+}
+
+.react-confirm-alert {
+    z-index: 10000 !important;
 }

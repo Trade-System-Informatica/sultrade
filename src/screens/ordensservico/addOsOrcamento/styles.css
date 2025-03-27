@@ -591,35 +591,41 @@ input[type=number] {
     }
 }
 
-.salvarOrdem {
+.action-buttons-container {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    padding: 10px 20px;
-    background-color: #4CAF50; /* Cor do botão */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
     z-index: 999;
 }
 
-.excluirEventos {
-    position: fixed;
-    bottom: 40px;
-    right: 0px;
+.action-button {
     padding: 10px 20px;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    font-size: 16px;
-    z-index: 999;
+    font-size: 15px;
+    min-width: 220px; /* Largura consistente para todos */
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .cabecalhoEventos{
     border-bottom: 2px solid black;
+}
+
+.react-confirm-alert-overlay {
+    z-index: 9999 !important;
+}
+
+.react-confirm-alert {
+    z-index: 10000 !important;
 }

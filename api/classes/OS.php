@@ -2124,6 +2124,26 @@ class OS
         return $result;
     }
 
+    public static function shareServicoItem($chaveEvento, $chaveOs)
+    {
+        $database = new Database();
+
+        $item = $database->doSelect('os_servicos_itens', '*', "chave = '$chaveEvento'");
+
+        $ultimaOrdem = $database->doSelect('os_servicos_itens', "os_servicos_itens.*", "chave_os = $chaveOs AND cancelada = 0");
+        $ordem = ($ultimaOrdem != NULL) ? end($ultimaOrdem)['ordem'] + 1 : 1;
+
+
+        $colsItens = 'chave_os, data, fornecedor, taxa, descricao, ordem, tipo_sub, Fornecedor_Custeio, remarks, Moeda, valor, valor1, repasse, qntd';
+        $valuesItens = "'$chaveOs', '{$item['data']}', '{$item['fornecedor']}', '{$item['taxa']}', '{$item['descricao']}', '{$ordem}', '{$item['tipo_sub']}', '{$item['Fornecedor_Custeio']}', '{$item['remarks']}', '{$item['Moeda']}', '{$item['valor']}', '{$item['valor1']}', '{$item['repasse']}', '{$item['qntd']}'";
+
+        $result = $database->doInsert('os_servicos_itens', $colsItens, $valuesItens);
+
+        
+        $database->closeConection();
+        return $result;
+    }
+
     public static function deleteCentroCusto($chave)
     {
         $database = new Database();

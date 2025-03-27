@@ -48,6 +48,8 @@ import apiHeroku from "../../../services/apiHeroku";
 
 const estadoInicial = {
   os: "",
+  ordem_servico: [],
+  ordem_servico_codigos: [],
 
   chave: 0,
   descricao: "",
@@ -117,6 +119,8 @@ const estadoInicial = {
   modal: 0,
   modalLista: "",
   modalPesquisa: "",
+
+  modalEscolhaOsShare: false,
 
   logs: [],
   modalLog: false,
@@ -279,6 +283,8 @@ const estadoInicial = {
 
   ordemModificada: false,
   selectedEvents: [],
+
+  os_escolhida: {},
 };
 
 class AddOS extends Component {
@@ -763,6 +769,29 @@ class AddOS extends Component {
     this.calculaTotal();
   };
 
+  getOS = async () => {
+      const ordem_servico = [
+        ...this.state.ordem_servico,
+        ...(await loader.getBase(
+          `getOS.php`,
+          this.state.usuarioLogado.empresa,
+          500,
+          0
+        )),
+      ];
+  
+      await this.setState({ ordem_servico });
+  
+      this.state.ordem_servico.map(async (ord) => {
+        const list_os_codigos = [
+          ...this.state.ordem_servico_codigos,
+          { label: ord.codigo, value: ord.Chave },
+        ];
+  
+        await this.setState({ ordem_servico_codigos: list_os_codigos });
+      });
+  };
+
   loadAll = async () => {
     await this.setState({
       naviosOptions: await loader.getBaseOptions(
@@ -813,6 +842,7 @@ class AddOS extends Component {
       await this.getCentrosCustos();
       await this.getServicosItens();
       await this.getDocumentos();
+      await this.getOS();
     }
 
     await this.getTemplates();
@@ -2324,6 +2354,67 @@ class AddOS extends Component {
                     );
                 }
                 document.location.reload();
+                onClose();
+              }}
+            >
+              Sim
+            </button>
+          </div>
+        );
+      },
+    });
+  };
+
+  ShareToOs = async () => {
+    if (this.state.selectedEvents.length === 0) return;
+
+    const eventNames = this.state.selectedEvents.map(chave => 
+      this.state.eventos.find(evento => evento.chave === chave)?.descricao
+    ).join(', ');
+
+    confirmAlert({
+      customUI: ({ onClose }) => {
+        {this.setState({ modalItemAberto: false })}
+        return (
+          <div className="custom-ui text-center">
+            <h1>{NOME_EMPRESA}</h1>
+            <p>Deseja transferir estes eventos ({eventNames}) para a OS ({this.state.os_escolhida.label})?</p>
+            <button
+              style={{ marginRight: 5 }}
+              className="btn btn-danger w-25"
+              onClick={onClose}
+            >
+              Não
+            </button>
+            <button
+              style={{ marginRight: 5 }}
+              className="btn btn-success w-25"
+              onClick={async () => {
+                for (const chave of this.state.selectedEvents) {
+                  await apiEmployee
+                    .post(`shareServicoItem.php`, {
+                      token: true,
+                      chaveEvento: chave,
+                      chaveOs: this.state.os_escolhida.value
+                    })
+                    .then(
+                      async (response) => {
+                        if (response.data == true) {
+                          await loader.salvaLogs(
+                            "os_servicos_itens",
+                            this.state.usuarioLogado.codigo,
+                            null,
+                            "Compartilhamento",
+                            chave
+                          );
+                        }
+                      },
+                      (response) => {
+                        this.erroApi(response);
+                      }
+                    );
+                }
+                await this.setState({ redirectAfterInsertEventsInOs: true });
                 onClose();
               }}
             >
@@ -8194,6 +8285,15 @@ class AddOS extends Component {
             {window.location.reload()}
           </>
         )}
+        {this.state.redirectAfterInsertEventsInOs && (
+                  <>
+                    <Redirect
+                      to={{
+                        pathname: `/ordensservico/addos/${this.state.os_escolhida.value}`,
+                      }}
+                    />
+                  </>
+        )}
         {this.state.redirectReturnOrcamento && (
           <>
           <Redirect
@@ -10764,6 +10864,110 @@ class AddOS extends Component {
               </div>
             </Modal>
 
+            <Modal
+              aria-labelledby="transition-modal-title"
+              aria-describedby="transition-modal-description"
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                paddingTop: "5%",
+                paddingBottom: "5%",
+                overflow: "scroll",
+              }}
+              open={this.state.modalEscolhaOsShare}
+              onClose={async () =>
+                await this.setState({ modalEscolhaOsShare: false })
+              }
+            >
+              <div className="modalContainer">
+                <div className="modalCriar">
+                  <div className="containersairlistprodmodal">
+                    <div
+                      className="botaoSairModal"
+                      onClick={async () =>
+                        await this.setState({ modalEscolhaOsShare: false })
+                      }
+                    >
+                      <span>X</span>
+                    </div>
+                  </div>
+                  <div className="modalContent">
+                    <div className="modalForm" style={{ width: "95%" }}>
+                      <Formik
+                        initialValues={{
+                          codigo: "",
+                        }}
+                        onSubmit={async () => {
+                          this.setState({ modalEscolhaOsShare: false })
+                          this.ShareToOs();
+                        }}
+                      >
+                        <Form className="contact-form">
+                          <div className="row">
+                            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 ">
+                                  <div className="row addservicos">
+                                    <div className="col-12">
+                                      <h4 className="text-center white">
+                                        Escolha a OS:
+                                      </h4>
+                                    </div>
+                                    <Select
+                                      className="SearchSelect"
+                                      options={this.state.ordem_servico_codigos}
+                                      value={this.state.os_escolhida}
+                                      search={true}
+                                      onChange={(e) => {
+                                        this.setState({ os_escolhida: e });
+                                      }}
+                                    />
+                                  </div>
+
+                                  <div
+                                    className="row"
+                                    style={{
+                                      display: "flex",
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <button
+                                      type="submit"
+                                      disabled={
+                                        this.state.os_escolhida.label
+                                          ? false
+                                          : true
+                                      }
+                                      style={
+                                        this.state.os_escolhida.label
+                                          ? {
+                                              justifyContent: "center",
+                                              alignItems: "center",
+                                              width: 300,
+                                            }
+                                          : {
+                                              justifyContent: "center",
+                                              alignItems: "center",
+                                              backgroundColor: "gray",
+                                              width: 300,
+                                            }
+                                      }
+                                    >
+                                      Enviar eventos
+                                    </button>
+                                  </div>
+
+                              <div className="col-2"></div>
+                            </div>
+                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-1"></div>
+                          </div>
+                        </Form>
+                      </Formik>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Modal>
+
             <ModalListas
               alteraModal={this.alteraModal}
               alteraNavio={this.alteraNavio}
@@ -13128,29 +13332,41 @@ class AddOS extends Component {
                                       )}
                                     </table>
                                   </div>
-                                  {this.state.acessosPermissoes
-                                  .filter((e) => {
-                                    if (
-                                      e.acessoAcao ==
-                                      "SERVICOS_ITENS"
-                                    ) {
-                                      return e;
-                                    }
-                                  })
-                                  .map(
-                                    (e) => e.permissaoDeleta
-                                  )[0] == 1 && this.state.selectedEvents.length > 0 && (
-                                    <div className="excluirEventos mb-3">
-                                      <button 
-                                        className="btn btn-danger"
-                                        onClick={this.deleteMultipleEvents}
-                                      >
-                                        <FontAwesomeIcon icon={faTrashAlt} /> Excluir Selecionados ({this.state.selectedEvents.length})
-                                      </button>
-                                    </div>
+                                  <div className="action-buttons-container">
+                                    {this.state.acessosPermissoes
+                                      .filter(e => e.acessoAcao === "SERVICOS_ITENS")
+                                      .map(e => e.permissaoInsere)[0] == 1 && 
+                                      this.state.selectedEvents.length > 0 && (
+                                        <button 
+                                          className="action-button btn-success"
+                                          onClick={() => {
+                                            this.setState({ modalEscolhaOsShare: true });
+                                          }}
+                                        >
+                                          <FontAwesomeIcon icon={faPlus} /> 
+                                          Transferir Selecionados ({this.state.selectedEvents.length})
+                                        </button>
                                     )}
+                                    
+                                    {this.state.acessosPermissoes
+                                      .filter(e => e.acessoAcao === "SERVICOS_ITENS")
+                                      .map(e => e.permissaoDeleta)[0] == 1 && 
+                                      this.state.selectedEvents.length > 0 && (
+                                        <button 
+                                          className="action-button btn-danger"
+                                          onClick={this.deleteMultipleEvents}
+                                        >
+                                          <FontAwesomeIcon icon={faTrashAlt} /> 
+                                          Excluir Selecionados ({this.state.selectedEvents.length})
+                                        </button>
+                                    )}
+                                    
                                     {this.state.ordemModificada && (
-                                      <button className='salvarOrdem' onClick={this.salvarOrdem} disabled={this.state.loading}>
+                                      <button 
+                                        className="action-button btn-success" 
+                                        onClick={this.salvarOrdem} 
+                                        disabled={this.state.loading}
+                                      >
                                         {this.state.loading ? (
                                           "Salvando..."
                                         ) : (
@@ -13160,6 +13376,7 @@ class AddOS extends Component {
                                         )}
                                       </button>
                                     )}
+                                  </div>
                                 </div>
                               </div>
                             </div>
