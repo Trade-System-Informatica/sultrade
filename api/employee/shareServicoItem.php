@@ -11,7 +11,7 @@ $objData = json_decode($data);
 
 if($objData != NULL){
     $token = prepareInput($objData->token);
-    $chaveEvento = prepareInput($objData->chaveEventos);
+    $chaveEvento = prepareInput($objData->chaveEvento);
     $chaveOs = prepareInput($objData->chaveOs);
 
     $os = new OS();
