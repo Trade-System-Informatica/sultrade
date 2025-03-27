@@ -2128,7 +2128,12 @@ class OS
     {
         $database = new Database();
 
-        $item = $database->doSelect('os_servicos_itens', "os_servicos_itens.*", 'chave = ' . $chaveEvento);
+        $evento = $database->doSelect('os_servicos_itens', "os_servicos_itens.*", 'chave = ' . $chaveEvento);
+
+        if (empty($evento)) {
+            throw new Exception("Item não encontrado");
+        }
+        $item = $evento[0];
 
         $ultimaOrdem = $database->doSelect('os_servicos_itens', "os_servicos_itens.*", "chave_os = $chaveOs AND cancelada = 0 ORDER BY ordem ASC");
         $ordem = ($ultimaOrdem != NULL) ? end($ultimaOrdem)['ordem'] + 1 : 1;

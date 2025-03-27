@@ -2412,8 +2412,9 @@ class AddOsOrcamento extends Component {
                       }
                     );
                 }
-                await this.setState({ redirectAfterInsertEventsInOs: true });
                 onClose();
+                await this.setState({ redirectAfterInsertEventsInOs: true });
+                window.location.reload();
               }}
             >
               Sim
