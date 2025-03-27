@@ -2392,7 +2392,7 @@ class AddOsOrcamento extends Component {
                   await apiEmployee
                     .post(`shareServicoItem.php`, {
                       token: true,
-                      chaveEventos: chave,
+                      chaveEvento: chave,
                       chaveOs: this.state.os_escolhida.value
                     })
                     .then(
