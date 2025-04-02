@@ -604,8 +604,8 @@ class Relatorio extends Component {
                         return date.isValid()
                           ? date.format("YY") === "99" // Verifica se o ano é 99
                             ? "N/A" // Se o ano for 99, define como "N/A"
-                            : date.format("DD/MM/YY") // Caso contrário, formata normalmente
-                          : moment().format("DD/MM/YY"); // Caso f.billing seja inválido, usa a data atual
+                            : date.format("YYYY-MM-DD") // Caso contrário, formata normalmente
+                          : moment().format("YYYY-MM-DD"); // Caso f.billing seja inválido, usa a data atual
                       })(),
                       roe: f?.roe || 5,
                       fda: FDA2,
@@ -657,8 +657,8 @@ class Relatorio extends Component {
                         return date.isValid()
                           ? date.format("YY") === "99" // Verifica se o ano é 99
                             ? "N/A" // Se o ano for 99, define como "N/A"
-                            : date.format("DD/MM/YY") // Caso contrário, formata normalmente
-                          : moment().format("DD/MM/YY"); // Caso f.billing seja inválido, usa a data atual
+                            : date.format("YYYY-MM-DD") // Caso contrário, formata normalmente
+                          : moment().format("YYYY-MM-DD"); // Caso f.billing seja inválido, usa a data atual
                       })(),
                       roe: f?.roe || 5,
                       fda: FDA2,
@@ -774,6 +774,18 @@ class Relatorio extends Component {
                                       >
                                         {moment(row.sailed).format("DD/MM/YY")}
                                       </td>
+                                      <td
+                                      style={{
+                                        backgroundColor: "inherit",
+                                        whiteSpace: "nowrap",
+                                        maxWidth: 60,
+                                        minWidth: 60,
+                                      }}
+                                    >
+                                      {row.billing === "N/A" 
+                                      ? "N/A" 
+                                      : moment(row.billing).format("DD/MM/YY")}
+                                    </td>
                                     </>
                                   )}
                                   {this.state.clientes[0] && (
@@ -800,18 +812,20 @@ class Relatorio extends Component {
                                           "MMM Do YYYY"
                                         )}
                                       </td>
-                                    </>
-                                  )}
-                                  <td
+                                      <td
                                     style={{
                                       backgroundColor: "inherit",
                                       whiteSpace: "nowrap",
-                                      maxWidth: 55,
-                                      minWidth: 55,
+                                      maxWidth: 95,
+                                      minWidth: 95,
                                     }}
                                   >
-                                    {row.billing}
+                                    {row.billing === "N/A" 
+                                    ? "N/A" 
+                                    : moment(row.billing).format("MMM Do YYYY")}
                                   </td>
+                                    </>
+                                  )}
                                   <td
                                     style={{
                                       backgroundColor: "inherit",
@@ -1059,7 +1073,7 @@ class Relatorio extends Component {
                           return date.isValid()
                             ? date.format("YY") === "99" // Verifica se o ano é 99
                               ? "N/A" // Se o ano for 99, define como "N/A"
-                              : date.format("DD/MM/YY") // Caso contrário, formata normalmente
+                              : date.format("YYYY-MM-DD") // Caso contrário, formata normalmente
                             : "";
                         })()
                       : "",
@@ -1321,7 +1335,7 @@ class Relatorio extends Component {
                             return date.isValid()
                               ? date.format("YY") == "99" // Verifica se o ano é 99
                                 ? "N/A" // Se o ano for 99, define como "N/A"
-                                : date.format("DD/MM/YY") // Caso contrário, formata normalmente
+                                : date.format("YYYY-MM-DD") // Caso contrário, formata normalmente
                               : "";
                           })()
                         : "",
@@ -1444,6 +1458,18 @@ class Relatorio extends Component {
                                     >
                                       {moment(row.sailed).format("DD/MM/YY")}
                                     </td>
+                                    <td
+                                    style={{
+                                      backgroundColor: "inherit",
+                                      whiteSpace: "nowrap",
+                                      maxWidth: 60,
+                                      minWidth: 60,
+                                    }}
+                                  >
+                                    {row.billing === "N/A" 
+                                    ? "N/A" 
+                                    : moment(row.billing).format("DD/MM/YY")}
+                                  </td>
                                   </>
                                 )}
                                 {this.state.clientes[0] && (
@@ -1468,18 +1494,20 @@ class Relatorio extends Component {
                                     >
                                       {moment(row.sailed).format("MMM Do YYYY")}
                                     </td>
+                                    <td
+                                    style={{
+                                      backgroundColor: "inherit",
+                                      whiteSpace: "nowrap",
+                                      maxWidth: 95,
+                                      minWidth: 95,
+                                    }}
+                                  >
+                                    {row.billing === "N/A" 
+                                    ? "N/A" 
+                                    : moment(row.billing).format("MMM Do YYYY")}
+                                  </td>
                                   </>
                                 )}
-                                <td
-                                  style={{
-                                    backgroundColor: "inherit",
-                                    whiteSpace: "nowrap",
-                                    maxWidth: 55,
-                                    minWidth: 55,
-                                  }}
-                                >
-                                  {row.billing}
-                                </td>
                                 <td
                                   style={{
                                     backgroundColor: "inherit",
