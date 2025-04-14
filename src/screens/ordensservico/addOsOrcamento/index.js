@@ -6531,7 +6531,7 @@ class AddOsOrcamento extends Component {
                       valorTotal += parseFloat(e.valor);
                       valorTotalDolar += Util.toFixed(
                         parseFloat(
-                          e.valor /
+                          (e.valor*e.qntd) /
                             (this.state.pdfContent[0].roe
                               ? this.state.pdfContent[0].roe
                               : 5)

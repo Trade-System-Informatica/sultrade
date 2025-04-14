@@ -6655,7 +6655,7 @@ class AddOS extends Component {
                       valorTotal += parseFloat((e.valor*e.qntd));
                       valorTotalDolar += Util.toFixed(
                         parseFloat(
-                          e.valor /
+                          (e.valor*e.qntd) /
                             (this.state.pdfContent[0].roe
                               ? this.state.pdfContent[0].roe
                               : 5)
@@ -7260,7 +7260,7 @@ class AddOS extends Component {
                       valorTotal += parseFloat((e.valor*e.qntd));
                       valorTotalDolar += Util.toFixed(
                         parseFloat(
-                          e.valor /
+                          (e.valor*e.qntd) /
                             (this.state.pdfContent[0].roe
                               ? this.state.pdfContent[0].roe
                               : 5)
