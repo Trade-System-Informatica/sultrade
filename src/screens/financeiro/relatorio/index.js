@@ -67,6 +67,13 @@ const estadoInicial = {
   failures: [],
   successes: [],
   emailModal: "",
+
+  situacao: 'T',
+  situacaoOptions: [
+    {value: "T", label: "Todas"},
+    {value: "E", label: "Enviadas"},
+    {value: "F", label: "Faturadas"},
+],
 };
 
 class Relatorio extends Component {
@@ -264,6 +271,7 @@ class Relatorio extends Component {
     const pessoa = this.state.clientes[0]
       ? `contas_aberto.pessoa IN ('${this.state.clientes.join("','")}')`
       : "";
+    const situacao = this.state.situacao == this.state.situacao == "E" ? `os.cancelada != 1 AND (os.envio != "" AND os.envio != "0000-00-00" AND (os.envio = "" OR os.envio = "0000-00-00"))` : this.state.situacao == "F" ? `os.cancelada != 1 AND (os.Data_Faturamento != "" AND os.Data_Faturamento != "0000-00-00 00:00:00")` : ``;
     let periodoInicial = "1=1"; //this.state.periodoInicial ? this.state.tipo == 'aberto' ? `contas_aberto.vencimento >= '${moment(this.state.periodoInicial).format('YYYY-MM-DD')}'` : `contas_aberto.data_pagto >= '${moment(this.state.periodoInicial).format('YYYY-MM-DD')}'` : '';
     let periodoFinal = "1=1"; //this.state.periodoFinal ? this.state.tipo == 'aberto' ? `contas_aberto.vencimento <= '${moment(this.state.periodoFinal).format('YYYY-MM-DD')}'` : `contas_aberto.data_pagto <= '${moment(this.state.periodoFinal).format('YYYY-MM-DD')}'` : '';
     const lancamentoInicial = "1=1"; //this.state.lancamentoInicial ? `contas_aberto.lancto >= '${moment(this.state.lancamentoInicial).format('YYYY-MM-DD')}'` : '';
@@ -333,6 +341,7 @@ class Relatorio extends Component {
       lancamentoInicial,
       lancamentoFinal,
       tiposDocumento,
+      situacao,
     ];
     where = where.filter((e) => e.trim() != "");
     console.log(where.join(" AND "));
@@ -346,6 +355,7 @@ class Relatorio extends Component {
           all: !this.state.clientes[0] ? true : false,
           chaves: this.state.clientes,
           centro_custo: this.state.centroCusto || false,
+          situacao: this.state.situacao || 'T',
         })
         .then(async (res) => {
           await this.setState({ relatorio: res.data });
@@ -2412,6 +2422,15 @@ class Relatorio extends Component {
                                   }`}</span>
                                 ))}
                               </div>
+                            </div>
+                            
+                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                <label>Situação</label>
+                            </div>
+                            <div className='col-1 errorMessage'>
+                            </div>
+                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                <Select className='SearchSelect' options={this.state.situacaoOptions} value={this.state.situacaoOptions.find(option => option.value == this.state.situacao)} search={true} onChange={(e) => { this.setState({ situacao: e.value, }) }} />
                             </div>
                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                               <label>Moeda</label>
