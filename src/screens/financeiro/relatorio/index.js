@@ -71,8 +71,8 @@ const estadoInicial = {
   situacao: 'T',
   situacaoOptions: [
     {value: "T", label: "Todas"},
-    {value: "E", label: "Enviadas"},
     {value: "F", label: "Faturadas"},
+    {value: "E", label: "Enviadas"},
 ],
 };
 
