@@ -4755,6 +4755,10 @@ class AddOS extends Component {
                 parseFloat(valor_cobrar) * parseFloat(roe),
                 2
               );
+              valor_pago = Util.toFixed(
+                parseFloat(valor_pago) * parseFloat(roe),
+                2
+              );
             }
 
             valorTotalCobrar += parseFloat(valor_cobrar);
