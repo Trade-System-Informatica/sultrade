@@ -333,7 +333,7 @@ class AddOS extends Component {
         porto: this.state.os.porto,
         eta: moment(this.state.os.eta).format("YYYY-MM-DD"),
         atb: moment(this.state.os.atb).format("YYYY-MM-DD"),
-        etb: moment(this.state.os.etb).format("YYYY-MM-DD HH:mm"),
+        etb: moment(this.state.os.etb).format("YYYY-MM-DD"),
         data_saida:
           moment(this.state.os.Data_Saida).format("YYYY-MM-DD") !=
           "Invalid date"
@@ -464,7 +464,7 @@ class AddOS extends Component {
           { titulo: "ATB", valor: util.formatForLogs(this.state.atb, "date") },
           {
             titulo: "ETB",
-            valor: util.formatForLogs(this.state.etb, "datetime"),
+            valor: util.formatForLogs(this.state.etb, "date"),
           },
           {
             titulo: "Government Taxes",
@@ -2740,7 +2740,7 @@ class AddOS extends Component {
         { titulo: "ATB", valor: util.formatForLogs(this.state.atb, "date") },
         {
           titulo: "ETB",
-          valor: util.formatForLogs(this.state.etb, "datetime"),
+          valor: util.formatForLogs(this.state.etb, "date"),
         },
         {
           titulo: "Government Taxes",
@@ -2932,7 +2932,7 @@ class AddOS extends Component {
             ? moment(this.state.atb).format("YYYY-MM-DD")
             : "",
           etb: this.state.etb
-            ? moment(this.state.etb).format("YYYY-MM-DD HH:mm")
+            ? moment(this.state.etb).format("YYYY-MM-DD")
             : "",
 
           Data_Saida: this.state.data_saida
@@ -7664,7 +7664,7 @@ class AddOS extends Component {
           : "T.B.I.",
       etb:
         moment(this.state.etb).format("DD/MM/YYYY") != "Invalid date"
-          ? moment(this.state.etb).format("DD/MM/YYYY HH:mm")
+          ? moment(this.state.etb).format("DD/MM/YYYY")
           : "T.B.I.",
       data_saida:
         moment(this.state.data_saida).format("DD/MM/YYYY") != "Invalid date"
@@ -11442,8 +11442,8 @@ class AddOS extends Component {
                               <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                 <Field
                                   className="form-control"
-                                  type="datetime-local"
-                                  max="9999-12-31T23:59"
+                                  type="date"
+                                  max="9999-12-31"
                                   value={this.state.etb}
                                   onChange={async (e) => {
                                     this.setState({
@@ -11460,8 +11460,8 @@ class AddOS extends Component {
                               <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                 <Field
                                   className="form-control"
-                                  type="datetime-local"
-                                  max="9999-12-31T23:59"
+                                  type="date"
+                                  max="9999-12-31"
                                   value={this.state.data_saida}
                                   onChange={async (e) => {
                                     this.setState({
@@ -11944,8 +11944,8 @@ class AddOS extends Component {
                                 <Field
                                   className="form-control"
                                   disabled={!this.state.editavel}
-                                  type="datetime-local"
-                                  max="9999-12-31T23:59"
+                                  type="date"
+                                  max="9999-12-31"
                                   value={this.state.etb}
                                   onChange={async (e) => {
                                     this.setState({
@@ -11963,8 +11963,8 @@ class AddOS extends Component {
                                 <Field
                                   className="form-control"
                                   disabled={!this.state.editavel}
-                                  type="datetime-local"
-                                  max="9999-12-31T23:59"
+                                  type="date"
+                                  max="9999-12-31"
                                   value={this.state.data_saida}
                                   onChange={async (e) => {
                                     this.setState({
