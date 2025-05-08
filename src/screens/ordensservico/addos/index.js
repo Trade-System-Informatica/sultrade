@@ -337,7 +337,7 @@ class AddOS extends Component {
         data_saida:
           moment(this.state.os.Data_Saida).format("YYYY-MM-DD") !=
           "Invalid date"
-            ? moment(this.state.os.Data_Saida).format("YYYY-MM-DD HH:mm")
+            ? moment(this.state.os.Data_Saida).format("YYYY-MM-DD")
             : "T.B.I.",
 
         encerramento:
@@ -476,7 +476,7 @@ class AddOS extends Component {
           },
           {
             titulo: "Data de Saida",
-            valor: util.formatForLogs(this.state.data_saida, "datetime"),
+            valor: util.formatForLogs(this.state.data_saida, "date"),
           },
           {
             titulo: "Data de Encerramento",
@@ -2752,7 +2752,7 @@ class AddOS extends Component {
         },
         {
           titulo: "Data de Saida",
-          valor: util.formatForLogs(this.state.data_saida, "datetime"),
+          valor: util.formatForLogs(this.state.data_saida, "date"),
         },
         {
           titulo: "Data de Encerramento",
@@ -2829,7 +2829,7 @@ class AddOS extends Component {
           }', '${moment(this.state.abertura).format("YYYY-MM-DD")}', '${moment(
             this.state.chegada
           ).format("YYYY-MM-DD")}', '${moment(this.state.data_saida).format(
-            "YYYY-MM-DD HH:mm"
+            "YYYY-MM-DD"
           )}', '${this.state.tipoServico}', '${this.state.viagem}', '${
             this.state.porto
           }', '${this.state.encerradoPor}', '${this.state.faturadoPor}', '${
@@ -2936,7 +2936,7 @@ class AddOS extends Component {
             : "",
 
           Data_Saida: this.state.data_saida
-            ? moment(this.state.data_saida).format("YYYY-MM-DD HH:mm")
+            ? moment(this.state.data_saida).format("YYYY-MM-DD")
             : "",
           Data_Encerramento: this.state.encerramento
             ? moment(this.state.encerramento).format("YYYY-MM-DD")
@@ -7668,7 +7668,7 @@ class AddOS extends Component {
           : "T.B.I.",
       data_saida:
         moment(this.state.data_saida).format("DD/MM/YYYY") != "Invalid date"
-          ? moment(this.state.data_saida).format("DD/MM/YYYY HH:mm")
+          ? moment(this.state.data_saida).format("DD/MM/YYYY")
           : "T.B.I.",
         criacao: criacao,
     });
