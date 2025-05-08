@@ -364,24 +364,6 @@ class AddOS extends Component {
         operador: this.state.os.operador,
       });
 
-      if (
-        moment(this.state.os.Data_Encerramento).format("YYYY-MM-DD") !=
-        "Invalid date"
-      ) {
-        await this.setState({ editavel: false });
-      } else {
-        await this.setState({ editavel: true });
-      }
-
-      if (
-        moment(this.state.os.Data_Faturamento).format("YYYY-MM-DD") !=
-        "Invalid date"
-      ) {
-        await this.setState({ editavelDataFaturamento: false });
-      } else {
-        await this.setState({ editavelDataFaturamento: true });
-      }
-
       if (this.state.cabecalho) {
         let cabecalho;
 
@@ -401,6 +383,43 @@ class AddOS extends Component {
       }
     }
     await this.loadAll();
+
+    if (
+      moment(this.state.os.Data_Encerramento).format("YYYY-MM-DD") !=
+      "Invalid date"
+    ) {
+      const hasEncerradaPermission = this.state.acessosPermissoes
+        .filter((e) => {
+          if (e.acessoAcao == "OS_ENCERRADA") {
+            return e;
+          }
+        })
+        .map((e) => e.permissaoEdita)[0] == 1;
+
+      await this.setState({ editavel: hasEncerradaPermission });
+    } else {
+      await this.setState({ editavel: true });
+    }
+
+    if (
+      moment(this.state.os.Data_Faturamento).format("YYYY-MM-DD") !=
+      "Invalid date"
+    ) {
+      const hasFaturadaPermission = this.state.acessosPermissoes
+        .filter((e) => {
+          if (e.acessoAcao == "OS_FATURADA") {
+            return e;
+          }
+        })
+        .map((e) => e.permissaoEdita)[0] == 1;
+
+        console.log('hasFaturadaPermission', hasFaturadaPermission)
+
+      await this.setState({ editavelDataFaturamento: hasFaturadaPermission });
+    } else {
+      await this.setState({ editavelDataFaturamento: true });
+    }
+    
     await this.getDadosCliente();
 
     if (this.state.chave != 0) {
