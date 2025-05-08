@@ -2139,10 +2139,8 @@ class OS
         $ordem = ($ultimaOrdem != NULL) ? end($ultimaOrdem)['ordem'] + 1 : 1;
 
 
-        $colsItens = 'chave_os, data, fornecedor, taxa, descricao, ordem, tipo_sub, Fornecedor_Custeio, remarks, Moeda, valor, valor1, repasse, qntd';
-        $valuesItens = "'$chaveOs', '{$item['data']}', '{$item['fornecedor']}', '{$item['taxa']}', '{$item['descricao']}', '{$ordem}', '{$item['tipo_sub']}', '{$item['Fornecedor_Custeio']}', '{$item['remarks']}', '{$item['Moeda']}', '{$item['valor']}', '{$item['valor1']}', '{$item['repasse']}', '{$item['qntd']}'";
-
-        $result = $database->doInsert('os_servicos_itens', $colsItens, $valuesItens);
+        $query = "chave_os = '$chaveOs', ordem = '$ordem'";
+        $result = $database->doUpdate('os_servicos_itens', $query, 'chave = ' . $chaveEvento);
 
         
         $database->closeConection();
