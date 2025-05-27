@@ -199,6 +199,7 @@ const estadoInicial = {
   company: "",
   address: "",
   CO: "",
+  PO: "",
 
   agrupadorModal: false,
   agrupadorTipo: "",
@@ -379,6 +380,7 @@ class AddOS extends Component {
           company: cabecalho.company ? cabecalho.company : "",
           address: cabecalho.address ? cabecalho.address : "",
           CO: cabecalho.CO ? cabecalho.CO : "",
+          CO: cabecalho.PO ? cabecalho.PO : "",
         });
       }
     }
@@ -3384,7 +3386,9 @@ class AddOS extends Component {
       .replaceAll("\t", "\\t")
       .replaceAll("\n", "\\n")}", "CO": "${this.state.CO.replaceAll('"', "'")
       .replaceAll("\t", "\\t")
-      .replaceAll("\n", "\\n")}"}`;
+      .replaceAll("\n", "\\n")}", "PO": "${this.state.PO ? this.state.PO.replaceAll('"', "'")
+      .replaceAll("\t", "\\t")
+      .replaceAll("\n", "\\n") : ""}"}`;
 
     await apiEmployee
       .post(`updateOSCabecalho.php`, {
@@ -3771,10 +3775,12 @@ class AddOS extends Component {
                   </td>
                   <td colSpan={2} className="pdf_money_colOS">
                     <b>PO:</b>{" "}
-                    {util.returnIfExists(
-                      this.state.pdfContent[0],
-                      this.state.pdfContent[0].codigo
-                    )}
+                    {this.state.PO ? 
+                      this.state.PO : 
+                      util.returnIfExists(
+                        this.state.pdfContent[0],
+                        this.state.pdfContent[0].codigo
+                      )}
                   </td>
                 </tr>
               </table>
@@ -9811,6 +9817,24 @@ class AddOS extends Component {
                                     onChange={async (e) => {
                                       this.setState({
                                         CO: e.currentTarget.value,
+                                      });
+                                    }}
+                                  />
+                                </div>
+                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                  <label>PO:</label>
+                                </div>
+                                <div className="col-1 errorMessage">
+                                </div>
+                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                  <Field
+                                    className="form-control"
+                                    as={"textarea"}
+                                    rows="3"
+                                    value={this.state.PO}
+                                    onChange={async (e) => {
+                                      this.setState({
+                                        PO: e.currentTarget.value,
                                       });
                                     }}
                                   />
