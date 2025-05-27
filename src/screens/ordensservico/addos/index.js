@@ -380,7 +380,7 @@ class AddOS extends Component {
           company: cabecalho.company ? cabecalho.company : "",
           address: cabecalho.address ? cabecalho.address : "",
           CO: cabecalho.CO ? cabecalho.CO : "",
-          CO: cabecalho.PO ? cabecalho.PO : "",
+          PO: cabecalho.PO ? cabecalho.PO : "",
         });
       }
     }
@@ -6190,7 +6190,7 @@ class AddOS extends Component {
                                 address ? "pdf_money_colOS" : "pdf_small_col"
                               }
                             >
-                              <b>PO:</b> {chave.codigo}
+                              <b>PO:</b> {this.state.PO ? this.state.PO : chave.codigo}
                             </td>
                           )}
                         </tr>
