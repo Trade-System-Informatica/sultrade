@@ -921,6 +921,26 @@ class AddOS extends Component {
     }
   };
 
+  checkOsRevisada= () => {
+    if (!this.state.editavel) {
+      if (
+        this.state.acessosPermissoes
+          .filter((e) => {
+            if (e.acessoAcao == "OS_REVISADA") {
+              return e;
+            }
+          })
+          .map((e) => e.permissaoEdita)[0] == 1
+      ) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return false;
+    }
+  };
+
   checkOsFaturada = () => {
     if (!this.state.editavelDataFaturamento) {
       if (
@@ -12240,7 +12260,7 @@ class AddOS extends Component {
                               <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                 <Field
                                   className="form-control"
-                                  disabled={this.checkOsClosed()}
+                                  disabled={this.checkOsRevisada()}
                                   type="date"
                                   value={this.state.revisao}
                                   onChange={async (e) => {
