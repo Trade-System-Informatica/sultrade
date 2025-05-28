@@ -4251,18 +4251,152 @@ class AddOS extends Component {
                     </td>
                   </tr>
                 </table>
-                {/*
-                            <div><span className='pdfTitle'>Bank's name:</span> <span>Banco do Brasil S/A</span></div>
-                            <div><span className='pdfTitle'>Branch's name:</span> <span>Rio Grande</span></div>
-                            <div><span className='pdfTitle'>Address:</span> <span>Benjamin Constant St, 72</span></div>
-                            <div><span className='pdfTitle'>Swift Code:</span> <span>BRASBRRJCTA</span></div>
-                            <div><span className='pdfTitle'>IBAN:</span> <span>BR6400000000026940001614410C1</span></div>
-                            <div><span className='pdfTitle'>Branch's number:</span> <span>2694-8</span></div>
-                            <div><span className='pdfTitle'>Account number:</span> <span>161441-X</span></div>
-                            <div><span className='pdfTitle'>Account name:</span> <span>SUL TRADE AGENCIAMENTOS MARITIMOS LTDA-ME</span></div>
-                            <div><span className='pdfTitle'>Phone:</span> <span>+55 53 3235 3500</span></div>
-                            <div><span className='pdfTitle'>CNPJ:</span> <span>10.432.546/0001-75</span></div>
-*/}
+
+                {this.state.pdfContent[0].GT &&
+                  (["SIM", "S"].includes(
+                    this.state.pdfContent[0].GT.toUpperCase()
+                  ) || Util.verificaDatas(this.state.pdfContent[0].data_encerramento, this.state.pdfContent[0].GT)) && (
+                    <>
+                    <br />
+                    <br />
+                    <br />
+
+                    <h5 style={{ width: "100%", textAlign: "center" }}>
+                      GOVERNMENT TAXES
+                    </h5>
+                      <table className={`voucherTable`}>
+                  <tr>
+                    <td className="pdfTitle" colSpan="2" style={{ width: 75 }}>
+                      Voucher
+                    </td>
+                    <td colSpan="6" className="pdfTitle">
+                      Description
+                    </td>
+                    <td className="pdfTitle" colSpan="1">Final USD</td>
+                  </tr>
+                  {(() => {
+                    let displayedRowCount = 0;
+                    return vouchers.map((voucher, index) => {
+                    const voucherInfo = this.state.pdfContent.find(
+                      (e) => e.chavTaxa == voucher
+                    );
+
+                    let valorTotal = 0;
+                    let totalFinalDolar = 0;
+
+                    if (!voucherInfo.chavTaxa) {
+                      return <></>;
+                    }
+
+                    const itensPositivos = this.state.pdfContent
+                    .filter(
+                      (e) =>
+                        e.tipo != 2 &&
+                        e.tipo != 3 &&
+                        e.chavTaxa == voucher &&
+                        (e.repasse || e.faturamentoCusteio) &&
+                        parseFloat(e.valor * e.qntd) > 0
+                    );
+                    
+                    // Se não houver itens positivos, não exiba o government taxes
+                    if (itensPositivos.length === 0) {
+                      return <></>;
+                    }
+
+                     if (displayedRowCount % 2 == 0) {
+                        backgroundColor = "#FFFFFF";
+                      } else {
+                        backgroundColor = "#BBBBBB";
+                      }
+                      displayedRowCount++;
+
+                    // Calcule o valor total dos itens filtrados
+                    itensPositivos.forEach((e) => {
+                      if (e.moeda == 5) {
+                        valorTotal += parseFloat(e.valor * e.qntd);
+                        totalFinalDolar += Util.toFixed(
+                          parseFloat(
+                            (e.valor * e.qntd) / this.state.pdfContent[0].roe
+                          ),
+                          2
+                        );
+                      } else {
+                        valorTotal += Util.toFixed(
+                          parseFloat(
+                            (e.valor * e.qntd) * this.state.pdfContent[0].roe
+                          ),
+                          2
+                        );
+                        totalFinalDolar += parseFloat(e.valor * e.qntd);
+                      }
+                    });
+                    return (
+                      <>
+                        <tr>
+                          <td
+                            className="pdf_small_col reduce_font"
+                            colSpan="2"
+                            style={{ backgroundColor: backgroundColor }}
+                          >
+                            {voucherInfo.chavTaxa}
+                          </td>
+                          <td
+                            colSpan="6"
+                            className="pdf_large_col reduce_font"
+                            style={{ backgroundColor: backgroundColor }}
+                          >
+                            {voucherInfo.descos}
+                          </td>
+                          <td
+                            className="pdf_money_colOS reduce_font"
+                            colSpan="1"
+                            style={{ backgroundColor: backgroundColor }}
+                          >
+                            {util.formataDinheiroBrasileiro(
+                              parseFloat(
+                                valorTotal / this.state.pdfContent[0].roe
+                              )
+                            )}
+                          </td>
+                        </tr>
+                      </>
+                    );
+                  });
+                  })()}
+                      <tr>
+                        <td colSpan="8" className="pdf_small_col text-right" style={{ borderBottom: "0"}}>
+                          
+                        </td>
+                        <td colSpan="1" className="pdf_money_colOS" style={{ borderBottom: "0", fontWeight: "bold"}}>
+                          {util.formataDinheiroBrasileiro(
+                            parseFloat(totalFinalDolar - (this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe))
+                          )}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan="8" className="pdf_small_col text-right" style={{ borderBottom: "0", fontWeight: "bold"}}>
+                          PERCENTAGE
+                        </td>
+                        <td colSpan="1" className="text-right" style={{ borderBottom: "0", fontWeight: "bold"}}>
+                          5%
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan="8" className="pdf_small_col text-right" style={{fontWeight: "bold"}}>
+                          GOVERNMENT TAXES
+                        </td>
+                        <td colSpan="1" className="pdf_money_colOS" style={{fontWeight: "bold"}}>
+                          {util.formataDinheiroBrasileiro(
+                            parseFloat(
+                              this.state.pdfContent[0].governmentTaxes /
+                                this.state.pdfContent[0].roe
+                            )
+                          )}
+                        </td>
+                      </tr>
+                      </table>
+                    </>
+                  )}
               </div>
             </div>
           </div>
