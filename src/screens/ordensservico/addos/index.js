@@ -4291,7 +4291,7 @@ class AddOS extends Component {
                   </tr>
                 </table>
 
-                {this.state.pdfContent[0].GT &&
+                {/* {this.state.pdfContent[0].GT &&
                   (["SIM", "S"].includes(
                     this.state.pdfContent[0].GT.toUpperCase()
                   ) || Util.verificaDatas(this.state.pdfContent[0].data_encerramento, this.state.pdfContent[0].GT)) && (
@@ -4435,7 +4435,7 @@ class AddOS extends Component {
                       </tr>
                       </table>
                     </>
-                  )}
+                  )} */}
               </div>
             </div>
           </div>
