@@ -279,10 +279,14 @@ class OS extends Component {
         } else if (this.state.situacao == 3) {
             osFiltrada = (os.cancelada != '0') ? os : '';
         } else if (this.state.situacao == 4) {
-            osFiltrada = (os.Data_Encerramento && moment(os.Data_Encerramento).format() != "Invalid date" && os.cancelada == '0') && (!os.Data_Faturamento || moment(os.Data_Faturamento).format() == "Invalid date") ? os : '';
+            osFiltrada = (os.Data_Encerramento && moment(os.Data_Encerramento).format() != "Invalid date" && os.cancelada == '0') && 
+            (!os.Data_Revisao || moment(os.Data_Revisao).format() == "Invalid date") && 
+            (!os.Data_Faturamento || moment(os.Data_Faturamento).format() == "Invalid date") ? os : '';
         } else if (this.state.situacao == 5) {
-            osFiltrada = (os.Data_Faturamento && moment(os.Data_Faturamento).format() != "Invalid date" && os.cancelada == '0') ? os : '';
+            osFiltrada = (os.Data_Revisao && moment(os.Data_Revisao).format() != "Invalid date" && os.cancelada == '0') && (!os.Data_Faturamento || moment(os.Data_Faturamento).format() == "Invalid date") ? os : '';
         } else if (this.state.situacao == 6) {
+            osFiltrada = (os.Data_Faturamento && moment(os.Data_Faturamento).format() != "Invalid date" && os.cancelada == '0') ? os : '';
+        } else if (this.state.situacao == 7) {
             osFiltrada = ((!os.Data_Faturamento || moment(os.Data_Faturamento).format() == "Invalid date") && os.cancelada == '0') ? os : '';
         }
 
@@ -409,8 +413,9 @@ class OS extends Component {
                                             <option value={2}>Em aberto</option>
                                             <option value={3}>Canceladas</option>
                                             <option value={4}>Encerradas</option>
-                                            <option value={5}>Faturadas</option>
-                                            <option value={6}>Não Faturadas</option>
+                                            <option value={5}>Revisadas</option>
+                                            <option value={6}>Faturadas</option>
+                                            <option value={7}>Não Faturadas</option>
                                         </select>
                                     </div>
                                     <div className="col-0 col-sm-0 col-md-3 col-lg-3 col-xl-3">

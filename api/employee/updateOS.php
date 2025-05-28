@@ -23,6 +23,7 @@ if($objData != NULL){
     $porto = prepareInput($objData->porto);
     $Data_Saida = prepareInput($objData->Data_Saida);
     $Data_Encerramento = prepareInput($objData->Data_Encerramento);
+    $Data_Revisao = prepareInput($objData->Data_Revisao);
     $Data_Faturamento = prepareInput($objData->Data_Faturamento);
     $centro_custo = prepareInput($objData->centro_custo);
     $ROE = prepareInput($objData->ROE);
@@ -40,7 +41,7 @@ if($objData != NULL){
 
     $os = new OS();
 
-        $result = $os->updateOS($Chave, $Descricao, $Chave_Cliente, $chave_navio, $Data_Abertura, $Data_Chegada, $chave_tipo_servico, $viagem, $porto, $Data_Saida, $Data_Encerramento, $Data_Faturamento, $centro_custo, $ROE, $Comentario_Voucher, $encerradoPor, $faturadoPor, $Empresa, $eta, $atb, $etb, $governmentTaxes, $bankCharges, $operador, $envio);
+        $result = $os->updateOS($Chave, $Descricao, $Chave_Cliente, $chave_navio, $Data_Abertura, $Data_Chegada, $chave_tipo_servico, $viagem, $porto, $Data_Saida, $Data_Encerramento, $Data_Revisao, $Data_Faturamento, $centro_custo, $ROE, $Comentario_Voucher, $encerradoPor, $faturadoPor, $Empresa, $eta, $atb, $etb, $governmentTaxes, $bankCharges, $operador, $envio);
 
 } else {
     $result = "false";

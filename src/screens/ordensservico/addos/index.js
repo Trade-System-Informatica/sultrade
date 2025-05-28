@@ -70,6 +70,7 @@ const estadoInicial = {
 
   data_saida: "",
   encerramento: "",
+  revisao: "",
   faturamento: "",
   envio: "",
   centroCusto: "",
@@ -346,6 +347,13 @@ class AddOS extends Component {
           "Invalid date"
             ? moment(this.state.os.Data_Encerramento).format("YYYY-MM-DD")
             : "T.B.I.",
+
+        revisao:
+          moment(this.state.os.Data_Revisao).format("YYYY-MM-DD") !=
+          "Invalid date"
+            ? moment(this.state.os.Data_Revisao).format("YYYY-MM-DD")
+            : "T.B.I.",
+
         faturamento:
           moment(this.state.os.Data_Faturamento).format("YYYY-MM-DD") !=
           "Invalid date"
@@ -502,6 +510,10 @@ class AddOS extends Component {
           {
             titulo: "Data de Encerramento",
             valor: util.formatForLogs(this.state.encerramento, "date"),
+          },
+          {
+            titulo: "Data de Revisão",
+            valor: util.formatForLogs(this.state.revisao, "date"),
           },
           {
             titulo: "Data de Faturamento",
@@ -2780,6 +2792,10 @@ class AddOS extends Component {
           valor: util.formatForLogs(this.state.encerramento, "date"),
         },
         {
+          titulo: "Data de Revisão",
+          valor: util.formatForLogs(this.state.revisao, "date"),
+        },
+        {
           titulo: "Data de Faturamento",
           valor: util.formatForLogs(this.state.faturamento, "date"),
         },
@@ -2961,6 +2977,9 @@ class AddOS extends Component {
             : "",
           Data_Encerramento: this.state.encerramento
             ? moment(this.state.encerramento).format("YYYY-MM-DD")
+            : "",
+          Data_Revisao: this.state.revisao
+            ? moment(this.state.revisao).format("YYYY-MM-DD")
             : "",
           Data_Faturamento: this.state.faturamento
             ? moment(this.state.faturamento).format("YYYY-MM-DD")
@@ -12209,6 +12228,24 @@ class AddOS extends Component {
                                         this.state.encerramento == ""
                                           ? ""
                                           : this.state.usuarioLogado.codigo,
+                                    });
+                                  }}
+                                />
+                              </div>
+                              <div className="col-1"></div>
+                              <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                <label>Data de Revisão</label>
+                              </div>
+                              <div className="col-1 errorMessage"></div>
+                              <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
+                                <Field
+                                  className="form-control"
+                                  disabled={this.checkOsClosed()}
+                                  type="date"
+                                  value={this.state.revisao}
+                                  onChange={async (e) => {
+                                    await this.setState({
+                                      revisao: e.currentTarget.value,
                                     });
                                   }}
                                 />
