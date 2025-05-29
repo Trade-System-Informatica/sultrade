@@ -6595,7 +6595,7 @@ class AddOS extends Component {
     }
   };
 
-  CloseToReal = async (codigo, validForm) => {
+  CloseToReal = async (codigo, validForm, selectedEvents = []) => {
     try {
       if (!validForm) {
         await this.setState({
@@ -6612,7 +6612,7 @@ class AddOS extends Component {
       this.setState({
         pdfNome: `Close to Real${
           this.state.codigo ? ` - ${this.state.codigo}` : ""
-        }`,
+        }${selectedEvents.length > 0 ? ` (Parcial)` : ""}`,
       });
 
       await this.setState({ loading: true });
@@ -6644,26 +6644,43 @@ class AddOS extends Component {
         });
       }
 
-      if (this.state.pdfContent[0]) {
-        if (this.state.pdfContent[0].governmentTaxes > 0) {
-          valorTotal += parseFloat(this.state.pdfContent[0].governmentTaxes);
+      // Filter content if we have selected events
+      let filteredContent = [...this.state.pdfContent];
+      if (selectedEvents && selectedEvents.length > 0) {
+        filteredContent = filteredContent.filter(
+          (item) => !item.chaveItem || selectedEvents.includes(item.chaveItem)
+        );
+        
+        // Make sure we keep the first item which contains metadata
+        if (!selectedEvents.includes(filteredContent[0]?.chave) && filteredContent.length > 1) {
+          const metadata = this.state.pdfContent[0];
+          filteredContent = [metadata, ...filteredContent.slice(1)];
+        }
+        
+        filteredContent[0].governmentTaxes = 0;
+        filteredContent[0].bankCharges = 0;
+      }
+
+      if (filteredContent[0]) {
+        if (filteredContent[0].governmentTaxes > 0) {
+          valorTotal += parseFloat(filteredContent[0].governmentTaxes);
           valorTotalDolar += Util.toFixed(
             parseFloat(
-              this.state.pdfContent[0].governmentTaxes /
-                (this.state.pdfContent[0].roe
-                  ? this.state.pdfContent[0].roe
+              filteredContent[0].governmentTaxes /
+                (filteredContent[0].roe
+                  ? filteredContent[0].roe
                   : 5)
             ),
             2
           );
         }
-        if (this.state.pdfContent[0].bankCharges > 0) {
-          valorTotal += parseFloat(this.state.pdfContent[0].bankCharges);
+        if (filteredContent[0].bankCharges > 0) {
+          valorTotal += parseFloat(filteredContent[0].bankCharges);
           valorTotalDolar += Util.toFixed(
             parseFloat(
-              this.state.pdfContent[0].bankCharges /
-                (this.state.pdfContent[0].roe
-                  ? this.state.pdfContent[0].roe
+              filteredContent[0].bankCharges /
+                (filteredContent[0].roe
+                  ? filteredContent[0].roe
                   : 5)
             ),
             2
@@ -6671,7 +6688,7 @@ class AddOS extends Component {
         }
 
         if (
-          this.state.pdfContent.find(
+          filteredContent.find(
             (os) => (os.tipo == 0 || os.tipo == 1) && !os.chavTaxa
           )
         ) {
@@ -6692,7 +6709,7 @@ class AddOS extends Component {
                 style={{ width: "24%", height: "150px" }}
               />
               <h3 className="pdfTitle"></h3>
-              <h4>Close to Real</h4>
+              <h4>Close to Real{selectedEvents.length > 0 ? " (Parcial)" : ""}</h4>
             </div>
             <hr />
             <div className="pdfContent">
@@ -6702,8 +6719,8 @@ class AddOS extends Component {
                     <td colSpan={4} className="pdf_large_col">
                       <b style={{ paddingRight: 5 }}>COMPANY:</b>{" "}
                       {util.returnIfExists(
-                        this.state.pdfContent[0],
-                        this.state.pdfContent[0].cliente
+                        filteredContent[0],
+                        filteredContent[0].cliente
                       )}
                     </td>
                   </tr>
@@ -6711,20 +6728,20 @@ class AddOS extends Component {
                     <td className="pdf_large_col" colSpan="4">
                       <b style={{ paddingRight: 5 }}>ADDRESS:</b>{" "}
                       {`${util.returnIfExists(
-                        this.state.pdfContent[0],
-                        this.state.pdfContent[0].complemento
+                        filteredContent[0],
+                        filteredContent[0].complemento
                       )} ${util.returnIfExists(
-                        this.state.pdfContent[0],
-                        this.state.pdfContent[0].rua
+                        filteredContent[0],
+                        filteredContent[0].rua
                       )} ${
-                        this.state.pdfContent[0].numero &&
-                        this.state.pdfContent[0].numero != "0"
-                          ? this.state.pdfContent[0].numero
+                        filteredContent[0].numero &&
+                        filteredContent[0].numero != "0"
+                          ? filteredContent[0].numero
                           : ""
                       } ${
-                        this.state.pdfContent[0].cep &&
-                        this.state.pdfContent[0].cep != "0"
-                          ? this.state.pdfContent[0].cep
+                        filteredContent[0].cep &&
+                        filteredContent[0].cep != "0"
+                          ? filteredContent[0].cep
                           : ""
                       }`}
                     </td>
@@ -6733,41 +6750,41 @@ class AddOS extends Component {
                     <td className="pdf_small_col" colSpan="2">
                       <b style={{ paddingRight: 5 }}>Vessel Name:</b>{" "}
                       {util.returnIfExists(
-                        this.state.pdfContent[0],
-                        this.state.pdfContent[0].nomeNavio
+                        filteredContent[0],
+                        filteredContent[0].nomeNavio
                       )}
                     </td>
                     <td className="pdf_money_colOS" colSpan="2">
                       <b style={{ paddingRight: 5 }}>Name of Port:</b>{" "}
                       {util.returnIfExists(
-                        this.state.pdfContent[0],
-                        this.state.pdfContent[0].nomePorto
+                        filteredContent[0],
+                        filteredContent[0].nomePorto
                       )}
                     </td>
                   </tr>
                   <tr>
-                    {this.state.pdfContent[0].data_chegada &&
+                    {filteredContent[0].data_chegada &&
                       moment(
-                        this.state.pdfContent[0].data_chegada
+                        filteredContent[0].data_chegada
                       ).isValid() && (
                         <td className="pdf_small_col" colSpan="2">
                           <b style={{ paddingRight: 5 }}>Arrived:</b>{" "}
                           {moment(
                             util.returnIfExists(
-                              this.state.pdfContent[0],
-                              this.state.pdfContent[0].data_chegada
+                              filteredContent[0],
+                              filteredContent[0].data_chegada
                             )
                           ).format("MMMM DD, YYYY")}
                         </td>
                       )}
-                    {this.state.pdfContent[0].data_saida &&
-                      moment(this.state.pdfContent[0].data_saida).format(
+                    {filteredContent[0].data_saida &&
+                      moment(filteredContent[0].data_saida).format(
                         "DD/MM/YYYY"
                       ) != "Invalid date" && (
                         <td
                           className={`${
-                            this.state.pdfContent[0].data_chegada &&
-                            moment(this.state.pdfContent[0].data_chegada)
+                            filteredContent[0].data_chegada &&
+                            moment(filteredContent[0].data_chegada)
                               .isValid
                               ? "pdf_money_colOS"
                               : "pdf_small_col"
@@ -6777,8 +6794,8 @@ class AddOS extends Component {
                           <b style={{ paddingRight: 5 }}>Sailed:</b>{" "}
                           {moment(
                             util.returnIfExists(
-                              this.state.pdfContent[0],
-                              this.state.pdfContent[0].data_saida
+                              filteredContent[0],
+                              filteredContent[0].data_saida
                             )
                           ).format("MMMM DD, YYYY")}
                         </td>
@@ -6788,15 +6805,15 @@ class AddOS extends Component {
                     <td className="pdf_small_col" colSpan="2">
                       <b style={{ paddingRight: 5 }}>PO:</b>{" "}
                       {util.returnIfExists(
-                        this.state.pdfContent[0],
-                        this.state.pdfContent[0].codigo
+                        filteredContent[0],
+                        filteredContent[0].codigo
                       )}
                     </td>
                     {/* <td className="pdf_money_colOS" colSpan="2">
                       <b style={{ paddingRight: 5 }}>O.C.C:</b>{" "}
                       {util.returnIfExists(
-                        this.state.pdfContent[0],
-                        this.state.pdfContent[0].centro_custo
+                        filteredContent[0],
+                        filteredContent[0].centro_custo
                       )}
                     </td> */}
                   </tr>
@@ -6804,8 +6821,8 @@ class AddOS extends Component {
                     <td className="pdf_small_col" colSpan="4">
                       <b style={{ paddingRight: 5 }}>ROE:</b>{" "}
                       {util.returnIfExists(
-                        this.state.pdfContent[0],
-                        this.state.pdfContent[0].roe.replaceAll(".", ",")
+                        filteredContent[0],
+                        filteredContent[0].roe.replaceAll(".", ",")
                       )}
                     </td>
                   </tr>
@@ -6842,15 +6859,15 @@ class AddOS extends Component {
                     VALUE (R$)
                   </td>
                 </tr>
-                {this.state.pdfContent.map((e, index) => {
+                {filteredContent.map((e, index) => {
                   if (e.tipo == 0 || e.tipo == 1) {
                     if (e.moeda == 5) {
                       valorTotal += parseFloat((e.valor*e.qntd));
                       valorTotalDolar += Util.toFixed(
                         parseFloat(
                           (e.valor*e.qntd) /
-                            (this.state.pdfContent[0].roe
-                              ? this.state.pdfContent[0].roe
+                            (filteredContent[0].roe
+                              ? filteredContent[0].roe
                               : 5)
                         ),
                         2
@@ -6859,8 +6876,8 @@ class AddOS extends Component {
                       valorTotal += Util.toFixed(
                         parseFloat(
                           (e.valor*e.qntd) *
-                            (this.state.pdfContent[0].roe
-                              ? this.state.pdfContent[0].roe
+                            (filteredContent[0].roe
+                              ? filteredContent[0].roe
                               : 5)
                         ),
                         2
@@ -6873,8 +6890,8 @@ class AddOS extends Component {
                       recebimentoTotalDolar += Util.toFixed(
                         parseFloat(
                           (e.valor*e.qntd) /
-                            (this.state.pdfContent[0].roe
-                              ? this.state.pdfContent[0].roe
+                            (filteredContent[0].roe
+                              ? filteredContent[0].roe
                               : 5)
                         ),
                         2
@@ -6883,8 +6900,8 @@ class AddOS extends Component {
                       recebimentoTotal += Util.toFixed(
                         parseFloat(
                           (e.valor*e.qntd) *
-                            (this.state.pdfContent[0].roe
-                              ? this.state.pdfContent[0].roe
+                            (filteredContent[0].roe
+                              ? filteredContent[0].roe
                               : 5)
                         ),
                         2
@@ -6897,8 +6914,8 @@ class AddOS extends Component {
                       descontoTotalDolar += Util.toFixed(
                         parseFloat(
                           (e.valor*e.qntd) /
-                            (this.state.pdfContent[0].roe
-                              ? this.state.pdfContent[0].roe
+                            (filteredContent[0].roe
+                              ? filteredContent[0].roe
                               : 5)
                         ),
                         2
@@ -6907,8 +6924,8 @@ class AddOS extends Component {
                       descontoTotal += Util.toFixed(
                         parseFloat(
                           (e.valor*e.qntd) *
-                            (this.state.pdfContent[0].roe
-                              ? this.state.pdfContent[0].roe
+                            (filteredContent[0].roe
+                              ? filteredContent[0].roe
                               : 5)
                         ),
                         2
@@ -6959,8 +6976,8 @@ class AddOS extends Component {
                             ? util.formataDinheiroBrasileiro(
                                 parseFloat(
                                   (e.valor*e.qntd) /
-                                    (this.state.pdfContent[0].roe
-                                      ? this.state.pdfContent[0].roe
+                                    (filteredContent[0].roe
+                                      ? filteredContent[0].roe
                                       : 5)
                                 )
                               )
@@ -6978,8 +6995,8 @@ class AddOS extends Component {
                             ? util.formataDinheiroBrasileiro(
                                 parseFloat(
                                   (e.valor*e.qntd) *
-                                    (this.state.pdfContent[0].roe
-                                      ? this.state.pdfContent[0].roe
+                                    (filteredContent[0].roe
+                                      ? filteredContent[0].roe
                                       : 5)
                                 )
                               )
@@ -6991,7 +7008,7 @@ class AddOS extends Component {
                     );
                   }
                 })}
-                {this.state.pdfContent[0].governmentTaxes > 0 && (
+                {filteredContent[0].governmentTaxes > 0 && (
                   <tr>
                     <td colSpan="7" className="pdf_large_col reduce_font">
                       <b>GOVERNMENT TAXES</b>
@@ -7000,9 +7017,9 @@ class AddOS extends Component {
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(
-                            this.state.pdfContent[0].governmentTaxes /
-                              (this.state.pdfContent[0].roe
-                                ? this.state.pdfContent[0].roe
+                            filteredContent[0].governmentTaxes /
+                              (filteredContent[0].roe
+                                ? filteredContent[0].roe
                                 : 5)
                           )
                         )}
@@ -7011,13 +7028,13 @@ class AddOS extends Component {
                     <td className="pdf_money_colOS reduce_font">
                       <b>
                         {util.formataDinheiroBrasileiro(
-                          parseFloat(this.state.pdfContent[0].governmentTaxes)
+                          parseFloat(filteredContent[0].governmentTaxes)
                         )}
                       </b>
                     </td>
                   </tr>
                 )}
-                {this.state.pdfContent[0].bankCharges > 0 && (
+                {filteredContent[0].bankCharges > 0 && (
                   <tr styles={{ padding: "37px 0px 37px 0px" }}>
                     <td colSpan="7" className="pdf_large_col reduce_font">
                       <b>BANK CHARGES</b>
@@ -7026,9 +7043,9 @@ class AddOS extends Component {
                       <b>
                         {util.formataDinheiroBrasileiro(
                           parseFloat(
-                            this.state.pdfContent[0].bankCharges /
-                              (this.state.pdfContent[0].roe
-                                ? this.state.pdfContent[0].roe
+                            filteredContent[0].bankCharges /
+                              (filteredContent[0].roe
+                                ? filteredContent[0].roe
                                 : 5)
                           )
                         )}
@@ -7037,7 +7054,7 @@ class AddOS extends Component {
                     <td className="pdf_money_colOS reduce_font">
                       <b>
                         {util.formataDinheiroBrasileiro(
-                          parseFloat(this.state.pdfContent[0].bankCharges)
+                          parseFloat(filteredContent[0].bankCharges)
                         )}
                       </b>
                     </td>
@@ -12457,10 +12474,12 @@ class AddOS extends Component {
                         <button
                           className="btn btn-danger"
                           onClick={() =>
-                            this.CloseToReal(this.state.os.codigo, validForm)
+                            this.CloseToReal(this.state.os.codigo, validForm, this.state.selectedEvents)
                           }
                         >
-                          Close to Real
+                          {this.state.selectedEvents && this.state.selectedEvents.length > 0 
+                            ? `Close to Real Parcial (${this.state.selectedEvents.length})`
+                            : "Close to Real"}
                         </button>
                       </div>
                       <div className="relatorioButton">
