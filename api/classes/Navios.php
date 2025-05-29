@@ -67,6 +67,7 @@ class Navios
             os_taxas.descricao as descTaxa,
             os_taxas.chave as chavTaxa,
             os_subgrupos_taxas.descricao as descSubgrupo,
+            os_servicos_itens.chave as chaveItem,
             os_servicos_itens.descricao as descos,
             os_servicos_itens.valor,
             os_servicos_itens.qntd,
