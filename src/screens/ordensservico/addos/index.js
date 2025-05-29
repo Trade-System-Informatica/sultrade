@@ -4291,14 +4291,17 @@ class AddOS extends Component {
                   </tr>
                 </table>
 
-                {/* {this.state.pdfContent[0].GT &&
+                {this.state.pdfContent[0].GT &&
                   (["SIM", "S"].includes(
                     this.state.pdfContent[0].GT.toUpperCase()
                   ) || Util.verificaDatas(this.state.pdfContent[0].data_encerramento, this.state.pdfContent[0].GT)) && (
                     <>
-                    <br />
-                    <br />
-                    <br />
+                    <div className="page-break" style={{ 
+                      height: '1px', 
+                      width: '100%', 
+                      display: 'block', 
+                      marginBottom: '10px' 
+                    }}/>
 
                     <h5 style={{ width: "100%", textAlign: "center" }}>
                       GOVERNMENT TAXES
@@ -4315,76 +4318,63 @@ class AddOS extends Component {
                   </tr>
                   {(() => {
                     let displayedRowCount = 0;
-                    return vouchers.map((voucher, index) => {
-                    const voucherInfo = this.state.pdfContent.find(
-                      (e) => e.chavTaxa == voucher
-                    );
-
-                    let valorTotal = 0;
-                    let totalFinalDolar = 0;
-
-                    if (!voucherInfo.chavTaxa) {
-                      return <></>;
-                    }
-
-                    const itensPositivos = this.state.pdfContent
-                    .filter(
-                      (e) =>
-                        e.tipo != 2 &&
-                        e.tipo != 3 &&
-                        e.chavTaxa == voucher &&
-                        (e.repasse || e.faturamentoCusteio) &&
-                        parseFloat(e.valor * e.qntd) > 0
+                    totalFinalDolar = 0;
+                    
+                    // Get all qualifying items
+                    const qualifyingItems = this.state.pdfContent.filter(e => 
+                      e.tipo != 2 &&
+                      e.tipo != 3 &&
+                      e.repasse !== 1 && 
+                      e.repasse !== "1" &&
+                      e.fornecedorCusteio && 
+                      e.fornecedorCusteio !== "0" &&
+                      parseFloat(e.valor * e.qntd) > 0
                     );
                     
-                    // Se não houver itens positivos, não exiba o government taxes
-                    if (itensPositivos.length === 0) {
-                      return <></>;
-                    }
-
-                     if (displayedRowCount % 2 == 0) {
+                    return qualifyingItems.map((item, index) => {
+                      if (displayedRowCount % 2 == 0) {
                         backgroundColor = "#FFFFFF";
                       } else {
                         backgroundColor = "#BBBBBB";
                       }
                       displayedRowCount++;
-
-                    // Calcule o valor total dos itens filtrados
-                    itensPositivos.forEach((e) => {
-                      if (e.moeda == 5) {
-                        valorTotal += parseFloat(e.valor * e.qntd);
+                      
+                      let valorItem = 0;
+                      
+                      // Calculate value for this item
+                      if (item.moeda == 5) {
+                        valorItem = parseFloat(item.valor * item.qntd);
                         totalFinalDolar += Util.toFixed(
                           parseFloat(
-                            (e.valor * e.qntd) / this.state.pdfContent[0].roe
+                            (item.valor * item.qntd) / this.state.pdfContent[0].roe
                           ),
                           2
                         );
                       } else {
-                        valorTotal += Util.toFixed(
+                        valorItem = Util.toFixed(
                           parseFloat(
-                            (e.valor * e.qntd) * this.state.pdfContent[0].roe
+                            (item.valor * item.qntd) * this.state.pdfContent[0].roe
                           ),
                           2
                         );
-                        totalFinalDolar += parseFloat(e.valor * e.qntd);
+                        totalFinalDolar += parseFloat(item.valor * item.qntd);
                       }
-                    });
-                    return (
-                      <>
-                        <tr>
+                      
+                      return (
+                        <tr key={index}>
                           <td
                             className="pdf_small_col reduce_font"
                             colSpan="2"
                             style={{ backgroundColor: backgroundColor }}
                           >
-                            {voucherInfo.chavTaxa}
+                            {item.chavTaxa}
                           </td>
                           <td
                             colSpan="6"
                             className="pdf_large_col reduce_font"
                             style={{ backgroundColor: backgroundColor }}
                           >
-                            {voucherInfo.descos}
+                            {item.descricao || item.descos}
                           </td>
                           <td
                             className="pdf_money_colOS reduce_font"
@@ -4393,22 +4383,23 @@ class AddOS extends Component {
                           >
                             {util.formataDinheiroBrasileiro(
                               parseFloat(
-                                valorTotal / this.state.pdfContent[0].roe
+                                item.moeda == 5
+                                  ? (item.valor * item.qntd) / this.state.pdfContent[0].roe
+                                  : item.valor * item.qntd
                               )
                             )}
                           </td>
                         </tr>
-                      </>
-                    );
-                  });
+                      );
+                    });
                   })()}
                       <tr>
-                        <td colSpan="8" className="pdf_small_col text-right" style={{ borderBottom: "0"}}>
-                          
+                        <td colSpan="8" className="pdf_small_col text-right" style={{ borderBottom: "0", fontWeight: "bold"}}>
+                          SUBTOTAL
                         </td>
                         <td colSpan="1" className="pdf_money_colOS" style={{ borderBottom: "0", fontWeight: "bold"}}>
                           {util.formataDinheiroBrasileiro(
-                            parseFloat(totalFinalDolar - (this.state.pdfContent[0].governmentTaxes / this.state.pdfContent[0].roe))
+                            parseFloat(totalFinalDolar)
                           )}
                         </td>
                       </tr>
@@ -4435,7 +4426,7 @@ class AddOS extends Component {
                       </tr>
                       </table>
                     </>
-                  )} */}
+                  )}
               </div>
             </div>
           </div>
