@@ -6644,21 +6644,20 @@ class AddOS extends Component {
         });
       }
 
-      // Filter content if we have selected events
       let filteredContent = [...this.state.pdfContent];
+
       if (selectedEvents && selectedEvents.length > 0) {
-        filteredContent = filteredContent.filter(
-          (item) => !item.chaveItem || selectedEvents.includes(item.chaveItem)
+        // Pegar apenas os itens que foram selecionados
+        filteredContent = this.state.pdfContent.filter((item) => 
+          selectedEvents.includes(item.chaveItem)
         );
         
-        // Make sure we keep the first item which contains metadata
-        if (!selectedEvents.includes(filteredContent[0]?.chave) && filteredContent.length > 1) {
-          const metadata = this.state.pdfContent[0];
-          filteredContent = [metadata, ...filteredContent.slice(1)];
-        }
-        
-        filteredContent[0].governmentTaxes = 0;
-        filteredContent[0].bankCharges = 0;
+        // Zerar taxes para relatórios parciais
+        filteredContent[0] = {
+          ...filteredContent[0],
+          governmentTaxes: 0,
+          bankCharges: 0
+        };
       }
 
       if (filteredContent[0]) {
