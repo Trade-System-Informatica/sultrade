@@ -706,8 +706,30 @@ class AddOS extends Component {
     for (let i = 0; i < info.length; i++) {
       const e = info[i];
 
+      let vigenciaBK = true;
+      let vigenciaGT = true;
+
       if (e.Tipo == "BK") {
-        if (["SIM", "S"].includes(e.Campo1.toUpperCase())) {
+        if (e.Campo2 && e.Campo2.trim() !== '') {
+          try {
+            // Converter a data do Campo2 para um objeto Date
+            const partes = e.Campo2.split('/');
+            if (partes.length === 3) {
+              const dataLimite = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
+              
+              // Converter a data de abertura para um objeto Date
+              const dataAbertura = this.state.abertura ? new Date(this.state.abertura) : null;
+              
+              // Se a data de abertura for válida e for maior que a data limite, não aplicar bank charges
+              if (dataAbertura && dataAbertura > dataLimite) {
+                vigenciaBK = false; // Pula para o próximo item no loop
+              }
+            }
+          } catch (error) {
+            console.error("Erro ao converter data do Campo2:", error);
+          }
+        }
+        if (["SIM", "S"].includes(e.Campo1.toUpperCase()) && vigenciaBK) {
           const parametros = await loader.getBody(`getParametros.php`, {
             token: true,
             empresa: this.state.usuarioLogado.empresa,
@@ -746,7 +768,26 @@ class AddOS extends Component {
         }
       }
       if (e.Tipo == "GT") {
-        if (["SIM", "S"].includes(e.Campo1.toUpperCase())) {
+        if (e.Campo2 && e.Campo2.trim() !== '') {
+          try {
+            // Converter a data do Campo2 para um objeto Date
+            const partes = e.Campo2.split('/');
+            if (partes.length === 3) {
+              const dataLimite = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
+              
+              // Converter a data de abertura para um objeto Date
+              const dataAbertura = this.state.abertura ? new Date(this.state.abertura) : null;
+              
+              // Se a data de abertura for válida e for maior que a data limite, não aplicar bank charges
+              if (dataAbertura && dataAbertura > dataLimite) {
+                vigenciaGT = false; // Pula para o próximo item no loop
+              }
+            }
+          } catch (error) {
+            console.error("Erro ao converter data do Campo2:", error);
+          }
+        }
+        if (["SIM", "S"].includes(e.Campo1.toUpperCase()) && vigenciaGT) {
           let valor = 0;
 
           this.state.eventos
@@ -7007,7 +7048,7 @@ class AddOS extends Component {
                     );
                   }
                 })}
-                {filteredContent[0].governmentTaxes > 0 && (
+                {filteredContent[0].governmentTaxes > 0 && (this.state.governmentTaxes > 0 || this.state.governmentTaxes) &&(
                   <tr>
                     <td colSpan="7" className="pdf_large_col reduce_font">
                       <b>GOVERNMENT TAXES</b>
@@ -7033,7 +7074,7 @@ class AddOS extends Component {
                     </td>
                   </tr>
                 )}
-                {filteredContent[0].bankCharges > 0 && (
+                {filteredContent[0].bankCharges > 0 && (this.state.bankCharges > 0 || this.state.bankCharges) &&(
                   <tr styles={{ padding: "37px 0px 37px 0px" }}>
                     <td colSpan="7" className="pdf_large_col reduce_font">
                       <b>BANK CHARGES</b>

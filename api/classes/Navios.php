@@ -188,6 +188,7 @@ class Navios
             pessoas_bk.campo1 as BK,
             pessoas_bk.campo2 as BK_data_vigencia,
             pessoas_gt.campo1 AS GT,
+            pessoas_gt.campo2 as GT_data_vigencia,
             os_navios.nome as nomeNavio,
             os_portos.descricao as nomePorto,
             pessoas.nome_fantasia AS cliente,
@@ -231,6 +232,28 @@ class Navios
                             // Se a data de abertura for maior que a data limite, remover o BK
                             if ($dataAbertura > $dataLimite) {
                                 $result[$key]['BK'] = null;
+                            }
+                        }
+                    } catch (Exception $e) {
+                        // Se ocorrer erro na conversão, manter o BK como está
+                    }
+                }
+            }
+        }
+
+        if (!empty($result)) {
+            foreach ($result as $key => $item) {
+                // Verificar se o campo2 existe e não está vazio
+                if (isset($item['GT_data_vigencia']) && !empty($item['GT_data_vigencia'])) {
+                    try {
+                        $partes = explode('/', $item['GT_data_vigencia']);
+                        if (count($partes) == 3) {
+                            $dataLimite = new DateTime($partes[2] . '-' . $partes[1] . '-' . $partes[0]);
+                            $dataAbertura = new DateTime($item['data_abertura']);
+                            
+                            // Se a data de abertura for maior que a data limite, remover o BK
+                            if ($dataAbertura > $dataLimite) {
+                                $result[$key]['GT'] = null;
                             }
                         }
                     } catch (Exception $e) {
