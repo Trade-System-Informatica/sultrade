@@ -53,6 +53,11 @@ class PessoaContatos extends Component {
     }
 
     componentDidMount = async () => {
+        if (!this.props.location.state || !this.props.location.state.pessoa) {
+            this.setState({ redirect: true });
+            return;
+        }
+
         await this.loadAll();
 
         if (this.state.chaveFocus) {
