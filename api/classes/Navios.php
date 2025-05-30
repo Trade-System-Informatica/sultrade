@@ -186,11 +186,13 @@ class Navios
             os.governmentTaxes,
             os.bankCharges,
             pessoas_bk.campo1 as BK,
+            pessoas_bk.campo2 as BK_data_vigencia,
             pessoas_gt.campo1 AS GT,
             os_navios.nome as nomeNavio,
             os_portos.descricao as nomePorto,
             pessoas.nome_fantasia AS cliente,
             os.eta AS data_chegada,
+            os.data_abertura,
             os.data_saida,
             os.data_faturamento,
             os.Data_Encerramento as data_encerramento,
@@ -215,6 +217,28 @@ class Navios
 
             "os.codigo = '" . $codigo . "' AND os.cancelada = 0 AND os_servicos_itens.cancelada = 0 && (os_servicos_itens.tipo_sub = 2 || os_servicos_itens.tipo_sub = 3 || (os_servicos_itens.repasse = 1 || os_servicos_itens.Fornecedor_Custeio != '')) GROUP BY os_servicos_itens.chave ORDER BY os_subgrupos_taxas.codigo ASC"
         );
+
+        if (!empty($result)) {
+            foreach ($result as $key => $item) {
+                // Verificar se o campo2 existe e não está vazio
+                if (isset($item['BK_data_vigencia']) && !empty($item['BK_data_vigencia'])) {
+                    try {
+                        $partes = explode('/', $item['BK_data_vigencia']);
+                        if (count($partes) == 3) {
+                            $dataLimite = new DateTime($partes[2] . '-' . $partes[1] . '-' . $partes[0]);
+                            $dataAbertura = new DateTime($item['data_abertura']);
+                            
+                            // Se a data de abertura for maior que a data limite, remover o BK
+                            if ($dataAbertura > $dataLimite) {
+                                $result[$key]['BK'] = null;
+                            }
+                        }
+                    } catch (Exception $e) {
+                        // Se ocorrer erro na conversão, manter o BK como está
+                    }
+                }
+            }
+        }
 
 
         $database->closeConection();
