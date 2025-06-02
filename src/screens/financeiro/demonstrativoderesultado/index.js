@@ -240,16 +240,29 @@ class DemonstrativoDeResultado extends Component {
             ["", "Receita Liquida (média):"]
         ], { origin: `A${linhaInicioTotais}` });
 
-        // Adicionar fórmulas dos totais na coluna C
+        // Adicionar fórmulas dos totais na coluna C com 2 casas decimais
         const cellResultadoTotal = XLSX.utils.encode_cell({ r: linhaInicioTotais - 1, c: 2 });
         const cellReceitaMedia = XLSX.utils.encode_cell({ r: linhaInicioTotais, c: 2 });
         const cellCustoMedia = XLSX.utils.encode_cell({ r: linhaInicioTotais + 1, c: 2 });
         const cellLiquidaMedia = XLSX.utils.encode_cell({ r: linhaInicioTotais + 2, c: 2 });
 
-        worksheet[cellResultadoTotal] = { f: `SUM(J4:J${ultimaLinhaDados})` };
-        worksheet[cellReceitaMedia] = { f: `SUM(H4:H${ultimaLinhaDados})/${dadosFormatados.length}` };
-        worksheet[cellCustoMedia] = { f: `SUM(I4:I${ultimaLinhaDados})/${dadosFormatados.length}` };
-        worksheet[cellLiquidaMedia] = { f: `SUM(J4:J${ultimaLinhaDados})/${dadosFormatados.length}` };
+        // CORRIGIDO: Fórmulas com formatação de 2 casas decimais
+        worksheet[cellResultadoTotal] = { 
+            f: `ROUND(SUM(J4:J${ultimaLinhaDados}),2)`,
+            z: "0.00"
+        };
+        worksheet[cellReceitaMedia] = { 
+            f: `ROUND(SUM(H4:H${ultimaLinhaDados})/${dadosFormatados.length},2)`,
+            z: "0.00"
+        };
+        worksheet[cellCustoMedia] = { 
+            f: `ROUND(SUM(I4:I${ultimaLinhaDados})/${dadosFormatados.length},2)`,
+            z: "0.00"
+        };
+        worksheet[cellLiquidaMedia] = { 
+            f: `ROUND(SUM(J4:J${ultimaLinhaDados})/${dadosFormatados.length},2)`,
+            z: "0.00"
+        };
 
         // Definir estilos
         const titleStyle = {
@@ -296,6 +309,17 @@ class DemonstrativoDeResultado extends Component {
             }
         };
 
+        // Estilo para valores monetários (2 casas decimais)
+        const moneyStyle = {
+            ...evenRowStyle,
+            numFmt: "0.00"
+        };
+
+        const moneyStyleOdd = {
+            ...oddRowStyle,
+            numFmt: "0.00"
+        };
+
         // Definir range da planilha
         const range = { s: { r: 0, c: 0 }, e: { r: linhaInicioTotais + 3, c: 9 } };
         worksheet['!ref'] = XLSX.utils.encode_range(range);
@@ -316,15 +340,20 @@ class DemonstrativoDeResultado extends Component {
             worksheet[cellAddress].s = headerStyle;
         }
 
-        // Dados (linhas 4 em diante) - intercalar cores
+        // Dados (linhas 4 em diante) - intercalar cores e aplicar formato monetário
         for (let r = 3; r < 3 + dadosFormatados.length; r++) {
             const isEven = (r - 3) % 2 === 0;
-            const rowStyle = isEven ? evenRowStyle : oddRowStyle;
             
             for (let c = 0; c <= 9; c++) {
                 const cellAddress = XLSX.utils.encode_cell({ r: r, c: c });
                 if (!worksheet[cellAddress]) worksheet[cellAddress] = {};
-                worksheet[cellAddress].s = rowStyle;
+                
+                // Aplicar formato monetário nas colunas H, I, J (Gross Profit, Costs, Net Profit)
+                if (c >= 7 && c <= 9) {
+                    worksheet[cellAddress].s = isEven ? moneyStyle : moneyStyleOdd;
+                } else {
+                    worksheet[cellAddress].s = isEven ? evenRowStyle : oddRowStyle;
+                }
             }
         }
 
