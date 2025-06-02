@@ -89,6 +89,7 @@ import Relatorio from './screens/financeiro/relatorio'
 import Faturas from './screens/financeiro/faturas'
 import Lancamentos from './screens/financeiro/lancamentos'
 import ExportarLancamentos from './screens/financeiro/exportarlancamentos'
+import DemonstrativoDeResultado from './screens/financeiro/demonstrativoderesultado'
 
 import AddConta from './screens/financeiro/addconta'
 import AddFatura from './screens/financeiro/addfatura'
@@ -185,6 +186,7 @@ export default function Routes(){
                 <Route path="/financeiro/faturas" component={Faturas} />
                 <Route path="/financeiro/lancamentos" component={Lancamentos} />
                 <Route path="/financeiro/exportarlancamentos" component={ExportarLancamentos} />          
+                <Route path="/financeiro/demonstrativoderesultado" component={DemonstrativoDeResultado} />          
 
                 <Route path="/financeiro/addconta/:id/" component={AddConta} />
                 <Route path="/financeiro/addfatura/:id/" component={AddFatura} />

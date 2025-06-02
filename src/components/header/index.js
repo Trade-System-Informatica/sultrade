@@ -845,6 +845,11 @@ class Header extends Component {
                                                             Lançamentos
                                                         </Link>
                                                     }
+                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_ABERTAS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                        <Link className="dropdown-item" to={{ pathname: `/financeiro/demonstrativoderesultado` }}>
+                                                            Demonstrativo de resultado
+                                                        </Link>
+                                                    }
                                                 </ul>
                                             }
                                         </div>
