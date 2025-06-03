@@ -179,9 +179,9 @@ class DemonstrativoDeResultado extends Component {
                 'ETS': formatarData(item.ETS),
                 'FDA issued': formatarData(item.FDA_issued || item.Data_Faturamento),
                 'Payment date': item.Payment_date === "OPEN" ? "OPEN" : formatarData(item.Payment_date),
-                'Gross Profit': item.Gross_Profit || 10,
-                'Costs': item.Costs || 2,
-                'Net Profit': (item.Gross_Profit || 10) - (item.Costs || 2)
+                'Gross Profit': item.Gross_Profit || 0,
+                'Costs': item.Costs || 0,
+                'Net Profit': (item.Gross_Profit || 0) - (item.Costs || 0)
             };
         });
 
