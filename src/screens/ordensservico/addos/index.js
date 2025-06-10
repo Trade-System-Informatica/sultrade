@@ -3089,7 +3089,7 @@ class AddOS extends Component {
               });
               // CHECA SE O BALANCE É MENOR QUE O BALANCE MAXIMO DO CLIENTE QUANDO FOR COLOCADO UMA DATA DE FATURAMENTO
               if ((this.state.dadosIniciais?.find((e) => e.titulo === "Data de Faturamento")?.valor) != (this.state.dadosFinais?.find((e) => e.titulo === "Data de Faturamento")?.valor)) {
-                fetch('https://siacwebapi.onrender.com//sultrade/maxBalance', {
+                fetch('https://apisiacweb.herokuapp.com/sultrade/maxBalance', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
