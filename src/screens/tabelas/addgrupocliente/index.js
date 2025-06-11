@@ -141,7 +141,7 @@ class AddGrupoCliente extends Component {
         })
 
         if (parseInt(this.state.chave) === 0 && validForm) {
-            await apiEmployee.post(`insertGrupoClientes.php`, {
+            await apiEmployee.post(`insertGrupoCliente.php`, {
                 token: true,
                 values: `'${this.state.descricao}'`
             }).then(

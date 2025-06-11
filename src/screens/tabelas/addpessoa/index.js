@@ -141,16 +141,18 @@ class AddPessoa extends Component {
     }
 
     componentDidMount = async () => {
-        window.scrollTo(0, 0)
-        var id = await this.props.match.params.id
-        await this.setState({ chave: id, loading: true })
-
+        window.scrollTo(0, 0);
+        var id = await this.props.match.params.id;
+        await this.setState({ chave: id, loading: true });
+        
         if (!this.props.location.state || !this.props.location.state.pessoa) {
             await this.getPessoa()
         } else {
-            await this.setState({ pessoa: this.props.location.state.pessoa })        }
+            await this.setState({ pessoa: this.props.location.state.pessoa })
+        }
         
-        console.log(this.state.Indicado)    
+        console.log(this.state.Indicado);
+        
         if (parseInt(id) !== 0 && this.state.pessoa) {
             //console.log('Servicos: ' + JSON.stringify(this.state.tiposervico))
             //await this.loadData(this.state.tiposervico)
@@ -171,13 +173,20 @@ class AddPessoa extends Component {
                 contaFaturar: this.state.pessoa.Conta_Faturar,
                 Indicado: this.state.pessoa.Indicado,
                 balance: this.state.pessoa.Limite,
-                grupo: this.state.pessoa.SubCategoria || ''
+                // Grupo será definido depois de carregar as opções
             })
             await this.converteCategoria();
         }
 
         await this.getPessoas()
         await this.loadAll();
+        
+        // Agora definir o valor do grupo APÓS carregar as opções
+        if (parseInt(id) !== 0 && this.state.pessoa) {
+            await this.setState({
+                grupo: this.state.pessoa.SubCategoria || ''
+            })
+        }
         await this.getPessoaEnderecos();
         await this.getPessoaContatos();
         await this.getTipos();
@@ -808,6 +817,21 @@ class AddPessoa extends Component {
                                                             <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10 ">
                                                                 <Field className="form-control" type="date" value={this.state.nascimento} onChange={async e => { this.setState({ nascimento: e.currentTarget.value }) }} />
                                                             </div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>Grupo de Clientes</label>
+                                                            </div>
+                                                            <div className='col-1 errorMessage'>
+                                                            </div>
+                                                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                <Select 
+                                                                    className='SearchSelect' 
+                                                                    options={this.state.gruposOptions.filter(e => this.filterSearch(e, this.state.gruposOptionsTexto)).slice(0, 20)} 
+                                                                    onInputChange={e => { this.setState({ gruposOptionsTexto: e }) }} 
+                                                                    value={this.state.gruposOptions.filter(option => option.value == this.state.grupo)[0]} 
+                                                                    search={true} 
+                                                                    onChange={(e) => { this.setState({ grupo: e.value }) }} 
+                                                                />
+                                                            </div>
                                                             {this.state.categoria.cliente &&
                                                                 <>
                                                                     <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
@@ -833,21 +857,6 @@ class AddPessoa extends Component {
                                                                     </div>
                                                                     <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                     <Field className="form-control" type="number" value={this.state.balance} onChange={async e => { this.setState({ balance: e.currentTarget.value }) }} />
-                                                                    </div>
-                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                                                        <label>Grupo de Clientes</label>
-                                                                    </div>
-                                                                    <div className='col-1 errorMessage'>
-                                                                    </div>
-                                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
-                                                                        <Select 
-                                                                            className='SearchSelect' 
-                                                                            options={this.state.gruposOptions.filter(e => this.filterSearch(e, this.state.gruposOptionsTexto)).slice(0, 20)} 
-                                                                            onInputChange={e => { this.setState({ gruposOptionsTexto: e }) }} 
-                                                                            value={this.state.gruposOptions.filter(option => option.value == this.state.grupo)[0]} 
-                                                                            search={true} 
-                                                                            onChange={(e) => { this.setState({ grupo: e.value }) }} 
-                                                                        />
                                                                     </div>
                                                                 </>
                                                             }
