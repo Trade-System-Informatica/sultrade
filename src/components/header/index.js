@@ -417,10 +417,14 @@ class Header extends Component {
                             {this.props.voltarSubgrupos &&
                                 <Link to={{ pathname: `/tabelas/subgrupos`, state: { chave: this.props.chave } }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
-                                </Link>
-                            }
+                                </Link>                            }
                             {this.props.voltarGrupos &&
                                 <Link to={{ pathname: `/tabelas/grupos`, state: { chave: this.props.chave } }}>
+                                    <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
+                                </Link>
+                            }
+                            {this.props.voltarGruposClientes &&
+                                <Link to={{ pathname: `/tabelas/gruposclientes`, state: { chave: this.props.chave } }}>
                                     <FontAwesomeIcon cursor="pointer" className='seta' icon={faArrowLeft} color="#17386b" size="2x" />
                                 </Link>
                             }

@@ -1,0 +1,11 @@
+.iconelixo:hover > svg {
+    border-bottom: 2px solid black;
+}
+
+.deleteMargin {
+    margin-bottom: 0px !important;
+}
+
+.row-list {
+    margin-bottom: 5px !important;
+}

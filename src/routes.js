@@ -14,6 +14,7 @@ import Financeiro from './screens/financeiro/inicio'
 import Ships from './screens/tabelas/ships'
 import TiposServicos from './screens/tabelas/tiposservicos'
 import Grupos from './screens/tabelas/grupos'
+import GruposClientes from './screens/tabelas/gruposclientes'
 import Subgrupos from './screens/tabelas/subgrupos'
 import Moedas from './screens/tabelas/moedas'
 import Taxas from './screens/tabelas/taxas'
@@ -32,6 +33,7 @@ import CategoriasDocumentos from './screens/tabelas/categoriasDocumentos'
 import AddShip from './screens/tabelas/addship'
 import AddTipoServico from './screens/tabelas/addtiposervico'
 import AddGrupo from './screens/tabelas/addgrupo'
+import AddGrupoCliente from './screens/tabelas/addgrupocliente'
 import AddSubgrupo from './screens/tabelas/addsubgrupo'
 import AddMoeda from './screens/tabelas/addmoeda'
 import AddTaxa from './screens/tabelas/addtaxa'
@@ -113,6 +115,7 @@ export default function Routes(){
                 <Route path="/tabelas/tiposservicos" component={TiposServicos} />
                 <Route path="/tabelas/subgrupos" component={Subgrupos} />
                 <Route path="/tabelas/grupos" component={Grupos} />
+                <Route path="/tabelas/gruposclientes" component={GruposClientes} />
                 <Route path="/tabelas/moedas" component={Moedas} />
                 <Route path="/tabelas/taxas" component={Taxas} />
                 <Route path="/tabelas/pessoas" component={Pessoas} />
@@ -131,6 +134,7 @@ export default function Routes(){
                 <Route path="/tabelas/addtiposervico/:id" component={AddTipoServico} />
                 <Route path="/tabelas/addsubgrupo/:id" component={AddSubgrupo} />
                 <Route path="/tabelas/addgrupo/:id" component={AddGrupo} />
+                <Route path="/tabelas/addgrupocliente/:id" component={AddGrupoCliente} />
                 <Route path="/tabelas/addmoeda/:id" component={AddMoeda} />
                 <Route path="/tabelas/addtaxa/:id" component={AddTaxa} />
                 <Route path="/tabelas/addpessoa/:id/" component={AddPessoa} />

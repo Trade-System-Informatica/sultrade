@@ -578,4 +578,25 @@ class Pessoas
         $database->closeConection();
         return $result;
     }
+
+    public static function getGruposClientes()
+    {
+        $database = new Database();
+
+        $result = $database->doSelect('subcategorias_pessoas', 'subcategorias_pessoas.*');
+        $database->closeConection();
+        return $result;
+    }
+
+    public static function insertGrupoCliente($values)
+    {
+        $database = new Database();
+
+        $cols = 'descricao';
+
+        $result = $database->doInsert('subcategorias_pessoas', $cols, $values);
+
+        $database->closeConection();
+        return $result;
+    }
 }
