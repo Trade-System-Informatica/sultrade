@@ -81,11 +81,15 @@ const estadoInicial = {
         bairro: '',
         cidade_descricao: '',
         pais: '',
-    }*/],
-    contaContabil: '',
+    }*/],    contaContabil: '',
     contaProvisao: '',
     contaFaturar: '',
     Indicado: null,
+
+    grupo: '',
+    grupos: [],
+    gruposOptions: [],
+    gruposOptionsTexto: '',
 
     cidades: [],
     cidadesOptions: [],
@@ -144,8 +148,7 @@ class AddPessoa extends Component {
         if (!this.props.location.state || !this.props.location.state.pessoa) {
             await this.getPessoa()
         } else {
-            await this.setState({ pessoa: this.props.location.state.pessoa })  
-        }
+            await this.setState({ pessoa: this.props.location.state.pessoa })        }
         
         console.log(this.state.Indicado)    
         if (parseInt(id) !== 0 && this.state.pessoa) {
@@ -167,7 +170,8 @@ class AddPessoa extends Component {
                 contaProvisao: this.state.pessoa.Conta_Provisao,
                 contaFaturar: this.state.pessoa.Conta_Faturar,
                 Indicado: this.state.pessoa.Indicado,
-                balance: this.state.pessoa.Limite
+                balance: this.state.pessoa.Limite,
+                grupo: this.state.pessoa.SubCategoria || ''
             })
             await this.converteCategoria();
         }
@@ -180,8 +184,7 @@ class AddPessoa extends Component {
         await this.adicionaInformacao();
 
         if (this.state.chave != 0) {
-            await this.setState({
-                dadosIniciais: [
+            await this.setState({                dadosIniciais: [
                     { titulo: 'Nome', valor: util.formatForLogs(this.state.nome) },
                     { titulo: 'Nome Fantasia', valor: util.formatForLogs(this.state.nome_fantasia) },
                     { titulo: 'Cnpj/Cpf', valor: util.formatForLogs(this.state.cnpj_cpf) },
@@ -193,6 +196,7 @@ class AddPessoa extends Component {
                     { titulo: 'Conta Receber', valor: util.formatForLogs(this.state.contaContabil, 'options', '', '', this.state.planosContasOptions) },
                     { titulo: 'Conta Faturar', valor: util.formatForLogs(this.state.contaFaturar, 'options', '', '', this.state.planosContasOptions) },
                     { titulo: 'Balance', valor: util.formatForLogs(this.state.balance) },
+                    { titulo: 'Grupo', valor: util.formatForLogs(this.state.grupo, 'options', '', '', this.state.gruposOptions) },
                 ],
             })
 
@@ -201,8 +205,7 @@ class AddPessoa extends Component {
         this.state.acessosPermissoes.map((e) => {
             if ((e.acessoAcao == "PESSOAS" && e.permissaoInsere == 0 && this.state.chave == 0) || (e.acessoAcao == "PESSOAS" && e.permissaoEdita == 0 && this.state.chave != 0)) {
                 this.setState({ bloqueado: true })
-            }
-        })
+            }        })
 
     }
 
@@ -210,11 +213,20 @@ class AddPessoa extends Component {
         await this.setState({
             planosContas: await loader.getBase('getPlanosContasAnaliticas.php'),
             planosContasOptions: await loader.getPlanosContasAnaliticasOptions(),
+            grupos: await loader.getBase('getGruposClientes.php'),
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php')
         })
 
+        // Criar opções para o select de grupos
+        const gruposOptions = this.state.grupos.map((grupo) => ({
+            label: grupo.descricao,
+            value: grupo.chave
+        }))
+        gruposOptions.unshift({ label: 'Nenhum', value: '' })
+
         await this.setState({
+            gruposOptions,
             acessosPermissoes: await loader.testaAcesso(this.state.acessos, this.state.permissoes, this.state.usuarioLogado),
             loading: false
         })
@@ -547,14 +559,14 @@ class AddPessoa extends Component {
                 { titulo: 'Conta Receber', valor: util.formatForLogs(this.state.contaContabil, 'options', '', '', this.state.planosContasOptions) },
                 { titulo: 'Conta Faturar', valor: util.formatForLogs(this.state.contaFaturar, 'options', '', '', this.state.planosContasOptions) },
                 { titulo: 'Balance', valor: util.formatForLogs(this.state.balance) },
+                { titulo: 'Grupo', valor: util.formatForLogs(this.state.grupo, 'options', '', '', this.state.gruposOptions) },
             ],
             loading: true
-        })
-
+        })        
         if (this.state.chave == 0) {
             await apiEmployee.post(`insertPessoa.php`, {
                 token: true,
-                values: `"${this.state.nome.replaceAll("'", "\'")}", '${this.state.nome_fantasia.replaceAll("'", "\'")}', '${this.state.cnpj_cpfLimpo}', '${this.state.rg_ie}', '${this.state.inscricao_municipal}', '${this.state.nascimento}', '${this.state.inclusao}', '${categoria}', '${this.state.contaContabil}', '${this.state.contaProvisao}', '${this.state.contaFaturar}', '${this.state.balance}', ${parseInt(this.state.apontadoPor)}`
+                values: `"${this.state.nome.replaceAll("'", "\'")}", '${this.state.nome_fantasia.replaceAll("'", "\'")}', '${this.state.cnpj_cpfLimpo}', '${this.state.rg_ie}', '${this.state.inscricao_municipal}', '${this.state.nascimento}', '${this.state.inclusao}', '${categoria}', '${this.state.contaContabil}', '${this.state.contaProvisao}', '${this.state.contaFaturar}', '${this.state.balance}', ${parseInt(this.state.apontadoPor)}, '${this.state.grupo}'`
             }).then(
                 async res => {
                     if (res.data[0].Chave) {
@@ -566,8 +578,7 @@ class AddPessoa extends Component {
                 },
                 async res => await console.log(`Erro: ${res.data}`)
             )
-        } else {
-            await apiEmployee.post(`updatePessoa.php`, {
+        } else {            await apiEmployee.post(`updatePessoa.php`, {
                 token: true,
                 Chave: this.state.chave,
                 Nome: this.state.nome.replaceAll("'", "\'"),
@@ -582,7 +593,8 @@ class AddPessoa extends Component {
                 Conta_Provisao: this.state.contaProvisao,
                 Conta_Faturar: this.state.contaFaturar,
                 Indicado: this.state.apontadoPor,
-                Balance: this.state.balance
+                Balance: this.state.balance,
+                SubCategoria: this.state.grupo
             }).then(
                 async res => {
                     console.log(res.data);
@@ -814,14 +826,28 @@ class AddPessoa extends Component {
                                                                     <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                         <Select className='SearchSelect' options={this.state.planosContasOptions.filter(e => this.filterSearch(e, this.state.planosContasOptionsTexto)).slice(0, 20)} onInputChange={e => { this.setState({ planosContasOptionsTexto: e }) }} value={this.state.planosContasOptions.filter(option => option.value == this.state.contaFaturar)[0]} search={true} onChange={(e) => { this.setState({ contaFaturar: e.value, }) }} />
                                                                     </div>
-                                                                    <div className='col-1'></div>
-                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                    <div className='col-1'></div>                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                     <label>Balance</label>
                                                                     </div>
                                                                     <div className='col-1 errorMessage'>
                                                                     </div>
                                                                     <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                                     <Field className="form-control" type="number" value={this.state.balance} onChange={async e => { this.setState({ balance: e.currentTarget.value }) }} />
+                                                                    </div>
+                                                                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                        <label>Grupo de Clientes</label>
+                                                                    </div>
+                                                                    <div className='col-1 errorMessage'>
+                                                                    </div>
+                                                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                                        <Select 
+                                                                            className='SearchSelect' 
+                                                                            options={this.state.gruposOptions.filter(e => this.filterSearch(e, this.state.gruposOptionsTexto)).slice(0, 20)} 
+                                                                            onInputChange={e => { this.setState({ gruposOptionsTexto: e }) }} 
+                                                                            value={this.state.gruposOptions.filter(option => option.value == this.state.grupo)[0]} 
+                                                                            search={true} 
+                                                                            onChange={(e) => { this.setState({ grupo: e.value }) }} 
+                                                                        />
                                                                     </div>
                                                                 </>
                                                             }

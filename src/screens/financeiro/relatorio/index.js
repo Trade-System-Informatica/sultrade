@@ -48,11 +48,15 @@ const estadoInicial = {
   planosContasOptionsTexto: "",
   centrosCustos: [],
   centrosCustosOptions: [],
-  centrosCustosOptionsTexto: "",
-  pessoas: [],
+  centrosCustosOptionsTexto: "",  pessoas: [],
   pessoasOptions: [],
   pessoasOptionsTexto: "",
   tiposDocumentoOptions: [],
+
+  grupo: "",
+  grupos: [],
+  gruposOptions: [],
+  gruposOptionsTexto: "",
 
   bloqueado: false,
 
@@ -123,6 +127,7 @@ class Relatorio extends Component {
     await this.getCentrosCustos();
     await this.getPessoasCategorias();
     await this.getTiposDocumento();
+    await this.getGrupos();
     await this.loadAll();
   };
 
@@ -231,6 +236,28 @@ class Relatorio extends Component {
           }));
 
           await this.setState({ tiposDocumentoOptions: tiposDocumentos });
+        },
+        async (err) => {
+          this.erroApi(err);
+        }
+      );
+  };
+
+  getGrupos = async () => {
+    await apiEmployee
+      .post(`getGruposClientes.php`, {
+        token: true,
+      })
+      .then(
+        async (res) => {
+          await this.setState({ grupos: res.data });
+
+          const options = this.state.grupos.map((e) => ({
+            label: e.descricao,
+            value: e.chave,
+          }));
+
+          await this.setState({ gruposOptions: options });
         },
         async (err) => {
           this.erroApi(err);
@@ -348,14 +375,14 @@ class Relatorio extends Component {
     console.log({
       clientes: this.state.clientes,
       centroCusto: this.state.centroCusto,
-    });
-    if (this.props.location.state.backTo == "contasReceber") {
+    });    if (this.props.location.state.backTo == "contasReceber") {
       await apiHeroku
         .post("/relatorio/receber", {
           all: !this.state.clientes[0] ? true : false,
           chaves: this.state.clientes,
           centro_custo: this.state.centroCusto || false,
           situacao: this.state.situacao || 'T',
+          grupo: this.state.grupo || false,
         })
         .then(async (res) => {
           await this.setState({ relatorio: res.data });
@@ -2420,8 +2447,37 @@ class Relatorio extends Component {
                                       ? ", "
                                       : " "
                                   }`}</span>
-                                ))}
-                              </div>
+                                ))}                              </div>
+                            </div>
+                            
+                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                              <label>Grupo de Clientes</label>
+                            </div>
+                            <div className="col-1 errorMessage"></div>
+                            <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                              <Select
+                                className="SearchSelect"
+                                options={this.state.gruposOptions
+                                  .filter((e) =>
+                                    this.filterSearch(
+                                      e,
+                                      this.state.gruposOptionsTexto
+                                    )
+                                  )
+                                  .slice(0, 20)}
+                                onInputChange={(e) => {
+                                  this.setState({ gruposOptionsTexto: e });
+                                }}
+                                value={
+                                  this.state.gruposOptions.filter(
+                                    (option) => option.value == this.state.grupo
+                                  )[0]
+                                }
+                                search={true}
+                                onChange={(e) => {
+                                  this.setState({ grupo: e.value });
+                                }}
+                              />
                             </div>
                             
                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">

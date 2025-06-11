@@ -137,6 +137,14 @@ class Tabelas extends Component {
                                                     <h4 className="textoMenu">Tipos de Serviços</h4>
                                                 </Link>
                                             </li>
+                                        } 
+                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'GRUPOS_CLIENTES') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                            <li className=" text-left itemMenu list-group-item ">
+                                                <Link className="semTextDecoration" to={{ pathname: `/tabelas/gruposclientes` }}>
+                                                    <FontAwesomeIcon icon={faLayerGroup} size="2x" color="tomato" />
+                                                    <h4 className="textoMenu">Grupos de Clientes</h4>
+                                                </Link>
+                                            </li>
                                         }
                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'GRUPOS_TAXAS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                             <li className=" text-left itemMenu list-group-item ">

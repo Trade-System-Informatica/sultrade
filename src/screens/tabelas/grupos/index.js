@@ -209,7 +209,7 @@ class Grupos extends Component {
                                 acessosPermissoes={this.state.acessosPermissoes}
                             />
 
-                            <AddButton addLink={{ pathname: `/tabelas/grupo/0` }} />
+                            <AddButton addLink={{ pathname: `/tabelas/addgrupo/0` }} />
 
                             <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-left">
                                 <div className="row mobileajuster3">
@@ -224,7 +224,7 @@ class Grupos extends Component {
                                         </select>
                                         <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
                                             <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
-                                                <Link to={{ pathname: `/tabelas/grupo/0` }}><button className="btn btn-success">+</button></Link>
+                                                <Link to={{ pathname: `/tabelas/addgrupo/0` }}><button className="btn btn-success">+</button></Link>
                                             </div>
                                     </div>
 

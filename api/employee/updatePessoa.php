@@ -27,6 +27,7 @@ if($objData != NULL){
     $Conta_Faturar = prepareInput($objData->Conta_Faturar);
     $Indicado = prepareInput($objData->Indicado);
     $Balance = prepareInput($objData->Balance);
+    $SubCategoria = prepareInput($objData->SubCategoria);
 
 
     $employees = new Employees();
@@ -35,7 +36,7 @@ if($objData != NULL){
     //$result = $employees->checkToken($token);
     //if($result == 'true'){
         //$result = "'" . $id_seaport . "'";
-        $result = $pessoas->updatePessoa($Chave, $Nome, $Nome_Fantasia, $Cnpj_Cpf, $Rg_Ie, $Inscricao_Municipal, $Nascimento_Abertura, $Inclusao, $Categoria, $Conta_Contabil, $Conta_Provisao, $Conta_Faturar, $Balance, $Indicado);
+        $result = $pessoas->updatePessoa($Chave, $Nome, $Nome_Fantasia, $Cnpj_Cpf, $Rg_Ie, $Inscricao_Municipal, $Nascimento_Abertura, $Inclusao, $Categoria, $Conta_Contabil, $Conta_Provisao, $Conta_Faturar, $Balance, $Indicado, $SubCategoria);
     //}
 } else {
     $result = "false";

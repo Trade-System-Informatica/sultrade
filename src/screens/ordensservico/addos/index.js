@@ -12612,6 +12612,7 @@ class AddOS extends Component {
                       </div>
                     </div>
                     <br />
+                    <br />
                     <div className="relatoriosSection">
                       <div className="relatorioButton">
                         <button
