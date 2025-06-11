@@ -121,7 +121,7 @@ class GruposClientes extends Component {
                             className="btn btn-danger w-25"
                             onClick={
                                 async () => {
-                                    await apiEmployee.post(`deleteGrupo.php`, {
+                                    await apiEmployee.post(`deleteGrupoCliente.php`, {
                                         token: true,
                                         chave: id
                                     }).then(

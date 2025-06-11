@@ -595,4 +595,13 @@ class Pessoas
         $database->closeConection();
         return $result;
     }
+
+    public static function deleteGrupoCliente($chave)
+    {
+        $database = new Database();
+
+        $result = $database->doDelete('subcategorias_pessoas', 'chave = ' . $chave);
+        $database->closeConection();
+        return $result;
+    }
 }
