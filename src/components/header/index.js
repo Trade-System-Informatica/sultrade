@@ -800,7 +800,8 @@ class Header extends Component {
                                                             }
                                                         </div>
                                                     }
-                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_LIQUIDADAS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                    {/* if (e.acessoAcao == 'CONTAS_LIQUIDADAS') INATIVADO*/}
+                                                    {this.state.acessosPermissoes.filter((e) => { if (false) { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                                         <div className="dropdown-item dropend" >
                                                             <Link className="dropdown-item" to={{ pathname: `/financeiro/contasliquidadas` }}>
                                                                 Contas Liquidadas
@@ -840,17 +841,20 @@ class Header extends Component {
                                                             Notas Fiscais de Serviço
                                                         </Link>
                                                     }
-                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_ABERTAS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                    {/* if (e.acessoAcao == 'CONTAS_ABERTAS')  */}
+                                                    {this.state.acessosPermissoes.filter((e) => { if (false) { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                                         <Link className="dropdown-item" to={{ pathname: `/financeiro/pagamentoslote` }}>
                                                             Pagamentos em Lote
                                                         </Link>
                                                     }
-                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_ABERTAS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                     {/* if (e.acessoAcao == 'CONTAS_ABERTAS')  */}
+                                                    {this.state.acessosPermissoes.filter((e) => { if (false) { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                                         <Link className="dropdown-item" to={{ pathname: `/financeiro/pagamentosmanual` }}>
                                                             Pagamentos Manual
                                                         </Link>
                                                     }
-                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissoes)[0] == 1 &&
+                                                    {/* if (e.acessoAcao == 'LANCAMENTOS') */}
+                                                    {this.state.acessosPermissoes.filter((e) => { if (false) { return e } }).map((e) => e.permissoes)[0] == 1 &&
                                                         <Link className="dropdown-item" to={{ pathname: `/financeiro/lancamentos` }}>
                                                             Lançamentos
                                                         </Link>

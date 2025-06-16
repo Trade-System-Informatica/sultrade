@@ -3896,18 +3896,13 @@ class AddOS extends Component {
 
 
                             </table>*/}
-                <br />
-
-                <table className={`voucherTable`}>
+                <br />                <table className={`voucherTable`}>
                   <tr>
                     <td className="pdfTitle" style={{ width: 75 }}>
                       Voucher
                     </td>
-                    <td colSpan="3" className="pdfTitle">
+                    <td colSpan="5" className="pdfTitle">
                       Description
-                    </td>
-                    <td colSpan="2" className="pdfTitle">
-                      Expense Type
                     </td>
                     <td className="pdfTitle">Final USD</td>
                     <td className="pdfTitle">Final BRL</td>
@@ -4003,18 +3998,11 @@ class AddOS extends Component {
                             {voucherInfo.chavTaxa}
                           </td>
                           <td
-                            colSpan="3"
+                            colSpan="5"
                             className="pdf_large_col reduce_font"
                             style={{ backgroundColor: backgroundColor }}
                           >
                             {voucherInfo.descSubgrupo}
-                          </td>
-                          <td
-                            colSpan="2"
-                            className="pdf_small_col reduce_font"
-                            style={{ backgroundColor: backgroundColor }}
-                          >
-                            {voucherInfo.descGrupo}
                           </td>
                           <td
                             className="pdf_money_colOS reduce_font"
@@ -4045,17 +4033,12 @@ class AddOS extends Component {
                       <tr>
                         <td></td>
                         <td
-                          colSpan="3"
+                          colSpan="5"
                           className="pdf_large_col"
                           style={{ fontWeight: "bold" }}
                         >
                           GOVERNMENT TAXES
                         </td>
-                        <td
-                          colSpan="2"
-                          className="pdf_small_col"
-                          style={{ fontWeight: "bold" }}
-                        ></td>
                         <td
                           className="pdf_money_colOS"
                           style={{ fontWeight: "bold" }}
@@ -4080,21 +4063,15 @@ class AddOS extends Component {
                   {this.state.pdfContent[0].BK &&
                     (["SIM", "S"].includes(
                       this.state.pdfContent[0].BK.toUpperCase()
-                    ) || Util.verificaDatas(this.state.pdfContent[0].data_encerramento, this.state.pdfContent[0].BK)) && (
-                      <tr>
+                    ) || Util.verificaDatas(this.state.pdfContent[0].data_encerramento, this.state.pdfContent[0].BK)) && (                      <tr>
                         <td></td>
                         <td
-                          colSpan="3"
+                          colSpan="5"
                           className="pdf_large_col"
                           style={{ fontWeight: "bold" }}
                         >
                           BANK CHARGES
                         </td>
-                        <td
-                          colSpan="2"
-                          className="pdf_small_col"
-                          style={{ fontWeight: "bold" }}
-                        ></td>
                         <td
                           className="pdf_money_colOS"
                           style={{ fontWeight: "bold" }}

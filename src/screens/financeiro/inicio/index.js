@@ -127,13 +127,12 @@ class Financeiro extends Component {
                                                 <h4 className="textoMenu">Contas em Aberto</h4>
                                             </Link>
                                         </li>
-
-                                        <li className=" text-left itemMenu list-group-item ">
+                                        {/* <li className=" text-left itemMenu list-group-item ">
                                             <Link className="semTextDecoration" to={{ pathname: `/financeiro/contasliquidadas` }}>
                                                 <FontAwesomeIcon icon={faArchive} size="2x" color="tomato" />
                                                 <h4 className="textoMenu">Contas Liquidadas</h4>
                                             </Link>
-                                        </li>
+                                        </li> */}
 
                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'FATURAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                             <li className=" text-left itemMenu list-group-item ">
@@ -144,32 +143,32 @@ class Financeiro extends Component {
                                             </li>
                                         }
 
-                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                        {/* {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'LANCAMENTOS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                             <li className=" text-left itemMenu list-group-item ">
                                                 <Link className="semTextDecoration" to={{ pathname: `/financeiro/lancamentos` }}>
                                                     <FontAwesomeIcon icon={faReceipt} size="2x" color="tomato" />
                                                     <h4 className="textoMenu">Lançamentos</h4>
                                                 </Link>
                                             </li>
-                                        }
+                                        } */}
 
-                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_ABERTAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                        {/* {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_ABERTAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                             <li className=" text-left itemMenu list-group-item ">
                                                 <Link className="semTextDecoration" to={{ pathname: `/financeiro/pagamentoslote` }}>
                                                     <FontAwesomeIcon icon={faCommentDollar} size="2x" color="tomato" />
                                                     <h4 className="textoMenu">Pagamentos em Lote</h4>
                                                 </Link>
                                             </li>
-                                        }
+                                        } */}
 
-                                        {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_ABERTAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
+                                        {/* {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_ABERTAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                             <li className=" text-left itemMenu list-group-item ">
                                                 <Link className="semTextDecoration" to={{ pathname: `/financeiro/pagamentosmanual` }}>
                                                     <FontAwesomeIcon icon={faMoneyCheck} size="2x" color="tomato" />
                                                     <h4 className="textoMenu">Pagamentos Manual</h4>
                                                 </Link>
                                             </li>
-                                        }
+                                        } */}
 
                                         {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'CONTAS_ABERTAS') { return e } }).map((e) => e.permissaoConsulta)[0] == 1 &&
                                             <li className=" text-left itemMenu list-group-item ">
