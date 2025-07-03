@@ -5,7 +5,7 @@ const apiHeroku = axios.create({
     headers: {
         Authorization: '07256661000128', //CNPJ
     },  
-    timeout: 30000
+    timeout: 240000
 })
 
 export default apiHeroku
