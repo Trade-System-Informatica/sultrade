@@ -208,9 +208,7 @@ class RelatorioExcel extends Component {
             }, 0)),    
 
             'SERVIÇO': item.tipoServicoNome,                                 
-            'ETA': item.ETA,                        
-            'ETB': item.ETB,                        
-            'ETS': item.ETS,               
+                          
         }});
     
         // Criar a worksheet manualmente
@@ -256,8 +254,8 @@ class RelatorioExcel extends Component {
         const headers = [
             'CLIENTES', 'ST', 'NAVIO', 'PORTOS', 'UND FATURAMENTO', 'NACIONALIDADE',
             'STA RIG', 'STA SANTOS', 'PORTO BRASIL', 'COAST',
-            'TOTAL CUSTEIO', 'SERVIÇO', 'ETA', 'ETB', 'ETS'
-        ];
+            'TOTAL CUSTEIO', 'SERVIÇO'
+        ];  
         const headerColors = [
             '9ED1E1', '9ED1E1', '9ED1E1', '9ED1E1', '9ED1E1', '9ED1E1',
             '9ED1E1', '9ED1E1', '9ED1E1', '9ED1E1',

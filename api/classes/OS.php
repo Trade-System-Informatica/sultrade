@@ -790,9 +790,6 @@ class OS
                 "os.codigo,
                 os_navios.nome AS navioNome,
                 os_portos.Descricao AS portoNome,
-                os.eta AS ETA,
-                os.etb AS ETB,
-                os.data_saida AS ETS,
                 (
                     (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
                             FROM os_servicos_itens osi 
@@ -884,9 +881,6 @@ class OS
                 "os.codigo,
                 os_navios.nome AS navioNome,
                 os_portos.Descricao AS portoNome,
-                os.eta AS ETA,
-                os.etb AS ETB,
-                os.atb AS ETS,
                 (
                     (IFNULL((SELECT SUM(osi.valor * osi.qntd) 
                             FROM os_servicos_itens osi 
