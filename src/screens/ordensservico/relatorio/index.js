@@ -125,7 +125,7 @@ class RelatorioOS extends Component {
         }
 
         const empresa = `os.Empresa = ${this.state.empresa}`;
-        const situacao = this.state.situacao == 'A' ? `os.cancelada != 1 AND (os.Data_Encerramento = "" OR os.Data_Encerramento = "0000-00-00 00:00:00")` : this.state.situacao == "E" ? `os.cancelada != 1 AND (os.Data_Encerramento != "" AND os.Data_Encerramento != "0000-00-00 00:00:00" AND (os.Data_Faturamento = "" OR os.Data_Faturamento = "0000-00-00 00:00:00"))` : this.state.situacao == "F" ? `os.cancelada != 1 AND (os.Data_Faturamento != "" AND os.Data_Faturamento != "0000-00-00 00:00:00")` : this.state.situacao == "C" ? `os.cancelada = 1` : ``;
+        const situacao = this.state.situacao == 'A' ? `os.cancelada != 1 AND (os.Data_Encerramento = "" OR os.Data_Encerramento = "0000-00-00 00:00:00" OR os.Data_Encerramento is null)` : this.state.situacao == "E" ? `os.cancelada != 1 AND (os.Data_Encerramento != "" AND os.Data_Encerramento != "0000-00-00 00:00:00" AND os.Data_Encerramento is not null AND (os.Data_Faturamento = "" OR os.Data_Faturamento = "0000-00-00 00:00:00" OR os.Data_Faturamento is null))` : this.state.situacao == "F" ? `os.cancelada != 1 AND (os.Data_Faturamento != "" AND os.Data_Faturamento != "0000-00-00 00:00:00" AND os.Data_Faturamento is not null)` : this.state.situacao == "C" ? `os.cancelada = 1` : ``;
         const navio = this.state.navio ? `os.chave_navio = '${this.state.navio}'` : '';
         const cliente = this.state.cliente ? `os.chave_cliente = '${this.state.cliente}'` : '';
         const centroCusto = this.state.centroCusto ? `os.centro_custo = '${this.state.centroCusto}'` : '';
