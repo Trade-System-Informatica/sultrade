@@ -77,6 +77,7 @@ const estadoInicial = {
     {value: "T", label: "Todas"},
     {value: "F", label: "Faturadas"},
     {value: "E", label: "Enviadas"},
+    {value: "N", label: "Não Enviadas"},
 ],
 };
 
