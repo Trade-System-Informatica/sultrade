@@ -49,11 +49,11 @@ class Operadores {
         if ($empresa != 0) {
             $result = $database->doSelect('operadores',
                                           'operadores.*',
-                                          "empresa = '".$empresa."' OR empresa = 0 ORDER BY Codigo"
+                                          "empresa = '".$empresa."' OR empresa = 0 ORDER BY Nome"
                                         );
         } else {
             $result = $database->doSelect('operadores',
-                                          'operadores.*', "1 ORDER BY Codigo"
+                                          'operadores.*', "1 ORDER BY Nome"
           );
         }
         $database->closeConection();
