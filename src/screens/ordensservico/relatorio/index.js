@@ -162,47 +162,80 @@ class RelatorioOS extends Component {
         return (e.label.toUpperCase().includes(text))
     }
 
+    // Função para determinar a situação da OS
+    getSituacaoOS = (os) => {
+        // Cancelada
+        if (os.cancelada == 1) return "Cancelada";
+        // Faturada
+        if (os.Data_Faturamento && os.Data_Faturamento != "" && os.Data_Faturamento != "0000-00-00 00:00:00" && os.Data_Faturamento != null)
+            return "Faturada";
+        // Encerrada
+        if (os.Data_Encerramento && os.Data_Encerramento != "" && os.Data_Encerramento != "0000-00-00 00:00:00" && os.Data_Encerramento != null)
+            return "Encerrada";
+        // Em Aberto
+        return "Em Aberto";
+    }
+
     relatorio = async () => {
         this.setState({ loading: true });
         const relatorio = this?.state?.relatorio;
 
-        console.log(relatorio);
+        // Cores para situações
+        const situacaoColors = {
+            "Em Aberto": "#f7ca18",
+            "Encerrada": "#3498db",
+            "Faturada": "#27ae60",
+            "Cancelada": "#e74c3c"
+        };
+
         let pdf =
             <div style={{ zoom: 1 }} key={546546554654}>
-
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                    <img className="img-fluid" src="https://i.ibb.co/vmKJkx4/logo.png" alt="logo-Strade" border="0" style={{ width: '30%', height: '230px', maxWidth: "100%" }} />
-                    <h3>
-                        Relatório de OS
-                    </h3>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+                    <img className="img-fluid" src="https://i.ibb.co/vmKJkx4/logo.png" alt="logo-Strade" border="0" style={{ width: '30%', height: '180px', maxWidth: "100%", marginBottom: 10 }} />
+                    <h2 style={{ margin: 0, color: '#2c3e50' }}>Relatório de OS</h2>
                 </div>
-                <hr />
                 <div className='pdfContent'>
-                    <table style={{width: "100%"}}>
-                    <tr style={{padding: "10px", fontSize: "1.2em"}}>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Código</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Navio</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Porto</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ETA</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ETB</th>
-                            <th style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>ETS</th>
-                            <th colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Cliente</th>
-                            <th colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>Tipo de Serviço</th>
+                    <table style={{width: "100%", borderCollapse: "collapse", fontSize: "0.95em"}}>
+                        <thead>
+                        <tr style={{background: "#f4f4f4"}}>
+                            <th style={{borderBottom: "2px solid #2c3e50", padding: "10px", textAlign: "center"}}>Código</th>
+                            <th style={{borderBottom: "2px solid #2c3e50", padding: "10px", textAlign: "center"}}>Navio</th>
+                            <th style={{borderBottom: "2px solid #2c3e50", padding: "10px", textAlign: "center"}}>Porto</th>
+                            <th style={{borderBottom: "2px solid #2c3e50", padding: "10px", textAlign: "center"}}>ETA</th>
+                            <th style={{borderBottom: "2px solid #2c3e50", padding: "10px", textAlign: "center"}}>ETB</th>
+                            <th style={{borderBottom: "2px solid #2c3e50", padding: "10px", textAlign: "center"}}>ETS</th>
+                            <th style={{borderBottom: "2px solid #2c3e50", padding: "10px", textAlign: "center"}}>Cliente</th>
+                            <th style={{borderBottom: "2px solid #2c3e50", padding: "10px", textAlign: "center"}}>Tipo de Serviço</th>
+                            <th style={{borderBottom: "2px solid #2c3e50", padding: "10px", textAlign: "center"}}>Situação</th>
                         </tr>
-                    {relatorio?.map((e) => {
-                        return (
-                        <tr style={{padding: "10px", fontSize: "0.8em"}}>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.codigo}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.navioNome}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.portoNome}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{moment(e.ETA).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.ETA).format("DD/MM/YYYY")}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{moment(e.ETB).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.ETB).format("DD/MM/YYYY")}</td>
-                            <td style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{moment(e.ETS).format("DD/MM/YYYY") == "Invalid date" ? "" : moment(e.ETS).format("DD/MM/YYYY")}</td>
-                            <td colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.pessoaNomeFantasia ? e.pessoaNomeFantasia : e.pessoaNome}</td>
-                            <td colSpan={2} style={{borderBottom: "2px solid black", paddingLeft: "15px", paddingRight: "15px"}}>{e.tipoServicoNome}</td>
-                        </tr>
-                        )
-                    })}
+                        </thead>
+                        <tbody>
+                        {relatorio?.map((e, idx) => {
+                            const situacao = this.getSituacaoOS(e);
+                            return (
+                                <tr key={idx} style={{background: idx % 2 === 0 ? "#fff" : "#f9f9f9"}}>
+                                    <td style={{borderBottom: "1px solid #ddd", padding: "8px", textAlign: "center"}}>{e.codigo}</td>
+                                    <td style={{borderBottom: "1px solid #ddd", padding: "8px", textAlign: "center"}}>{e.navioNome}</td>
+                                    <td style={{borderBottom: "1px solid #ddd", padding: "8px", textAlign: "center"}}>{e.portoNome}</td>
+                                    <td style={{borderBottom: "1px solid #ddd", padding: "8px", textAlign: "center"}}>{moment(e.ETA).format("DD/MM/YYYY") === "Invalid date" ? "" : moment(e.ETA).format("DD/MM/YYYY")}</td>
+                                    <td style={{borderBottom: "1px solid #ddd", padding: "8px", textAlign: "center"}}>{moment(e.ETB).format("DD/MM/YYYY") === "Invalid date" ? "" : moment(e.ETB).format("DD/MM/YYYY")}</td>
+                                    <td style={{borderBottom: "1px solid #ddd", padding: "8px", textAlign: "center"}}>{moment(e.ETS).format("DD/MM/YYYY") === "Invalid date" ? "" : moment(e.ETS).format("DD/MM/YYYY")}</td>
+                                    <td style={{borderBottom: "1px solid #ddd", padding: "8px", textAlign: "center"}}>{e.pessoaNomeFantasia ? e.pessoaNomeFantasia : e.pessoaNome}</td>
+                                    <td style={{borderBottom: "1px solid #ddd", padding: "8px", textAlign: "center"}}>{e.tipoServicoNome}</td>
+                                    <td style={{borderBottom: "1px solid #ddd", padding: "8px", textAlign: "center"}}>
+                                        <span style={{
+                                            background: situacaoColors[situacao] || "#bdc3c7",
+                                            color: "#fff",
+                                            borderRadius: "12px",
+                                            padding: "4px 12px",
+                                            fontWeight: "bold",
+                                            fontSize: "0.95em"
+                                        }}>{situacao}</span>
+                                    </td>
+                                </tr>
+                            )
+                        })}
+                        </tbody>
                     </table>
                 </div>
             </div >
