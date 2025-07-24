@@ -4121,82 +4121,66 @@ class AddOsOrcamento extends Component {
                 </h5>
                 <table style={{ width: "80%", marginLeft: "5%" }}>
                   <tr>
-                    <td
-                      style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}
-                    >
-                      <b style={{ paddingRight: 5 }}>Bank's name:</b> Banco do
-                      Brasil
-                    </td>
-                  </tr>
-                  <tr>
-                    <td
-                      style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}
-                    >
-                      <b style={{ paddingRight: 5 }}>Branch's name:</b> Rio
-                      Grande
-                    </td>
-                  </tr>
-                  <tr>
-                    <td
-                      style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}
-                    >
-                      <b style={{ paddingRight: 5 }}>Address:</b> Benjamin
-                      Constant St, 72
-                    </td>
-                  </tr>
-                  <tr>
-                    <td
-                      style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}
-                    >
-                      <b style={{ paddingRight: 5 }}>Swift Code:</b> BRASBRRJCTA
-                    </td>
-                  </tr>
-                  <tr>
-                    <td
-                      style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}
-                    >
-                      <b style={{ paddingRight: 5 }}>IBAN:</b>{" "}
-                      BR6400000000026940001614410C1
-                    </td>
-                  </tr>
-                  <tr>
-                    <td
-                      style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}
-                    >
-                      <b style={{ paddingRight: 5 }}>Branch's number:</b> 2694-8
-                    </td>
-                  </tr>
-                  <tr>
-                    <td
-                      style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}
-                    >
-                      <b style={{ paddingRight: 5 }}>Account number:</b>{" "}
-                      161441-X
-                    </td>
-                  </tr>
-                  <tr>
-                    <td
-                      style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}
-                    >
-                      <b style={{ paddingRight: 5 }}>Account name:</b> SUL TRADE
-                      AGENCIAMENTOS MARITIMOS LTDA-ME
-                    </td>
-                  </tr>
-                  <tr>
-                    <td
-                      style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}
-                    >
-                      <b style={{ paddingRight: 5 }}>Phone:</b> +55 53 3235 3500
-                    </td>
-                  </tr>
-                  <tr>
-                    <td
-                      style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}
-                    >
-                      <b style={{ paddingRight: 5 }}>CNPJ:</b>{" "}
-                      10.432.546/0001-75
-                    </td>
-                  </tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Bank's name:</b> Banco Santander
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Branch's name:</b> Rio Grande
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>SWIFT code:</b> BSCHBRSPXXX
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>IBAN:</b> BR290400888032720130031839C1
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Branch's number:</b> 3272
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Account number:</b> 130031839
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Sender’s correspondent:</b> Standard Chartered Bank
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Sender’s correspondent - SWIFT:</b> SCBLUS33XXX
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Account name:</b> SUL TRADE
+                    AGENCIAMENTOS MARITIMOS LTDA-ME
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Address:</b> 161 Andrade Neves Street
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Phone:</b> +55 53 3235 3500
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>CNPJ:</b> 10.432.546/0001-75
+                  </td>
+                </tr>
                 </table>
                 {/*
                             <div><span className='pdfTitle'>Bank's name:</span> <span>Banco do Brasil S/A</span></div>
@@ -6803,59 +6787,66 @@ class AddOsOrcamento extends Component {
             </h5>
             <table style={{ width: "80%", marginLeft: "5%" }}>
               <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Bank's name:</b> Banco do
-                  Brasil
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Branch's name:</b> Rio Grande
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Address:</b> Benjamin Constant
-                  St, 72
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Swift Code:</b> BRASBRRJCTA
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>IBAN:</b>{" "}
-                  BR6400000000026940001614410C1
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Branch's number:</b> 2694-8
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Account number:</b> 161441-X
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Account name:</b> SUL TRADE
-                  AGENCIAMENTOS MARITIMOS LTDA-ME
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Phone:</b> +55 53 3235 3500
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>CNPJ:</b> 10.432.546/0001-75
-                </td>
-              </tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Bank's name:</b> Banco Santander
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Branch's name:</b> Rio Grande
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>SWIFT code:</b> BSCHBRSPXXX
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>IBAN:</b> BR290400888032720130031839C1
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Branch's number:</b> 3272
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Account number:</b> 130031839
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Sender’s correspondent:</b> Standard Chartered Bank
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Sender’s correspondent - SWIFT:</b> SCBLUS33XXX
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Account name:</b> SUL TRADE
+                    AGENCIAMENTOS MARITIMOS LTDA-ME
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Address:</b> 161 Andrade Neves Street
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Phone:</b> +55 53 3235 3500
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>CNPJ:</b> 10.432.546/0001-75
+                  </td>
+                </tr>
             </table>
           </div>
         );
@@ -7498,59 +7489,66 @@ class AddOsOrcamento extends Component {
             </h5>
             <table style={{ width: "80%", marginLeft: "5%" }}>
               <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Bank's name:</b> Banco do
-                  Brasil
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Branch's name:</b> Rio Grande
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Address:</b> Benjamin Constant
-                  St, 72
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Swift Code:</b> BRASBRRJCTA
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>IBAN:</b>{" "}
-                  BR6400000000026940001614410C1
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Branch's number:</b> 2694-8
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Account number:</b> 161441-X
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Account name:</b> SUL TRADE
-                  AGENCIAMENTOS MARITIMOS LTDA-ME
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>Phone:</b> +55 53 3235 3500
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                  <b style={{ paddingRight: 5 }}>CNPJ:</b> 10.432.546/0001-75
-                </td>
-              </tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Bank's name:</b> Banco Santander
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Branch's name:</b> Rio Grande
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>SWIFT code:</b> BSCHBRSPXXX
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>IBAN:</b> BR290400888032720130031839C1
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Branch's number:</b> 3272
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Account number:</b> 130031839
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Sender’s correspondent:</b> Standard Chartered Bank
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Sender’s correspondent - SWIFT:</b> SCBLUS33XXX
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Account name:</b> SUL TRADE
+                    AGENCIAMENTOS MARITIMOS LTDA-ME
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Address:</b> 161 Andrade Neves Street
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Phone:</b> +55 53 3235 3500
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>CNPJ:</b> 10.432.546/0001-75
+                  </td>
+                </tr>
             </table>
           </div>
         );

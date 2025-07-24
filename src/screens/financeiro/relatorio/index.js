@@ -1739,8 +1739,7 @@ class Relatorio extends Component {
               <table style={{ width: "80%", marginLeft: "5%" }}>
                 <tr>
                   <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                    <b style={{ paddingRight: 5 }}>Bank's name:</b> Banco do
-                    Brasil
+                    <b style={{ paddingRight: 5 }}>Bank's name:</b> Banco Santander
                   </td>
                 </tr>
                 <tr>
@@ -1750,35 +1749,43 @@ class Relatorio extends Component {
                 </tr>
                 <tr>
                   <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                    <b style={{ paddingRight: 5 }}>Address:</b> Benjamin
-                    Constant St, 72
+                    <b style={{ paddingRight: 5 }}>SWIFT code:</b> BSCHBRSPXXX
                   </td>
                 </tr>
                 <tr>
                   <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                    <b style={{ paddingRight: 5 }}>Swift Code:</b> BRASBRRJCTA
+                    <b style={{ paddingRight: 5 }}>IBAN:</b> BR290400888032720130031839C1
                   </td>
                 </tr>
                 <tr>
                   <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                    <b style={{ paddingRight: 5 }}>IBAN:</b>{" "}
-                    BR6400000000026940001614410C1
+                    <b style={{ paddingRight: 5 }}>Branch's number:</b> 3272
                   </td>
                 </tr>
                 <tr>
                   <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                    <b style={{ paddingRight: 5 }}>Branch's number:</b> 2694-8
+                    <b style={{ paddingRight: 5 }}>Account number:</b> 130031839
                   </td>
                 </tr>
                 <tr>
                   <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                    <b style={{ paddingRight: 5 }}>Account number:</b> 161441-X
+                    <b style={{ paddingRight: 5 }}>Sender’s correspondent:</b> Standard Chartered Bank
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Sender’s correspondent - SWIFT:</b> SCBLUS33XXX
                   </td>
                 </tr>
                 <tr>
                   <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
                     <b style={{ paddingRight: 5 }}>Account name:</b> SUL TRADE
                     AGENCIAMENTOS MARITIMOS LTDA-ME
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                    <b style={{ paddingRight: 5 }}>Address:</b> 161 Andrade Neves Street
                   </td>
                 </tr>
                 <tr>
