@@ -4137,7 +4137,7 @@ class AddOsOrcamento extends Component {
                 </tr>
                 <tr>
                   <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                    <b style={{ paddingRight: 5 }}>IBAN:</b> BR290400888032720130031839C1
+                    <b style={{ paddingRight: 5 }}>IBAN:</b> BR8290400888032720130031839C1
                   </td>
                 </tr>
                 <tr>
@@ -6803,7 +6803,7 @@ class AddOsOrcamento extends Component {
                 </tr>
                 <tr>
                   <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                    <b style={{ paddingRight: 5 }}>IBAN:</b> BR290400888032720130031839C1
+                    <b style={{ paddingRight: 5 }}>IBAN:</b> BR8290400888032720130031839C1
                   </td>
                 </tr>
                 <tr>
@@ -7505,7 +7505,7 @@ class AddOsOrcamento extends Component {
                 </tr>
                 <tr>
                   <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
-                    <b style={{ paddingRight: 5 }}>IBAN:</b> BR290400888032720130031839C1
+                    <b style={{ paddingRight: 5 }}>IBAN:</b> BR8290400888032720130031839C1
                   </td>
                 </tr>
                 <tr>
