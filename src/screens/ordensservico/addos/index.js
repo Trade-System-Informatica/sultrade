@@ -8360,21 +8360,44 @@ class AddOS extends Component {
 
   render() {
     const validations = [];
-    validations.push(this.state.abertura);  
-    validations.push(this.state.chegada);
-    validations.push(this.state.cliente);
-    validations.push(this.state.navio);
-    validations.push(this.state.operador);
-    validations.push(this.state.tipoServico);
-    validations.push(this.state.empresa);
-    validations.push(
-      this.state.roe && this.state.roe == parseFloat(this.state.roe)
-    );
-    validations.push(!this.state.bloqueado);
+    const validationFields = [
+      { name: 'abertura', value: this.state.abertura },
+      { name: 'chegada', value: this.state.chegada },
+      { name: 'cliente', value: this.state.cliente },
+      { name: 'navio', value: this.state.navio },
+      { name: 'operador', value: this.state.operador },
+      { name: 'tipoServico', value: this.state.tipoServico },
+      { name: 'empresa', value: this.state.empresa },
+      { name: 'roe', value: this.state.roe && this.state.roe == parseFloat(this.state.roe) },
+      { name: 'bloqueado', value: !this.state.bloqueado }
+    ];
+
+    validationFields.forEach(field => {
+      validations.push(field.value);
+    });
+
+    // Validação específica para relatórios - ignora o campo bloqueado
+    const validationsForReports = [];
+    const validationFieldsForReports = [
+      { name: 'abertura', value: this.state.abertura },
+      { name: 'chegada', value: this.state.chegada },
+      { name: 'cliente', value: this.state.cliente },
+      { name: 'navio', value: this.state.navio },
+      { name: 'operador', value: this.state.operador },
+      { name: 'tipoServico', value: this.state.tipoServico },
+      { name: 'empresa', value: this.state.empresa },
+      { name: 'roe', value: this.state.roe && this.state.roe == parseFloat(this.state.roe) }
+      // bloqueado não é incluído aqui para permitir relatórios mesmo com usuário sem permissão de edição
+    ];
+
+    validationFieldsForReports.forEach(field => {
+      validationsForReports.push(field.value);
+    });
 
     const validDateCheck = this.validateDates();
 
     const validForm = validations.reduce((t, a) => t && a) && validDateCheck;
+    const validFormForReports = validationsForReports.reduce((t, a) => t && a) && validDateCheck;
 
     const validationsContabiliza = [];
     validationsContabiliza.push(this.state.meioPagamento);
@@ -12482,7 +12505,7 @@ class AddOS extends Component {
                         <button
                           className="btn btn-danger"
                           onClick={() =>
-                            this.CloseToReal(this.state.os.codigo, validForm, this.state.selectedEvents)
+                            this.CloseToReal(this.state.os.codigo, validFormForReports, this.state.selectedEvents)
                           }
                         >
                           {this.state.selectedEvents && this.state.selectedEvents.length > 0 
@@ -12494,7 +12517,7 @@ class AddOS extends Component {
                         <button
                           className="btn btn-danger"
                           onClick={() =>
-                            this.CommercialInvoice(this.state.os.codigo, validForm)
+                            this.CommercialInvoice(this.state.os.codigo, validFormForReports)
                           }
                         >
                           Commercial Invoice
@@ -12514,7 +12537,7 @@ class AddOS extends Component {
                               onClick={() =>
                                 this.RelatorioVoucher(
                                   this.state.os.codigo,
-                                  validForm
+                                  validFormForReports
                                 )
                               }
                             >
@@ -12527,7 +12550,7 @@ class AddOS extends Component {
                               onClick={() =>
                                 this.CapaVoucher(
                                   this.state.os.codigo,
-                                  validForm
+                                  validFormForReports
                                 )
                               }
                             >
@@ -12540,7 +12563,7 @@ class AddOS extends Component {
                               onClick={() =>
                                 this.FaturamentoCusteio(
                                   this.state.os.codigo,
-                                  validForm
+                                  validFormForReports
                                 )
                               }
                             >
