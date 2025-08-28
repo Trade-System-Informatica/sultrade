@@ -22,7 +22,7 @@ const estadoInicial = {
     os: [],
     osPesquisa: [],
     pesquisa: "",
-    tipoPesquisa: 1,
+    tipoPesquisa: 2,
     situacao: 2,
 
     pesquisaTimer: 0,
