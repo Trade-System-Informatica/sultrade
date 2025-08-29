@@ -1350,7 +1350,11 @@ class AddEvento extends Component {
                     <Redirect to={'/'} />
                 }
                 {this.state.recarregaPagina &&
-                    <Redirect to={{ pathname: '/ordensservico/addevento/0', state: { ... this.props.location.state, evento: {} } }} />
+                    <>
+                        <Redirect to={{ pathname: '/ordensservico/addevento/0', state: { ... this.props.location.state, evento: {} } }} />
+                        {window.location.reload()}
+                    </>
+
                 }
                 {this.state.redirectOS &&
                     <Redirect to={{ pathname: `/ordensservico/addos/${this.props.location?.state?.os?.Chave}`, state: { os: this.props?.location?.state?.os } }} />
