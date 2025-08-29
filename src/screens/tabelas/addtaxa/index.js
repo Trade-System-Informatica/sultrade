@@ -291,7 +291,8 @@ class AddTaxa extends Component {
             async res => {
                 console.log(res);
                 console.log(res.data);
-                window.location.reload();
+                // Navigate back to taxas list instead of reloading
+                this.setState({ redirect: true });
             },
             async res => await console.log(`Erro: ${res.data}`)
         )

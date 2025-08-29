@@ -101,6 +101,18 @@ class CategoriasDocumentos extends Component {
         })
     }
 
+    refreshData = async () => {
+        await this.setState({ loading: true });
+        
+        // Re-fetch only the categorias data
+        await this.setState({
+            categorias: await loader.getBody('getCategoriasDocumentos.php', { empresa: this.state.usuarioLogado.empresa }),
+            loading: false,
+            deleteCategoria: false,
+            modalItemAberto: false,
+        });
+    }
+
     deleteCategoria = async (id, nome) => {
         this.setState({ deleteCategoria: true })
         confirmAlert({
@@ -134,14 +146,18 @@ class CategoriasDocumentos extends Component {
                                                 if (response.data == "true" || response.data == true) {
                                                     await loader.salvaLogs('tipos_docto_categorias', this.state.usuarioLogado.codigo, null, "Exclusão", id);
 
-                                                    window.location.reload();
+                                                    // Re-fetch data instead of reloading page
+                                                    await this.refreshData();
+                                                    onClose(); // Close modal after successful deletion
                                                 } else {
                                                     //alert('Error')
+                                                    onClose(); // Close modal even if there's an error
                                                 }
                                             },
                                         )
                                 } catch {
                                     console.log('Erro de conexão com o banco')
+                                    onClose(); // Close modal on connection error
                                 }
                             }}
 

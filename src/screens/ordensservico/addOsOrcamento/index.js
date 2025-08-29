@@ -602,6 +602,60 @@ class AddOsOrcamento extends Component {
     }));
   };
 
+  refreshDocuments = async () => {
+    await this.setState({ loading: true });
+    
+    try {
+      // Re-fetch documents for this OS
+      await this.getDocumentos();
+      
+      await this.setState({
+        loading: false,
+        documentoModalAberto: false, // Close modal after refresh
+      });
+    } catch (error) {
+      console.error("Erro ao recarregar documentos:", error);
+      await this.setState({ loading: false });
+    }
+  };
+
+  refreshEvents = async () => {
+    await this.setState({ loading: true });
+    
+    try {
+      // Re-fetch events for this OS
+      await this.getServicosItens();
+      
+      await this.setState({ 
+        loading: false,
+        eventoModalAberto: false, // Close modal after refresh
+        ordemModificada: false, // Reset order modification flag
+      });
+    } catch (error) {
+      console.error("Erro ao recarregar eventos:", error);
+      await this.setState({ loading: false });
+    }
+  };
+
+  refreshData = async () => {
+    await this.setState({ loading: true });
+    
+    try {
+      // Re-fetch OS data
+      const os = await loader.getOne("getOSUma.php", null, null, {
+        chave_os: this.state.chave,
+      });
+      
+      await this.setState({ 
+        os,
+        loading: false,
+      });
+    } catch (error) {
+      console.error("Erro ao recarregar dados:", error);
+      await this.setState({ loading: false });
+    }
+  };
+
   calculaTotal = () => {
     let eventosTotal = 0;
 
@@ -672,7 +726,8 @@ class AddOsOrcamento extends Component {
       console.log("Ordem dos eventos salva com sucesso.");
       
       this.setState({ loading: false });
-      window.location.reload();
+      // Re-fetch events instead of reloading page
+      await this.refreshEvents();
     } catch (error) {
       console.error("Erro ao salvar ordem dos eventos: ", error);
       this.setState({ loading: false });
@@ -2115,12 +2170,10 @@ class AddOsOrcamento extends Component {
       })
       .then(
         async (response) => {
-          const todosEventos = [...this.state.todosEventos, ...response.data];
+          // Replace arrays instead of adding to existing ones
+          const todosEventos = response.data;
 
-          const eventos = [
-            ...this.state.eventos,
-            ...response.data.filter((e) => e.cancelada != 1),
-          ];
+          const eventos = response.data.filter((e) => e.cancelada != 1);
 
           if (eventos.find((evento) => evento.Moeda == 0)) {
             this.setState({
@@ -2147,7 +2200,8 @@ class AddOsOrcamento extends Component {
       })
       .then(
         async (response) => {
-          const documentos = [...this.state.documentos, ...response.data];
+          // Replace documents instead of adding to existing ones
+          const documentos = response.data;
           await this.setState({ documentos: documentos });
         },
         (response) => {
@@ -3003,7 +3057,8 @@ class AddOsOrcamento extends Component {
                   : false,
               });
               if (reload) {
-                window.location.reload();
+                // Re-fetch data instead of reloading page
+                await this.refreshData();
               }
             } else {
               await alert(`Erro ${JSON.stringify(res)}`);
@@ -7682,7 +7737,8 @@ class AddOsOrcamento extends Component {
               res.data[0].chave
             );
 
-            window.location.reload();
+            // Re-fetch documents instead of reloading page
+            await this.refreshDocuments();
           },
           async (res) => await console.log(`Erro: ${res}`)
         );
@@ -7708,7 +7764,8 @@ class AddOsOrcamento extends Component {
                 this.state.documentoChave
               );
 
-              window.location.reload();
+              // Re-fetch documents instead of reloading page
+              await this.refreshDocuments();
             },
             async (res) => await console.log(`Erro: ${res}`)
           );
@@ -7729,7 +7786,8 @@ class AddOsOrcamento extends Component {
                 this.state.documentoChave
               );
 
-              window.location.reload();
+              // Re-fetch documents instead of reloading page
+              await this.refreshDocuments();
             },
             async (res) => await console.log(`Erro: ${res}`)
           );
@@ -7877,7 +7935,8 @@ class AddOsOrcamento extends Component {
               res.data[0].chave
             );
 
-            window.location.reload();
+            // Re-fetch events instead of reloading page
+            await this.refreshEvents();
           },
           async (res) => await console.log(`Erro: ${res.data}`)
         );
@@ -7920,7 +7979,8 @@ class AddOsOrcamento extends Component {
                 `EVENTO: ${this.state.descricao}`
               );
 
-              window.location.reload();
+              // Re-fetch events instead of reloading page
+              await this.refreshEvents();
             } else {
               await alert(`Erro ${JSON.stringify(res)}`);
             }
@@ -8009,7 +8069,7 @@ class AddOsOrcamento extends Component {
                         await this.setState({
                           redirectAfterDelOrcamento: true,
                         });
-                        window.location.reload();
+                        // Use redirect instead of reload
                       }
                     },
                     async (response) => {
@@ -8049,7 +8109,8 @@ class AddOsOrcamento extends Component {
           await console.log(`FOI: ${res.data}`);
 
           await this.setState({ redirectAfterInsertEventsInOs: true });
-          window.location.reload();
+          // Re-fetch events instead of reloading page
+          await this.refreshEvents();
         },
         async (res) => await console.log(`Erro: ${res.data}`)
       );
@@ -8087,7 +8148,7 @@ class AddOsOrcamento extends Component {
             });
             if (reload) {
               await this.setState({ redirectToNewOs: reload });
-              window.location.reload();
+              // Use redirect instead of reload
             }
           } else {
             await alert(`Erro ${JSON.stringify(res)}`);
@@ -8228,18 +8289,15 @@ class AddOsOrcamento extends Component {
         {this.state.redirect && <Redirect to={"/"} />}
 
         {this.state.recarregaPagina && (
-          <>
-            <Redirect
-              to={{
-                pathname: `/ordensservico/addOsOrcamento/${this.state.chave}`,
-                state: {
-                  ...this.props.location.state,
-                  os: { ...this.state.os },
-                },
-              }}
-            />
-            {window.location.reload()}
-          </>
+          <Redirect
+            to={{
+              pathname: `/ordensservico/addOsOrcamento/${this.state.chave}`,
+              state: {
+                ...this.props.location.state,
+                os: { ...this.state.os },
+              },
+            }}
+          />
         )}
 
         {this.state.redirectToNewOs && (

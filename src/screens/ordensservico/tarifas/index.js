@@ -103,6 +103,16 @@ class Tarifas extends Component {
         })
     }
 
+    refreshData = async () => {
+        await this.setState({ loading: true });
+        
+        // Re-fetch tarifas data
+        await this.setState({
+            tarifas: await loader.getBase('getTarifas.php'),
+            loading: false,
+        });
+    }
+
     erroApi = async (res) => {
         console.log(res)
         await this.setState({ redirect: true })
@@ -254,7 +264,8 @@ class Tarifas extends Component {
           console.log("Descrição salva com sucesso.");
           
           this.setState({ loading: false, descricaoModificada: false });
-          window.location.reload();
+          // Re-fetch data instead of reloading page
+          await this.refreshData();
         } catch (error) {
           console.error("Erro ao salvar descrição: ", error);
           this.setState({ loading: false });

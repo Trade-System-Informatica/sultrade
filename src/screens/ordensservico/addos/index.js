@@ -643,6 +643,103 @@ class AddOS extends Component {
     }));
   };
 
+  // Refresh methods to replace window.location.reload()
+  refreshDocuments = async () => {
+    await this.setState({ loading: true });
+    
+    try {
+      // Re-fetch documents for this OS
+      const documentosResponse = await apiEmployee.post(`getDocumentosOS.php`, {
+        token: true,
+        chave_os: this.state.chave,
+      });
+      
+      const documentos = documentosResponse.data;
+      
+      await this.setState({ 
+        documentos,
+        loading: false,
+        documentoModalAberto: false, // Close modal after refresh
+      });
+    } catch (error) {
+      console.error("Erro ao recarregar documentos:", error);
+      await this.setState({ loading: false });
+    }
+  };
+
+  refreshEvents = async () => {
+    await this.setState({ loading: true });
+    
+    try {
+      // Re-fetch events for this OS
+      const eventosResponse = await apiEmployee.post(`getServicosItensOs.php`, {
+        token: true,
+        chave_os: this.state.chave,
+      });
+      
+      const todosEventos = eventosResponse.data;
+      const eventos = eventosResponse.data.filter((e) => e.cancelada != 1);
+      
+      await this.setState({ 
+        eventos,
+        loading: false,
+        eventoModalAberto: false, // Close modal after refresh
+        ordemModificada: false, // Reset order modification flag
+      });
+    } catch (error) {
+      console.error("Erro ao recarregar eventos:", error);
+      await this.setState({ loading: false });
+    }
+  };
+
+  refreshOSData = async () => {
+    await this.setState({ loading: true });
+    
+    try {
+      // Re-fetch all OS data
+      const os = await loader.getOne("getOSUma.php", null, null, {
+        chave_os: this.state.chave,
+      });
+      
+      const contaOs = await loader.getOne("getContaOS.php", null, null, {
+        chave_os: this.state.chave,
+      });
+
+      // Re-fetch events
+      const eventosResponse = await apiEmployee.post(`getServicosItensOs.php`, {
+        token: true,
+        chave_os: this.state.chave,
+      });
+      
+      const todosEventos = eventosResponse.data;
+      const eventos = eventosResponse.data.filter((e) => e.cancelada != 1);
+
+      // Re-fetch documents
+      const documentosResponse = await apiEmployee.post(`getDocumentosOS.php`, {
+        token: true,
+        chave_os: this.state.chave,
+      });
+      
+      const documentos = documentosResponse.data;
+      
+      await this.setState({ 
+        os,
+        contaOs,
+        eventos,
+        todosEventos,
+        documentos,
+        loading: false,
+      });
+      
+      // Recalculate totals
+      await this.calculaTotal();
+      
+    } catch (error) {
+      console.error("Erro ao recarregar dados da OS:", error);
+      await this.setState({ loading: false });
+    }
+  };
+
   calculaTotal = () => {
     let eventosTotal = 0;
 
@@ -2763,7 +2860,7 @@ class AddOS extends Component {
     if (validForm) {
       this.salvarOS(validForm);
     } else {
-      this.setState({ recarregaPagina: true });
+      await this.refreshOSData();
     }
   };
 
@@ -2981,7 +3078,9 @@ class AddOS extends Component {
               );
 
               await this.setState({ loading: false, bloqueado: false });
-              this.setState({ recarregaPagina: reload });
+              if (reload) {
+                await this.refreshOSData();
+              }
             } else {
               console.log(res.data);
             }
@@ -3104,10 +3203,12 @@ class AddOS extends Component {
                 });
                 
                 if (reload) {
-                  window.location.reload();
+                  // Re-fetch OS data instead of reloading page
+                  await this.refreshOSData();
                 }
               } else if (reload) {
-                window.location.reload();
+                // Re-fetch OS data instead of reloading page
+                await this.refreshOSData();
               }
             } else {
               await alert(`Erro ${JSON.stringify(res)}`);
@@ -7949,7 +8050,8 @@ class AddOS extends Component {
               res.data[0].chave
             );
 
-            window.location.reload();
+            // Re-fetch documents instead of reloading page
+            await this.refreshDocuments();
           },
           async (res) => await console.log(`Erro: ${res}`)
         );
@@ -7975,7 +8077,8 @@ class AddOS extends Component {
                 this.state.documentoChave
               );
 
-              window.location.reload();
+              // Re-fetch documents instead of reloading page
+              await this.refreshDocuments();
             },
             async (res) => await console.log(`Erro: ${res}`)
           );
@@ -7996,7 +8099,8 @@ class AddOS extends Component {
                 this.state.documentoChave
               );
 
-              window.location.reload();
+              // Re-fetch documents instead of reloading page
+              await this.refreshDocuments();
             },
             async (res) => await console.log(`Erro: ${res}`)
           );
@@ -8046,7 +8150,8 @@ class AddOS extends Component {
       console.log("Ordem dos eventos salva com sucesso.");
       
       this.setState({ loading: false });
-      window.location.reload();
+      // Re-fetch events instead of reloading page
+      await this.refreshEvents();
     } catch (error) {
       console.error("Erro ao salvar ordem dos eventos: ", error);
       this.setState({ loading: false });
@@ -8173,7 +8278,8 @@ class AddOS extends Component {
               res.data[0].chave
             );
 
-            window.location.reload();
+            // Re-fetch events instead of reloading page
+            await this.refreshEvents();
           },
           async (res) => await console.log(`Erro: ${res.data}`)
         );
@@ -8215,12 +8321,13 @@ class AddOS extends Component {
                 "os_servicos_itens",
                 this.state.usuarioLogado.codigo,
                 this.state.dadosIniciaisSol,
-                this.state.dadosFinaisSol,
+                this.state.dadosFinaisDoc,
                 this.state.eventoChave,
                 `EVENTO: ${this.state.descricao}`
               );
 
-              window.location.reload();
+              // Re-fetch events instead of reloading page
+              await this.refreshEvents();
             } else {
               await alert(`Erro ${JSON.stringify(res)}`);
             }
@@ -8255,7 +8362,7 @@ class AddOS extends Component {
           if (res.data === true) {
             if (reload) {
               await this.setState({ redirectReturnOrcamento: reload });
-              window.location.reload();
+              // Use redirect instead of reload - will be handled by React Router
             }
           } else {
             await alert(`Erro ${JSON.stringify(res)}`);
@@ -8514,18 +8621,15 @@ class AddOS extends Component {
         {this.state.redirect && <Redirect to={"/"} />}
 
         {this.state.recarregaPagina && (
-          <>
-            <Redirect
-              to={{
-                pathname: `/ordensservico/addos/${this.state.chave}`,
-                state: {
-                  ...this.props.location.state,
-                  os: { ...this.state.os },
-                },
-              }}
-            />
-            {window.location.reload()}
-          </>
+          <Redirect
+            to={{
+              pathname: `/ordensservico/addos/${this.state.chave}`,
+              state: {
+                ...this.props.location.state,
+                os: { ...this.state.os },
+              },
+            }}
+          />
         )}
         {this.state.redirectAfterInsertEventsInOs && (
                   <>
@@ -8537,7 +8641,6 @@ class AddOS extends Component {
                   </>
         )}
         {this.state.redirectReturnOrcamento && (
-          <>
           <Redirect
             to={{
               pathname: `/ordensservico/addOsOrcamento/${this.state.chave}`,
@@ -8547,8 +8650,6 @@ class AddOS extends Component {
               },
             }}
           />
-          {window.location.reload()}
-        </>
         )}
         {this.state.redirectEventos && (
           <>

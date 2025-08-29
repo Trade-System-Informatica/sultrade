@@ -96,6 +96,16 @@ class TiposDocumentos extends Component {
         })
     }
 
+    refreshData = async () => {
+        await this.setState({ loading: true });
+        
+        // Re-fetch only the tipos documentos data
+        await this.setState({
+            tiposDocumentos: await loader.getBase('getTiposDocumento.php'),
+            loading: false,
+        });
+    }
+
     deleteTipoDocumento = async (id, nome) => {
         this.setState({ deleteTipoDocumento: true })
         confirmAlert({
@@ -118,7 +128,7 @@ class TiposDocumentos extends Component {
                         <button
                             style={{ marginRight: 5 }}
                             className="btn btn-success w-25"
-                            onClick={() => this.teste556(id)}
+                            onClick={() => { this.teste556(id); onClose(); }}
 
                         >
                             Sim
@@ -141,7 +151,8 @@ class TiposDocumentos extends Component {
                         if (response.data == "true" || response.data == true) {
                             await loader.salvaLogs('tipos_docto', this.state.usuarioLogado.codigo, null, "Exclusão", id2);
 
-                            window.location.reload();
+                            // Re-fetch data instead of reloading page
+                            await this.refreshData();
                         } else {
                             //alert('Error')
                         }
