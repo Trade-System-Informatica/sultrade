@@ -325,6 +325,22 @@ class AddEvento extends Component {
         
     }
 
+    refreshDocuments = async () => {
+        await this.setState({ loading: true });
+        
+        try {
+            await this.getDocumentos();
+
+            await this.setState({ 
+                loading: false,
+                documentoModalAberto: false, // Close modal after refresh
+            });
+        } catch (error) {
+            console.error("Erro ao recarregar documentos:", error);
+            await this.setState({ loading: false });
+        }
+    };
+
     carregaTiposAcessos = async () => {
         await apiEmployee.post(`getTiposAcessos.php`, {
             token: true,
@@ -743,7 +759,8 @@ class AddEvento extends Component {
                 tipo: this.state.documentoTipo,
             }).then(
                 async res => {
-                    window.location.reload();
+                    // Re-fetch documents instead of reloading page
+                    await this.refreshDocuments();
                 },
                 async res => await console.log(`Erro: ${res}`)
             )
@@ -759,7 +776,8 @@ class AddEvento extends Component {
                     caminho: this.state.documentoCaminho
                 }).then(
                     async res => {
-                        window.location.reload();
+                        // Re-fetch documents instead of reloading page
+                        await this.refreshDocuments();
 
                     },
                     async res => await console.log(`Erro: ${res}`)
@@ -771,7 +789,8 @@ class AddEvento extends Component {
                     tipo: this.state.documentoTipo,
                 }).then(
                     async res => {
-                        window.location.reload();
+                        // Re-fetch documents instead of reloading page
+                        await this.refreshDocuments();
                     },
                     async res => await console.log(`Erro: ${res}`)
                 )
@@ -1335,6 +1354,7 @@ class AddEvento extends Component {
                         <Redirect to={{ pathname: '/ordensservico/addevento/0', state: { ... this.props.location.state, evento: {} } }} />
                         {window.location.reload()}
                     </>
+
                 }
                 {this.state.redirectOS &&
                     <Redirect to={{ pathname: `/ordensservico/addos/${this.props.location?.state?.os?.Chave}`, state: { os: this.props?.location?.state?.os } }} />

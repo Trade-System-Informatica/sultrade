@@ -52,6 +52,7 @@ const estadoInicial = {
     offset: 0,
 
     descricaoModificada: false,
+    itensModificados: new Set(), // Track which items have been modified
     os: []
 }
 
@@ -115,6 +116,14 @@ class OsOrcamento extends Component {
             acessosPermissoes: await loader.testaAcesso(this.state.acessos, this.state.permissoes, this.state.usuarioLogado),
             loading: false
         })
+    }
+
+    refreshData = async () => {
+        // Re-fetch OS data - reset offset and replace data
+        await this.setState({ offset: 0 });
+        const os = await loader.getBase(`getOsOrcamento.php`, this.state.usuarioLogado.empresa, 201, 0);
+        
+        await this.setState({ os });
     }
 
     getOS = async () => {
@@ -265,7 +274,7 @@ class OsOrcamento extends Component {
         this.setState((prevState) => {
             const osAtualizados = prevState.os.map((osItem) => {
                 if (osItem.Chave === feed.Chave) {
-                    return { 
+                    return {
                         ...osItem,
                         chave: feed.Chave,
                         Descricao: novaDescricao 
@@ -276,7 +285,7 @@ class OsOrcamento extends Component {
 
             const osPesquisaAtualizados = prevState.osPesquisa.map((osItem) => {
                 if (osItem.Chave === feed.Chave) {
-                    return { 
+                    return {
                         ...osItem,
                         chave: feed.Chave,
                         Descricao: novaDescricao 
@@ -284,27 +293,35 @@ class OsOrcamento extends Component {
                 }
                 return osItem;
             });
+
+            // Add the item to modified items set
+            const newItensModificados = new Set(prevState.itensModificados);
+            newItensModificados.add(feed.Chave);
     
             return {
                 os: osAtualizados,
                 osPesquisa: osPesquisaAtualizados,
-                descricaoModificada: true, 
+                descricaoModificada: true,
+                itensModificados: newItensModificados,
             };
         });
-    };
+    };    salvarDescricao = async () => {
+        // Get all modified items from both os and osPesquisa arrays
+        const todosOsItens = [...this.state.os, ...this.state.osPesquisa];
+        
+        // Filter items that were actually modified
+        const itensParaSalvar = todosOsItens.filter((os) => 
+            this.state.itensModificados.has(os.Chave) && 
+            os.chave && 
+            os.Descricao !== undefined
+        );
 
-    salvarDescricao = async () => {
-        this.setState({ loading: true });
-
-        // Filtrando apenas os itens que foram modificados
-        const itensParaSalvar = this.state.os.filter((os) => os.chave && os.Descricao && this.state.descricaoModificada);
-
+        console.log("Itens modificados:", Array.from(this.state.itensModificados));
         console.log("Itens a serem salvos:", itensParaSalvar);
 
         // Verificar se há itens para salvar
         if (itensParaSalvar.length === 0) {
             console.log("Nenhuma descrição modificada para salvar.");
-            this.setState({ loading: false });
             return;
         }
       
@@ -319,11 +336,14 @@ class OsOrcamento extends Component {
           await Promise.all(promises);
           console.log("Descrição salva com sucesso.");
           
-          this.setState({ loading: false, descricaoModificada: false });
-          window.location.reload();
+          this.setState({ 
+            descricaoModificada: false,
+            itensModificados: new Set() // Clear modified items
+          });
+          // Re-fetch data instead of reloading page
+          await this.refreshData();
         } catch (error) {
           console.error("Erro ao salvar descrição: ", error);
-          this.setState({ loading: false });
         }
       };
 
@@ -926,13 +946,13 @@ class OsOrcamento extends Component {
                                         <div className='loadMore' onClick={async () => { await this.setState({ offset: this.state.load, load: this.state.load + 50 }); await this.getOS() }}>Carregar Mais...</div>
                                     </div>
                                 }
-                                {this.state.descricaoModificada && (
+                                {this.state.itensModificados.size > 0 && (
                                       <button className='salvarDescricao' onClick={this.salvarDescricao} disabled={this.state.loading}>
                                         {this.state.loading ? (
                                           "Salvando..."
                                         ) : (
                                           <>
-                                            <FontAwesomeIcon icon={faSave} /> Salvar Descrição
+                                            <FontAwesomeIcon icon={faSave} /> Salvar Descrição ({this.state.itensModificados.size})
                                           </>
                                         )}
                                       </button>

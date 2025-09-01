@@ -101,6 +101,16 @@ class Portos extends Component {
         })
     }
 
+    refreshData = async () => {
+        await this.setState({ loading: true });
+        
+        // Re-fetch only the portos data
+        await this.setState({
+            portos: await loader.getBase('getPortos.php'),
+            loading: false,
+        });
+    }
+
     deletePorto = async (id, nome) => {
         this.setState({deletePorto: true})
         confirmAlert({
@@ -123,7 +133,7 @@ class Portos extends Component {
                         <button
                             style={{ marginRight: 5 }}
                             className="btn btn-success w-25"
-                            onClick={() => this.teste556(id)}
+                            onClick={() => { this.teste556(id); onClose(); }}
 
                         >
                             Sim
@@ -146,7 +156,8 @@ class Portos extends Component {
                         if (response.data == "true" || response.data == true) {
                             await loader.salvaLogs('os_portos', this.state.usuarioLogado.codigo, null, "Exclusão", id2);
 
-                            window.location.reload();
+                            // Re-fetch data instead of reloading page
+                            await this.refreshData();
                         } else {
                             //alert('Error')
                         }

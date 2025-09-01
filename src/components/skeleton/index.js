@@ -1,15 +1,27 @@
 import React, {Component} from 'react'
-import Skeleton from 'react-loading-skeleton'
-
 import './styles.css'
 
 class ComponentSkeleton extends Component {
 
     render(){
+        const { 
+            size = 'normal', // 'small', 'normal', 'large'
+            variant = 'overlay', // 'overlay', 'inline'
+            color = 'primary', // 'primary', 'success', 'warning', 'danger', 'info'
+            text = 'Carregando...'
+        } = this.props;
+
+        const className = `loading-overlay ${variant} ${size} ${color}`;
+
         return (
-            <div className="skeleton-container row">
-                <div className="skeleton-title col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                    <Skeleton style={{alignItems: 'center', justifyContent: 'center'}} height={1200} width={'100%'} />
+            <div className={className}>
+                <div className="loading-container">
+                    <div className="circular-progress">
+                        <div className="spinner"></div>
+                    </div>
+                    <div className="loading-text">
+                        {text}
+                    </div>
                 </div>
             </div>
         )

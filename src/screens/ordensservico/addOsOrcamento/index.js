@@ -602,6 +602,48 @@ class AddOsOrcamento extends Component {
     }));
   };
 
+  refreshDocuments = async () => {
+    try {
+      // Re-fetch documents for this OS
+      await this.getDocumentos();
+      
+      await this.setState({
+        documentoModalAberto: false, // Close modal after refresh
+      });
+    } catch (error) {
+      console.error("Erro ao recarregar documentos:", error);
+    }
+  };
+
+  refreshEvents = async () => {
+    try {
+      // Re-fetch events for this OS
+      await this.getServicosItens();
+      
+      await this.setState({ 
+        eventoModalAberto: false, // Close modal after refresh
+        ordemModificada: false, // Reset order modification flag
+      });
+    } catch (error) {
+      console.error("Erro ao recarregar eventos:", error);
+    }
+  };
+
+  refreshData = async () => {
+    try {
+      // Re-fetch OS data
+      const os = await loader.getOne("getOSUma.php", null, null, {
+        chave_os: this.state.chave,
+      });
+      
+      await this.setState({ 
+        os,
+      });
+    } catch (error) {
+      console.error("Erro ao recarregar dados:", error);
+    }
+  };
+
   calculaTotal = () => {
     let eventosTotal = 0;
 
@@ -655,8 +697,6 @@ class AddOsOrcamento extends Component {
   };
 
   salvarOrdem = async () => {
-    this.setState({ loading: true });
-  
     // Mapear eventos e criar as requisições para salvar a ordem no backend
     const promises = this.state.eventos.map((evento, index) => {
       return apiEmployee.post(`updateServicoItemOrdem.php`, {
@@ -671,11 +711,10 @@ class AddOsOrcamento extends Component {
       await Promise.all(promises);
       console.log("Ordem dos eventos salva com sucesso.");
       
-      this.setState({ loading: false });
-      window.location.reload();
+      // Re-fetch events instead of reloading page
+      await this.refreshEvents();
     } catch (error) {
       console.error("Erro ao salvar ordem dos eventos: ", error);
-      this.setState({ loading: false });
     }
   };
 
@@ -2115,12 +2154,10 @@ class AddOsOrcamento extends Component {
       })
       .then(
         async (response) => {
-          const todosEventos = [...this.state.todosEventos, ...response.data];
+          // Replace arrays instead of adding to existing ones
+          const todosEventos = response.data;
 
-          const eventos = [
-            ...this.state.eventos,
-            ...response.data.filter((e) => e.cancelada != 1),
-          ];
+          const eventos = response.data.filter((e) => e.cancelada != 1);
 
           if (eventos.find((evento) => evento.Moeda == 0)) {
             this.setState({
@@ -2147,7 +2184,8 @@ class AddOsOrcamento extends Component {
       })
       .then(
         async (response) => {
-          const documentos = [...this.state.documentos, ...response.data];
+          // Replace documents instead of adding to existing ones
+          const documentos = response.data;
           await this.setState({ documentos: documentos });
         },
         (response) => {
@@ -2227,7 +2265,8 @@ class AddOsOrcamento extends Component {
                               item.chave
                             );
                           }
-                          document.location.reload();
+                          // Re-fetch events instead of reloading page
+                          await this.refreshEvents();
                         },
                         async (response) => {
                           this.erroApi(response);
@@ -2680,6 +2719,9 @@ class AddOsOrcamento extends Component {
         );
     };
 
+    // Refresh events after creating templates
+    await this.refreshEvents();
+
     if (validForm) {
       this.salvarOS(validForm);
     } else {
@@ -3003,7 +3045,8 @@ class AddOsOrcamento extends Component {
                   : false,
               });
               if (reload) {
-                window.location.reload();
+                // Re-fetch data instead of reloading page
+                await this.refreshData();
               }
             } else {
               await alert(`Erro ${JSON.stringify(res)}`);
@@ -3352,7 +3395,7 @@ class AddOsOrcamento extends Component {
 
   salvarCabecalho = async () => {
     this.setState({ ...util.cleanStates(this.state) });
-    await this.setState({ loading: true, cabecalhoModal: false });
+    await this.setState({ cabecalhoModal: false });
 
     const cabecalho = `{"company": "${this.state.company
       .replaceAll('"', "'")
@@ -3374,7 +3417,6 @@ class AddOsOrcamento extends Component {
         async (res) => {
           if (res.data === true) {
             //console.log(res.data);
-            await this.setState({ loading: false });
           } else {
             await alert(`Erro ${JSON.stringify(res)}`);
           }
@@ -7622,7 +7664,6 @@ class AddOsOrcamento extends Component {
   };
 
   enviaDocumento = async () => {
-    await this.setState({ loading: true });
     let documento = "";
     let format = "";
     let ext = "";
@@ -7682,7 +7723,8 @@ class AddOsOrcamento extends Component {
               res.data[0].chave
             );
 
-            window.location.reload();
+            // Re-fetch documents instead of reloading page
+            await this.refreshDocuments();
           },
           async (res) => await console.log(`Erro: ${res}`)
         );
@@ -7708,7 +7750,8 @@ class AddOsOrcamento extends Component {
                 this.state.documentoChave
               );
 
-              window.location.reload();
+              // Re-fetch documents instead of reloading page
+              await this.refreshDocuments();
             },
             async (res) => await console.log(`Erro: ${res}`)
           );
@@ -7729,7 +7772,8 @@ class AddOsOrcamento extends Component {
                 this.state.documentoChave
               );
 
-              window.location.reload();
+              // Re-fetch documents instead of reloading page
+              await this.refreshDocuments();
             },
             async (res) => await console.log(`Erro: ${res}`)
           );
@@ -7877,7 +7921,8 @@ class AddOsOrcamento extends Component {
               res.data[0].chave
             );
 
-            window.location.reload();
+            // Re-fetch events instead of reloading page
+            await this.refreshEvents();
           },
           async (res) => await console.log(`Erro: ${res.data}`)
         );
@@ -7920,7 +7965,8 @@ class AddOsOrcamento extends Component {
                 `EVENTO: ${this.state.descricao}`
               );
 
-              window.location.reload();
+              // Re-fetch events instead of reloading page
+              await this.refreshEvents();
             } else {
               await alert(`Erro ${JSON.stringify(res)}`);
             }
@@ -8009,7 +8055,7 @@ class AddOsOrcamento extends Component {
                         await this.setState({
                           redirectAfterDelOrcamento: true,
                         });
-                        window.location.reload();
+                        // Use redirect instead of reload
                       }
                     },
                     async (response) => {
@@ -8049,7 +8095,8 @@ class AddOsOrcamento extends Component {
           await console.log(`FOI: ${res.data}`);
 
           await this.setState({ redirectAfterInsertEventsInOs: true });
-          window.location.reload();
+          // Re-fetch events instead of reloading page
+          await this.refreshEvents();
         },
         async (res) => await console.log(`Erro: ${res.data}`)
       );
@@ -8087,7 +8134,7 @@ class AddOsOrcamento extends Component {
             });
             if (reload) {
               await this.setState({ redirectToNewOs: reload });
-              window.location.reload();
+              // Use redirect instead of reload
             }
           } else {
             await alert(`Erro ${JSON.stringify(res)}`);
