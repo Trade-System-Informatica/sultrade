@@ -792,10 +792,15 @@ class Relatorio extends Component {
                         }
                         return null;
                       })}
-                    <tr style={{ fontSize: 12 }}>
-                      <td colSpan={hasDiscount ? 6 : 5}></td>
-                      <td style={{ textAlign: "left" }}>TOTAL:</td>
-                      <td style={{}}>
+                    <tr style={{ fontSize: 13 }}>
+                      <td colSpan='6' style={{ fontWeight: "bold" }}>{"Total ->"}</td>
+                      <td
+                        style={{
+                          paddingRight: "15px",
+                          borderTop: "1px solid black",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
                         {this.state.moeda === 5 ? "R$" : "USD"}{" "}
                         {totalFDAPorGrupo.toLocaleString("pt-BR", {
                           minimumFractionDigits: 2,
@@ -803,7 +808,11 @@ class Relatorio extends Component {
                         })}
                       </td>
                       {hasDiscount && (
-                        <td style={{}}>
+                        <td style={{
+                          paddingRight: "15px",
+                          borderTop: "1px solid black",
+                          whiteSpace: "nowrap",
+                        }}>
                           {this.state.moeda === 5 ? "R$" : "USD"}{" "}
                           {totalDiscountPorGrupo.toLocaleString("pt-BR", {
                             minimumFractionDigits: 2,
@@ -811,14 +820,22 @@ class Relatorio extends Component {
                           })}
                         </td>
                       )}
-                      <td style={{}}>
+                      <td style={{
+                        paddingRight: "15px",
+                        borderTop: "1px solid black",
+                        whiteSpace: "nowrap",
+                      }}>
                         {this.state.moeda === 5 ? "R$" : "USD"}{" "}
                         {totalReceivedPorGrupo.toLocaleString("pt-BR", {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
                       </td>
-                      <td style={{}}>
+                      <td style={{
+                        paddingRight: "15px",
+                        borderTop: "1px solid black",
+                        whiteSpace: "nowrap",
+                      }}>
                         {this.state.moeda === 5 ? "R$" : "USD"}{" "}
                         {totalBalancePorGrupo.toLocaleString("pt-BR", {
                           minimumFractionDigits: 2,
@@ -832,9 +849,13 @@ class Relatorio extends Component {
             }
             return null;
           })}
+
+          <br></br>
+          <div style={{ border: "1px solid #dee2e6" }}></div>
+          <br></br>
           
           {/* Tabela de totais gerais igual ao PDF original - mesmo valor do primeiro total */}
-          <table style={{ width: "100%", marginTop: "20px" }}>
+          <table className="totalTablePDF">
             <tr style={{ fontSize: 13 }}>
               <th></th>
               <th style={{ borderBottom: "1px solid black" }}>FDA</th>
