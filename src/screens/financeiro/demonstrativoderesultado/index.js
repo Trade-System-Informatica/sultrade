@@ -12,7 +12,7 @@ import { apiEmployee } from '../../../services/apiamrg'
 import loader from '../../../classes/loader'
 import moment from 'moment'
 import Select from 'react-select';
-import { Skeleton } from '@mui/material';
+import Skeleton from '../../../components/skeleton'
 import XLSX from "xlsx-js-style";
 import apiHeroku from '../../../services/apiHeroku'
 

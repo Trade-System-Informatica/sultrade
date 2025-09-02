@@ -17,7 +17,7 @@ import { confirmAlert } from 'react-confirm-alert'
 import ModalItem from '../../../components/modalItem'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import ModalLogs from '../../../components/modalLogs'
-import { Skeleton } from '@mui/material'
+import Skeleton from '../../../components/skeleton'
 import util from '../../../classes/util'
 
 const estadoInicial = {

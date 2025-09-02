@@ -11,7 +11,7 @@ import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import { apiEmployee } from '../../../services/apiamrg'
 import ModalLogs from '../../../components/modalLogs'
-import { Skeleton } from '@mui/material'
+import Skeleton from '../../../components/skeleton'
 const estadoInicial = {
     porto: 0,
     thumb: [],

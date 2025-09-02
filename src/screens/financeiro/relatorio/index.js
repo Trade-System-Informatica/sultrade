@@ -18,7 +18,7 @@ import { apiEmployee } from "../../../services/apiamrg";
 import loader from "../../../classes/loader";
 import moment from "moment";
 import Select from "react-select";
-import { Skeleton } from "@mui/material";
+import Skeleton from '../../../components/skeleton'
 import Modal from "@material-ui/core/Modal";
 import apiHeroku from "../../../services/apiHeroku";
 
@@ -64,6 +64,7 @@ const estadoInicial = {
   pdfgerado: [],
   pdfContent: [],
   pdfNome: "",
+  pdfsSeparadosGerados: [],
 
   pdfEmail: "",
   emails: [],
@@ -79,6 +80,8 @@ const estadoInicial = {
     {value: "E", label: "Enviadas"},
     {value: "N", label: "Não Enviadas"},
 ],
+
+  pdfsSeparados: false,
 };
 
 class Relatorio extends Component {
@@ -281,7 +284,7 @@ class Relatorio extends Component {
   };
 
   gerarRelatorio = async (validForm) => {
-    this.setState({ loading: true });
+    this.setState({ loading: true, pdfsSeparadosGerados: [] });
     if (!validForm) {
       return;
     }
@@ -377,21 +380,28 @@ class Relatorio extends Component {
       clientes: this.state.clientes,
       centroCusto: this.state.centroCusto,
     });    if (this.props.location.state.backTo == "contasReceber") {
-      await apiHeroku
-        .post("/relatorio/receber", {
-          all: !this.state.clientes[0] ? true : false,
-          chaves: this.state.clientes,
-          centro_custo: this.state.centroCusto || false,
-          situacao: this.state.situacao || 'T',
-          grupo: this.state.grupo || false,
-        })
-        .then(async (res) => {
-          await this.setState({ relatorio: res.data });
-          this.relatorio();
-        })
-        .catch((res) => {
-          console.log(res?.response?.data);
-        });
+      // Verificar se deve gerar PDFs separados para contas a receber
+      if (this.state.pdfsSeparados && this.state.clientes.length >= 1) {
+        console.log('Iniciando geração de PDFs separados...');
+        await this.gerarPDFsSeparados();
+      } else {
+        console.log('Gerando relatório único...');
+        await apiHeroku
+          .post("/relatorio/receber", {
+            all: !this.state.clientes[0] ? true : false,
+            chaves: this.state.clientes,
+            centro_custo: this.state.centroCusto || false,
+            situacao: this.state.situacao || 'T',
+            grupo: this.state.grupo || false,
+          })
+          .then(async (res) => {
+            await this.setState({ relatorio: res.data });
+            this.relatorio();
+          })
+          .catch((res) => {
+            console.log(res?.response?.data);
+          });
+      }
     } else {
       await apiEmployee
         .post(`gerarRelatorioContas.php`, {
@@ -411,6 +421,812 @@ class Relatorio extends Component {
         );
       this.setState({ loading: false });
     } 
+  };
+
+  gerarPDFsSeparados = async () => {
+    console.log('=== INICIANDO GERAÇÃO DE PDFs SEPARADOS ===');
+    console.log('Clientes selecionados:', this.state.clientes);
+    
+    const clientesOriginais = [...this.state.clientes];
+    const pdfsSeparados = [];
+    
+    // Primeiro, gerar o relatório unificado para ter os dados
+    await apiHeroku
+      .post("/relatorio/receber", {
+        all: !this.state.clientes[0] ? true : false,
+        chaves: this.state.clientes,
+        centro_custo: this.state.centroCusto || false,
+        situacao: this.state.situacao || 'T',
+        grupo: this.state.grupo || false,
+      })
+      .then(async (res) => {
+        console.log('Dados do relatório unificado recebidos:', res.data);
+        await this.setState({ relatorio: res.data });
+        await this.relatorio(); // Gerar visualização unificada
+      })
+      .catch((res) => {
+        console.log("Erro ao gerar relatório unificado:", res?.response?.data);
+      });
+    
+    // Simplesmente preparar a lista de PDFs para serem gerados na hora da exportação
+    for (const clienteAtual of clientesOriginais) {
+      const nomeCliente = this.state.pessoas.find(p => p.Chave == clienteAtual)?.Nome || `Cliente_${clienteAtual}`;
+      
+      pdfsSeparados.push({
+        clienteId: clienteAtual,
+        nomeCliente: nomeCliente.replaceAll(".", ""),
+        pdfNome: `SOA (${moment().format("DD-MM-YYYY")}) - ${nomeCliente.replaceAll(".", "")}`
+      });
+    }
+    
+    await this.setState({ 
+      pdfsSeparadosGerados: pdfsSeparados,
+      loading: false 
+    });
+    
+    console.log('PDFs separados preparados:', pdfsSeparados);
+  };
+
+  renderPDFContent = (relatorioFiltrado, clienteId) => {
+    console.log(`=== RENDERIZANDO PDF PARA CLIENTE ${clienteId} ===`);
+    console.log('Relatório filtrado recebido:', relatorioFiltrado);
+    console.log('Quantidade de itens:', relatorioFiltrado.length);
+    
+    let totalBalance = 0;
+    
+    // Calcular totais antes de renderizar
+    let totaisGerais = {
+      fda: 0,
+      discount: 0,
+      received: 0,
+      balance: 0
+    };
+
+    // Percorrer os dados para calcular totais
+    relatorioFiltrado.forEach(e => {
+      if (e.contas_normais) {
+        e.contas_normais.forEach(f => {
+          let FDA2 = f?.fda;
+          let DISCONT2 = f?.discount;
+          let RECEIVED2 = f?.received;
+          let BALANCE2 = f?.balance;
+          
+          if (this.state.moeda) {
+            if (parseInt(this.state.moeda) !== parseInt(f?.moeda)) {
+              FDA2 = f?.FDADOLAR ? f?.FDADOLAR : FDA2 / f?.roe;
+              DISCONT2 = f?.discountDOLAR ? f?.discountDOLAR : DISCONT2 / f?.roe;
+              RECEIVED2 = f?.receivedDOLAR ? f.receivedDOLAR : RECEIVED2 / f?.roe;
+              BALANCE2 = f?.balanceDolar ? f?.balanceDolar : BALANCE2 / f?.roe;
+            }
+          }
+          
+          if (parseFloat(BALANCE2) > 0) {
+            totaisGerais.fda += parseFloat(FDA2);
+            totaisGerais.discount += parseFloat(DISCONT2);
+            totaisGerais.received += parseFloat(RECEIVED2);
+            totaisGerais.balance += parseFloat(BALANCE2);
+          }
+        });
+      }
+      
+      if (e.contas_manuais) {
+        e.contas_manuais.forEach(f => {
+          let FDA2 = f?.fda;
+          let DISCONT2 = f?.discount;
+          let RECEIVED2 = f?.received;
+          let BALANCE2 = f?.balance;
+          
+          if (this.state.moeda) {
+            if (parseInt(this.state.moeda) !== parseInt(f?.moeda)) {
+              FDA2 = FDA2 / f.roe;
+              DISCONT2 = DISCONT2 / f?.roe;
+              RECEIVED2 = RECEIVED2 / f?.roe;
+              BALANCE2 = BALANCE2 / f?.roe;
+            }
+          }
+          
+          if (parseFloat(BALANCE2) > 0) {
+            totaisGerais.fda += parseFloat(FDA2);
+            totaisGerais.discount += parseFloat(DISCONT2);
+            totaisGerais.received += parseFloat(RECEIVED2);
+            totaisGerais.balance += parseFloat(BALANCE2);
+          }
+        });
+      }
+    });
+
+    const pdfContent = (
+      <div style={{ zoom: 1 }} id={`pdfDiv_${clienteId}`}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <img
+            className="img-fluid"
+            src="https://i.ibb.co/vmKJkx4/logo.png"
+            alt="logo-Strade"
+            border="0"
+            style={{ width: "30%", height: "150px", maxWidth: "100%" }}
+          />
+          <h4>SOA - Statement of Accounts</h4>
+          <p>Issued on {moment().format("MMM Do YYYY")}</p>
+        </div>
+        <hr />
+        <div className="pdfContent">
+          {relatorioFiltrado.map((e, index) => {
+            console.log(`Processando item ${index} para cliente ${clienteId}:`, e);
+            
+            if (this.props.location.state.backTo === "contasReceber") {
+              const rows = [];
+              
+              // Processar contas normais igual ao original
+              e.contas_normais.forEach((f) => {
+                let FDA2 = f?.fda;
+                let DISCONT2 = f?.discount;
+                let RECEIVED2 = f?.received;
+                let BALANCE2 = f?.balance;
+                
+                if (this.state.moeda) {
+                  if (parseInt(this.state.moeda) === parseInt(f?.moeda)) {
+                  } else {
+                    FDA2 = f?.FDADOLAR ? f?.FDADOLAR : FDA2 / f?.roe;
+                    DISCONT2 = f?.discountDOLAR ? f?.discountDOLAR : DISCONT2 / f?.roe;
+                    RECEIVED2 = f?.receivedDOLAR ? f.receivedDOLAR : RECEIVED2 / f?.roe;
+                    BALANCE2 = f?.balanceDolar ? f?.balanceDolar : BALANCE2 / f?.roe;
+                  }
+                }
+                
+                const row = {
+                  ship: f?.ship || "",
+                  os: f?.os || "",
+                  port: f?.port || "",
+                  moeda: f?.moeda || 5,
+                  sailed: f?.sailed || moment().format("YYYY-MM-DD"),
+                  billing: (() => {
+                    const date = moment(f?.billing);
+                    return date.isValid()
+                      ? date.format("YY") === "99"
+                        ? "N/A"
+                        : date.format("YYYY-MM-DD")
+                      : moment().format("YYYY-MM-DD");
+                  })(),
+                  roe: f?.roe || 5,
+                  fda: FDA2,
+                  discount: DISCONT2,
+                  received: RECEIVED2,
+                  balance: BALANCE2,
+                };
+                rows.push(row);
+              });
+
+              // Processar contas manuais igual ao original
+              e.contas_manuais.forEach((f) => {
+                let FDA2 = f?.fda;
+                let DISCONT2 = f?.discount;
+                let RECEIVED2 = f?.received;
+                let BALANCE2 = f?.balance;
+                
+                if (this.state.moeda) {
+                  if (parseInt(this.state.moeda) === parseInt(f?.moeda)) {
+                  } else {
+                    FDA2 = f?.FDADOLAR ? f?.FDADOLAR : FDA2 / f?.roe;
+                    DISCONT2 = f?.discountDOLAR ? f?.discountDOLAR : DISCONT2 / f?.roe;
+                    RECEIVED2 = f?.receivedDOLAR ? f.receivedDOLAR : RECEIVED2 / f?.roe;
+                    BALANCE2 = f?.balanceDolar ? f?.balanceDolar : BALANCE2 / f?.roe;
+                  }
+                }
+                
+                const row = {
+                  ship: f?.ship || "",
+                  os: f?.os || "",
+                  port: f?.port || "",
+                  moeda: f?.moeda || 5,
+                  sailed: f?.sailed || moment().format("YYYY-MM-DD"),
+                  billing: (() => {
+                    const date = moment(f?.billing);
+                    return date.isValid()
+                      ? date.format("YY") === "99"
+                        ? "N/A"
+                        : date.format("YYYY-MM-DD")
+                      : moment().format("YYYY-MM-DD");
+                  })(),
+                  roe: f?.roe || 5,
+                  fda: FDA2,
+                  discount: DISCONT2,
+                  received: RECEIVED2,
+                  balance: BALANCE2,
+                };
+                rows.push(row);
+              });
+
+              console.log(`Cliente ${clienteId} - Total rows:`, rows);
+
+              let totalFDAPorGrupo = 0;
+              let totalDiscountPorGrupo = 0;
+              let totalReceivedPorGrupo = 0;
+              let totalBalancePorGrupo = 0;
+
+              const hasDiscount = rows.some(row => parseFloat(row.discount) > 0.00);
+
+              return (
+                <div key={index}>
+                  <table className="pdfTable">
+                    <tr>
+                      <th colSpan={hasDiscount ? 9 : 8}>
+                        <span style={{ fontSize: 15 }}>
+                          {e.pessoa?.nome || ""}
+                        </span>
+                      </th>
+                    </tr>
+                    <tr style={{ fontSize: 13 }}>
+                      <th>SHIP'S NAME</th>
+                      <th>PO</th>
+                      <th>PORT OF CALL</th>
+                      <th>SAILED</th>
+                      <th>BILLING</th>
+                      <th>ROE</th>
+                      <th>FDA</th>
+                      {hasDiscount && <th>DISCOUNT</th>}
+                      <th>RECEIVED</th>
+                      <th>BALANCE</th>
+                    </tr>
+                    {rows
+                      .sort((a, b) => moment(a.sailed).diff(moment(b.sailed)))
+                      .map((row, rowIndex) => {
+                        if (parseFloat(row.balance) > 0.01) {
+                          totalFDAPorGrupo += parseFloat(row.fda);
+                          totalDiscountPorGrupo += parseFloat(row.discount);
+                          totalReceivedPorGrupo += parseFloat(row.received);
+                          totalBalancePorGrupo += parseFloat(row.balance);
+                          
+                          return (
+                            <tr key={rowIndex} style={{ fontSize: 12 }} className="SOA_row">
+                              <td style={{
+                                backgroundColor: "inherit",
+                                whiteSpace: "nowrap",
+                                maxWidth: 135,
+                                minWidth: 135,
+                              }}>
+                                {row.ship}
+                              </td>
+                              <td style={{
+                                backgroundColor: "inherit",
+                                whiteSpace: "nowrap",
+                                maxWidth: 55,
+                                minWidth: 55,
+                              }}>
+                                {row.os}
+                              </td>
+                              <td style={{
+                                backgroundColor: "inherit",
+                                whiteSpace: "nowrap",
+                                maxWidth: 85,
+                                minWidth: 85,
+                              }}>
+                                {row.port}
+                              </td>
+                              <td style={{
+                                backgroundColor: "inherit",
+                                whiteSpace: "nowrap",
+                                maxWidth: 60,
+                                minWidth: 60,
+                              }}>
+                                {moment(row.sailed).format("MMM Do YYYY")}
+                              </td>
+                              <td style={{
+                                backgroundColor: "inherit",
+                                whiteSpace: "nowrap",
+                                maxWidth: 60,
+                                minWidth: 60,
+                              }}>
+                                {row.billing !== "N/A" ? moment(row.billing).format("MMM Do YYYY") : "N/A"}
+                              </td>
+                              <td style={{
+                                backgroundColor: "inherit",
+                                whiteSpace: "nowrap",
+                                maxWidth: 45,
+                                minWidth: 45,
+                              }}>
+                                {parseFloat(row?.roe || 5).toFixed(4)}
+                              </td>
+                              <td style={{
+                                backgroundColor: "inherit",
+                                whiteSpace: "nowrap",
+                                maxWidth: 80,
+                                minWidth: 80,
+                              }}>
+                                {this.state.moeda === 5 ? "R$" : "USD"}{" "}
+                                {new Intl.NumberFormat("pt-BR", {
+                                  style: "decimal",
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                }).format(row.fda)}
+                              </td>
+                              {hasDiscount && (
+                                <td style={{
+                                  backgroundColor: "inherit",
+                                  whiteSpace: "nowrap",
+                                  maxWidth: 80,
+                                  minWidth: 80,
+                                }}>
+                                  {this.state.moeda === 5 ? "R$" : "USD"}{" "}
+                                  {new Intl.NumberFormat("pt-BR", {
+                                    style: "decimal",
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  }).format(row.discount)}
+                                </td>
+                              )}
+                              <td style={{
+                                backgroundColor: "inherit",
+                                whiteSpace: "nowrap",
+                                maxWidth: 80,
+                                minWidth: 80,
+                              }}>
+                                {this.state.moeda === 5 ? "R$" : "USD"}{" "}
+                                {new Intl.NumberFormat("pt-BR", {
+                                  style: "decimal",
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                }).format(row.received)}
+                              </td>
+                              <td style={{
+                                backgroundColor: "inherit",
+                                whiteSpace: "nowrap",
+                                maxWidth: 80,
+                                minWidth: 80,
+                              }}>
+                                {this.state.moeda === 5 ? "R$" : "USD"}{" "}
+                                {new Intl.NumberFormat("pt-BR", {
+                                  style: "decimal",
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                }).format(row.balance)}
+                              </td>
+                            </tr>
+                          );
+                        }
+                        return null;
+                      })}
+                    <tr style={{ fontSize: 12 }}>
+                      <td colSpan={hasDiscount ? 6 : 5}></td>
+                      <td style={{ textAlign: "left" }}>TOTAL:</td>
+                      <td style={{}}>
+                        {this.state.moeda === 5 ? "R$" : "USD"}{" "}
+                        {totalFDAPorGrupo.toLocaleString("pt-BR", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                      {hasDiscount && (
+                        <td style={{}}>
+                          {this.state.moeda === 5 ? "R$" : "USD"}{" "}
+                          {totalDiscountPorGrupo.toLocaleString("pt-BR", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </td>
+                      )}
+                      <td style={{}}>
+                        {this.state.moeda === 5 ? "R$" : "USD"}{" "}
+                        {totalReceivedPorGrupo.toLocaleString("pt-BR", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                      <td style={{}}>
+                        {this.state.moeda === 5 ? "R$" : "USD"}{" "}
+                        {totalBalancePorGrupo.toLocaleString("pt-BR", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              );
+            }
+            return null;
+          })}
+          
+          {/* Tabela de totais gerais igual ao PDF original - mesmo valor do primeiro total */}
+          <table style={{ width: "100%", marginTop: "20px" }}>
+            <tr style={{ fontSize: 13 }}>
+              <th></th>
+              <th style={{ borderBottom: "1px solid black" }}>FDA</th>
+              <th style={{ borderBottom: "1px solid black" }}>DISCOUNT</th>
+              <th style={{ borderBottom: "1px solid black" }}>RECEIVED</th>
+              <th style={{ borderBottom: "1px solid black" }}>BALANCE</th>
+            </tr>
+            <tr style={{ fontSize: 12 }}>
+              <th style={{ textAlign: "left" }}>{"Total ->"}</th>
+              <td style={{ paddingRight: "15px", whiteSpace: "nowrap" }}>
+                {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "decimal",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(totaisGerais.fda)}
+              </td>
+              <td style={{ paddingRight: "15px", whiteSpace: "nowrap" }}>
+                {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "decimal",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(totaisGerais.discount)}
+              </td>
+              <td style={{ paddingRight: "15px", whiteSpace: "nowrap" }}>
+                {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "decimal",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(totaisGerais.received)}
+              </td>
+              <td style={{ paddingRight: "15px", whiteSpace: "nowrap" }}>
+                {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "decimal",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(totaisGerais.balance)}
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    );
+    
+    console.log(`=== PDF FINAL PARA CLIENTE ${clienteId} ===`);
+    console.log('Conteúdo completo do PDF:', pdfContent);
+    
+    return pdfContent;
+  };
+
+  gerarPDFIndividual = async () => {
+    const relatorio = this.state.relatorio;
+    console.log('=== GERAÇÃO PDF INDIVIDUAL ===');
+    console.log('Relatório recebido:', relatorio);
+    console.log('Cliente atual:', this.state.clientes);
+    console.log('Props location:', this.props.location.state.backTo);
+    let totalBalance = 0;
+
+    let pdf = (
+      <div style={{ zoom: 1 }} id={`pdfDiv_${this.state.clientes[0]}`} key={`pdf_${this.state.clientes[0]}_${Date.now()}`}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <img
+            className="img-fluid"
+            src="https://i.ibb.co/vmKJkx4/logo.png"
+            alt="logo-Strade"
+            border="0"
+            style={{ width: "30%", height: "150px", maxWidth: "100%" }}
+          />
+          <h4>SOA - Statement of Accounts</h4>
+          <p>Issued on {moment().format("MMM Do YYYY")}</p>
+        </div>
+        <hr />
+        <div className="pdfContent">
+          {relatorio.map((e, index) => {
+            console.log(`Processando item ${index}:`, e);
+            if (this.props.location.state.backTo == "contasReceber") {
+              console.log('Entrando no bloco contasReceber');
+              const rows = [];
+              console.log('Contas normais:', e.contas_normais);
+              console.log('Contas manuais:', e.contas_manuais);
+              
+              if (!e.contas_normais || !e.contas_manuais) {
+                console.log('PROBLEMA: Contas normais ou manuais estão undefined!');
+                return null;
+              }
+              
+              e.contas_normais.forEach((f) => {
+              let FDA2 = f?.fda;
+              let DISCONT2 = f?.discount;
+              let RECEIVED2 = f?.received;
+              let BALANCE2 = f?.balance;
+              
+              if (this.state.moeda) {
+                if (parseInt(this.state.moeda) === parseInt(f?.moeda)) {
+                } else {
+                  FDA2 = f?.FDADOLAR ? f?.FDADOLAR : FDA2 / f?.roe;
+                  DISCONT2 = f?.discountDOLAR ? f?.discountDOLAR : DISCONT2 / f?.roe;
+                  RECEIVED2 = f?.receivedDOLAR ? f.receivedDOLAR : RECEIVED2 / f?.roe;
+                  BALANCE2 = f?.balanceDolar ? f?.balanceDolar : BALANCE2 / f?.roe;
+                }
+              }
+              
+              const row = {
+                ship: f?.ship || "",
+                os: f?.os || "",
+                port: f?.port || "",
+                moeda: f?.moeda || 5,
+                sailed: f?.sailed || moment().format("YYYY-MM-DD"),
+                billing: (() => {
+                  const date = moment(f?.billing);
+                  return date.isValid()
+                    ? date.format("YY") === "99" 
+                      ? "N/A" 
+                      : date.format("YYYY-MM-DD") 
+                    : moment().format("YYYY-MM-DD"); 
+                })(),
+                roe: f?.roe || 5,
+                fda: FDA2,
+                discount: DISCONT2,
+                received: RECEIVED2,
+                balance: BALANCE2,
+              };
+              rows.push(row);
+            });
+
+            e.contas_manuais.forEach((f) => {
+              let FDA2 = f?.fda;
+              let DISCONT2 = f?.discount;
+              let RECEIVED2 = f?.received;
+              let BALANCE2 = f?.balance;
+              
+              if (this.state.moeda) {
+                if (parseInt(this.state.moeda) === parseInt(f?.moeda)) {
+                } else {
+                  FDA2 = FDA2 / f.roe;
+                  DISCONT2 = DISCONT2 / f?.roe;
+                  RECEIVED2 = RECEIVED2 / f?.roe;
+                  BALANCE2 = BALANCE2 / f?.roe;
+                }
+              }
+              
+              const row = {
+                ship: f?.ship || "",
+                os: f?.os || "",
+                port: f?.port || "",
+                moeda: f?.moeda || 5,
+                sailed: f?.sailed || moment().format("YYYY-MM-DD"),
+                billing: (() => {
+                  const date = moment(f?.billing);
+                  return date.isValid()
+                    ? date.format("YY") === "99" 
+                      ? "N/A" 
+                      : date.format("YYYY-MM-DD") 
+                    : moment().format("YYYY-MM-DD"); 
+                })(),
+                roe: f?.roe || 5,
+                fda: FDA2,
+                discount: DISCONT2,
+                received: RECEIVED2,
+                balance: BALANCE2,
+              };
+              rows.push(row);
+            });
+
+            let totalFDAPorGrupo = 0;
+            let totalDiscountPorGrupo = 0;
+            let totalReceivedPorGrupo = 0;
+            let totalBalancePorGrupo = 0;
+
+            const hasDiscount = rows.some(row => parseFloat(row.discount) > 0.00);
+
+            return (
+              <div key={e.pessoa?.codigo || Math.random()}>
+                <table className="pdfTable">
+                  <tr>
+                    <th colSpan={hasDiscount ? 9 : 8}>
+                      <span style={{ fontSize: 15 }}>
+                        {e.pessoa?.nome || ""}
+                      </span>
+                    </th>
+                  </tr>
+                  <tr style={{ fontSize: 13 }}>
+                    <th>SHIP'S NAME</th>
+                    <th>PO</th>
+                    <th>PORT OF CALL</th>
+                    <th>SAILED</th>
+                    <th>BILLING</th>
+                    <th>ROE</th>
+                    <th>FDA</th>
+                    {hasDiscount && <th>DISCOUNT</th>}
+                    <th>RECEIVED</th>
+                    <th>BALANCE</th>
+                  </tr>
+                  {rows
+                    .sort((a, b) => moment(a.sailed).diff(moment(b.sailed)))
+                    .map((row, index) => {
+                      if (parseFloat(row.balance) > 0.01) {
+                        totalFDAPorGrupo += parseFloat(row.fda);
+                        totalDiscountPorGrupo += parseFloat(row.discount);
+                        totalReceivedPorGrupo += parseFloat(row.received);
+                        totalBalancePorGrupo += parseFloat(row.balance);
+                        totalBalance += parseFloat(row.balance);
+                        
+                        return (
+                          <tr style={{ fontSize: 12 }} className="SOA_row" key={index}>
+                            <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 135, minWidth: 135 }}>
+                              {row.ship}
+                            </td>
+                            <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 55, minWidth: 55 }}>
+                              {row.os}
+                            </td>
+                            <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 105, minWidth: 105 }}>
+                              {row.port}
+                            </td>
+                            <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 95, minWidth: 95 }}>
+                              {moment(row.sailed).format("MMM Do YYYY")}
+                            </td>
+                            <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 95, minWidth: 95 }}>
+                              {row.billing === "N/A" ? "N/A" : moment(row.billing).format("MMM Do YYYY")}
+                            </td>
+                            <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 65, minWidth: 65 }}>
+                              {parseFloat(row?.roe || 5).toFixed(4)}
+                            </td>
+                            <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 95, minWidth: 95 }}>
+                              {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                              {new Intl.NumberFormat("pt-BR", {
+                                style: "decimal",
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              }).format(row.fda)}
+                            </td>
+                            {hasDiscount && (
+                              <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 95, minWidth: 95 }}>
+                                {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                                {new Intl.NumberFormat("pt-BR", {
+                                  style: "decimal",
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                }).format(row.discount)}
+                              </td>
+                            )}
+                            <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap", maxWidth: 95, minWidth: 95 }}>
+                              {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                              {new Intl.NumberFormat("pt-BR", {
+                                style: "decimal",
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              }).format(row.received)}
+                            </td>
+                            <td style={{ backgroundColor: "inherit", whiteSpace: "nowrap" }}>
+                              {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                              {new Intl.NumberFormat("pt-BR", {
+                                style: "decimal",
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              }).format(row.balance)}
+                            </td>
+                          </tr>
+                        );
+                      }
+                      return null;
+                    })}
+                  <tr style={{ fontSize: 13 }}>
+                    <th colSpan="6">{"Total ->"}</th>
+                    <td style={{ paddingRight: "15px", borderTop: "1px solid black", whiteSpace: "nowrap" }}>
+                      {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                      {new Intl.NumberFormat("pt-BR", {
+                        style: "decimal",
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }).format(totalFDAPorGrupo)}
+                    </td>
+                    {hasDiscount && (
+                      <td style={{ paddingRight: "15px", borderTop: "1px solid black", whiteSpace: "nowrap" }}>
+                        {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                        {new Intl.NumberFormat("pt-BR", {
+                          style: "decimal",
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }).format(totalDiscountPorGrupo)}
+                      </td>
+                    )}
+                    <td style={{ paddingRight: "15px", borderTop: "1px solid black", whiteSpace: "nowrap" }}>
+                      {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                      {new Intl.NumberFormat("pt-BR", {
+                        style: "decimal",
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }).format(totalReceivedPorGrupo)}
+                    </td>
+                    <td style={{ paddingRight: "15px", borderTop: "1px solid black", whiteSpace: "nowrap" }}>
+                      {this.state.moeda == 5 ? "R$" : "USD"}{" "}
+                      {new Intl.NumberFormat("pt-BR", {
+                        style: "decimal",
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }).format(totalBalancePorGrupo)}
+                    </td>
+                  </tr>
+                </table>
+                <hr />
+              </div>
+            );
+            }
+            console.log('Não é contasReceber, retornando null');
+            return null; // Para outros tipos de relatório
+          })}
+
+          <br />
+          <br />
+          <br />
+
+          <h5 style={{ width: "100%", textAlign: "center" }}>BANKING DETAILS</h5>
+          <table style={{ width: "80%", marginLeft: "5%" }}>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Bank's name:</b> Banco Santander
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Branch's name:</b> Rio Grande
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>SWIFT code:</b> BSCHBRSPXXX
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>IBAN:</b> BR8290400888032720130031839C1
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Branch's number:</b> 3272
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Account number:</b> 130031839
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Sender's correspondent:</b> Standard Chartered Bank
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Sender's correspondent - SWIFT:</b> SCBLUS33XXX
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Account name:</b> SUL TRADE AGENCIAMENTOS MARITIMOS LTDA-ME
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Address:</b> 161 Andrade Neves Street
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Phone:</b> +55 53 3235 3500
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>CNPJ:</b> 10.432.546/0001-75
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    );
+
+    console.log('PDF final gerado:', pdf);
+    console.log('Total balance:', totalBalance);
+    return { pdf, totalBalance };
   };
 
   enviarEmail = async (validFormEmail) => {
@@ -1494,7 +2310,7 @@ class Relatorio extends Component {
                                         minWidth: 60,
                                       }}
                                     >
-                                      {moment(row.sailed).format("DD/MM/YY")}
+                                      {moment(row.sailed).format("MMM Do YYYY")}
                                     </td>
                                     <td
                                     style={{
@@ -1506,7 +2322,7 @@ class Relatorio extends Component {
                                   >
                                     {row.billing === "N/A" 
                                     ? "N/A" 
-                                    : moment(row.billing).format("DD/MM/YY")}
+                                    : moment(row.billing).format("MMM Do YYYY")}
                                   </td>
                                   </>
                                 )}
@@ -2211,6 +3027,7 @@ class Relatorio extends Component {
                 width: 830,
               }}
             >
+              {/* Sempre exibir o PDF único para visualização */}
               <PDFExport
                 fileName={this.state.pdfNome}
                 scale={0.6}
@@ -2221,6 +3038,127 @@ class Relatorio extends Component {
               >
                 {this.state.pdfgerado}
               </PDFExport>
+
+              {/* PDFs separados visíveis para exportação */}
+              {this.state.pdfsSeparadosGerados.length > 0 && (
+                <div style={{ marginTop: "40px", borderTop: "2px solid #ccc", paddingTop: "20px" }}>
+                  <div style={{ textAlign: "center", marginBottom: "20px", backgroundColor: "#f8f9fa", padding: "10px", borderRadius: "5px" }}>
+                    <h4 style={{ color: "#495057", margin: "0" }}>📄 PDFs Individuais Preparados para Exportação</h4>
+                    <p style={{ margin: "5px 0 0 0", color: "#6c757d", fontSize: "14px" }}>
+                      {this.state.pdfsSeparadosGerados.length} arquivo(s) serão gerados separadamente
+                    </p>
+                  </div>
+                  {this.state.pdfsSeparadosGerados.map((pdfData, index) => {
+                    const clientesFiltrados = [pdfData.clienteId];
+                    const relatorioFiltrado = this.state.relatorio.filter(item => 
+                      item.pessoa.chave == parseInt(pdfData.clienteId)
+                    );
+                    
+                    console.log(`Filtro para cliente ${pdfData.clienteId}:`, relatorioFiltrado);
+                    
+                    return (
+                      <div key={pdfData.clienteId} style={{ 
+                        marginBottom: "30px", 
+                        border: "1px solid #dee2e6", 
+                        borderRadius: "5px",
+                        overflow: "hidden"
+                      }}>
+                        <div style={{ 
+                          backgroundColor: "#e9ecef", 
+                          padding: "10px 15px", 
+                          borderBottom: "1px solid #dee2e6",
+                          fontSize: "14px",
+                          fontWeight: "500",
+                          color: "#495057"
+                        }}>
+                          📄 {pdfData.pdfNome}
+                        </div>
+                        <div style={{ backgroundColor: "white" }}>
+                          <PDFExport
+                            fileName={pdfData.pdfNome}
+                            scale={0.6}
+                            portrait={true}
+                            paperSize="A4"
+                            margin="0.5cm"
+                            ref={(ref) => this[`pdfExportRef_${pdfData.clienteId}`] = ref}
+                          >
+                            {this.renderPDFContent(relatorioFiltrado, pdfData.clienteId)}
+                            
+                            {/* Copiando exatamente do gerarPDFIndividual */}
+                            <br />
+                            <br />
+                            <br />
+
+                            <h5 style={{ width: "100%", textAlign: "center" }}>BANKING DETAILS</h5>
+                            <table style={{ width: "80%", marginLeft: "5%" }}>
+                              <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                                  <b style={{ paddingRight: 5 }}>Bank's name:</b> Banco Santander
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                                  <b style={{ paddingRight: 5 }}>Branch's name:</b> Rio Grande
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                                  <b style={{ paddingRight: 5 }}>SWIFT code:</b> BSCHBRSPXXX
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                                  <b style={{ paddingRight: 5 }}>IBAN:</b> BR8290400888032720130031839C1
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                                  <b style={{ paddingRight: 5 }}>Branch's number:</b> 3272
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                                  <b style={{ paddingRight: 5 }}>Account number:</b> 130031839
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                                  <b style={{ paddingRight: 5 }}>Sender's correspondent:</b> Standard Chartered Bank
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                                  <b style={{ paddingRight: 5 }}>Sender's correspondent - SWIFT:</b> SCBLUS33XXX
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                                  <b style={{ paddingRight: 5 }}>Account name:</b> SUL TRADE AGENCIAMENTOS MARITIMOS LTDA-ME
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                                  <b style={{ paddingRight: 5 }}>Address:</b> 161 Andrade Neves Street
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                                  <b style={{ paddingRight: 5 }}>Phone:</b> +55 53 3235 3500
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                                  <b style={{ paddingRight: 5 }}>CNPJ:</b> 10.432.546/0001-75
+                                </td>
+                              </tr>
+                            </table>
+                          </PDFExport>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               <div
                 style={{
@@ -2233,9 +3171,23 @@ class Relatorio extends Component {
                 <button
                   className="btn btn-danger"
                   style={{ margin: 20 }}
-                  onClick={() => this.pdfExportComponent.current.save()}
+                  onClick={() => {
+                    // Se há PDFs separados, exportar todos eles
+                    if (this.state.pdfsSeparadosGerados.length > 0) {
+                      this.state.pdfsSeparadosGerados.forEach((pdfData, index) => {
+                        setTimeout(() => {
+                          this[`pdfExportRef_${pdfData.clienteId}`].save();
+                        }, 500 * (index + 1));
+                      });
+                    } else {
+                      // Caso contrário, exportar o PDF único como antes
+                      this.pdfExportComponent.current.save();
+                    }
+                  }}
                 >
-                  Exportar PDF
+                  {this.state.pdfsSeparadosGerados.length > 0 
+                    ? `Exportar PDFs (${this.state.pdfsSeparadosGerados.length} arquivos)` 
+                    : "Exportar PDF"}
                 </button>
                 {this.state.clientes[0] && !this.state.clientes[1] && (
                   <button
@@ -2256,7 +3208,7 @@ class Relatorio extends Component {
                   backgroundColor: "inherit",
                   border: "none",
                 }}
-                onClick={() => this.setState({ pdfView: false })}
+                onClick={() => this.setState({ pdfView: false, pdfsSeparadosGerados: [] })}
               >
                 <FontAwesomeIcon
                   cursor="pointer"
@@ -2525,6 +3477,29 @@ class Relatorio extends Component {
                                 }}
                               />
                             </div>
+                            
+                            {this.props.location.state.backTo == "contasReceber" && (
+                              <>
+                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                  <label>PDFs Separados</label>
+                                </div>
+                                <div className="col-1 errorMessage"></div>
+                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                  <Field 
+                                    type="checkbox" 
+                                    className="form-check-input" 
+                                    style={{marginLeft: "2px", width: "36px", height: "10px"}}
+                                    checked={this.state.pdfsSeparados} 
+                                    onChange={(e) => { 
+                                      this.setState({ pdfsSeparados: e.target.checked }) 
+                                    }} 
+                                  />
+                                  <label className="form-check-label" style={{marginLeft: "60px", fontSize: "12px", color: "#666"}}>
+                                    Gerar um PDF para cada cliente selecionado
+                                  </label>
+                                </div>
+                              </>
+                            )}
                             {/* <div className="col-12">
                                                             <label className="center relatorioLabelTitulo">Período</label>
                                                         </div>
