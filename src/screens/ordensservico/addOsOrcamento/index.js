@@ -623,6 +623,7 @@ class AddOsOrcamento extends Component {
       await this.setState({ 
         eventoModalAberto: false, // Close modal after refresh
         ordemModificada: false, // Reset order modification flag
+        loading: false, 
       });
     } catch (error) {
       console.error("Erro ao recarregar eventos:", error);

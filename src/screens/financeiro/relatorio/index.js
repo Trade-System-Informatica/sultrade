@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./styles.css";
-import ReactDOMServer from "react-dom/server";
+import * as ReactDOMServer from "react-dom/server";
 import { Formik, Field, Form } from "formik";
 import Header from "../../../components/header";
 import Rodape from "../../../components/rodape";
@@ -21,6 +21,8 @@ import Select from "react-select";
 import Skeleton from '../../../components/skeleton'
 import Modal from "@material-ui/core/Modal";
 import apiHeroku from "../../../services/apiHeroku";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 const estadoInicial = {
   por: "",
@@ -82,6 +84,7 @@ const estadoInicial = {
 ],
 
   pdfsSeparados: false,
+  downloadZipAutomatico: false,
 };
 
 class Relatorio extends Component {
@@ -96,6 +99,17 @@ class Relatorio extends Component {
   };
 
   componentDidMount = async () => {
+    // Adicionar CSS para animações
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes pulse {
+        0% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.05); }
+        100% { opacity: 1; transform: scale(1); }
+      }
+    `;
+    document.head.appendChild(style);
+    
     if (this.state.usuarioLogado.empresa != 0) {
       await this.setState({ empresa: this.state.usuarioLogado.empresa });
     }
@@ -380,28 +394,39 @@ class Relatorio extends Component {
       clientes: this.state.clientes,
       centroCusto: this.state.centroCusto,
     });    if (this.props.location.state.backTo == "contasReceber") {
-      // Verificar se deve gerar PDFs separados para contas a receber
-      if (this.state.pdfsSeparados && this.state.clientes.length >= 1) {
-        console.log('Iniciando geração de PDFs separados...');
-        await this.gerarPDFsSeparados();
-      } else {
-        console.log('Gerando relatório único...');
-        await apiHeroku
-          .post("/relatorio/receber", {
-            all: !this.state.clientes[0] ? true : false,
-            chaves: this.state.clientes,
-            centro_custo: this.state.centroCusto || false,
-            situacao: this.state.situacao || 'T',
-            grupo: this.state.grupo || false,
-          })
-          .then(async (res) => {
-            await this.setState({ relatorio: res.data });
-            this.relatorio();
-          })
-          .catch((res) => {
-            console.log(res?.response?.data);
-          });
-      }
+      // Para contas a receber, sempre gerar o relatório primeiro para visualização
+      await apiHeroku
+        .post("/relatorio/receber", {
+          all: !this.state.clientes[0] ? true : false,
+          chaves: this.state.clientes,
+          centro_custo: this.state.centroCusto || false,
+          situacao: this.state.situacao || 'T',
+          grupo: this.state.grupo || false,
+        })
+        .then(async (res) => {
+          await this.setState({ relatorio: res.data });
+          
+          // Se for PDFs separados, preparar a lista e marcar para download automático
+          if (this.state.pdfsSeparados) {
+            await this.prepararPDFsSeparados();
+          }
+          
+          this.relatorio();
+        })
+        .catch((err) => {
+          console.log('Erro na API:', err?.response?.data);
+          
+          // Verificar se é erro 503 (Service Unavailable)
+          if (err?.response?.status === 503) {
+            alert('Serviço temporariamente indisponível. Tente novamente em alguns instantes.');
+          } else {
+            console.log('Erro completo:', err);
+            alert('Erro ao gerar relatório. Tente novamente em alguns instantes.');
+          }
+          
+          // Parar o loading
+          this.setState({ loading: false });
+        });
     } else {
       await apiEmployee
         .post(`gerarRelatorioContas.php`, {
@@ -423,33 +448,164 @@ class Relatorio extends Component {
     } 
   };
 
+  prepararPDFsSeparados = async () => {
+    console.log('=== PREPARANDO PDFs SEPARADOS ===');
+    
+    // Verificar se o relatório existe
+    if (!this.state.relatorio || !Array.isArray(this.state.relatorio)) {
+      console.log('Relatório não está disponível ou não é um array');
+      alert('Erro: Dados do relatório não disponíveis. Tente gerar o relatório novamente.');
+      return;
+    }
+    
+    // Se nenhum cliente selecionado, buscar todos os clientes do relatório
+    let clientesParaPDF = [];
+    if (!this.state.clientes[0]) {
+      console.log('Nenhum cliente selecionado, extraindo todos do relatório...');
+      // Extrair clientes únicos do relatório
+      const clientesUnicos = new Set();
+      
+      this.state.relatorio.forEach(item => {
+        // Verificar se tem pessoa no nível principal (item.pessoa.chave)
+        if (item.pessoa && item.pessoa.chave) {
+          clientesUnicos.add(item.pessoa.chave.toString());
+        }
+        
+        // Verificar nas contas normais
+        if (item.contas_normais && Array.isArray(item.contas_normais)) {
+          item.contas_normais.forEach(conta => {
+            if (conta.pessoa) {
+              // O campo pessoa pode ser apenas o ID ou um objeto
+              if (typeof conta.pessoa === 'object' && conta.pessoa.chave) {
+                clientesUnicos.add(conta.pessoa.chave.toString());
+              } else if (typeof conta.pessoa === 'number' || typeof conta.pessoa === 'string') {
+                clientesUnicos.add(conta.pessoa.toString());
+              }
+            }
+          });
+        }
+        
+        // Verificar nas contas manuais
+        if (item.contas_manuais && Array.isArray(item.contas_manuais)) {
+          item.contas_manuais.forEach(conta => {
+            if (conta.pessoa) {
+              // O campo pessoa pode ser apenas o ID ou um objeto
+              if (typeof conta.pessoa === 'object' && conta.pessoa.chave) {
+                clientesUnicos.add(conta.pessoa.chave.toString());
+              } else if (typeof conta.pessoa === 'number' || typeof conta.pessoa === 'string') {
+                clientesUnicos.add(conta.pessoa.toString());
+              }
+            }
+          });
+        }
+      });
+      
+      clientesParaPDF = Array.from(clientesUnicos);
+      console.log('Clientes extraídos do relatório:', clientesParaPDF);
+    } else {
+      clientesParaPDF = [...this.state.clientes];
+      console.log('Clientes selecionados:', clientesParaPDF);
+    }
+    
+    if (clientesParaPDF.length === 0) {
+      console.log('Nenhum cliente encontrado para gerar PDFs');
+      this.mostrarMensagem('Nenhum cliente encontrado para gerar PDFs separados.', 'warning');
+      return;
+    }
+    
+    console.log('Clientes para PDF:', clientesParaPDF);
+    
+    const pdfsSeparados = [];
+    
+    for (const clienteAtual of clientesParaPDF) {
+      const nomeCliente = this.state.pessoas.find(p => p.Chave == clienteAtual)?.Nome || `Cliente_${clienteAtual}`;
+      
+      pdfsSeparados.push({
+        clienteId: clienteAtual,
+        nomeCliente: nomeCliente.replaceAll(".", ""),
+        pdfNome: `SOA (${moment().format("DD-MM-YYYY")}) - ${nomeCliente.replaceAll(".", "")}`
+      });
+    }
+    
+    await this.setState({ 
+      pdfsSeparadosGerados: pdfsSeparados,
+      downloadZipAutomatico: true // Flag para indicar download automático
+    });
+    
+    console.log('PDFs separados preparados:', pdfsSeparados);
+  };
+
   gerarPDFsSeparados = async () => {
     console.log('=== INICIANDO GERAÇÃO DE PDFs SEPARADOS ===');
     console.log('Clientes selecionados:', this.state.clientes);
     
-    const clientesOriginais = [...this.state.clientes];
+    let clientesParaProcessar = [...this.state.clientes];
+    
+    // Se nenhum cliente foi selecionado, buscar todos os clientes
+    if (clientesParaProcessar.length === 0) {
+      console.log('Nenhum cliente selecionado, buscando todos...');
+      
+      // Buscar todos os clientes do relatório primeiro para obter a lista
+      await apiHeroku
+        .post("/relatorio/receber", {
+          all: true,
+          chaves: [],
+          centro_custo: this.state.centroCusto || false,
+          situacao: this.state.situacao || 'T',
+          grupo: this.state.grupo || false,
+        })
+        .then(async (res) => {
+          console.log('Dados do relatório para todos os clientes:', res.data);
+          
+          // Extrair lista única de clientes do relatório
+          const clientesUnicos = new Set();
+          res.data.forEach(item => {
+            if (item.contas_normais) {
+              item.contas_normais.forEach(conta => {
+                if (conta.pessoa && conta.pessoa.chave) {
+                  clientesUnicos.add(conta.pessoa.chave);
+                }
+              });
+            }
+            if (item.contas_manuais && Array.isArray(item.contas_manuais)) {
+              item.contas_manuais.forEach(conta => {
+                if (conta.pessoa && conta.pessoa.chave) {
+                  clientesUnicos.add(conta.pessoa.chave);
+                }
+              });
+            }
+          });
+          
+          clientesParaProcessar = Array.from(clientesUnicos);
+          console.log('Clientes encontrados no relatório:', clientesParaProcessar);
+          
+          await this.setState({ relatorio: res.data });
+        })
+        .catch((res) => {
+          console.log("Erro ao buscar todos os clientes:", res?.response?.data);
+        });
+    } else {
+      // Gerar o relatório unificado para ter os dados
+      await apiHeroku
+        .post("/relatorio/receber", {
+          all: false,
+          chaves: clientesParaProcessar,
+          centro_custo: this.state.centroCusto || false,
+          situacao: this.state.situacao || 'T',
+          grupo: this.state.grupo || false,
+        })
+        .then(async (res) => {
+          console.log('Dados do relatório para clientes selecionados:', res.data);
+          await this.setState({ relatorio: res.data });
+        })
+        .catch((res) => {
+          console.log("Erro ao gerar relatório:", res?.response?.data);
+        });
+    }
+    
+    // Preparar a lista de PDFs para serem gerados
     const pdfsSeparados = [];
-    
-    // Primeiro, gerar o relatório unificado para ter os dados
-    await apiHeroku
-      .post("/relatorio/receber", {
-        all: !this.state.clientes[0] ? true : false,
-        chaves: this.state.clientes,
-        centro_custo: this.state.centroCusto || false,
-        situacao: this.state.situacao || 'T',
-        grupo: this.state.grupo || false,
-      })
-      .then(async (res) => {
-        console.log('Dados do relatório unificado recebidos:', res.data);
-        await this.setState({ relatorio: res.data });
-        await this.relatorio(); // Gerar visualização unificada
-      })
-      .catch((res) => {
-        console.log("Erro ao gerar relatório unificado:", res?.response?.data);
-      });
-    
-    // Simplesmente preparar a lista de PDFs para serem gerados na hora da exportação
-    for (const clienteAtual of clientesOriginais) {
+    for (const clienteAtual of clientesParaProcessar) {
       const nomeCliente = this.state.pessoas.find(p => p.Chave == clienteAtual)?.Nome || `Cliente_${clienteAtual}`;
       
       pdfsSeparados.push({
@@ -465,6 +621,133 @@ class Relatorio extends Component {
     });
     
     console.log('PDFs separados preparados:', pdfsSeparados);
+    
+    // Gerar e baixar o ZIP automaticamente
+    await this.gerarZipPDFs();
+  };
+
+  gerarZipPDFs = async () => {
+    console.log('=== INICIANDO GERAÇÃO DO ZIP COM PDFs ===');
+    this.mostrarMensagem(`Gerando ${this.state.pdfsSeparadosGerados.length} PDFs...`, 'info');
+    
+    const zip = new JSZip();
+    let pdfsGerados = 0;
+    
+    try {
+      for (const pdfData of this.state.pdfsSeparadosGerados) {
+        console.log(`Processando PDF para cliente ${pdfData.clienteId}...`);
+        
+        // Buscar o elemento DOM específico do cliente
+        const elementoPDF = document.getElementById(`pdfDiv_${pdfData.clienteId}`);
+        
+        if (!elementoPDF) {
+          console.log(`Elemento DOM não encontrado para cliente ${pdfData.clienteId}`);
+          continue;
+        }
+        
+        console.log(`Elemento DOM encontrado para cliente ${pdfData.clienteId}, gerando PDF...`);
+        
+        // Gerar o PDF usando o drawDOM e exportPDF
+        const base64 = await drawDOM(elementoPDF, {
+          paperSize: "A4",
+          margin: "0.5cm",
+          scale: 0.6,
+          portrait: true,
+        })
+        .then((group) => {
+          return exportPDF(group);
+        })
+        .then((dataUri) => {
+          // Remover o prefixo data:application/pdf;base64,
+          return dataUri.split(',')[1];
+        });
+        
+        if (base64 && base64.length > 100) { // Verificar se o PDF não está vazio
+          zip.file(`${pdfData.pdfNome}.pdf`, base64, { base64: true });
+          pdfsGerados++;
+          console.log(`PDF gerado com sucesso para cliente ${pdfData.clienteId}`);
+        } else {
+          console.log(`PDF vazio gerado para cliente ${pdfData.clienteId}`);
+        }
+      }
+      
+      if (pdfsGerados > 0) {
+        // Gerar e baixar o arquivo ZIP
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        const nomeZip = `SOAs_${moment().format("DD-MM-YYYY")}_${pdfsGerados}_clientes.zip`;
+        
+        // Baixar o arquivo
+        saveAs(zipBlob, nomeZip);
+        
+        this.mostrarMensagem(`✅ ZIP gerado com sucesso: ${nomeZip}`, 'success');
+        console.log(`ZIP gerado com sucesso: ${nomeZip}`);
+        
+        // Voltar para a tela anterior após alguns segundos
+        setTimeout(() => {
+          this.setState({ 
+            pdfView: false, 
+            pdfsSeparadosGerados: [], 
+            downloadZipAutomatico: false,
+            mensagemElegante: null
+          });
+        }, 3000);
+        
+      } else {
+        this.mostrarMensagem('❌ Erro: Nenhum PDF foi gerado com sucesso.', 'error');
+      }
+      
+    } catch (error) {
+      console.error('Erro ao gerar ZIP:', error);
+      this.mostrarMensagem('❌ Erro ao gerar arquivo ZIP. Tente novamente.', 'error');
+    }
+  };
+
+  mostrarMensagem = (mensagem, tipo = 'info') => {
+    const notificacao = document.createElement('div');
+    
+    let cor = '#17a2b8'; // info (azul)
+    if (tipo === 'success') cor = '#28a745'; // verde
+    if (tipo === 'error') cor = '#dc3545'; // vermelho
+    if (tipo === 'warning') cor = '#ffc107'; // amarelo
+    
+    notificacao.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${cor};
+      color: white;
+      padding: 15px 20px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      z-index: 9999;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      max-width: 400px;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease-out;
+    `;
+    notificacao.textContent = mensagem;
+    
+    document.body.appendChild(notificacao);
+    
+    // Animar entrada
+    setTimeout(() => {
+      notificacao.style.opacity = '1';
+      notificacao.style.transform = 'translateX(0)';
+    }, 10);
+    
+    // Remover após alguns segundos
+    const tempo = tipo === 'error' ? 7000 : 4000;
+    setTimeout(() => {
+      notificacao.style.opacity = '0';
+      notificacao.style.transform = 'translateX(100%)';
+      setTimeout(() => {
+        if (notificacao.parentNode) {
+          notificacao.remove();
+        }
+      }, 300);
+    }, tempo);
   };
 
   renderPDFContent = (relatorioFiltrado, clienteId) => {
@@ -484,7 +767,7 @@ class Relatorio extends Component {
 
     // Percorrer os dados para calcular totais
     relatorioFiltrado.forEach(e => {
-      if (e.contas_normais) {
+      if (e.contas_normais && Array.isArray(e.contas_normais)) {
         e.contas_normais.forEach(f => {
           let FDA2 = f?.fda;
           let DISCONT2 = f?.discount;
@@ -509,7 +792,7 @@ class Relatorio extends Component {
         });
       }
       
-      if (e.contas_manuais) {
+      if (e.contas_manuais && Array.isArray(e.contas_manuais)) {
         e.contas_manuais.forEach(f => {
           let FDA2 = f?.fda;
           let DISCONT2 = f?.discount;
@@ -564,84 +847,88 @@ class Relatorio extends Component {
               const rows = [];
               
               // Processar contas normais igual ao original
-              e.contas_normais.forEach((f) => {
-                let FDA2 = f?.fda;
-                let DISCONT2 = f?.discount;
-                let RECEIVED2 = f?.received;
-                let BALANCE2 = f?.balance;
-                
-                if (this.state.moeda) {
-                  if (parseInt(this.state.moeda) === parseInt(f?.moeda)) {
-                  } else {
-                    FDA2 = f?.FDADOLAR ? f?.FDADOLAR : FDA2 / f?.roe;
-                    DISCONT2 = f?.discountDOLAR ? f?.discountDOLAR : DISCONT2 / f?.roe;
-                    RECEIVED2 = f?.receivedDOLAR ? f.receivedDOLAR : RECEIVED2 / f?.roe;
-                    BALANCE2 = f?.balanceDolar ? f?.balanceDolar : BALANCE2 / f?.roe;
+              if (e.contas_normais && Array.isArray(e.contas_normais)) {
+                e.contas_normais.forEach((f) => {
+                  let FDA2 = f?.fda;
+                  let DISCONT2 = f?.discount;
+                  let RECEIVED2 = f?.received;
+                  let BALANCE2 = f?.balance;
+                  
+                  if (this.state.moeda) {
+                    if (parseInt(this.state.moeda) === parseInt(f?.moeda)) {
+                    } else {
+                      FDA2 = f?.FDADOLAR ? f?.FDADOLAR : FDA2 / f?.roe;
+                      DISCONT2 = f?.discountDOLAR ? f?.discountDOLAR : DISCONT2 / f?.roe;
+                      RECEIVED2 = f?.receivedDOLAR ? f.receivedDOLAR : RECEIVED2 / f?.roe;
+                      BALANCE2 = f?.balanceDolar ? f?.balanceDolar : BALANCE2 / f?.roe;
+                    }
                   }
-                }
-                
-                const row = {
-                  ship: f?.ship || "",
-                  os: f?.os || "",
-                  port: f?.port || "",
-                  moeda: f?.moeda || 5,
-                  sailed: f?.sailed || moment().format("YYYY-MM-DD"),
-                  billing: (() => {
-                    const date = moment(f?.billing);
-                    return date.isValid()
-                      ? date.format("YY") === "99"
-                        ? "N/A"
-                        : date.format("YYYY-MM-DD")
-                      : moment().format("YYYY-MM-DD");
-                  })(),
-                  roe: f?.roe || 5,
-                  fda: FDA2,
-                  discount: DISCONT2,
-                  received: RECEIVED2,
-                  balance: BALANCE2,
-                };
-                rows.push(row);
-              });
+                  
+                  const row = {
+                    ship: f?.ship || "",
+                    os: f?.os || "",
+                    port: f?.port || "",
+                    moeda: f?.moeda || 5,
+                    sailed: f?.sailed || moment().format("YYYY-MM-DD"),
+                    billing: (() => {
+                      const date = moment(f?.billing);
+                      return date.isValid()
+                        ? date.format("YY") === "99"
+                          ? "N/A"
+                          : date.format("YYYY-MM-DD")
+                        : moment().format("YYYY-MM-DD");
+                    })(),
+                    roe: f?.roe || 5,
+                    fda: FDA2,
+                    discount: DISCONT2,
+                    received: RECEIVED2,
+                    balance: BALANCE2,
+                  };
+                  rows.push(row);
+                });
+              }
 
               // Processar contas manuais igual ao original
-              e.contas_manuais.forEach((f) => {
-                let FDA2 = f?.fda;
-                let DISCONT2 = f?.discount;
-                let RECEIVED2 = f?.received;
-                let BALANCE2 = f?.balance;
-                
-                if (this.state.moeda) {
-                  if (parseInt(this.state.moeda) === parseInt(f?.moeda)) {
-                  } else {
-                    FDA2 = f?.FDADOLAR ? f?.FDADOLAR : FDA2 / f?.roe;
-                    DISCONT2 = f?.discountDOLAR ? f?.discountDOLAR : DISCONT2 / f?.roe;
-                    RECEIVED2 = f?.receivedDOLAR ? f.receivedDOLAR : RECEIVED2 / f?.roe;
-                    BALANCE2 = f?.balanceDolar ? f?.balanceDolar : BALANCE2 / f?.roe;
+              if (e.contas_manuais && Array.isArray(e.contas_manuais)) {
+                e.contas_manuais.forEach((f) => {
+                  let FDA2 = f?.fda;
+                  let DISCONT2 = f?.discount;
+                  let RECEIVED2 = f?.received;
+                  let BALANCE2 = f?.balance;
+                  
+                  if (this.state.moeda) {
+                    if (parseInt(this.state.moeda) === parseInt(f?.moeda)) {
+                    } else {
+                      FDA2 = f?.FDADOLAR ? f?.FDADOLAR : FDA2 / f?.roe;
+                      DISCONT2 = f?.discountDOLAR ? f?.discountDOLAR : DISCONT2 / f?.roe;
+                      RECEIVED2 = f?.receivedDOLAR ? f.receivedDOLAR : RECEIVED2 / f?.roe;
+                      BALANCE2 = f?.balanceDolar ? f?.balanceDolar : BALANCE2 / f?.roe;
+                    }
                   }
-                }
-                
-                const row = {
-                  ship: f?.ship || "",
-                  os: f?.os || "",
-                  port: f?.port || "",
-                  moeda: f?.moeda || 5,
-                  sailed: f?.sailed || moment().format("YYYY-MM-DD"),
-                  billing: (() => {
-                    const date = moment(f?.billing);
-                    return date.isValid()
-                      ? date.format("YY") === "99"
-                        ? "N/A"
-                        : date.format("YYYY-MM-DD")
-                      : moment().format("YYYY-MM-DD");
-                  })(),
-                  roe: f?.roe || 5,
-                  fda: FDA2,
-                  discount: DISCONT2,
-                  received: RECEIVED2,
-                  balance: BALANCE2,
-                };
-                rows.push(row);
-              });
+                  
+                  const row = {
+                    ship: f?.ship || "",
+                    os: f?.os || "",
+                    port: f?.port || "",
+                    moeda: f?.moeda || 5,
+                    sailed: f?.sailed || moment().format("YYYY-MM-DD"),
+                    billing: (() => {
+                      const date = moment(f?.billing);
+                      return date.isValid()
+                        ? date.format("YY") === "99"
+                          ? "N/A"
+                          : date.format("YYYY-MM-DD")
+                        : moment().format("YYYY-MM-DD");
+                    })(),
+                    roe: f?.roe || 5,
+                    fda: FDA2,
+                    discount: DISCONT2,
+                    received: RECEIVED2,
+                    balance: BALANCE2,
+                  };
+                  rows.push(row);
+                });
+              }
 
               console.log(`Cliente ${clienteId} - Total rows:`, rows);
 
@@ -899,6 +1186,74 @@ class Relatorio extends Component {
               </td>
             </tr>
           </table>
+          
+          {/* Banking Details */}
+          <br />
+          <br />
+          <br />
+          <h5 style={{ width: "100%", textAlign: "center" }}>BANKING DETAILS</h5>
+          <table style={{ width: "80%", marginLeft: "5%" }}>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Bank's name:</b> Banco Santander
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Branch's name:</b> Rio Grande
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>SWIFT code:</b> BSCHBRSPXXX
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>IBAN:</b> BR8290400888032720130031839C1
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Branch's number:</b> 3272
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Account number:</b> 130031839
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Sender's correspondent:</b> Standard Chartered Bank
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Sender's correspondent - SWIFT:</b> SCBLUS33XXX
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Account name:</b> SUL TRADE AGENCIAMENTOS MARITIMOS LTDA-ME
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Address:</b> 161 Andrade Neves Street
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>Phone:</b> +55 53 3235 3500
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "0px 3px 0px 3px", paddingRight: 100 }}>
+                <b style={{ paddingRight: 5 }}>CNPJ:</b> 10.432.546/0001-75
+              </td>
+            </tr>
+          </table>
         </div>
       </div>
     );
@@ -947,12 +1302,13 @@ class Relatorio extends Component {
               console.log('Contas normais:', e.contas_normais);
               console.log('Contas manuais:', e.contas_manuais);
               
-              if (!e.contas_normais || !e.contas_manuais) {
-                console.log('PROBLEMA: Contas normais ou manuais estão undefined!');
+              if (!e.contas_normais && !e.contas_manuais) {
+                console.log('PROBLEMA: Nem contas normais nem manuais estão disponíveis!');
                 return null;
               }
               
-              e.contas_normais.forEach((f) => {
+              if (e.contas_normais && Array.isArray(e.contas_normais)) {
+                e.contas_normais.forEach((f) => {
               let FDA2 = f?.fda;
               let DISCONT2 = f?.discount;
               let RECEIVED2 = f?.received;
@@ -990,8 +1346,10 @@ class Relatorio extends Component {
               };
               rows.push(row);
             });
+            }
 
-            e.contas_manuais.forEach((f) => {
+            if (e.contas_manuais && Array.isArray(e.contas_manuais)) {
+              e.contas_manuais.forEach((f) => {
               let FDA2 = f?.fda;
               let DISCONT2 = f?.discount;
               let RECEIVED2 = f?.received;
@@ -1029,6 +1387,7 @@ class Relatorio extends Component {
               };
               rows.push(row);
             });
+            }
 
             let totalFDAPorGrupo = 0;
             let totalDiscountPorGrupo = 0;
@@ -1439,7 +1798,8 @@ class Relatorio extends Component {
               {relatorio.map((e) => {
                 if (this.props.location.state.backTo == "contasReceber") {
                   const rows = [];
-                  e.contas_normais.forEach((f) => {
+                  if (e.contas_normais && Array.isArray(e.contas_normais)) {
+                    e.contas_normais.forEach((f) => {
                     let FDA2 = f?.fda;
                     let DISCONT2 = f?.discount;
                     let RECEIVED2 = f?.received;
@@ -1492,7 +1852,9 @@ class Relatorio extends Component {
 
                     return f;
                   });
-                  e.contas_manuais.forEach((f) => {
+                  }
+                  if (e.contas_manuais && Array.isArray(e.contas_manuais)) {
+                    e.contas_manuais.forEach((f) => {
                     let FDA2 = f?.fda;
                     let DISCONT2 = f?.discount;
                     let RECEIVED2 = f?.received;
@@ -1545,6 +1907,7 @@ class Relatorio extends Component {
 
                     return f;
                   });
+                  }
 
                   console.log(rows, "rows");
                   let totalFDAPorGrupo = 0;
@@ -2985,6 +3348,32 @@ class Relatorio extends Component {
 
   handleExportWithComponent = (event) => {
     this.setState({ loading: false });
+    
+    // Se está marcado para download automático, gerar o ZIP
+    if (this.state.downloadZipAutomatico && this.state.pdfsSeparadosGerados.length > 0) {
+      // Aguardar que a visualização seja totalmente renderizada
+      setTimeout(() => {
+        // Verificar se os elementos DOM existem antes de gerar o ZIP
+        const verificarElementosDOM = () => {
+          const elementosEncontrados = this.state.pdfsSeparadosGerados.map(pdf => 
+            document.getElementById(`pdfDiv_${pdf.clienteId}`)
+          ).filter(el => el !== null);
+          
+          console.log(`Verificando elementos DOM: ${elementosEncontrados.length}/${this.state.pdfsSeparadosGerados.length}`);
+          
+          if (elementosEncontrados.length === this.state.pdfsSeparadosGerados.length) {
+            console.log('Todos os elementos DOM estão prontos, gerando ZIP...');
+            this.gerarZipPDFs();
+          } else {
+            console.log('Aguardando mais elementos DOM...');
+            // Tentar novamente em 500ms
+            setTimeout(verificarElementosDOM, 500);
+          }
+        };
+        
+        verificarElementosDOM();
+      }, 2000); // Aguardar 2 segundos iniciais para garantir que o DOM comece a renderizar
+    }
   };
 
   getPessoaContatos = async (pessoa) => {
@@ -3063,17 +3452,105 @@ class Relatorio extends Component {
               {/* PDFs separados visíveis para exportação */}
               {this.state.pdfsSeparadosGerados.length > 0 && (
                 <div style={{ marginTop: "40px", borderTop: "2px solid #ccc", paddingTop: "20px" }}>
-                  <div style={{ textAlign: "center", marginBottom: "20px", backgroundColor: "#f8f9fa", padding: "10px", borderRadius: "5px" }}>
-                    <h4 style={{ color: "#495057", margin: "0" }}>📄 PDFs Individuais Preparados para Exportação</h4>
-                    <p style={{ margin: "5px 0 0 0", color: "#6c757d", fontSize: "14px" }}>
-                      {this.state.pdfsSeparadosGerados.length} arquivo(s) serão gerados separadamente
-                    </p>
+                  <div style={{ textAlign: "center", marginBottom: "20px", backgroundColor: this.state.downloadZipAutomatico ? "#e7f3ff" : "#f8f9fa", padding: "15px", borderRadius: "5px", border: this.state.downloadZipAutomatico ? "2px solid #007bff" : "none" }}>
+                    {this.state.downloadZipAutomatico ? (
+                      <>
+                        <h4 style={{ color: "#007bff", margin: "0" }}>🚀 Download Automático Ativado</h4>
+                        <p style={{ margin: "8px 0 0 0", color: "#0056b3", fontSize: "14px", fontWeight: "bold" }}>
+                          Um arquivo ZIP com {this.state.pdfsSeparadosGerados.length} PDFs será baixado automaticamente em instantes...
+                        </p>
+                        <div style={{ 
+                          display: "inline-block", 
+                          marginTop: "10px", 
+                          padding: "5px 15px", 
+                          backgroundColor: "#007bff", 
+                          color: "white", 
+                          borderRadius: "20px", 
+                          fontSize: "12px",
+                          animation: "pulse 1.5s infinite"
+                        }}>
+                          ⬇️ Preparando download...
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <h4 style={{ color: "#495057", margin: "0" }}>📄 PDFs Individuais Preparados para Exportação</h4>
+                        <p style={{ margin: "5px 0 0 0", color: "#6c757d", fontSize: "14px" }}>
+                          {this.state.pdfsSeparadosGerados.length} arquivo(s) serão gerados separadamente
+                        </p>
+                      </>
+                    )}
                   </div>
                   {this.state.pdfsSeparadosGerados.map((pdfData, index) => {
-                    const clientesFiltrados = [pdfData.clienteId];
-                    const relatorioFiltrado = this.state.relatorio.filter(item => 
-                      item.pessoa.chave == parseInt(pdfData.clienteId)
-                    );
+                    // Filtrar relatório para este cliente específico
+                    const relatorioFiltrado = [];
+                    
+                    // Verificar se o relatório existe antes de usar forEach
+                    if (this.state.relatorio && Array.isArray(this.state.relatorio)) {
+                      this.state.relatorio.forEach(item => {
+                        let itemFiltrado = { ...item };
+                        let temDados = false;
+                        
+                        if (item.contas_normais && Array.isArray(item.contas_normais)) {
+                          const contasCliente = item.contas_normais.filter(conta => {
+                            // O campo pessoa pode ser apenas o ID ou um objeto
+                            if (typeof conta.pessoa === 'object' && conta.pessoa.chave) {
+                              return parseInt(conta.pessoa.chave) === parseInt(pdfData.clienteId);
+                            } else if (typeof conta.pessoa === 'number' || typeof conta.pessoa === 'string') {
+                            return parseInt(conta.pessoa) === parseInt(pdfData.clienteId);
+                          }
+                          return false;
+                        });
+                        if (contasCliente.length > 0) {
+                          itemFiltrado.contas_normais = contasCliente;
+                          temDados = true;
+                        } else {
+                          delete itemFiltrado.contas_normais;
+                        }
+                      }
+                      
+                      if (item.contas_manuais && Array.isArray(item.contas_manuais)) {
+                        const contasCliente = item.contas_manuais.filter(conta => {
+                          // O campo pessoa pode ser apenas o ID ou um objeto
+                          if (typeof conta.pessoa === 'object' && conta.pessoa.chave) {
+                            return parseInt(conta.pessoa.chave) === parseInt(pdfData.clienteId);
+                          } else if (typeof conta.pessoa === 'number' || typeof conta.pessoa === 'string') {
+                            return parseInt(conta.pessoa) === parseInt(pdfData.clienteId);
+                          }
+                          return false;
+                        });
+                        if (contasCliente.length > 0) {
+                          itemFiltrado.contas_manuais = contasCliente;
+                          temDados = true;
+                        } else {
+                          delete itemFiltrado.contas_manuais;
+                        }
+                      }
+                      
+                      // Se há contas normais ou manuais para este cliente, adicionar o item
+                      if (temDados) {
+                        // Definir a pessoa principal baseada nas contas encontradas ou do item principal
+                        if (item.pessoa && item.pessoa.chave && parseInt(item.pessoa.chave) === parseInt(pdfData.clienteId)) {
+                          itemFiltrado.pessoa = item.pessoa;
+                        } else if (itemFiltrado.contas_normais && itemFiltrado.contas_normais[0]) {
+                          // Se a pessoa é apenas ID, buscar dados completos na lista de pessoas
+                          const pessoaId = typeof itemFiltrado.contas_normais[0].pessoa === 'object' 
+                            ? itemFiltrado.contas_normais[0].pessoa.chave 
+                            : itemFiltrado.contas_normais[0].pessoa;
+                          const pessoaCompleta = this.state.pessoas.find(p => p.Chave == pessoaId);
+                          itemFiltrado.pessoa = pessoaCompleta || { chave: pessoaId, nome: `Cliente ${pessoaId}` };
+                        } else if (itemFiltrado.contas_manuais && itemFiltrado.contas_manuais[0]) {
+                          // Se a pessoa é apenas ID, buscar dados completos na lista de pessoas
+                          const pessoaId = typeof itemFiltrado.contas_manuais[0].pessoa === 'object' 
+                            ? itemFiltrado.contas_manuais[0].pessoa.chave 
+                            : itemFiltrado.contas_manuais[0].pessoa;
+                          const pessoaCompleta = this.state.pessoas.find(p => p.Chave == pessoaId);
+                          itemFiltrado.pessoa = pessoaCompleta || { chave: pessoaId, nome: `Cliente ${pessoaId}` };
+                        }
+                        relatorioFiltrado.push(itemFiltrado);
+                      }
+                    });
+                    } // Fechamento do if que verifica se relatório existe
                     
                     console.log(`Filtro para cliente ${pdfData.clienteId}:`, relatorioFiltrado);
                     
@@ -3516,7 +3993,7 @@ class Relatorio extends Component {
                                     }} 
                                   />
                                   <label className="form-check-label" style={{marginLeft: "60px", fontSize: "12px", color: "#666"}}>
-                                    Gerar um PDF para cada cliente selecionado
+                                    Gerar um PDF para cada cliente
                                   </label>
                                 </div>
                               </>
