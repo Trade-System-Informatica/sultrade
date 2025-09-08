@@ -20,7 +20,6 @@ import moment from "moment";
 import Select from "react-select";
 import Skeleton from '../../../components/skeleton'
 import Modal from "@material-ui/core/Modal";
-import apiHeroku from "../../../services/apiHeroku";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
@@ -395,8 +394,9 @@ class Relatorio extends Component {
       centroCusto: this.state.centroCusto,
     });    if (this.props.location.state.backTo == "contasReceber") {
       // Para contas a receber, sempre gerar o relatório primeiro para visualização
-      await apiHeroku
-        .post("/relatorio/receber", {
+      await apiEmployee
+        .post("relatorioContasReceber.php", {
+          token: true,
           all: !this.state.clientes[0] ? true : false,
           chaves: this.state.clientes,
           centro_custo: this.state.centroCusto || false,
@@ -546,8 +546,9 @@ class Relatorio extends Component {
       console.log('Nenhum cliente selecionado, buscando todos...');
       
       // Buscar todos os clientes do relatório primeiro para obter a lista
-      await apiHeroku
-        .post("/relatorio/receber", {
+      await apiEmployee
+        .post("relatorioContasReceber.php", {
+          token: true,
           all: true,
           chaves: [],
           centro_custo: this.state.centroCusto || false,
@@ -586,8 +587,9 @@ class Relatorio extends Component {
         });
     } else {
       // Gerar o relatório unificado para ter os dados
-      await apiHeroku
-        .post("/relatorio/receber", {
+      await apiEmployee
+        .post("relatorioContasReceber.php", {
+          token: true,
           all: false,
           chaves: clientesParaProcessar,
           centro_custo: this.state.centroCusto || false,

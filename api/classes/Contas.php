@@ -1501,4 +1501,408 @@ class Contas
         }
         return $result;
     }
+
+    public static function relatorioContasReceber($all, $chaves, $centro_custo, $situacao, $grupo)
+    {
+        $database = new Database();
+        
+        // Construir WHERE clause
+        $where_conditions = array();
+        $where_conditions[] = "contas_aberto.Empresa = 1";
+        $where_conditions[] = "contas_aberto.Saldo >= 1";
+        $where_conditions[] = "contas_aberto.tipo = 0";
+        
+        // Filtro por clientes específicos
+        if (!$all && is_array($chaves) && count($chaves) > 0) {
+            $chaves_string = "'" . implode("','", $chaves) . "'";
+            $where_conditions[] = "pessoas.chave IN ($chaves_string)";
+        }
+        
+        // Filtro por centro de custo
+        if ($centro_custo) {
+            $where_conditions[] = "contas_aberto.Centro_Custo = '$centro_custo'";
+        }
+        
+        // Filtro por grupo (subcategoria)
+        if ($grupo) {
+            $where_conditions[] = "pessoas.subcategoria = '$grupo'";
+        }
+        
+        $where_clause = implode(" AND ", $where_conditions);
+        
+        // Query principal para buscar contas
+        $query = "
+            SELECT 
+                contas_aberto.*,
+                pessoas.chave as pessoa_chave,
+                pessoas.Nome as pessoa_nome,
+                pessoas.Nome_Fantasia as pessoa_nome_fantasia,
+                pessoas.subcategoria as pessoa_subcategoria,
+                os.chave as os_chave,
+                os.roe as os_roe,
+                os.envio as os_envio,
+                os.cancelada as os_cancelada,
+                os.governmentTaxes as os_government_taxes,
+                os.data_abertura as os_data_abertura,
+                os.Data_Encerramento as os_data_encerramento,
+                os.Data_Faturamento as os_data_faturamento,
+                os.bankCharges as os_bank_charges,
+                os.codigo as os_codigo,
+                os.Data_Saida as os_data_saida,
+                os_navios.nome as navio_nome,
+                os_navios.chave as navio_chave,
+                os_portos.descricao as porto_descricao,
+                os_portos.chave as porto_chave,
+                contas_navios.nome as manual_navio_nome,
+                contas_navios.chave as manual_navio_chave,
+                contas_portos.descricao as manual_porto_descricao,
+                contas_portos.chave as manual_porto_chave
+            FROM contas_aberto
+            LEFT JOIN pessoas ON contas_aberto.pessoa = pessoas.chave
+            LEFT JOIN os ON contas_aberto.os = os.chave
+            LEFT JOIN os_navios ON os.chave_navio = os_navios.chave
+            LEFT JOIN os_portos ON os.porto = os_portos.chave
+            LEFT JOIN os_navios as contas_navios ON contas_aberto.os_navio_manual = contas_navios.chave
+            LEFT JOIN os_portos as contas_portos ON contas_aberto.os_porto_manual = contas_portos.chave
+            WHERE $where_clause
+            ORDER BY pessoas.Nome ASC
+        ";
+        
+        $contas_data = $database->doRawSelect($query);
+        
+        // Buscar contatos das pessoas para government taxes e bank charges
+        $pessoas_chaves = array();
+        foreach ($contas_data as $conta) {
+            if ($conta['pessoa_chave'] && !in_array($conta['pessoa_chave'], $pessoas_chaves)) {
+                $pessoas_chaves[] = $conta['pessoa_chave'];
+            }
+        }
+        
+        $contatos = array();
+        if (count($pessoas_chaves) > 0) {
+            $pessoas_string = implode(',', $pessoas_chaves);
+            $contatos_query = "
+                SELECT 
+                    pessoas_contatos.*,
+                    pessoas_contatos.Chave_Pessoa as pessoa_chave
+                FROM pessoas_contatos 
+                WHERE pessoas_contatos.Chave_Pessoa IN ($pessoas_string) 
+                AND pessoas_contatos.Tipo IN ('GT', 'BK')
+            ";
+            $contatos_raw = $database->doRawSelect($contatos_query);
+            foreach ($contatos_raw as $contato) {
+                $pessoa_chave = $contato['pessoa_chave'];
+                if (!isset($contatos[$pessoa_chave])) {
+                    $contatos[$pessoa_chave] = array();
+                }
+                $contatos[$pessoa_chave][] = $contato;
+            }
+        }
+        
+        // Filtrar contas baseado na situação
+        $contas_filtradas = array();
+        foreach ($contas_data as $conta) {
+            $incluir = true;
+            
+            if ($conta['os_chave']) {
+                $data_encerramento = $conta['os_data_encerramento'];
+                if ($data_encerramento && $data_encerramento !== '0000-00-00 00:00:00') {
+                    if ($situacao === 'E') {
+                        // Enviados - devem ter data de envio válida
+                        $envio_date = $conta['os_envio'];
+                        $incluir = $envio_date && 
+                                  $envio_date !== '0000-00-00' && 
+                                  $envio_date !== '0000-00-00 00:00:00';
+                    } else if ($situacao === 'N') {
+                        // Não enviados - não devem ter data de envio válida
+                        $envio_date = $conta['os_envio'];
+                        $incluir = !$envio_date || 
+                                  $envio_date === '0000-00-00' || 
+                                  $envio_date === '0000-00-00 00:00:00';
+                    } else if ($situacao === 'F') {
+                        // Faturados - devem ter data de faturamento válida
+                        $faturamento_date = $conta['os_data_faturamento'];
+                        $incluir = $faturamento_date && 
+                                  $faturamento_date !== '0000-00-00 00:00:00';
+                    }
+                } else {
+                    $incluir = false;
+                }
+            }
+            
+            if ($incluir) {
+                $contas_filtradas[] = $conta;
+            }
+        }
+        
+        // Buscar serviços das OS
+        $os_chaves = array();
+        foreach ($contas_filtradas as $conta) {
+            if ($conta['os_chave'] && !in_array($conta['os_chave'], $os_chaves)) {
+                $os_chaves[] = $conta['os_chave'];
+            }
+        }
+        
+        $servicos = array();
+        if (count($os_chaves) > 0) {
+            $os_string = implode(',', $os_chaves);
+            $servicos_query = "
+                SELECT 
+                    os_servicos_itens.*
+                FROM os_servicos_itens 
+                WHERE os_servicos_itens.chave_os IN ($os_string)
+                AND os_servicos_itens.cancelada != 1
+            ";
+            $servicos_raw = $database->doRawSelect($servicos_query);
+            foreach ($servicos_raw as $servico) {
+                $os_chave = $servico['chave_os'];
+                if (!isset($servicos[$os_chave])) {
+                    $servicos[$os_chave] = array();
+                }
+                $servicos[$os_chave][] = $servico;
+            }
+        }
+        
+        // Processar dados
+        $pessoas_resultado = array();
+        $dados_manuais = array();
+        $dados_normais = array();
+        
+        foreach ($contas_filtradas as $conta) {
+            $pessoa_chave = $conta['pessoa_chave'];
+            
+            // Adicionar pessoa ao resultado se não existir
+            if (!isset($pessoas_resultado[$pessoa_chave])) {
+                $pessoas_resultado[$pessoa_chave] = array(
+                    'pessoa' => array(
+                        'chave' => $conta['pessoa_chave'],
+                        'nome' => $conta['pessoa_nome'],
+                        'nome_fantasia' => $conta['pessoa_nome_fantasia']
+                    ),
+                    'lancamento' => $conta['lancto']
+                );
+            }
+            
+            // Processar conta manual ou normal
+            if (!$conta['os_chave']) {
+                // Conta manual
+                $fda = floatval($conta['valor']);
+                $discount = floatval($conta['discount_manual']);
+                $received = floatval($conta['received_manual']);
+                $balance = $fda - $discount - $received;
+                
+                if ($balance > 0.01) {
+                    $dados_manuais[] = array(
+                        'ship' => $conta['manual_navio_nome'] ?: '',
+                        'os' => $conta['os_manual'] ?: '',
+                        'pessoa' => $pessoa_chave,
+                        'port' => $conta['manual_porto_descricao'] ?: '',
+                        'sailed' => $conta['sailed_manual'] ?: date('Y-m-d'),
+                        'billing' => $conta['envio'] ?: date('Y-m-d'),
+                        'roe' => floatval($conta['roe_manual']) ?: 5,
+                        'governmentTaxes' => 0,
+                        'bankCharges' => 0,
+                        'moeda' => intval($conta['moeda']) ?: 5,
+                        'fda' => $fda,
+                        'discount' => $discount,
+                        'received' => $received,
+                        'balance' => $balance
+                    );
+                }
+            } else {
+                // Conta normal (com OS)
+                if ($conta['os_cancelada'] == 0) {
+                    $pessoa_contatos = isset($contatos[$pessoa_chave]) ? $contatos[$pessoa_chave] : array();
+                    
+                    // Buscar contatos específicos
+                    $gt_contact = null;
+                    $bk_contact = null;
+                    foreach ($pessoa_contatos as $contato) {
+                        if ($contato['Tipo'] == 'GT') $gt_contact = $contato;
+                        if ($contato['Tipo'] == 'BK') $bk_contact = $contato;
+                    }
+                    
+                    // Verificar aplicação de taxas baseada na data limite
+                    $aplicar_bank_charges = true;
+                    $aplicar_government_taxes = true;
+                    
+                    if ($bk_contact && !empty($bk_contact['Campo2'])) {
+                        $partes = explode('/', $bk_contact['Campo2']);
+                        if (count($partes) == 3) {
+                            $data_limite = $partes[2] . '-' . $partes[1] . '-' . $partes[0];
+                            $data_abertura = substr($conta['os_data_abertura'], 0, 10);
+                            if ($data_abertura > $data_limite) {
+                                $aplicar_bank_charges = false;
+                            }
+                        }
+                    }
+                    
+                    if ($gt_contact && !empty($gt_contact['Campo2'])) {
+                        $partes = explode('/', $gt_contact['Campo2']);
+                        if (count($partes) == 3) {
+                            $data_limite = $partes[2] . '-' . $partes[1] . '-' . $partes[0];
+                            $data_abertura = substr($conta['os_data_abertura'], 0, 10);
+                            if ($data_abertura > $data_limite) {
+                                $aplicar_government_taxes = false;
+                            }
+                        }
+                    }
+                    
+                    $fda = 0;
+                    $fda_dolar = 0;
+                    $discount = 0;
+                    $discount_dolar = 0;
+                    $received = 0;
+                    $received_dolar = 0;
+                    
+                    $os_chave = $conta['os_chave'];
+                    $roe = floatval($conta['os_roe']) ?: 1;
+                    
+                    // Processar serviços da OS
+                    if (isset($servicos[$os_chave])) {
+                        foreach ($servicos[$os_chave] as $servico) {
+                            $tipo_sub = intval($servico['tipo_sub']);
+                            $moeda_servico = intval($servico['moeda']);
+                            $valor_servico = floatval($servico['valor']) * floatval($servico['qntd']);
+                            $repasse = intval($servico['repasse']);
+                            $fornecedor_custeio = intval($servico['Fornecedor_Custeio']);
+                            
+                            // Verificar se deve incluir o serviço
+                            $incluir_servico = false;
+                            if (($tipo_sub === 0 || $tipo_sub === 1) && ($repasse === 1 || $fornecedor_custeio !== 0)) {
+                                $incluir_servico = true;
+                            } else if ($tipo_sub === 2 || $tipo_sub === 3) {
+                                $incluir_servico = true;
+                            }
+                            
+                            if ($incluir_servico) {
+                                if ($tipo_sub === 3) {
+                                    // Desconto
+                                    if ($moeda_servico === 5) {
+                                        $discount += $valor_servico;
+                                        $discount_dolar += $valor_servico / $roe;
+                                    } else {
+                                        $discount_dolar += $valor_servico;
+                                        $discount += $valor_servico * $roe;
+                                    }
+                                } else if ($tipo_sub === 2) {
+                                    // Recebido
+                                    if ($moeda_servico === 5) {
+                                        $received += $valor_servico;
+                                        $received_dolar += $valor_servico / $roe;
+                                    } else {
+                                        $received_dolar += $valor_servico;
+                                        $received += $valor_servico * $roe;
+                                    }
+                                } else {
+                                    // FDA
+                                    if ($moeda_servico === 5) {
+                                        $fda += $valor_servico;
+                                        $fda_dolar += $valor_servico / $roe;
+                                    } else {
+                                        $fda_dolar += $valor_servico;
+                                        $fda += $valor_servico * $roe;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Adicionar government taxes e bank charges
+                    $data_encerramento = $conta['os_data_encerramento'];
+                    $aplicar_taxas_antigas = strtotime($data_encerramento) < strtotime('2024-01-25');
+                    
+                    $government_taxes = floatval($conta['os_government_taxes']);
+                    $bank_charges = floatval($conta['os_bank_charges']);
+                    
+                    $gov_taxes_aplicar = ($aplicar_taxas_antigas || 
+                                         (strtoupper($gt_contact['Campo1'] ?? '') === 'SIM')) && 
+                                        $aplicar_government_taxes;
+                    
+                    $bank_charges_aplicar = ($aplicar_taxas_antigas || 
+                                            (strtoupper($bk_contact['Campo1'] ?? '') === 'SIM')) && 
+                                           $aplicar_bank_charges;
+                    
+                    $moeda_conta = intval($conta['moeda']);
+                    
+                    if ($gov_taxes_aplicar && $government_taxes > 0) {
+                        if ($moeda_conta === 5 || !$moeda_conta) {
+                            $fda += $government_taxes;
+                            $fda_dolar += $government_taxes / $roe;
+                        } else {
+                            $fda_dolar += $government_taxes;
+                            $fda += $government_taxes * $roe;
+                        }
+                    }
+                    
+                    if ($bank_charges_aplicar && $bank_charges > 0) {
+                        if ($moeda_conta === 5 || !$moeda_conta) {
+                            $fda += $bank_charges;
+                            $fda_dolar += $bank_charges / $roe;
+                        } else {
+                            $fda_dolar += $bank_charges;
+                            $fda += $bank_charges * $roe;
+                        }
+                    }
+                    
+                    $balance = $fda - $discount - $received;
+                    $balance_dolar = $fda_dolar - $discount_dolar - $received_dolar;
+                    
+                    if ($balance > 0.01) {
+                        $dados_normais[] = array(
+                            'ship' => $conta['navio_nome'] ?: '',
+                            'os' => $conta['os_codigo'] ?: '',
+                            'pessoa' => $pessoa_chave,
+                            'port' => $conta['porto_descricao'] ?: '',
+                            'sailed' => $conta['os_data_saida'] ?: date('Y-m-d'),
+                            'billing' => $conta['os_envio'] ?: date('Y-m-d'),
+                            'roe' => $roe,
+                            'governmentTaxes' => $gov_taxes_aplicar ? $government_taxes : 0,
+                            'bankCharges' => $bank_charges_aplicar ? $bank_charges : 0,
+                            'moeda' => $moeda_conta ?: 5,
+                            'fda' => $fda,
+                            'discount' => $discount,
+                            'received' => $received,
+                            'balance' => $balance,
+                            'balanceDolar' => $balance_dolar,
+                            'receivedDOLAR' => $received_dolar,
+                            'discountDOLAR' => $discount_dolar,
+                            'FDADOLAR' => $fda_dolar
+                        );
+                    }
+                }
+            }
+        }
+        
+        // Organizar resultado final
+        $resultado_final = array();
+        foreach ($pessoas_resultado as $pessoa_chave => $pessoa_data) {
+            $contas_manuais = array_filter($dados_manuais, function($item) use ($pessoa_chave) {
+                return $item['pessoa'] == $pessoa_chave;
+            });
+            
+            $contas_normais = array_filter($dados_normais, function($item) use ($pessoa_chave) {
+                return $item['pessoa'] == $pessoa_chave;
+            });
+            
+            // Calcular total para verificar se deve incluir
+            $total = 0;
+            foreach ($contas_manuais as $conta) {
+                $total += $conta['balance'];
+            }
+            foreach ($contas_normais as $conta) {
+                $total += $conta['balance'];
+            }
+            
+            if ($total > 0.01) {
+                $resultado_final[] = array_merge($pessoa_data, array(
+                    'contas_normais' => array_values($contas_normais),
+                    'contas_manuais' => array_values($contas_manuais)
+                ));
+            }
+        }
+        
+        $database->closeConection();
+        return $resultado_final;
+    }
 }
