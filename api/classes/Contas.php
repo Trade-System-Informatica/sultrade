@@ -1816,11 +1816,11 @@ class Contas
                     $bank_charges = floatval($conta['os_bank_charges']);
                     
                     $gov_taxes_aplicar = ($aplicar_taxas_antigas || 
-                                         (strtoupper($gt_contact['Campo1'] ?? '') === 'SIM')) && 
+                                         (strtoupper(isset($gt_contact['Campo1']) ? $gt_contact['Campo1'] : '') === 'SIM')) && 
                                         $aplicar_government_taxes;
                     
                     $bank_charges_aplicar = ($aplicar_taxas_antigas || 
-                                            (strtoupper($bk_contact['Campo1'] ?? '') === 'SIM')) && 
+                                            (strtoupper(isset($bk_contact['Campo1']) ? $bk_contact['Campo1'] : '') === 'SIM')) && 
                                            $aplicar_bank_charges;
                     
                     $moeda_conta = intval($conta['Moeda']);
