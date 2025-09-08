@@ -1510,12 +1510,12 @@ class Contas
         $where_conditions = array();
         $where_conditions[] = "contas_aberto.Empresa = 1";
         $where_conditions[] = "contas_aberto.Saldo >= 1";
-        $where_conditions[] = "contas_aberto.tipo = 0";
+        $where_conditions[] = "contas_aberto.Tipo = 0";
         
         // Filtro por clientes específicos
         if (!$all && is_array($chaves) && count($chaves) > 0) {
             $chaves_string = "'" . implode("','", $chaves) . "'";
-            $where_conditions[] = "pessoas.chave IN ($chaves_string)";
+            $where_conditions[] = "pessoas.Chave IN ($chaves_string)";
         }
         
         // Filtro por centro de custo
@@ -1525,7 +1525,7 @@ class Contas
         
         // Filtro por grupo (subcategoria)
         if ($grupo) {
-            $where_conditions[] = "pessoas.subcategoria = '$grupo'";
+            $where_conditions[] = "pessoas.SubCategoria = '$grupo'";
         }
         
         $where_clause = implode(" AND ", $where_conditions);
@@ -1534,16 +1534,16 @@ class Contas
         $query = "
             SELECT 
                 contas_aberto.*,
-                pessoas.chave as pessoa_chave,
+                pessoas.Chave as pessoa_chave,
                 pessoas.Nome as pessoa_nome,
                 pessoas.Nome_Fantasia as pessoa_nome_fantasia,
-                pessoas.subcategoria as pessoa_subcategoria,
-                os.chave as os_chave,
-                os.roe as os_roe,
+                pessoas.SubCategoria as pessoa_subcategoria,
+                os.Chave as os_chave,
+                os.ROE as os_roe,
                 os.envio as os_envio,
                 os.cancelada as os_cancelada,
                 os.governmentTaxes as os_government_taxes,
-                os.data_abertura as os_data_abertura,
+                os.Data_Abertura as os_data_abertura,
                 os.Data_Encerramento as os_data_encerramento,
                 os.Data_Faturamento as os_data_faturamento,
                 os.bankCharges as os_bank_charges,
@@ -1551,19 +1551,19 @@ class Contas
                 os.Data_Saida as os_data_saida,
                 os_navios.nome as navio_nome,
                 os_navios.chave as navio_chave,
-                os_portos.descricao as porto_descricao,
-                os_portos.chave as porto_chave,
+                os_portos.Descricao as porto_descricao,
+                os_portos.Chave as porto_chave,
                 contas_navios.nome as manual_navio_nome,
                 contas_navios.chave as manual_navio_chave,
-                contas_portos.descricao as manual_porto_descricao,
-                contas_portos.chave as manual_porto_chave
+                contas_portos.Descricao as manual_porto_descricao,
+                contas_portos.Chave as manual_porto_chave
             FROM contas_aberto
-            LEFT JOIN pessoas ON contas_aberto.pessoa = pessoas.chave
-            LEFT JOIN os ON contas_aberto.os = os.chave
+            LEFT JOIN pessoas ON contas_aberto.Pessoa = pessoas.Chave
+            LEFT JOIN os ON contas_aberto.os_origem = os.Chave
             LEFT JOIN os_navios ON os.chave_navio = os_navios.chave
-            LEFT JOIN os_portos ON os.porto = os_portos.chave
-            LEFT JOIN os_navios as contas_navios ON contas_aberto.os_navio_manual = contas_navios.chave
-            LEFT JOIN os_portos as contas_portos ON contas_aberto.os_porto_manual = contas_portos.chave
+            LEFT JOIN os_portos ON os.porto = os_portos.Chave
+            LEFT JOIN os_navios as contas_navios ON contas_aberto.navio_manual = contas_navios.chave
+            LEFT JOIN os_portos as contas_portos ON contas_aberto.porto_manual = contas_portos.Chave
             WHERE $where_clause
             ORDER BY pessoas.Nome ASC
         ";
@@ -1679,14 +1679,14 @@ class Contas
                         'nome' => $conta['pessoa_nome'],
                         'nome_fantasia' => $conta['pessoa_nome_fantasia']
                     ),
-                    'lancamento' => $conta['lancto']
+                    'lancamento' => $conta['Lancto']
                 );
             }
             
             // Processar conta manual ou normal
             if (!$conta['os_chave']) {
                 // Conta manual
-                $fda = floatval($conta['valor']);
+                $fda = floatval($conta['Valor']);
                 $discount = floatval($conta['discount_manual']);
                 $received = floatval($conta['received_manual']);
                 $balance = $fda - $discount - $received;
@@ -1702,7 +1702,7 @@ class Contas
                         'roe' => floatval($conta['roe_manual']) ?: 5,
                         'governmentTaxes' => 0,
                         'bankCharges' => 0,
-                        'moeda' => intval($conta['moeda']) ?: 5,
+                        'moeda' => intval($conta['Moeda']) ?: 5,
                         'fda' => $fda,
                         'discount' => $discount,
                         'received' => $received,
@@ -1762,7 +1762,7 @@ class Contas
                     if (isset($servicos[$os_chave])) {
                         foreach ($servicos[$os_chave] as $servico) {
                             $tipo_sub = intval($servico['tipo_sub']);
-                            $moeda_servico = intval($servico['moeda']);
+                            $moeda_servico = intval($servico['Moeda']);
                             $valor_servico = floatval($servico['valor']) * floatval($servico['qntd']);
                             $repasse = intval($servico['repasse']);
                             $fornecedor_custeio = intval($servico['Fornecedor_Custeio']);
@@ -1823,7 +1823,7 @@ class Contas
                                             (strtoupper($bk_contact['Campo1'] ?? '') === 'SIM')) && 
                                            $aplicar_bank_charges;
                     
-                    $moeda_conta = intval($conta['moeda']);
+                    $moeda_conta = intval($conta['Moeda']);
                     
                     if ($gov_taxes_aplicar && $government_taxes > 0) {
                         if ($moeda_conta === 5 || !$moeda_conta) {
