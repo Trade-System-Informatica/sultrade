@@ -9,8 +9,9 @@ import { NOME_EMPRESA, CAMINHO_DOCUMENTOS } from '../../../config'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowUp, faArrowDown, faSave } from '@fortawesome/free-solid-svg-icons'
+import { faArrowUp, faArrowDown, faSave, faPlus, faPen } from '@fortawesome/free-solid-svg-icons'
 import { apiEmployee } from '../../../services/apiamrg'
+import { Link } from 'react-router-dom'
 import Skeleton from '../../../components/skeleton'
 import 'moment-timezone';
 import moment from 'moment';
@@ -50,6 +51,9 @@ const estadoInicial = {
     bloqueado: false,
     loading: true,
     alert: { type: "", msg: "" },
+
+    eventoModal: false,
+    eventoSelecionado: null,
 }
 
 class AddGrupoTemplate extends Component {
@@ -276,6 +280,10 @@ class AddGrupoTemplate extends Component {
         this.setState({ templatesEscolhidas });
       }
 
+    recarregarTemplates = async () => {
+        await this.getEventosTemplates();
+    }
+
     render() {
         const validations = []
         validations.push(this.state.nome);
@@ -379,46 +387,83 @@ class AddGrupoTemplate extends Component {
                                                                                 <th className='text-center'>
                                                                                     <span>Valor </span>
                                                                                 </th>
+                                                                                {this.state.acessosPermissoes.filter((e) => e.acessoAcao == 'SERVICOS_ITENS').map((e) => e.permissaoEdita)[0] == 1 &&
+                                                                                    <th className='text-center' style={{ width: 60, height: 20, padding: 5 }}>
+                                                                                        <span>Ações</span>
+                                                                                    </th>
+                                                                                }
                                                                                 <th className='text-center' style={{ width: 20, height: 20, padding: 5 }}>
                                                                                 </th>
                                                                             </tr>
                                                                             {this.state.templates[0] != undefined && this.state.templates.filter((feed) => this.state.templatesEscolhidas.includes(feed.chave)).map((feed, index) => (
                                                                                 <>
                                                                                     {window.innerWidth < 500 &&
-                                                                                        <tr onClick={() => {
-                                                                                            this.setState({ templatesEscolhidas: this.state.templatesEscolhidas.filter((e) => e != feed.chave) })
-                                                                                        }}>
-                                                                                            <td className="text-center">
+                                                                                        <tr>
+                                                                                            <td className="text-center" onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: this.state.templatesEscolhidas.filter((e) => e != feed.chave) })
+                                                                                            }}>
                                                                                                 <p>{feed.chave}</p>
                                                                                             </td>
-                                                                                            <td className="text-center">
+                                                                                            <td className="text-center" onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: this.state.templatesEscolhidas.filter((e) => e != feed.chave) })
+                                                                                            }}>
                                                                                                 <p>{feed.descricao}</p>
                                                                                             </td>
-                                                                                            <td className="text-center">
+                                                                                            <td className="text-center" onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: this.state.templatesEscolhidas.filter((e) => e != feed.chave) })
+                                                                                            }}>
                                                                                                 <p>{feed.Moeda == 5 ? "BRL" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor)}</p>
                                                                                             </td>
-                                                                                            <td>
+                                                                                            {this.state.acessosPermissoes.filter((e) => e.acessoAcao == 'SERVICOS_ITENS').map((e) => e.permissaoEdita)[0] == 1 &&
+                                                                                                <td className="text-center">
+                                                                                                    <div className='iconelixo giveMargin' type='button' >
+                                                                                                        <Link to={`/utilitarios/addeventotemplate/${feed.chave}`} target="_blank">
+                                                                                                            <FontAwesomeIcon icon={faPen} />
+                                                                                                        </Link>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                            }
+                                                                                            <td style={{ marginRight: '10px' }} onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: this.state.templatesEscolhidas.filter((e) => e != feed.chave) })
+                                                                                            }}>
                                                                                                 <input type="checkbox" checked={true} />
                                                                                             </td>
                                                                                         </tr>
                                                                                     }
                                                                                     {window.innerWidth >= 500 &&
-                                                                                        <tr onClick={() => {
-                                                                                            this.setState({ templatesEscolhidas: this.state.templatesEscolhidas.filter((e) => e != feed.chave) })
-                                                                                        }}>
-                                                                                            <td className="text-center">
+                                                                                        <tr>
+                                                                                            <td className="text-center" onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: this.state.templatesEscolhidas.filter((e) => e != feed.chave) })
+                                                                                            }}>
                                                                                                 <p>{feed.chave}</p>
                                                                                             </td>
-                                                                                            <td className="text-center">
+                                                                                            <td className="text-center" onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: this.state.templatesEscolhidas.filter((e) => e != feed.chave) })
+                                                                                            }}>
                                                                                                 <p>{this.state.tiposServicosItens[feed.tipo_sub]}</p>
                                                                                             </td>
-                                                                                            <td className="text-center">
+                                                                                            <td className="text-center" onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: this.state.templatesEscolhidas.filter((e) => e != feed.chave) })
+                                                                                            }}>
                                                                                                 <p>{feed.descricao}</p>
                                                                                             </td>
-                                                                                            <td className="text-center">
+                                                                                            <td className="text-center" onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: this.state.templatesEscolhidas.filter((e) => e != feed.chave) })
+                                                                                            }}>
                                                                                                 <p>{feed.Moeda == 5 ? "BRL" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor)}</p>
                                                                                             </td>
-                                                                                            <td>
+                                                                                            {this.state.acessosPermissoes.filter((e) => e.acessoAcao == 'SERVICOS_ITENS').map((e) => e.permissaoEdita)[0] == 1 &&
+                                                                                                <td className="text-center">
+                                                                                                    <div className='iconelixo giveMargin' type='button' >
+                                                                                                        <Link to={`/utilitarios/addeventotemplate/${feed.chave}`} target="_blank">
+                                                                                                            <FontAwesomeIcon icon={faPen} />
+                                                                                                        </Link>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                            }
+                                                                                            <td style={{ marginRight: '10px' }} onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: this.state.templatesEscolhidas.filter((e) => e != feed.chave) })
+                                                                                            }}>
                                                                                                 <input type="checkbox" checked={true} />
                                                                                             </td>
                                                                                         </tr>
@@ -433,7 +478,16 @@ class AddGrupoTemplate extends Component {
                                                                     <h4 className='text-center'>Nenhum</h4>
                                                                 }
                                                                 <br /><br /><br />
-                                                                <h3 className='text-center white'>Eventos</h3>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                                                                    <h3 className='text-center white' style={{ margin: 0, flex: 1 }}>Eventos</h3>
+                                                                    {this.state.acessosPermissoes.filter((e) => e.acessoAcao == 'SERVICOS_ITENS').map((e) => e.permissaoInsere)[0] == 1 &&
+                                                                        <a href="/utilitarios/addeventotemplate/0" target="_blank">
+                                                                            <button type="button" className="btn btn-success" style={{ margin: '10px', color: 'white', borderColor: 'white' }}>
+                                                                                <FontAwesomeIcon icon={faPlus} /> Criar Novo
+                                                                            </button>
+                                                                        </a>
+                                                                    }
+                                                                </div>
                                                                 {this.state.templates.find((feed) => !this.state.templatesEscolhidas.includes(feed.chave)) &&
                                                                     <div className="agrupador_eventos">
                                                                         <table className='agrupador_lista'>
@@ -452,46 +506,83 @@ class AddGrupoTemplate extends Component {
                                                                                 <th className='text-center'>
                                                                                     <span>Valor</span>
                                                                                 </th>
+                                                                                {this.state.acessosPermissoes.filter((e) => e.acessoAcao == 'SERVICOS_ITENS').map((e) => e.permissaoEdita)[0] == 1 &&
+                                                                                    <th className='text-center' style={{ width: 60, height: 20, padding: 5 }}>
+                                                                                        <span>Ações</span>
+                                                                                    </th>
+                                                                                }
                                                                                 <th className='text-center' style={{ width: 20, height: 20, padding: 5 }}>
                                                                                 </th>
                                                                             </tr>
                                                                             {this.state.templates[0] != undefined && this.state.templates.filter((feed) => !this.state.templatesEscolhidas.includes(feed.chave)).map((feed, index) => (
                                                                                 <>
                                                                                     {window.innerWidth < 500 &&
-                                                                                        <tr onClick={() => {
-                                                                                            this.setState({ templatesEscolhidas: [...this.state.templatesEscolhidas, feed.chave] })
-                                                                                        }}>
-                                                                                            <td className="text-center">
+                                                                                        <tr>
+                                                                                            <td className="text-center" onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: [...this.state.templatesEscolhidas, feed.chave] })
+                                                                                            }}>
                                                                                                 <p>{feed.chave}</p>
                                                                                             </td>
-                                                                                            <td className="text-center">
+                                                                                            <td className="text-center" onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: [...this.state.templatesEscolhidas, feed.chave] })
+                                                                                            }}>
                                                                                                 <p>{feed.descricao}</p>
                                                                                             </td>
-                                                                                            <td className="text-center">
+                                                                                            <td className="text-center" onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: [...this.state.templatesEscolhidas, feed.chave] })
+                                                                                            }}>
                                                                                                 <p>{feed.Moeda == 5 ? "BRL" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor)}</p>
                                                                                             </td>
-                                                                                            <td>
+                                                                                            {this.state.acessosPermissoes.filter((e) => e.acessoAcao == 'SERVICOS_ITENS').map((e) => e.permissaoEdita)[0] == 1 &&
+                                                                                                <td className="text-center">
+                                                                                                    <div className='iconelixo giveMargin' type='button' >
+                                                                                                        <Link to={`/utilitarios/addeventotemplate/${feed.chave}`} target="_blank">
+                                                                                                            <FontAwesomeIcon icon={faPen} />
+                                                                                                        </Link>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                            }
+                                                                                            <td style={{ marginRight: '10px' }} onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: [...this.state.templatesEscolhidas, feed.chave] })
+                                                                                            }}>
                                                                                                 <input type="checkbox" checked={false} />
                                                                                             </td>
                                                                                         </tr>
                                                                                     }
                                                                                     {window.innerWidth >= 500 &&
-                                                                                        <tr onClick={() => {
-                                                                                            this.setState({ templatesEscolhidas: [...this.state.templatesEscolhidas, feed.chave] })
-                                                                                        }}>
-                                                                                            <td className="text-center">
+                                                                                        <tr>
+                                                                                            <td className="text-center" onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: [...this.state.templatesEscolhidas, feed.chave] })
+                                                                                            }}>
                                                                                                 <p>{feed.chave}</p>
                                                                                             </td>
-                                                                                            <td className="text-center">
+                                                                                            <td className="text-center" onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: [...this.state.templatesEscolhidas, feed.chave] })
+                                                                                            }}>
                                                                                                 <p>{this.state.tiposServicosItens[feed.tipo_sub]}</p>
                                                                                             </td>
-                                                                                            <td className="text-center">
+                                                                                            <td className="text-center" onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: [...this.state.templatesEscolhidas, feed.chave] })
+                                                                                            }}>
                                                                                                 <p>{feed.descricao}</p>
                                                                                             </td>
-                                                                                            <td className="text-center">
+                                                                                            <td className="text-center" onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: [...this.state.templatesEscolhidas, feed.chave] })
+                                                                                            }}>
                                                                                                 <p>{feed.Moeda == 5 ? "BRL" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor)}</p>
                                                                                             </td>
-                                                                                            <td>
+                                                                                            {this.state.acessosPermissoes.filter((e) => e.acessoAcao == 'SERVICOS_ITENS').map((e) => e.permissaoEdita)[0] == 1 &&
+                                                                                                <td className="text-center">
+                                                                                                    <div className='iconelixo giveMargin' type='button' >
+                                                                                                        <Link to={`/utilitarios/addeventotemplate/${feed.chave}`} target="_blank">
+                                                                                                            <FontAwesomeIcon icon={faPen} />
+                                                                                                        </Link>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                            }
+                                                                                            <td style={{ marginRight: '10px' }} onClick={() => {
+                                                                                                this.setState({ templatesEscolhidas: [...this.state.templatesEscolhidas, feed.chave] })
+                                                                                            }}>
                                                                                                 <input type="checkbox" checked={false} />
                                                                                             </td>
                                                                                         </tr>
@@ -653,6 +744,11 @@ class AddGrupoTemplate extends Component {
                                                                             <th className='text-center'>
                                                                                 <span>Valor</span>
                                                                             </th>
+                                                                            {this.state.acessosPermissoes.filter((e) => e.acessoAcao == 'SERVICOS_ITENS').map((e) => e.permissaoEdita)[0] == 1 &&
+                                                                                <th className='text-center'>
+                                                                                    <span>Editar</span>
+                                                                                </th>
+                                                                            }
                                                                         </tr>
                                                                         {this.state.templates[0] != undefined &&
                                                                         this.state.templates
@@ -688,6 +784,15 @@ class AddGrupoTemplate extends Component {
                                                                                         <td className="text-center">
                                                                                             <p>{feed.Moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor)}</p>
                                                                                         </td>
+                                                                                        {this.state.acessosPermissoes.filter((e) => e.acessoAcao == 'SERVICOS_ITENS').map((e) => e.permissaoEdita)[0] == 1 &&
+                                                                                            <td className="text-center">
+                                                                                                <div className='iconelixo giveMargin' type='button' >
+                                                                                                    <Link to={`/utilitarios/addeventotemplate/${feed.chave}`} target="_blank">
+                                                                                                        <FontAwesomeIcon icon={faPen} />
+                                                                                                    </Link>
+                                                                                                </div>
+                                                                                            </td>
+                                                                                        }
                                                                                     </tr>
                                                                                 }
                                                                                 {window.innerWidth >= 500 &&
@@ -713,6 +818,15 @@ class AddGrupoTemplate extends Component {
                                                                                         <td className="text-center">
                                                                                             <p>{feed.Moeda == 5 ? "R$" : "USD"} {new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(feed.valor)}</p>
                                                                                         </td>
+                                                                                        {this.state.acessosPermissoes.filter((e) => e.acessoAcao == 'SERVICOS_ITENS').map((e) => e.permissaoEdita)[0] == 1 &&
+                                                                                            <td className="text-center">
+                                                                                                <div className='iconelixo giveMargin' type='button' >
+                                                                                                    <Link to={`/utilitarios/addeventotemplate/${feed.chave}`} target="_blank">
+                                                                                                        <FontAwesomeIcon icon={faPen} />
+                                                                                                    </Link>
+                                                                                                </div>
+                                                                                            </td>
+                                                                                        }
                                                                                     </tr>
                                                                                 }
                                                                             </>
