@@ -18,6 +18,7 @@ const estadoInicial = {
     name: '',
     porto: '',
     grupos: [],
+    clientes: [],
     pesquisa: "",
     tipoPesquisa: 1,
     chaveFocus: '',
@@ -68,6 +69,7 @@ class GruposTemplates extends Component {
     loadAll = async () => {
         await this.setState({
             grupos: await loader.getBase('getGruposTemplates.php', this.state.usuarioLogado.empresa),
+            clientes: await loader.getBase('getClientes.php'),
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php'),
         })
@@ -216,8 +218,10 @@ class GruposTemplates extends Component {
             return grupos.nome.toLowerCase().includes(this.state.pesquisa.toLowerCase());
         } else if (this.state.tipoPesquisa == 2) {
             return (grupos.porto || '').toLowerCase().includes(this.state.pesquisa.toLowerCase());
-        } else {
+        } else if (this.state.tipoPesquisa == 3) {
             return grupos.chave.toLowerCase().includes(this.state.pesquisa.toLowerCase());
+        } else {
+            return (grupos.cliente || '').toLowerCase().includes(this.state.pesquisa.toLowerCase());
         }
 
     }
@@ -262,6 +266,7 @@ class GruposTemplates extends Component {
                                                 <option value={1}>Nome</option>
                                                 <option value={2}>Porto</option>
                                                 <option value={3}>Chave</option>
+                                                <option value={4}>Cliente</option>
                                             </select>
                                             <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
                                             <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
@@ -295,11 +300,14 @@ class GruposTemplates extends Component {
                                                 <div className="col-2 text-left">
                                                     <span className="subtituloships">Chave</span>
                                                 </div>
-                                            <div className="col-5 text-left">
+                                            <div className="col-3 text-left">
                                                 <span className="subtituloships">Nome</span>
                                             </div>
-                                            <div className="col-3 text-left">
+                                            <div className="col-2 text-left">
                                                 <span className="subtituloships">Porto</span>
+                                            </div>
+                                            <div className="col-3 text-left">
+                                                <span className="subtituloships">Cliente</span>
                                             </div>
                                             <div className="col-2 text-right revertItem" onClick={() => this.reverterItens()}>
                                                 <span className="subtituloships"><FontAwesomeIcon icon={this.state.direcaoTabela} /></span>
@@ -319,11 +327,14 @@ class GruposTemplates extends Component {
                                                 <div className="col-2 text-left">
                                                     <p>{feed.chave}</p>
                                                 </div>
-                                                <div className="col-5 text-left">
+                                                <div className="col-3 text-left">
                                                     <p>{feed.nome}</p>
                                                 </div>
-                                                <div className="col-3 text-left">
+                                                <div className="col-2 text-left">
                                                     <p>{feed.porto}</p>
+                                                </div>
+                                                <div className="col-3 text-left">
+                                                    <p>{this.state.clientes.find(c => c.Chave == feed.cliente)?.Nome || ''}</p>
                                                 </div>
                                                 <div className="col-2 text-left mobileajuster4 icones">
                                                     <div className='iconelixo giveMargin' type='button' >

@@ -28,6 +28,7 @@ const estadoInicial = {
     chave: '',
     nome: '',
     porto: '',
+    cliente: '',
 
     logs: [],
     modalLog: false,
@@ -38,6 +39,9 @@ const estadoInicial = {
     recarregaPagina: "",
 
     templates: [],
+    clientes: [],
+    clientesOptions: [],
+    clientesOptionsTexto: '',
 
     templatesIniciais: [],
     templatesEscolhidas: [],
@@ -77,6 +81,7 @@ class AddGrupoTemplate extends Component {
             await this.setState({
                 nome: this.state.grupo.nome,
                 porto: this.state.grupo.porto,
+                cliente: this.state.grupo.cliente || '',
                 templatesIniciais: this.state.grupo.templatesChaves != null ? this.state.grupo.templatesChaves.split('@.@') : [],
                 templatesEscolhidas: this.state.grupo.templatesChaves != null ? this.state.grupo.templatesChaves?.split('@.@') : [],
                 ordem: this.state.grupo.ordem != null ? this.state.grupo.ordem?.split('@.@') : []
@@ -86,12 +91,14 @@ class AddGrupoTemplate extends Component {
         await this.carregaPermissoes()
         await this.testaAcesso()
         await this.getEventosTemplates();
+        await this.getClientes();
 
         if (this.state.chave != 0) {
             await this.setState({
                 dadosIniciais: [
                     { titulo: 'Nome', valor: util.formatForLogs(this.state.nome) },
-                    { titulo: 'Porto', valor: util.formatForLogs(this.state.porto) }
+                    { titulo: 'Porto', valor: util.formatForLogs(this.state.porto) },
+                    { titulo: 'Cliente', valor: util.formatForLogs(this.state.cliente) }
                 ]
             })
         }
@@ -158,6 +165,18 @@ class AddGrupoTemplate extends Component {
         });
     }
 
+    getClientes = async () => {
+        this.setState({
+            clientesOptions: await loader.getBaseOptionsCustomLabel(
+                'getClientes.php',
+                'Nome',
+                'Cnpj_Cpf',
+                'Chave'
+            ),
+            clientes: await loader.getBase('getClientes.php')
+        });
+    }
+
     alteraModal = async (valor) => {
         this.setState({ modal: valor });
     }
@@ -172,6 +191,7 @@ class AddGrupoTemplate extends Component {
             dadosFinais: [
                 { titulo: 'Nome', valor: util.formatForLogs(this.state.nome) },
                 { titulo: 'Porto', valor: util.formatForLogs(this.state.porto) },
+                { titulo: 'Cliente', valor: util.formatForLogs(this.state.cliente) },
             ],
             loading: true
         })
@@ -179,7 +199,7 @@ class AddGrupoTemplate extends Component {
         if (parseInt(this.state.chave) === 0 && validForm) {
             await apiEmployee.post(`insertGrupoTemplate.php`, {
                 token: true,
-                values: `'${this.state.nome}', '${this.state.porto}'`,
+                values: `'${this.state.nome}', '${this.state.porto}', '${this.state.cliente}'`,
                 templates: this.state.templatesEscolhidas.map((chave, index) => ({
                     chave,
                     ordem: index + 1, // Inclui a ordem
@@ -218,6 +238,7 @@ class AddGrupoTemplate extends Component {
                 chave: this.state.chave,
                 nome: this.state.nome,
                 porto: this.state.porto,
+                cliente: this.state.cliente,
                 templatesNovas,
                 templatesDeletadas,
                 ordemTemplates: this.state.templatesEscolhidas.map((chave, index) => ({
@@ -288,6 +309,7 @@ class AddGrupoTemplate extends Component {
         const validations = []
         validations.push(this.state.nome);
         validations.push(this.state.porto);
+        validations.push(this.state.cliente);
 
         validations.push(!this.state.bloqueado);
 
@@ -671,6 +693,21 @@ class AddGrupoTemplate extends Component {
                                                         </div>
                                                         <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
                                                             <Field className='form-control' value={this.state.porto} onChange={(e) => { this.setState({ porto: e.currentTarget.value }) }} />
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Cliente</label>
+                                                        </div>
+                                                        <div className='col-1 errorMessage'>
+                                                        </div>
+                                                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                                            <Select
+                                                                className='SearchSelect'
+                                                                options={this.state.clientesOptions.filter(e => this.filterSearch(e, this.state.clientesOptionsTexto)).slice(0, 20)}
+                                                                onInputChange={e => { this.setState({ clientesOptionsTexto: e }) }}
+                                                                value={this.state.clientesOptions.filter(option => option.value == this.state.cliente)[0]}
+                                                                onChange={(e) => { this.setState({ cliente: e.value }) }}
+                                                                search={true}
+                                                            />
                                                         </div>
                                                     </div>
 

@@ -1294,7 +1294,7 @@ class OS
     {
         $database = new Database();
 
-        $cols = 'nome, porto';
+        $cols = 'nome, porto, cliente';
 
         $result = $database->doInsert('templates_grupos', $cols, $values);
         $chave = $result[0]['chave'];
@@ -1331,8 +1331,8 @@ class OS
         $grupo = $grupoOriginal[0];
         
         // Inserir novo grupo com nome modificado
-        $cols = 'nome, porto';
-        $values = "'" . $novoNome . "', '" . $grupo['porto'] . "'";
+        $cols = 'nome, porto, cliente';
+        $values = "'" . $novoNome . "', '" . $grupo['porto'] . "', '" . $grupo['cliente'] . "'";
         
         $result = $database->doInsert('templates_grupos', $cols, $values);
         $novaChave = $result[0]['chave'];
@@ -1947,11 +1947,11 @@ class OS
         }
     }
 
-    public static function updateGrupoTemplate($chave, $nome, $templatesNovas, $templatesDeletadas, $porto)
+    public static function updateGrupoTemplate($chave, $nome, $templatesNovas, $templatesDeletadas, $porto, $cliente = '')
     {
         $database = new Database();
 
-        $query = "nome = '" . $nome . "', porto = '" . $porto . "'";
+        $query = "nome = '" . $nome . "', porto = '" . $porto . "', cliente = '" . $cliente . "'";
 
         $result = $database->doUpdate('templates_grupos', $query, 'chave = ' . $chave);
 
