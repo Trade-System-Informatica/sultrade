@@ -1632,7 +1632,7 @@ class Contas
             
             // Filtrar por "Enviada há X dias"
             if ($incluir && $faturada_ha_dias !== null && is_numeric($faturada_ha_dias) && $conta['os_chave']) {
-                $envio_date = $conta['os_data_envio'];
+                $envio_date = $conta['os_envio'];
                 if ($envio_date && $envio_date !== '0000-00-00 00:00:00') {
                     // Calcular a diferença em dias entre a data de envio e hoje
                     $data_envio = new DateTime($envio_date);
