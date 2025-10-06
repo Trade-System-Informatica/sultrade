@@ -1638,9 +1638,8 @@ class Contas
                     $data_faturamento = new DateTime($faturamento_date);
                     $data_hoje = new DateTime();
                     $diferenca_dias = $data_hoje->diff($data_faturamento)->days;
-                    
-                    // Incluir apenas se a diferença for igual aos dias especificados
-                    $incluir = ($diferenca_dias == intval($faturada_ha_dias));
+                    // Incluir apenas se a diferença for MAIOR que os dias especificados
+                    $incluir = ($diferenca_dias >= intval($faturada_ha_dias));
                 } else {
                     // Se não tem data de faturamento válida, não incluir
                     $incluir = false;
