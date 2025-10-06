@@ -213,7 +213,6 @@ class GruposTemplates extends Component {
         if (!this.state.pesquisa) {
             return true;
         }
-        
         if (this.state.tipoPesquisa == 1) {
             return grupos.nome.toLowerCase().includes(this.state.pesquisa.toLowerCase());
         } else if (this.state.tipoPesquisa == 2) {
@@ -221,7 +220,10 @@ class GruposTemplates extends Component {
         } else if (this.state.tipoPesquisa == 3) {
             return grupos.chave.toLowerCase().includes(this.state.pesquisa.toLowerCase());
         } else {
-            return (grupos.cliente || '').toLowerCase().includes(this.state.pesquisa.toLowerCase());
+            // Pesquisa por nome do cliente
+            const clienteObj = this.state.clientes.find(c => c.Chave == grupos.cliente);
+            const nomeCliente = clienteObj ? clienteObj.Nome : '';
+            return nomeCliente.toLowerCase().includes(this.state.pesquisa.toLowerCase());
         }
 
     }
