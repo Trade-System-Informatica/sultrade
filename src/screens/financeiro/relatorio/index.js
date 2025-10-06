@@ -3985,7 +3985,7 @@ class Relatorio extends Component {
                             {this.props.location.state.backTo == "contasReceber" && (
                               <>
                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
-                                  <label>Faturada há (dias)</label>
+                                  <label>Enviada há (dias)</label>
                                 </div>
                                 <div className="col-1 errorMessage"></div>
                                 <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">

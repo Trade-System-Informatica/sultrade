@@ -1630,18 +1630,18 @@ class Contas
                 }
             }
             
-            // Filtrar por "Faturada há X dias"
+            // Filtrar por "Enviada há X dias"
             if ($incluir && $faturada_ha_dias !== null && is_numeric($faturada_ha_dias) && $conta['os_chave']) {
-                $faturamento_date = $conta['os_data_faturamento'];
-                if ($faturamento_date && $faturamento_date !== '0000-00-00 00:00:00') {
-                    // Calcular a diferença em dias entre a data de faturamento e hoje
-                    $data_faturamento = new DateTime($faturamento_date);
+                $envio_date = $conta['os_data_envio'];
+                if ($envio_date && $envio_date !== '0000-00-00 00:00:00') {
+                    // Calcular a diferença em dias entre a data de envio e hoje
+                    $data_envio = new DateTime($envio_date);
                     $data_hoje = new DateTime();
-                    $diferenca_dias = $data_hoje->diff($data_faturamento)->days;
+                    $diferenca_dias = $data_hoje->diff($data_envio)->days;
                     // Incluir apenas se a diferença for MAIOR que os dias especificados
                     $incluir = ($diferenca_dias >= intval($faturada_ha_dias));
                 } else {
-                    // Se não tem data de faturamento válida, não incluir
+                    // Se não tem data de envio válida, não incluir
                     $incluir = false;
                 }
             }
