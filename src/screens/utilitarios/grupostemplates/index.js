@@ -10,7 +10,7 @@ import { Link, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { PRECISA_LOGAR, NOME_EMPRESA } from '../../../config'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPen, faPlus, faChevronDown, faChevronUp, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faPen, faPlus, faChevronDown, faChevronUp, faTimes, faCopy } from '@fortawesome/free-solid-svg-icons'
 import { confirmAlert } from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 
@@ -137,6 +137,61 @@ class GruposTemplates extends Component {
                 )
             }
         })
+    }
+
+    duplicarGrupoTemplate = (chave, nome) => {
+        // Armazene o valor do input em uma variável da classe
+        this.novoNomeDuplicado = `Cópia de ${nome}`;
+        confirmAlert({
+            customUI: ({ onClose }) => (
+                <div className='custom-ui text-center'>
+                    <h1>{NOME_EMPRESA}</h1>
+                    <p>Digite o nome do novo grupo de templates:</p>
+                    <input
+                        type="text"
+                        className="form-control"
+                        style={{ marginBottom: 15, textAlign: 'center' }}
+                        defaultValue={this.novoNomeDuplicado}
+                        autoFocus
+                        onChange={e => { this.novoNomeDuplicado = e.target.value; }}
+                    />
+                    <button
+                        style={{ marginRight: 5 }}
+                        className="btn btn-danger w-30"
+                        onClick={() => onClose()}
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        style={{ marginRight: 5 }}
+                        className="btn btn-success w-30"
+                        onClick={async () => {
+                            await apiEmployee.post(`duplicarGrupoTemplate.php`, {
+                                token: true,
+                                chave: chave,
+                                novoNome: this.novoNomeDuplicado
+                            }).then(
+                                async response => {
+                                    if (response.data && response.data[0]) {
+                                        await loader.salvaLogs('templates_grupos', this.state.usuarioLogado.codigo, null, "Duplicação de grupo template", response.data[0].chave);
+                                        document.location.reload();
+                                    } else {
+                                        alert('Erro ao duplicar grupo template');
+                                    }
+                                },
+                                async response => {
+                                    this.erroApi(response)
+                                }
+                            );
+                            onClose();
+                        }}
+                    >
+                        Confirmar
+                    </button>
+                </div>
+            ),
+            closeOnClickOutside: false
+        });
     }
 
     reverterItens = async () => {
@@ -291,6 +346,12 @@ class GruposTemplates extends Component {
                                                             <FontAwesomeIcon icon={faPen} />
                                                         </Link>
                                                     </div>
+
+                                                    {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'GRUPOS_TEMPLATES') { return e } }).map((e) => e.permissaoInsere)[0] == 1 &&
+                                                        <div type='button' className='iconelixo giveMargin' onClick={() => this.duplicarGrupoTemplate(feed.chave, feed.nome)} >
+                                                            <FontAwesomeIcon icon={faCopy} />
+                                                        </div>
+                                                    }
 
                                                     {this.state.acessosPermissoes.filter((e) => { if (e.acessoAcao == 'GRUPOS_TEMPLATES') { return e } }).map((e) => e.permissaoDeleta)[0] == 1 &&
 

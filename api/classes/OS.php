@@ -1316,6 +1316,49 @@ class OS
         return $result;
     }
 
+    public static function duplicarGrupoTemplate($chaveOriginal, $novoNome)
+    {
+        $database = new Database();
+
+        // Buscar dados do grupo original
+        $grupoOriginal = $database->doSelect('templates_grupos', '*', "chave = $chaveOriginal");
+        
+        if (!$grupoOriginal[0]) {
+            $database->closeConection();
+            return false;
+        }
+
+        $grupo = $grupoOriginal[0];
+        
+        // Inserir novo grupo com nome modificado
+        $cols = 'nome, porto';
+        $values = "'" . $novoNome . "', '" . $grupo['porto'] . "'";
+        
+        $result = $database->doInsert('templates_grupos', $cols, $values);
+        $novaChave = $result[0]['chave'];
+
+        if ($novaChave) {
+            // Buscar templates relacionados ao grupo original
+            $templatesRelacoes = $database->doSelect(
+                'templates_relacoes', 
+                '*', 
+                "grupo = $chaveOriginal ORDER BY ordem"
+            );
+
+            // Inserir os mesmos templates no novo grupo
+            foreach ($templatesRelacoes as $relacao) {
+                $database->doInsert(
+                    'templates_relacoes', 
+                    'template, grupo, ordem', 
+                    "'" . $relacao['template'] . "', $novaChave, '" . $relacao['ordem'] . "'"
+                );
+            }
+        }
+
+        $database->closeConection();
+        return $result;
+    }
+
     public static function insertCusteioSubagente($os, $eventos)
     {
         $database = new Database();
