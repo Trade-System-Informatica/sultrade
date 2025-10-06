@@ -82,6 +82,7 @@ const estadoInicial = {
     {value: "N", label: "Não Enviadas"},
 ],
 
+  faturadaHaDias: null,
   pdfsSeparados: false,
   downloadZipAutomatico: false,
 };
@@ -402,6 +403,7 @@ class Relatorio extends Component {
           centro_custo: this.state.centroCusto || false,
           situacao: this.state.situacao || 'T',
           grupo: this.state.grupo || false,
+          faturada_ha_dias: this.state.faturadaHaDias,
         })
         .then(async (res) => {
           await this.setState({ relatorio: res.data });
@@ -554,6 +556,7 @@ class Relatorio extends Component {
           centro_custo: this.state.centroCusto || false,
           situacao: this.state.situacao || 'T',
           grupo: this.state.grupo || false,
+          faturada_ha_dias: this.state.faturadaHaDias,
         })
         .then(async (res) => {
           console.log('Dados do relatório para todos os clientes:', res.data);
@@ -595,6 +598,7 @@ class Relatorio extends Component {
           centro_custo: this.state.centroCusto || false,
           situacao: this.state.situacao || 'T',
           grupo: this.state.grupo || false,
+          faturada_ha_dias: this.state.faturadaHaDias,
         })
         .then(async (res) => {
           console.log('Dados do relatório para clientes selecionados:', res.data);
@@ -3980,6 +3984,23 @@ class Relatorio extends Component {
                             
                             {this.props.location.state.backTo == "contasReceber" && (
                               <>
+                                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                  <label>Faturada há (dias)</label>
+                                </div>
+                                <div className="col-1 errorMessage"></div>
+                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-10 col-10">
+                                  <Field 
+                                    className="form-control" 
+                                    type="number" 
+                                    min="0"
+                                    placeholder="Ex: 30 (deixe vazio para ignorar)"
+                                    value={this.state.faturadaHaDias || ''} 
+                                    onChange={(e) => { 
+                                      this.setState({ faturadaHaDias: e.target.value ? parseInt(e.target.value) : null }) 
+                                    }} 
+                                  />
+                                </div>
+                                
                                 <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                   <label>PDFs Separados</label>
                                 </div>

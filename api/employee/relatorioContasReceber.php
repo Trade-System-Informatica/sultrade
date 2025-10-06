@@ -18,13 +18,14 @@ if($objData != NULL){
     $centro_custo = isset($objData->centro_custo) ? prepareInput($objData->centro_custo) : false;
     $situacao = isset($objData->situacao) ? prepareInput($objData->situacao) : 'T';
     $grupo = isset($objData->grupo) ? prepareInput($objData->grupo) : false;
+    $faturada_ha_dias = isset($objData->faturada_ha_dias) ? intval($objData->faturada_ha_dias) : null;
 
     $employees = new Employees();
     $tokenValid = $employees->checkToken($token);
     
     if($tokenValid == 'true'){
         $contas = new Contas();
-        $result = $contas->relatorioContasReceber($all, $chaves, $centro_custo, $situacao, $grupo);
+        $result = $contas->relatorioContasReceber($all, $chaves, $centro_custo, $situacao, $grupo, $faturada_ha_dias);
     } else {
         $result = array("error" => "Token inválido");
     }

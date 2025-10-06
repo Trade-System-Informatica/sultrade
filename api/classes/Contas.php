@@ -1502,7 +1502,7 @@ class Contas
         return $result;
     }
 
-    public static function relatorioContasReceber($all, $chaves, $centro_custo, $situacao, $grupo)
+    public static function relatorioContasReceber($all, $chaves, $centro_custo, $situacao, $grupo, $faturada_ha_dias = null)
     {
         $database = new Database();
         
@@ -1626,6 +1626,23 @@ class Contas
                                   $faturamento_date !== '0000-00-00 00:00:00';
                     }
                 } else {
+                    $incluir = false;
+                }
+            }
+            
+            // Filtrar por "Faturada há X dias"
+            if ($incluir && $faturada_ha_dias !== null && is_numeric($faturada_ha_dias) && $conta['os_chave']) {
+                $faturamento_date = $conta['os_data_faturamento'];
+                if ($faturamento_date && $faturamento_date !== '0000-00-00 00:00:00') {
+                    // Calcular a diferença em dias entre a data de faturamento e hoje
+                    $data_faturamento = new DateTime($faturamento_date);
+                    $data_hoje = new DateTime();
+                    $diferenca_dias = $data_hoje->diff($data_faturamento)->days;
+                    
+                    // Incluir apenas se a diferença for igual aos dias especificados
+                    $incluir = ($diferenca_dias == intval($faturada_ha_dias));
+                } else {
+                    // Se não tem data de faturamento válida, não incluir
                     $incluir = false;
                 }
             }
