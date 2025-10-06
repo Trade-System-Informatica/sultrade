@@ -1301,13 +1301,14 @@ class OS
 
         if ($chave) {
             // Loop para inserir os templates com ordem
-            foreach ($templates as $index => $template) {
-                $ordem = $index + 1;
+            foreach ($templates as $template) {
+                $template_chave = $template->chave;
+                $ordem = $template->ordem;
     
                 $database->doInsert(
                     'templates_relacoes', 
                     'template, grupo, ordem', 
-                    "'$template', $chave, $ordem"
+                    "'$template_chave', $chave, $ordem"
                 );
             }
         }
