@@ -248,8 +248,8 @@ class Pessoas extends Component {
                                                 <option value="">Todas</option>
                                                 <option value="1">Cliente</option>
                                                 <option value="2">Fornecedor</option>
-                                                <option value="3">Banco</option>
-                                                <option value="4">Broker</option>
+                                                <option value="5">Banco</option>
+                                                <option value="6">Broker</option>
                                             </select>
                                             <select className="form-control tipoPesquisa col-3 col-sm-3 col-md-2 col-lg-2 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
                                                 <option value={1}>Nome</option>

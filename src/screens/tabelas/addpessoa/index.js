@@ -61,8 +61,9 @@ const estadoInicial = {
         prestador_servico: false,
         transportador: false,
         banco: false,
-        adm_cartao: false,
-        adm_convenio: false
+        broker: false
+        // adm_cartao: false,
+        // adm_convenio: false
     },
     nascimento: moment(),
     contato: [/*{
@@ -477,8 +478,7 @@ class AddPessoa extends Component {
             prestador_servico: categoriaArray[2],
             transportador: categoriaArray[3],
             banco: categoriaArray[4],
-            adm_cartao: categoriaArray[5],
-            adm_convenio: categoriaArray[6]
+            broker: categoriaArray[5]
         }
 
         this.setState({ categoria: categoria })
@@ -539,7 +539,7 @@ class AddPessoa extends Component {
     salvarPessoa = async (validForm) => {
         this.setState({ ...util.cleanStates(this.state) });
 
-        let categoria = [this.state.categoria.cliente ? 1 : 0, this.state.categoria.fornecedor ? 1 : 0, this.state.categoria.prestador_servico ? 1 : 0, this.state.categoria.transportador ? 1 : 0, this.state.categoria.banco ? 1 : 0, this.state.categoria.adm_cartao ? 1 : 0, this.state.categoria.adm_convenio ? 1 : 0]
+        let categoria = [this.state.categoria.cliente ? 1 : 0, this.state.categoria.fornecedor ? 1 : 0, this.state.categoria.prestador_servico ? 1 : 0, this.state.categoria.transportador ? 1 : 0, this.state.categoria.banco ? 1 : 0, this.state.categoria.broker ? 1 : 0]
         categoria = categoria.join('');
 
         if (!validForm) {
@@ -904,6 +904,12 @@ class AddPessoa extends Component {
                                                             </div>
                                                             <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                                 <Field type="checkbox" name='banco' checked={this.state.categoria.banco} onChange={async e => { this.setState({ categoria: { ...this.state.categoria, banco: e.target.checked } }) }} />
+                                                            </div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <label>Broker</label>
+                                                            </div>
+                                                            <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                                <Field type="checkbox" name='broker' checked={this.state.categoria.broker} onChange={async e => { this.setState({ categoria: { ...this.state.categoria, broker: e.target.checked } }) }} />
                                                             </div>
                                                             {/*<div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                     <label>Adm. Cartão</label>
