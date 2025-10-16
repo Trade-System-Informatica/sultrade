@@ -3085,7 +3085,11 @@ class AddOS extends Component {
                 res.data[0].Chave
               );
 
-              await this.setState({ loading: false, bloqueado: false });
+              await this.setState({ 
+                loading: false, 
+                bloqueado: false,
+                recarregaPagina: true
+              });
               if (reload) {
                 await this.refreshOSData();
               }
@@ -11690,22 +11694,27 @@ class AddOS extends Component {
                               <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
                                 <Select
                                   className="SearchSelect"
-                                  options={this.state.brokersOptions
-                                    .filter((e) =>
-                                      this.filterSearch(
-                                        e,
-                                        this.state.brokersOptionsTexto
+                                  options={[
+                                    { label: "Sem broker", value: "" },
+                                    ...this.state.brokersOptions
+                                      .filter((e) =>
+                                        this.filterSearch(
+                                          e,
+                                          this.state.brokersOptionsTexto
+                                        )
                                       )
-                                    )
-                                    .slice(0, 20)}
+                                      .slice(0, 20)
+                                  ]}
                                   onInputChange={(e) => {
                                     this.setState({ brokersOptionsTexto: e });
                                   }}
                                   value={
-                                    this.state.brokersOptions.filter(
-                                      (option) =>
-                                        option.value == this.state.broker
-                                    )[0]
+                                    this.state.broker === "" || !this.state.broker
+                                      ? { label: "Sem broker", value: "" }
+                                      : this.state.brokersOptions.filter(
+                                          (option) =>
+                                            option.value == this.state.broker
+                                        )[0]
                                   }
                                   search={true}
                                   onChange={async (e) => {
@@ -12257,22 +12266,27 @@ class AddOS extends Component {
                                 <Select
                                   className="SearchSelect"
                                   isDisabled={!this.state.editavel}
-                                  options={this.state.brokersOptions
-                                    .filter((e) =>
-                                      this.filterSearch(
-                                        e,
-                                        this.state.brokersOptionsTexto
+                                  options={[
+                                    { label: "Sem broker", value: "" },
+                                    ...this.state.brokersOptions
+                                      .filter((e) =>
+                                        this.filterSearch(
+                                          e,
+                                          this.state.brokersOptionsTexto
+                                        )
                                       )
-                                    )
-                                    .slice(0, 20)}
+                                      .slice(0, 20)
+                                  ]}
                                   onInputChange={(e) => {
                                     this.setState({ brokersOptionsTexto: e });
                                   }}
                                   value={
-                                    this.state.brokersOptions.filter(
-                                      (option) =>
-                                        option.value == this.state.broker
-                                    )[0]
+                                    this.state.broker === "" || !this.state.broker
+                                      ? { label: "Sem broker", value: "" }
+                                      : this.state.brokersOptions.filter(
+                                          (option) =>
+                                            option.value == this.state.broker
+                                        )[0]
                                   }
                                   search={true}
                                   onChange={async (e) => {
