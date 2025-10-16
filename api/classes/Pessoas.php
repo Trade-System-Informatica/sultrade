@@ -59,6 +59,19 @@ class Pessoas
         $database->closeConection();
         return $result;
     }
+
+    public static function getBrokers()
+    {
+        $database = new Database();
+
+        $result = $database->doSelect(
+            'pessoas',
+            'pessoas.*',
+            "Categoria LIKE '_____1%'"
+        );
+        $database->closeConection();
+        return $result;
+    }
     
     public static function getIndicados()
     {
