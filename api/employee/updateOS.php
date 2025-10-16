@@ -15,6 +15,7 @@ if($objData != NULL){
     $Chave = prepareInput($objData->Chave);
     $Descricao = prepareInput($objData->Descricao);
     $Chave_Cliente = prepareInput($objData->Chave_Cliente);
+    $Chave_Broker = prepareInput($objData->Chave_Broker);
     $chave_navio = prepareInput($objData->chave_navio);
     $Data_Abertura = prepareInput($objData->Data_Abertura);
     $Data_Chegada = prepareInput($objData->Data_Chegada);
@@ -41,7 +42,7 @@ if($objData != NULL){
 
     $os = new OS();
 
-        $result = $os->updateOS($Chave, $Descricao, $Chave_Cliente, $chave_navio, $Data_Abertura, $Data_Chegada, $chave_tipo_servico, $viagem, $porto, $Data_Saida, $Data_Encerramento, $Data_Revisao, $Data_Faturamento, $centro_custo, $ROE, $Comentario_Voucher, $encerradoPor, $faturadoPor, $Empresa, $eta, $atb, $etb, $governmentTaxes, $bankCharges, $operador, $envio);
+        $result = $os->updateOS($Chave, $Descricao, $Chave_Cliente, $Chave_Broker, $chave_navio, $Data_Abertura, $Data_Chegada, $chave_tipo_servico, $viagem, $porto, $Data_Saida, $Data_Encerramento, $Data_Revisao, $Data_Faturamento, $centro_custo, $ROE, $Comentario_Voucher, $encerradoPor, $faturadoPor, $Empresa, $eta, $atb, $etb, $governmentTaxes, $bankCharges, $operador, $envio);
 
 } else {
     $result = "false";

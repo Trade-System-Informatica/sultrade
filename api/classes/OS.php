@@ -1089,11 +1089,11 @@ class OS
 
                 $database->doUpdate('codigos', "Proximo = '" . ($codigoCC + 1) . "'", "Tipo = 'CC'");
             }
-            $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio, centro_custo';
+            $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, Chave_Broker, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio, centro_custo';
             $result = $database->doInsert('os', $cols, $values . ", '" . $centroCusto[0]["Chave"] . "'");
         // ATE AQ
         } else {
-            $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio';
+            $cols = 'Operador_Inclusao, Descricao, codigo, Chave_Cliente, Chave_Broker, chave_navio, Data_Abertura, Data_Chegada, Data_Saida, chave_tipo_servico, viagem, porto, encerradoPor, faturadoPor, Empresa, eta, atb, etb, governmentTaxes, bankCharges, operador, envio';
             $result = $database->doInsert('os', $cols, $values);
         }
 
@@ -1614,11 +1614,11 @@ class OS
     }
 
 
-    public static function updateOS($Chave, $Descricao, $Chave_Cliente, $chave_navio, $Data_Abertura, $Data_Chegada, $chave_tipo_servico, $viagem, $porto, $Data_Saida, $Data_Encerramento, $Data_Revisao, $Data_Faturamento, $centro_custo, $ROE, $Comentario_Voucher, $encerradoPor, $faturadoPor, $Empresa, $eta, $atb, $etb, $governmentTaxes, $bankCharges, $operador, $envio)
+    public static function updateOS($Chave, $Descricao, $Chave_Cliente, $Chave_Broker, $chave_navio, $Data_Abertura, $Data_Chegada, $chave_tipo_servico, $viagem, $porto, $Data_Saida, $Data_Encerramento, $Data_Revisao, $Data_Faturamento, $centro_custo, $ROE, $Comentario_Voucher, $encerradoPor, $faturadoPor, $Empresa, $eta, $atb, $etb, $governmentTaxes, $bankCharges, $operador, $envio)
     {
         $database = new Database();
 
-        $query = "Descricao = '" . $Descricao . "', Chave_Cliente = '" . $Chave_Cliente . "', chave_navio = '" . $chave_navio . "', Data_Abertura = '" . $Data_Abertura . "', Data_Chegada = '" . $Data_Chegada . "', chave_tipo_servico = '" . $chave_tipo_servico . "', viagem = '" . $viagem . "', porto = '" . $porto . "', Data_Saida = '" . $Data_Saida . "', Data_Encerramento = '" . $Data_Encerramento . "', Data_Revisao = '" . $Data_Revisao . "', Data_Faturamento = '" . $Data_Faturamento . "', centro_custo = '" . $centro_custo . "', ROE = '" . $ROE . "', Comentario_Voucher = '" . $Comentario_Voucher . "', encerradoPor = '" . $encerradoPor . "', faturadoPor = '" . $faturadoPor . "',Empresa = '" . $Empresa . "', eta = '" . $eta . "', atb = '" . $atb . "', etb = '" . $etb . "', governmentTaxes = '" . $governmentTaxes . "', bankCharges = '" . $bankCharges . "', operador = '$operador', envio = '$envio'";
+        $query = "Descricao = '" . $Descricao . "', Chave_Cliente = '" . $Chave_Cliente . "', Chave_Broker = '" . $Chave_Broker . "', chave_navio = '" . $chave_navio . "', Data_Abertura = '" . $Data_Abertura . "', Data_Chegada = '" . $Data_Chegada . "', chave_tipo_servico = '" . $chave_tipo_servico . "', viagem = '" . $viagem . "', porto = '" . $porto . "', Data_Saida = '" . $Data_Saida . "', Data_Encerramento = '" . $Data_Encerramento . "', Data_Revisao = '" . $Data_Revisao . "', Data_Faturamento = '" . $Data_Faturamento . "', centro_custo = '" . $centro_custo . "', ROE = '" . $ROE . "', Comentario_Voucher = '" . $Comentario_Voucher . "', encerradoPor = '" . $encerradoPor . "', faturadoPor = '" . $faturadoPor . "',Empresa = '" . $Empresa . "', eta = '" . $eta . "', atb = '" . $atb . "', etb = '" . $etb . "', governmentTaxes = '" . $governmentTaxes . "', bankCharges = '" . $bankCharges . "', operador = '$operador', envio = '$envio'";
 
         $result = $database->doUpdate('os', $query, 'Chave = ' . $Chave);
         $database->closeConection();

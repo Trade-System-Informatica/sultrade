@@ -55,6 +55,7 @@ const estadoInicial = {
   descricao: "",
   codigo: "",
   cliente: "",
+  broker: "",
   navio: "",
   abertura: moment().format("YYYY-MM-DD"),
   chegada: moment().format("YYYY-MM-DD"),
@@ -90,6 +91,9 @@ const estadoInicial = {
   clientes: [],
   clientesOptions: [],
   clientesOptionsTexto: "",
+  brokers: [],
+  brokersOptions: [],
+  brokersOptionsTexto: "",
   navios: [],
   naviosOptions: [],
   naviosOptionsTexto: "",
@@ -120,6 +124,7 @@ const estadoInicial = {
   modal: 0,
   modalLista: "",
   modalPesquisa: "",
+  modalCategoriaFiltro: "",
 
   modalEscolhaOsShare: false,
 
@@ -153,6 +158,11 @@ const estadoInicial = {
   clienteCpf: "",
   clienteCpfLimpo: "",
   clienteBloqueado: false,
+
+  brokerNome: "",
+  brokerCpf: "",
+  brokerCpfLimpo: "",
+  brokerBloqueado: false,
 
   tipoServicoNome: "",
   tipoServicoPrazo: "",
@@ -327,6 +337,7 @@ class AddOS extends Component {
         descricao: this.state.os.Descricao,
         codigo: this.state.os.codigo,
         cliente: this.state.os.Chave_Cliente,
+        broker: this.state.os.Chave_Broker,
         navio: this.state.os.chave_navio,
         abertura: moment(this.state.os.Data_Abertura).format("YYYY-MM-DD"),
         chegada: moment(this.state.os.Data_Chegada).format("YYYY-MM-DD"),
@@ -961,6 +972,12 @@ class AddOS extends Component {
       ),
       clientesOptions: await loader.getBaseOptionsCustomLabel(
         "getClientes.php",
+        "Nome",
+        "Cnpj_Cpf",
+        "Chave"
+      ),
+      brokersOptions: await loader.getBaseOptionsCustomLabel(
+        "getBrokers.php",
         "Nome",
         "Cnpj_Cpf",
         "Chave"
@@ -3009,6 +3026,8 @@ class AddOS extends Component {
           values: `'${this.state.usuarioLogado.codigo}', '${
             this.state.descricao
           }', 'ST${this.state.codigo.Proximo}', '${this.state.cliente}', '${
+            this.state.broker || ''
+          }', '${
             this.state.navio
           }', '${moment(this.state.abertura).format("YYYY-MM-DD")}', '${moment(
             this.state.chegada
@@ -3101,6 +3120,7 @@ class AddOS extends Component {
           Descricao: this.state.descricao,
           Codigo: this.state.codigo,
           Chave_Cliente: this.state.cliente,
+          Chave_Broker: this.state.broker,
           chave_navio: this.state.navio,
           Data_Abertura: this.state.abertura
             ? moment(this.state.abertura).format("YYYY-MM-DD")
@@ -3646,6 +3666,22 @@ class AddOS extends Component {
       clientesOptions: await loader.getBaseOptions(
         "getClientes.php",
         "Nome",
+        "Chave"
+      ),
+    });
+  };
+
+  alteraBroker = async (valor, categoria) => {
+    if (categoria.split("")[5] == "1") {
+      await this.setState({ broker: valor });
+    }
+    await this.setState({
+      modalAberto: false,
+      brokers: await loader.getBase("getBrokers.php"),
+      brokersOptions: await loader.getBaseOptionsCustomLabel(
+        "getBrokers.php",
+        "Nome",
+        "Cnpj_Cpf",
         "Chave"
       ),
     });
@@ -11317,6 +11353,7 @@ class AddOS extends Component {
               alteraNavio={this.alteraNavio}
               alteraPorto={this.alteraPorto}
               alteraCliente={this.alteraCliente}
+              alteraBroker={this.alteraBroker}
               alteraTipoServico={this.alteraTipoServico}
               alteraCentroCusto={this.alteraCentroCusto}
               acessosPermissoes={this.state.acessosPermissoes}
@@ -11324,6 +11361,7 @@ class AddOS extends Component {
               modal={this.state.modal}
               modalLista={this.state.modalLista}
               pesquisa={this.state.modalPesquisa}
+              categoriaFiltro={this.state.modalCategoriaFiltro}
               closeModal={() => {
                 this.setState({ modalAberto: false });
               }}
@@ -11635,6 +11673,71 @@ class AddOS extends Component {
                                         modal: "listarCliente",
                                         modalPesquisa: this.state.cliente,
                                         modalLista: this.state.clientes,
+                                        modalCategoriaFiltro: "1",
+                                      });
+                                    }}
+                                  >
+                                    ...
+                                  </div>
+                                )}
+                              </div>
+                              <div className="col-1"></div>
+                              <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                <label>Broker</label>
+                              </div>
+                              <div className="col-1 errorMessage">
+                              </div>
+                              <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
+                                <Select
+                                  className="SearchSelect"
+                                  options={this.state.brokersOptions
+                                    .filter((e) =>
+                                      this.filterSearch(
+                                        e,
+                                        this.state.brokersOptionsTexto
+                                      )
+                                    )
+                                    .slice(0, 20)}
+                                  onInputChange={(e) => {
+                                    this.setState({ brokersOptionsTexto: e });
+                                  }}
+                                  value={
+                                    this.state.brokersOptions.filter(
+                                      (option) =>
+                                        option.value == this.state.broker
+                                    )[0]
+                                  }
+                                  search={true}
+                                  onChange={async (e) => {
+                                    await this.setState({ broker: e.value });
+                                  }}
+                                />
+                              </div>
+                              <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
+                                {this.state.acessosPermissoes
+                                  .filter((e) => {
+                                    if (e.acessoAcao == "PESSOAS") {
+                                      return e;
+                                    }
+                                  })
+                                  .map((e) => e.permissaoConsulta)[0] == 1 && (
+                                  <div
+                                    className="insideFormButton"
+                                    onClick={async () => {
+                                      if (this.state.brokers[0]) {
+                                      } else {
+                                        await this.setState({
+                                          brokers: await loader.getBase(
+                                            "getBrokers.php"
+                                          ),
+                                        });
+                                      }
+                                      await this.setState({
+                                        modalAberto: true,
+                                        modal: "listarCliente",
+                                        modalPesquisa: this.state.broker,
+                                        modalLista: this.state.brokers,
+                                        modalCategoriaFiltro: "6",
                                       });
                                     }}
                                   >
@@ -12135,6 +12238,75 @@ class AddOS extends Component {
                                             modal: "listarCliente",
                                             modalPesquisa: this.state.cliente,
                                             modalLista: this.state.clientes,
+                                            modalCategoriaFiltro: "1",
+                                          });
+                                        }}
+                                      >
+                                        ...
+                                      </div>
+                                    )
+                                  : null}
+                              </div>
+                              <div className="col-1"></div>
+                              <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                <label>Broker</label>
+                              </div>
+                              <div className="col-1 errorMessage">
+                              </div>
+                              <div className="col-xl-6 col-lg-5 col-md-5 col-sm-10 col-10">
+                                <Select
+                                  className="SearchSelect"
+                                  isDisabled={!this.state.editavel}
+                                  options={this.state.brokersOptions
+                                    .filter((e) =>
+                                      this.filterSearch(
+                                        e,
+                                        this.state.brokersOptionsTexto
+                                      )
+                                    )
+                                    .slice(0, 20)}
+                                  onInputChange={(e) => {
+                                    this.setState({ brokersOptionsTexto: e });
+                                  }}
+                                  value={
+                                    this.state.brokersOptions.filter(
+                                      (option) =>
+                                        option.value == this.state.broker
+                                    )[0]
+                                  }
+                                  search={true}
+                                  onChange={async (e) => {
+                                    await this.setState({ broker: e.value });
+                                  }}
+                                />
+                              </div>
+                              <div className="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-12">
+                                {this.state.editavel
+                                  ? this.state.acessosPermissoes
+                                      .filter((e) => {
+                                        if (e.acessoAcao == "PESSOAS") {
+                                          return e;
+                                        }
+                                      })
+                                      .map((e) => e.permissaoConsulta)[0] ==
+                                      1 && (
+                                      <div
+                                        className="insideFormButton"
+                                        onClick={async () => {
+                                          if (this.state.brokers[0]) {
+                                          } else {
+                                            await this.setState({
+                                              brokers: await loader.getBase(
+                                                "getBrokers.php"
+                                              ),
+                                            });
+                                          }
+                                          await this.setState({
+                                            modalAberto: true,
+                                            modal: "listarCliente",
+                                            modalPesquisa: this.state.broker,
+                                            modalLista: this.state.brokers,
+                                            modalCategoriaFiltro: "6",
                                           });
                                         }}
                                       >

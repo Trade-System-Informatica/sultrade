@@ -22,6 +22,7 @@ const estadoInicial = {
     tipoPesquisa: 1,
     pesquisaExata: false,
     load: 100,
+    categoria: "",
 
     dadosIniciais: '',
     dadosFinais: '',
@@ -66,8 +67,9 @@ const estadoInicial = {
         prestador_servico: false,
         transportador: false,
         banco: false,
-        adm_cartao: false,
-        adm_convenio: false
+        broker: false,
+        // adm_cartao: false,
+        // adm_convenio: false
     },
     clienteBloqueado: false,
 
@@ -233,6 +235,11 @@ class ModalListas extends Component {
     }
 
     componentDidUpdate = async (prevProps, prevState) => {
+        // Atualizar categoria quando receber da prop
+        if (prevProps.categoriaFiltro != this.props.categoriaFiltro && this.props.categoriaFiltro) {
+            await this.setState({ categoria: this.props.categoriaFiltro });
+        }
+        
         if (prevState.clienteCpf != this.state.clienteCpf) {
             let numberPattern = /\d+/g;
             var cpflimpo = ''
@@ -449,8 +456,9 @@ class ModalListas extends Component {
             prestador_servico: categoriaArray[2],
             transportador: categoriaArray[3],
             banco: categoriaArray[4],
-            adm_cartao: categoriaArray[5],
-            adm_convenio: categoriaArray[6]
+            broker: categoriaArray[5]
+            // adm_cartao: categoriaArray[5],
+            // adm_convenio: categoriaArray[6]
         }
 
         this.setState({ clienteCategoria: categoria })
@@ -765,7 +773,7 @@ class ModalListas extends Component {
             }
         }
 
-        let categoria = [this.state.clienteCategoria.cliente ? 1 : 0, this.state.clienteCategoria.fornecedor ? 1 : 0, this.state.clienteCategoria.prestador_servico ? 1 : 0, this.state.clienteCategoria.transportador ? 1 : 0, this.state.clienteCategoria.banco ? 1 : 0, this.state.clienteCategoria.adm_cartao ? 1 : 0, this.state.clienteCategoria.adm_convenio ? 1 : 0]
+        let categoria = [this.state.clienteCategoria.cliente ? 1 : 0, this.state.clienteCategoria.fornecedor ? 1 : 0, this.state.clienteCategoria.prestador_servico ? 1 : 0, this.state.clienteCategoria.transportador ? 1 : 0, this.state.clienteCategoria.banco ? 1 : 0, this.state.clienteCategoria.broker ? 1 : 0];
         categoria = categoria.join('');
 
         await this.setState({
@@ -1740,6 +1748,18 @@ class ModalListas extends Component {
     }
 
     filtrarPesquisa = (item) => {
+        // Filtro por categoria (verificar bit específico)
+        if (this.state.categoria) {
+            const subCategoria = item.Categoria || '0';
+            const posicao = parseInt(this.state.categoria) - 1;
+            
+            // Verificar se o bit na posição está ativo (1)
+            if (subCategoria.length <= posicao || subCategoria[posicao] != '1') {
+                return false;
+            }
+        }
+
+        // Filtro por pesquisa
         if (!this.state.pesquisa) {
             return true;
         }
@@ -2406,7 +2426,7 @@ class ModalListas extends Component {
                             </div>
                             <div className='modalContent'>
                                 <div className='tituloModal'>
-                                    <span>Pessoas</span>
+                                    <span>{this.state.categoria === "6" ? "Brokers" : "Pessoas"}</span>
                                 </div>
 
 
@@ -2417,12 +2437,19 @@ class ModalListas extends Component {
                                             </div>
 
                                             <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
-                                                <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value, pesquisaExata: false }) }}>
+                                                <select className="form-control tipoPesquisa col-3 col-sm-3 col-md-2 col-lg-2 col-xl-2" placeholder="Categoria..." value={this.state.categoria} onChange={e => { this.setState({ categoria: e.currentTarget.value }) }}>
+                                                    <option value="">Todas</option>
+                                                    <option value="1">Cliente</option>
+                                                    <option value="2">Fornecedor</option>
+                                                    <option value="5">Banco</option>
+                                                    <option value="6">Broker</option>
+                                                </select>
+                                                <select className="form-control tipoPesquisa col-3 col-sm-3 col-md-2 col-lg-2 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value, pesquisaExata: false }) }}>
                                                     <option value={1}>Nome</option>
                                                     <option value={5}>Cpf/Cnpj</option>
                                                     <option value={3}>Chave</option>
                                                 </select>
-                                                <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value, pesquisaExata: false }) }} />
+                                                <input className="form-control campoPesquisa col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value, pesquisaExata: false }) }} />
                                                 {!this.props.modalLista[0] &&
                                                     <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-center">
                                                         <div><button onClick={() => { this.setState({ dadosIniciais: [], clienteChave: 0, clienteNome: '', clienteNomeFantasia: '', clienteCpf: '', clienteCpfLimpo: '', clienteNascimento: '', clienteRG: '', clienteInscricaoMunicipal: "", clienteContaContabil: '', clienteContaProvisao: '', clienteContaFatura: '', clienteContaContabilInicial: '', clienteContaProvisaoInicial: '', clienteContaFaturaInicial: '' }); this.converteCategoria("0000000"); this.props.alteraModal('criarCliente') }} className="btn btn-success">Adicionar Pessoa</button></div>
@@ -2468,13 +2495,13 @@ class ModalListas extends Component {
                                                 <div key={feed.id} className={index % 2 == 0 ? "col-lg-12 col-md-12 col-sm-12 mix all dresses bags par lightHover" : "col-lg-12 col-md-12 col-sm-12 mix all dresses bags itemLista impar darkHover"}>
 
                                                     <div className="row ">
-                                                        <div onClick={() => this.props.alteraCliente(feed.Chave, feed.Categoria)} className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
+                                                        <div onClick={() => this.state.categoria === "6" ? this.props.alteraBroker(feed.Chave, feed.Categoria) : this.props.alteraCliente(feed.Chave, feed.Categoria)} className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-left">
                                                             <p className="mobileajuster5">{feed.Chave}</p>
                                                         </div>
-                                                        <div onClick={() => this.props.alteraCliente(feed.Chave, feed.Categoria)} className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-left" style={{ overflowWrap: 'anywhere' }}>
+                                                        <div onClick={() => this.state.categoria === "6" ? this.props.alteraBroker(feed.Chave, feed.Categoria) : this.props.alteraCliente(feed.Chave, feed.Categoria)} className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-left" style={{ overflowWrap: 'anywhere' }}>
                                                             <h6 className="mobileajuster5">{feed.Nome}</h6>
                                                         </div>
-                                                        <div onClick={() => this.props.alteraCliente(feed.Chave, feed.Categoria)} className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-left" style={{ overflowWrap: 'anywhere' }}>
+                                                        <div onClick={() => this.state.categoria === "6" ? this.props.alteraBroker(feed.Chave, feed.Categoria) : this.props.alteraCliente(feed.Chave, feed.Categoria)} className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 text-left" style={{ overflowWrap: 'anywhere' }}>
                                                             <h6>{feed.Cnpj_Cpf}</h6>
                                                         </div>
                                                         <div className="col-lg-2 col-md-2 col-sm-2 col-2  text-left  mobileajuster4 icones">
@@ -2729,6 +2756,12 @@ class ModalListas extends Component {
                                                         </div>
                                                         <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
                                                             <Field type="checkbox" name='banco' checked={this.state.clienteCategoria.banco} onChange={async e => { this.setState({ clienteCategoria: { ...this.state.clienteCategoria, banco: e.target.checked } }) }} />
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <label>Broker</label>
+                                                        </div>
+                                                        <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12 labelForm">
+                                                            <Field type="checkbox" name='broker' checked={this.state.clienteCategoria.broker} onChange={async e => { this.setState({ clienteCategoria: { ...this.state.clienteCategoria, broker: e.target.checked } }) }} />
                                                         </div>
 
                                                     </div>
