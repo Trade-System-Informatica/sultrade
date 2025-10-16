@@ -22,6 +22,7 @@ const estadoInicial = {
     pessoas: [],
     pesquisa: "",
     tipoPesquisa: 1,
+    categoria: "",
     //Tipos de pesquisa: 1 (descricao), 2 (prazo)
     /*seaports: [],*/
     loading: true,
@@ -86,7 +87,8 @@ class Pessoas extends Component {
             acessos: await loader.getBase('getTiposAcessos.php'),
             permissoes: await loader.getBase('getPermissoes.php')
         })
-
+        console.log(this.state.pessoas);
+        
         if (this.props.location.state && this.props.location.state.chave) {
             await this.setState({ chaveFocus: this.props.location.state.chave });
         }
@@ -168,6 +170,18 @@ class Pessoas extends Component {
     }
 
     filtrarPesquisa = (pessoas) => {
+        // Filtro por categoria (verificar bit específico)
+        if (this.state.categoria) {
+            const subCategoria = pessoas.Categoria || '0';
+            const posicao = parseInt(this.state.categoria) - 1;
+            
+            // Verificar se o bit na posição está ativo (1)
+            if (subCategoria.length < posicao || subCategoria[posicao] != '1') {
+                return false;
+            }
+        }
+
+        // Filtro por pesquisa
         if (this.state.tipoPesquisa == 1) {
             return pessoas.Nome.toLowerCase().includes(this.state.pesquisa.toLowerCase())
         } else if (this.state.tipoPesquisa == 2) {
@@ -228,13 +242,21 @@ class Pessoas extends Component {
 
                                     <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
                                         <div className="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12  text-right pesquisa mobileajuster1 ">
-                                            <div className='col-2'></div>
-                                            <select className="form-control tipoPesquisa col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
+                                            <div className='col-1'></div>
+                                            <span style={{marginRight: 8, fontSize: '1.1em', fontWeight: '500'}}>Categoria:</span>
+                                            <select className="form-control tipoPesquisa col-3 col-sm-3 col-md-2 col-lg-2 col-xl-2" placeholder="Categoria..." value={this.state.categoria} onChange={e => { this.setState({ categoria: e.currentTarget.value }) }}>
+                                                <option value="">Todas</option>
+                                                <option value="1">Cliente</option>
+                                                <option value="2">Fornecedor</option>
+                                                <option value="3">Banco</option>
+                                                <option value="4">Broker</option>
+                                            </select>
+                                            <select className="form-control tipoPesquisa col-3 col-sm-3 col-md-2 col-lg-2 col-xl-2" placeholder="Tipo de pesquisa..." value={this.state.tipoPesquisa} onChange={e => { this.setState({ tipoPesquisa: e.currentTarget.value }) }}>
                                                 <option value={1}>Nome</option>
                                                 <option value={2}>CPF/CNPJ</option>
                                                 <option value={3}>Chave</option>
                                             </select>
-                                            <input className="form-control campoPesquisa col-7 col-sm-6 col-md-6 col-lg-5 col-xl-5" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
+                                            <input className="form-control campoPesquisa col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4" placeholder="Pesquise aqui..." value={this.state.pesquisa} onChange={e => { this.setState({ pesquisa: e.currentTarget.value }) }} />
                                             <div className="col-7 col-sm-3 col-md-2 col-lg-2 col-xl-2 text-left">
                                                 <Link to={{ pathname: `/tabelas/addpessoa/0` }}><button className="btn btn-success">+</button></Link>
                                             </div>
