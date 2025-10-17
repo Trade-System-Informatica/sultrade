@@ -15,7 +15,7 @@ if($objData != NULL){
 
     $pessoas = new Pessoas();
 
-    $result = $pessoas->($categoria);
+    $result = $pessoas->getPessoasCategoria($categoria);
 
     } else {
         $result = "false";
